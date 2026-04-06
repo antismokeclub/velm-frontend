@@ -2938,6 +2938,15 @@
                     </div>
                 </div>
 
+                <!-- STREAK CARD -->
+                <div id="streak-card" class="home-anim" style="display:none;background:white;border-radius:20px;border:1px solid #EBEBEB;padding:16px 20px;margin-bottom:12px;align-items:center;justify-content:space-between;">
+                    <div>
+                        <div style="font-size:11px;font-weight:700;color:#8A8A8A;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px;">Seria check-inów</div>
+                        <div id="streak-value" style="font-size:24px;font-weight:800;font-family:'Outfit',sans-serif;color:#1A1A1A;">0 dni</div>
+                    </div>
+                    <div style="font-size:32px;">🔥</div>
+                </div>
+
                 <!-- POST CHECK-IN BANNER -->
                 <div id="post-checkin-banner" style="display:none;margin-top:16px;margin-bottom:8px;">
                     <div onclick="openCheckin('post',window._todayTyp,window._todayKm)"
@@ -3084,6 +3093,31 @@
                         <span style="font-size:14px;color:#1A1A1A;">Data zawodów</span>
                         <span id="settings-race-date" style="font-size:13px;color:#8A8A8A;">Nie ustawiono</span>
                     </div>
+                </div>
+
+                <!-- TWÓJ CEL -->
+                <div style="background:white;border-radius:20px;border:1px solid #EBEBEB;padding:20px;margin-bottom:12px;">
+                    <div style="font-size:11px;font-weight:700;color:#8A8A8A;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:16px;">Twój cel</div>
+
+                    <div style="margin-bottom:12px;">
+                        <div style="font-size:12px;color:#8A8A8A;margin-bottom:4px;">Data zawodów</div>
+                        <input type="date" id="settings-edit-race-date" style="width:100%;padding:12px;border:1.5px solid #EBEBEB;border-radius:12px;font-size:15px;font-family:'Inter',sans-serif;color:#1A1A1A;background:white;outline:none;box-sizing:border-box;">
+                    </div>
+
+                    <div style="margin-bottom:12px;">
+                        <div style="font-size:12px;color:#8A8A8A;margin-bottom:4px;">Cel czasowy (MM:SS lub H:MM:SS)</div>
+                        <input type="text" id="settings-edit-time-goal" placeholder="np. 45:00 lub 1:45:00" style="width:100%;padding:12px;border:1.5px solid #EBEBEB;border-radius:12px;font-size:15px;font-family:'Inter',sans-serif;color:#1A1A1A;background:white;outline:none;box-sizing:border-box;">
+                    </div>
+
+                    <div style="margin-bottom:16px;">
+                        <div style="font-size:12px;color:#8A8A8A;margin-bottom:4px;">Tygodniowy kilometraż (km)</div>
+                        <input type="number" id="settings-edit-weekly-km" min="10" max="200" style="width:100%;padding:12px;border:1.5px solid #EBEBEB;border-radius:12px;font-size:15px;font-family:'Inter',sans-serif;color:#1A1A1A;background:white;outline:none;box-sizing:border-box;">
+                    </div>
+
+                    <button onclick="saveGoalSettings()" style="width:100%;padding:14px;background:#1A1A1A;color:white;border:none;border-radius:14px;font-size:15px;font-weight:700;font-family:'Inter',sans-serif;cursor:pointer;">
+                        Zapisz i zaktualizuj plan →
+                    </button>
+                    <div id="settings-save-msg" style="display:none;text-align:center;font-size:13px;color:#22C55E;margin-top:8px;">✓ Zapisano — trwa generowanie nowego planu</div>
                 </div>
 
                 <!-- BEZPIECZEŃSTWO -->
@@ -5695,6 +5729,8 @@
                     updateRaceCountdown();
                     loadPlanChanges();
                     updatePostCheckinBanner();
+                    loadStreak();
+                    loadWeeklySummary();
                 }
 
                 if (viewName === 'settings') {
@@ -5738,7 +5774,66 @@
                 if (sDays) sDays.textContent = onb.daysPerWeek ? `${onb.daysPerWeek} dni` : '—';
                 const sRace = document.getElementById('settings-race-date');
                 if (sRace) sRace.textContent = raceDate ?? 'Nie ustawiono';
+                const editRaceDate = document.getElementById('settings-edit-race-date');
+                const editTimeGoal = document.getElementById('settings-edit-time-goal');
+                const editWeeklyKm = document.getElementById('settings-edit-weekly-km');
+                if (editRaceDate && raceDate) editRaceDate.value = raceDate;
+                if (editTimeGoal && onb.time_target_mins) editTimeGoal.value = onb.time_target_mins + ':' + String(onb.time_target_secs || 0).padStart(2, '0');
+                if (editWeeklyKm && onb.weekly_km) editWeeklyKm.value = onb.weekly_km;
             } catch (e) { /* zostaw placeholdery */ }
+        }
+
+        async function saveGoalSettings() {
+            const userId = localStorage.getItem('velm_user_id');
+            if (!userId) return;
+
+            const raceDate = document.getElementById('settings-edit-race-date')?.value;
+            const timeGoal = document.getElementById('settings-edit-time-goal')?.value;
+            const weeklyKm = document.getElementById('settings-edit-weekly-km')?.value;
+
+            const updates = {};
+
+            if (raceDate) {
+                updates.time_race_date = raceDate;
+                updates.dist_goal_date = raceDate;
+                updates.time_race_target = raceDate;
+            }
+
+            if (timeGoal) {
+                const parts = timeGoal.split(':').map(Number);
+                if (parts.length === 2) {
+                    updates.time_target_mins = parts[0];
+                    updates.time_target_secs = parts[1];
+                } else if (parts.length === 3) {
+                    updates.time_target_hours = parts[0];
+                    updates.time_target_mins = parts[1];
+                    updates.time_target_secs = parts[2];
+                }
+            }
+
+            if (weeklyKm) {
+                updates.weekly_km = parseInt(weeklyKm);
+                updates.current_weekly_km = parseInt(weeklyKm);
+            }
+
+            if (Object.keys(updates).length === 0) return;
+
+            try {
+                const res = await fetch(`${API_BASE}/api/user/${userId}/goal`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(updates)
+                });
+                const data = await res.json();
+                if (data.success) {
+                    const msg = document.getElementById('settings-save-msg');
+                    if (msg) { msg.style.display = 'block'; setTimeout(() => msg.style.display = 'none', 4000); }
+                    loadUserProfile();
+                    updateRaceCountdown();
+                }
+            } catch(e) {
+                console.error('saveGoalSettings błąd:', e);
+            }
         }
 
         // --- Memory System ---
@@ -6147,6 +6242,41 @@
                 <div onclick="event.stopPropagation();switchView('settings')" style="font-size:11px;color:#8A8A8A;cursor:pointer;text-decoration:underline;">Dodaj datę zawodów</div>`;
         }
 
+        async function loadStreak() {
+            if (!currentUserId) return;
+            try {
+                const res = await fetch(`${API_BASE}/api/streak/${currentUserId}`);
+                const data = await res.json();
+                const streak = data.streak || 0;
+                const card = document.getElementById('streak-card');
+                const val = document.getElementById('streak-value');
+                if (card && val) {
+                    val.textContent = streak + (streak === 1 ? ' dzień' : ' dni');
+                    card.style.display = streak > 0 ? 'flex' : 'none';
+                }
+            } catch(e) {}
+        }
+
+        async function loadWeeklySummary() {
+            if (!currentUserId) return;
+            try {
+                const res = await fetch(`${API_BASE}/api/weekly-summary/${currentUserId}`);
+                const data = await res.json();
+                if (!data.summary) return;
+                const existing = document.getElementById('weekly-summary-card');
+                if (existing) existing.remove();
+                const card = document.createElement('div');
+                card.id = 'weekly-summary-card';
+                card.style.cssText = 'background:white;border-radius:20px;border-left:3px solid #1A1A1A;padding:16px 20px;margin-bottom:12px;';
+                card.innerHTML = `
+                    <div style="font-size:11px;font-weight:700;color:#8A8A8A;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;">Podsumowanie tygodnia</div>
+                    <div style="font-size:14px;color:#1A1A1A;line-height:1.6;">${data.summary}</div>
+                `;
+                const homeView = document.getElementById('view-home');
+                if (homeView) homeView.insertBefore(card, homeView.firstChild);
+            } catch(e) {}
+        }
+
         // Init
         // --- Login logic ---
         const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname.startsWith('192.168'))
@@ -6277,6 +6407,8 @@
             loadUserProfile();
             updateRaceCountdown();
             loadPlanChanges();
+            loadStreak();
+            loadWeeklySummary();
             startHeartAnimation();
 
             // Initial Rolling Counters
@@ -6678,9 +6810,27 @@
             if (currentMode === 'morning') {
                 localStorage.setItem('velm_checkin_morning_done', today);
                 sendMorningCheckinToAI();
+                fetch(`${API_BASE}/api/checkin`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        userId: localStorage.getItem('velm_user_id'),
+                        type: currentMode,
+                        data: { sleep: state.morning.sleep, energy: state.morning.energy, readiness: state.morning.readiness }
+                    })
+                }).catch(e => console.error('checkin save błąd:', e));
             } else {
                 localStorage.setItem('velm_checkin_post_done', today);
                 sendPostCheckinToAI();
+                fetch(`${API_BASE}/api/checkin`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        userId: localStorage.getItem('velm_user_id'),
+                        type: currentMode,
+                        data: { duration: state.post.duration, rpe: state.post.rpe, completion: state.post.completion }
+                    })
+                }).catch(e => console.error('checkin save błąd:', e));
             }
             setTimeout(() => {
                 closeCheckin();
