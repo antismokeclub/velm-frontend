@@ -2803,8 +2803,7 @@
                 </div>
 
                 <div style="position: relative;">
-                    <img src="https://i.pravatar.cc/150?img=11" alt="Profil"
-                        style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 1px solid rgba(255,255,255,0.1);">
+                    <div id="user-avatar-initials" style="width: 36px; height: 36px; border-radius: 50%; background: #1A1A1A; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; color: #fff; font-family: 'Inter', sans-serif; flex-shrink: 0;">?</div>
                     <div
                         style="position: absolute; top: 0; right: 0; width: 8px; height: 8px; background: var(--primary-color); border: 1.5px solid var(--bg-color); border-radius: 50%;">
                     </div>
@@ -3344,6 +3343,11 @@
                     localStorage.setItem('velm_maxHR', String(userMaxHR));
                     localStorage.setItem('velm_age', String(age));
                 }
+                const avatarEl = document.getElementById('user-avatar-initials');
+                if (avatarEl && u) {
+                    const name = u.onboarding_data?.name || u.name || '';
+                    avatarEl.textContent = name ? name.charAt(0).toUpperCase() : '?';
+                }
             } catch(e) { /* zostaje domyślne 190 */ }
             updateSleepRing();
             loadReadinessDelta();
@@ -3812,26 +3816,6 @@
                 .to(runElems.flash, { opacity: 0, duration: 0.8, ease: "power2.in" });
         }
 
-        // Expose for testing/demo
-        window.simulateAddXP = function () {
-            if (rStatus !== 'IDLE') return;
-            rStatus = 'RUNNING';
-            runnerXP += 20;
-            const gXP = 100 + extraGoalXP;
-            startRunnerRun();
-            updateRunnerUI();
-            setTimeout(() => {
-                if (runnerXP >= gXP) {
-                    runnerXP = gXP + 5; updateRunnerUI(true);
-                    setTimeout(() => {
-                        runnerLevelUp();
-                        rStatus = 'IDLE'; stopRunnerAnims(); startRunnerIdle();
-                    }, 600);
-                } else {
-                    rStatus = 'IDLE'; stopRunnerAnims(); startRunnerIdle();
-                }
-            }, 1500);
-        };
 
         // Call on initial load
         document.addEventListener('DOMContentLoaded', () => {
@@ -5966,13 +5950,19 @@
                 const response = await fetch(`${API_BASE}/api/memory/get?userId=${currentUserId}`);
                 const data = await response.json();
 
-                if (data.context && data.context.length > 0) {
-                    list.innerHTML = data.context.map(item => `
-                        <div style="padding: 4px 0; border-bottom: 1px solid var(--border-color); display: flex; gap: 6px;">
-                            <span style="font-weight: 600; color: #8A8A8A; text-transform: uppercase; font-size: 9px; padding-top: 2px;">${item.category}</span>
-                            <span>${item.fact}</span>
-                        </div>
-                    `).join('');
+                const AGENT_DISPLAY = { analityk: 'Analityk', fizjo: 'Fizjo', psycholog: 'Psycholog', szef_sztabu: 'Trener' };
+                const entries = Object.entries(data.memory || {})
+                    .filter(([, notes]) => notes && notes.trim().length > 0)
+                    .map(([agent, notes]) => {
+                        const label = AGENT_DISPLAY[agent] || agent;
+                        const preview = notes.length > 200 ? notes.slice(0, 200) + '...' : notes;
+                        return `<div style="padding: 4px 0; border-bottom: 1px solid var(--border-color); display: flex; gap: 6px;">
+                            <span style="font-weight: 600; color: #8A8A8A; text-transform: uppercase; font-size: 9px; padding-top: 2px;">${label}</span>
+                            <span>${preview}</span>
+                        </div>`;
+                    });
+                if (entries.length > 0) {
+                    list.innerHTML = entries.join('');
                 } else {
                     list.innerHTML = '<div style="padding: 4px 0; font-style: italic; opacity: 0.6;">Brak zapisanych faktów... (Porozmawiaj z trenerem)</div>';
                 }
