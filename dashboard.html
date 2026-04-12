@@ -102,29 +102,25 @@
             #app-container {
                 height: 90vh;
                 max-height: 900px;
-                border-radius: 40px;
+                border-radius: 44px;
                 background-color: var(--bg-color);
-                /* Stronger border only on desktop */
-                border: 12px solid var(--border-color);
-                box-shadow: 0 0 0 2px var(--surface-alt), 0 0 60px var(--shadow-2);
-                /* Double border for realism */
+                border: 8px solid #E8E5E0;
+                box-shadow: 0 0 0 1px rgba(0,0,0,0.04), 0 20px 60px rgba(0,0,0,0.12), 0 4px 16px rgba(0,0,0,0.06);
                 position: relative;
-                /* Catch absolute children */
                 overflow: hidden;
             }
 
-            /* Fake Notch - Only on desktop simulation */
+            /* Dynamic Island - Only on desktop simulation */
             #app-container::before {
                 content: '';
                 position: absolute;
-                top: 0;
+                top: 10px;
                 left: 50%;
                 transform: translateX(-50%);
-                width: 120px;
-                height: 24px;
-                background: var(--border-color);
-                border-bottom-left-radius: 16px;
-                border-bottom-right-radius: 16px;
+                width: 100px;
+                height: 28px;
+                background: #1A1A1A;
+                border-radius: 20px;
                 z-index: 2000;
             }
         }
@@ -135,24 +131,25 @@
             top: max(12px, env(safe-area-inset-top));
             left: 12px;
             width: calc(100% - 24px);
-            height: 60px;
+            height: 56px;
             z-index: 2000;
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 0 16px;
-            background: rgba(245,243,240,0.96);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border-bottom: 1px solid #EBEBEB;
-            border-radius: 20px;
+            background: rgba(245,243,240,0.88);
+            backdrop-filter: blur(24px) saturate(1.4);
+            -webkit-backdrop-filter: blur(24px) saturate(1.4);
+            border: 1px solid rgba(235,235,235,0.5);
+            border-radius: 18px;
+            box-shadow: 0 2px 16px rgba(0,0,0,0.04);
             transition: all 0.3s ease;
         }
 
         #app-header.scrolled {
-            background: rgba(245,243,240,0.98);
-            backdrop-filter: blur(12px);
-            border-bottom: 1px solid #EBEBEB;
+            background: rgba(245,243,240,0.95);
+            backdrop-filter: blur(24px) saturate(1.4);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
         }
 
         .header-left {
@@ -275,13 +272,13 @@
         .battery-shell {
             width: 54px;
             height: 100px;
-            border: 2px solid #D4D4D4;
+            border: 2px solid #E0DCDA;
             border-radius: 14px;
             padding: 4px;
             position: relative;
             background: #F5F3F0;
             flex-shrink: 0;
-            box-shadow: none;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.04);
             overflow: visible;
         }
 
@@ -428,10 +425,10 @@
             flex: 1;
             overflow-y: auto;
             overflow-x: hidden;
-            padding-top: calc(80px + env(safe-area-inset-top));
-            /* Space for new header height + safe area */
-            padding-bottom: calc(var(--nav-height) + 20px);
-            /* Space for bottom nav */
+            padding-top: calc(78px + env(safe-area-inset-top));
+            /* Space for header + safe area */
+            padding-bottom: calc(var(--nav-height) + 36px);
+            /* Extra space for floating nav pill */
             scroll-behavior: smooth;
             height: 100%;
         }
@@ -458,28 +455,29 @@
             }
         }
 
-        /* --- Bottom Navigation --- */
+        /* --- Bottom Navigation — floating pill (Cal AI style) --- */
         #bottom-nav {
             position: absolute;
-            bottom: max(0px, env(safe-area-inset-bottom));
-            left: 0;
-            width: 100%;
-            height: var(--nav-height);
-            background: #FFFFFF;
-            backdrop-filter: none;
-            border-top: 1px solid #EBEBEB;
+            bottom: max(12px, calc(env(safe-area-inset-bottom) + 6px));
+            left: 16px;
+            width: calc(100% - 32px);
+            height: 58px;
+            background: rgba(255,255,255,0.92);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-top: none;
+            border: 1px solid rgba(235,235,235,0.6);
             display: flex;
             justify-content: space-around;
             align-items: center;
             z-index: 4000;
-            border-bottom-left-radius: 0;
-            border-bottom-right-radius: 0;
+            border-radius: 22px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.04);
         }
 
         @media (min-width: 481px) {
             #bottom-nav {
-                border-bottom-left-radius: 28px;
-                border-bottom-right-radius: 28px;
+                border-radius: 22px;
             }
         }
 
@@ -488,11 +486,12 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            color: #C4C4C4;
-            font-size: 9px;
-            gap: 4px;
+            color: #B0A89E;
+            font-size: 10px;
+            font-weight: 500;
+            gap: 3px;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: all 0.22s cubic-bezier(0.22,1,0.36,1);
             flex: 1;
             height: 100%;
             position: relative;
@@ -501,22 +500,22 @@
         .nav-item.active { color: var(--primary-color); }
 
         .nav-item svg {
-            width: 24px;
-            height: 24px;
-            stroke: #C4C4C4;
+            width: 22px;
+            height: 22px;
+            stroke: #B0A89E;
             fill: none;
             stroke-width: 1.8;
             stroke-linecap: round;
             stroke-linejoin: round;
-            transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1);
+            transition: transform 0.25s cubic-bezier(0.22,1,0.36,1), stroke 0.2s;
         }
 
-        .nav-item.active svg { transform: scale(1.15); stroke: var(--primary-color); }
+        .nav-item.active svg { transform: scale(1.1); stroke: var(--primary-color); }
         .nav-item.active .nav-fill { fill: var(--primary-color); opacity: 1; }
         .nav-item .nav-fill { fill: none; opacity: 0; transition: all 0.25s; }
-        .nav-item span { transition: color 0.2s, font-weight 0.2s; font-size: 9px; }
+        .nav-item span { transition: color 0.2s, font-weight 0.2s; font-size: 10px; }
         .nav-item.active span { color: var(--primary-color); font-weight: 700; }
-        .nav-item svg .nav-stroke { stroke: #C4C4C4; transition: stroke 0.2s; }
+        .nav-item svg .nav-stroke { stroke: #B0A89E; transition: stroke 0.2s; }
         .nav-item.active svg .nav-stroke { stroke: var(--primary-color); }
         .nav-item.active[data-view="settings"] svg { transform: scale(1.15) rotate(30deg); }
         @keyframes gear-spin { from { transform: rotate(0deg); } to { transform: rotate(30deg); } }
@@ -569,9 +568,9 @@
         }
         .login-card {
             width:100%; max-width:360px;
-            background:#FFFFFF; border:1px solid #EBEBEB;
+            background:#FFFFFF; border:1px solid rgba(235,235,235,0.5);
             border-radius:24px; padding:28px 24px;
-            box-shadow:0 2px 12px rgba(0,0,0,0.06);
+            box-shadow:0 4px 24px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04);
         }
         .login-card h2 {
             font-family:'Bricolage Grotesque',sans-serif;
@@ -600,10 +599,11 @@
             background:var(--primary-color); color:#fff;
             border:none; border-radius:14px;
             font-family:'Inter',sans-serif; font-size:15px; font-weight:700;
-            cursor:pointer; transition:opacity 0.15s ease, transform 0.1s ease;
+            cursor:pointer; transition:opacity 0.15s ease, transform 0.15s cubic-bezier(0.22,1,0.36,1);
+            box-shadow: 0 4px 14px rgba(26,26,26,0.18);
         }
         .login-btn:active { transform:scale(0.97); }
-        .login-btn:disabled { opacity:0.55; cursor:not-allowed; }
+        .login-btn:disabled { opacity:0.55; cursor:not-allowed; box-shadow:none; }
         .login-error {
             font-size:13px; color:#f87171; font-weight:500;
             text-align:center; margin-top:12px; min-height:18px;
@@ -640,8 +640,9 @@
         /* --- Stats charts v2 --- */
         .stats-hero { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-bottom:16px; }
         .stats-hero-card {
-            background:#fff; border:1px solid #EBEBEB; border-radius:16px;
+            background:#fff; border:1px solid rgba(235,235,235,0.4); border-radius:16px;
             padding:16px 12px; text-align:center; position:relative; overflow:hidden;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.03);
         }
         .stats-hero-card .sh-icon {
             display:flex; align-items:center; justify-content:center;
@@ -656,8 +657,9 @@
             text-transform:uppercase; color:#8A8A8A; margin-top:4px;
         }
         .stats-chart-card {
-            background:#fff; border:1px solid #EBEBEB; border-radius:20px;
+            background:#fff; border:1px solid rgba(235,235,235,0.4); border-radius:20px;
             padding:20px; position:relative; overflow:visible;
+            box-shadow: 0 2px 16px rgba(0,0,0,0.03);
         }
         .stats-chart-card .sc-header {
             display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;
@@ -964,9 +966,9 @@
         }
         .details-enter { animation: slideDownPanel 0.38s cubic-bezier(0.22,1,0.36,1) both; }
 
-        /* Card press */
-        .card { transition: transform 0.18s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.18s ease; }
-        .card:active { transform: scale(0.96) !important; box-shadow: 0 1px 4px rgba(0,0,0,0.08) !important; }
+        /* Card press — tactile feedback */
+        .card { transition: transform 0.22s cubic-bezier(0.22,1,0.36,1), box-shadow 0.22s ease; }
+        .card:active { transform: scale(0.97) !important; box-shadow: 0 1px 6px rgba(0,0,0,0.06) !important; }
 
         /* Nav icon bounce on click */
         @keyframes navBounce {
@@ -983,6 +985,10 @@
             to   { opacity: 1; transform: translateY(0); }
         }
         .home-anim { animation: cardSlideIn 0.4s cubic-bezier(0.22,1,0.36,1) both; }
+
+        /* Generating plan dot animation */
+        @keyframes dotPulse { 0%,80%,100% { opacity:0; } 40% { opacity:1; } }
+        .generating-dot::after { content:'...'; animation: dotPulse 1.4s infinite both; }
 
         /* Button ripple feedback */
         @keyframes btnPop {
@@ -1007,8 +1013,8 @@
             border-radius: 20px;
             padding: 20px;
             margin-bottom: 16px;
-            border: 1px solid #EBEBEB;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+            border: 1px solid rgba(235,235,235,0.5);
+            box-shadow: 0 2px 16px rgba(0,0,0,0.04), 0 0 1px rgba(0,0,0,0.06);
         }
 
         /* --- Coach View Specifics --- */
@@ -1031,10 +1037,10 @@
 
         .msg {
             max-width: 85%;
-            padding: 12px 18px;
-            border-radius: 18px;
+            padding: 14px 18px;
+            border-radius: 20px;
             font-size: 15px;
-            line-height: 1.5;
+            line-height: 1.55;
             word-wrap: break-word;
             box-shadow: none;
         }
@@ -1043,15 +1049,17 @@
             align-self: flex-end;
             background: #1A1A1A;
             color: #fff;
-            border-bottom-right-radius: 4px;
+            border-bottom-right-radius: 6px;
+            box-shadow: 0 2px 12px rgba(26,26,26,0.15);
         }
 
         .msg-ai {
             align-self: flex-start;
             background: #FFFFFF;
-            border: 1px solid #EBEBEB;
+            border: 1px solid rgba(235,235,235,0.6);
             color: #1A1A1A;
-            border-bottom-left-radius: 4px;
+            border-bottom-left-radius: 6px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.04);
         }
 
         /* Suggestions */
@@ -1078,67 +1086,94 @@
 
         .suggestion-chip {
             background: #FFFFFF;
-            border: 1px solid #EBEBEB;
+            border: 1px solid rgba(235,235,235,0.6);
             padding: 12px 18px;
             border-radius: 18px;
             color: #1A1A1A;
-            font-size: 15px;
+            font-size: 14px;
             font-weight: 500;
             cursor: pointer;
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.22s cubic-bezier(0.22,1,0.36,1);
             text-align: left;
             white-space: normal;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.04);
             width: fit-content;
             align-self: flex-start;
-            border-bottom-left-radius: 4px;
+            border-bottom-left-radius: 6px;
             max-width: 90%;
         }
 
         .suggestion-chip:hover {
             background: #F5F3F0;
-            border-color: #1A1A1A;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            border-color: rgba(26,26,26,0.2);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.07);
         }
 
-        /* Input Area */
+        /* Input Area — floating above nav */
         #coach-input-area {
             position: fixed;
-            bottom: var(--nav-height);
-            left: 0;
-            width: 100%;
-            padding: 12px;
-            background: var(--bg-color);
-            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            bottom: calc(var(--nav-height) + 20px);
+            left: 12px;
+            width: calc(100% - 24px);
+            max-width: 456px;
+            padding: 8px;
+            background: rgba(255,255,255,0.92);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(235,235,235,0.5);
+            border-radius: 22px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
             display: none;
-            /* Hidden by default, shown in switchView */
-            gap: 10px;
+            gap: 8px;
             z-index: 900;
+        }
+
+        @media (min-width: 481px) {
+            #coach-input-area {
+                left: 50%;
+                transform: translateX(-50%);
+            }
         }
 
         #chat-input {
             flex: 1;
-            background: var(--surface-color);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: white;
-            padding: 12px;
-            border-radius: 20px;
+            background: #F5F3F0;
+            border: 1px solid rgba(235,235,235,0.5);
+            color: var(--text-color);
+            padding: 12px 16px;
+            border-radius: 16px;
             outline: none;
             font-size: 14px;
+            font-family: 'Inter', sans-serif;
+            transition: border-color 0.2s;
+        }
+
+        #chat-input:focus {
+            border-color: rgba(26,26,26,0.2);
+        }
+
+        #chat-input::placeholder {
+            color: #B0A89E;
         }
 
         #send-btn {
             background: var(--primary-color);
             border: none;
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
+            width: 42px;
+            height: 42px;
+            border-radius: 14px;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
             color: white;
+            transition: opacity 0.15s;
+            flex-shrink: 0;
+        }
+
+        #send-btn:active {
+            opacity: 0.8;
         }
 
         /* Sleep Card Animation */
@@ -1596,7 +1631,7 @@
             margin: 6px auto 8px;
             padding: 4px 0 6px;
             background: #FFFFFF;
-            border: 1px solid #EBEBEB;
+            border: 1px solid rgba(235,235,235,0.5);
             border-radius: 14px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.05);
             width: 100%;
@@ -1703,7 +1738,7 @@
             align-items: center;
             padding: 12px 18px;
             background: #FFFFFF;
-            border: 1px solid #EBEBEB;
+            border: 1px solid rgba(235,235,235,0.5);
             border-radius: 12px;
             transition: all 0.3s ease;
             cursor: pointer;
@@ -1751,7 +1786,7 @@
             padding: 30px 20px;
             text-align: center;
             background: #FFFFFF;
-            border: 1px solid #EBEBEB;
+            border: 1px solid rgba(235,235,235,0.5);
             border-radius: 18px;
             margin: 10px auto;
             max-width: 85%;
@@ -2080,10 +2115,10 @@
             align-items: center;
             justify-content: space-between;
             padding: calc(env(safe-area-inset-top, 12px) + 14px) 20px 14px;
-            border-bottom: 1px solid #EBEBEB;
-            background: rgba(245,243,240,0.95);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid rgba(235,235,235,0.4);
+            background: rgba(245,243,240,0.88);
+            backdrop-filter: blur(24px) saturate(1.4);
+            -webkit-backdrop-filter: blur(24px) saturate(1.4);
             flex-shrink: 0;
         }
         #coach-back-btn {
@@ -2097,11 +2132,11 @@
             justify-content: center;
             width: 36px;
             height: 36px;
-            border-radius: 10px;
-            transition: background 0.15s;
+            border-radius: 12px;
+            transition: background 0.18s, transform 0.18s;
             flex-shrink: 0;
         }
-        #coach-back-btn:active { background: rgba(0,0,0,0.06); }
+        #coach-back-btn:active { background: rgba(0,0,0,0.05); transform: scale(0.92); }
         #coach-header-info {
             display: flex;
             align-items: center;
@@ -2241,7 +2276,7 @@
             align-items: center;
             justify-content: space-between;
             background: white;
-            border: 1px solid #EBEBEB;
+            border: 1px solid rgba(235,235,235,0.5);
             border-radius: 12px;
             padding: 12px 16px;
             font-family: 'Inter', sans-serif;
@@ -2305,7 +2340,7 @@
         .msg-ai {
             background: #FFFFFF;
             color: #1A1A1A;
-            border: 1px solid #EBEBEB;
+            border: 1px solid rgba(235,235,235,0.5);
             border-radius: 18px 18px 18px 4px;
             padding: 13px 17px;
             font-size: 15px;
@@ -2326,7 +2361,7 @@
         }
         .typing-bubble {
             background: #FFFFFF;
-            border: 1px solid #EBEBEB;
+            border: 1px solid rgba(235,235,235,0.5);
             border-radius: 18px 18px 18px 4px;
             padding: 14px 18px;
             display: flex;
@@ -2367,10 +2402,10 @@
         /* Input Area */
         #coach-input-area {
             flex-shrink: 0;
-            background: rgba(245,243,240,0.97);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border-top: 1px solid #EBEBEB;
+            background: rgba(245,243,240,0.88);
+            backdrop-filter: blur(24px) saturate(1.4);
+            -webkit-backdrop-filter: blur(24px) saturate(1.4);
+            border-top: 1px solid rgba(235,235,235,0.4);
             padding: 14px 16px calc(env(safe-area-inset-bottom, 8px) + 10px);
             display: flex !important;
             flex-direction: row;
@@ -2500,7 +2535,7 @@
             display: block;
             width: 100%;
             background: white;
-            border: 1px solid #EBEBEB;
+            border: 1px solid rgba(235,235,235,0.5);
             border-left: 3px solid var(--primary-color);
             border-radius: 18px;
             padding: 18px 20px;
@@ -2786,7 +2821,7 @@
 
                 <!-- MAIN CARD: TODAY'S WORKOUT (dynamic) -->
                 <div style="font-size:27px;font-weight:800;color:#111;font-family:'Outfit',sans-serif;letter-spacing:-0.01em;margin-bottom:16px;text-align:center;">Dzisiejszy trening</div>
-                <div class="card home-anim" id="home-main-workout-card" onclick="switchView('calendar')" style="border-top: 4px solid var(--primary-color); border: 1px solid #EBEBEB; border-top: 4px solid var(--primary-color); border-radius: 20px; margin-bottom: 16px; cursor: pointer; background: #FFFFFF; animation-delay: 0.05s;">
+                <div class="card home-anim" id="home-main-workout-card" onclick="switchView('calendar')" style="border-top: 4px solid var(--primary-color); border: 1px solid rgba(235,235,235,0.5); border-top: 4px solid var(--primary-color); border-radius: 20px; margin-bottom: 16px; cursor: pointer; background: #FFFFFF; box-shadow: 0 4px 24px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04); animation-delay: 0.05s;">
                     <!-- hidden for JS compat -->
                     <div id="home-main-workout-badge" style="display:none;"></div>
                     <div id="home-main-workout-desc" style="display:none;"></div>
@@ -2820,8 +2855,8 @@
                     <!-- hidden refs for JS compat -->
                     <div id="home-main-duration" style="display:none;"></div>
                     <div id="home-main-distance" style="display:none;"></div>
-                    <button onclick="event.stopPropagation();calDayClick(toDateStr(new Date()));switchView('calendar');" style="width:100%;padding:13px;background:var(--primary-color);border:none;border-radius:14px;color:white;font-weight:700;font-size:14px;cursor:pointer;transition:opacity 0.15s;box-shadow:0 4px 12px rgba(0,0,0,0.12);">
-                        Zobacz szczegóły →
+                    <button onclick="event.stopPropagation();calDayClick(toDateStr(new Date()));switchView('calendar');" style="width:100%;padding:14px;background:var(--primary-color);border:none;border-radius:14px;color:white;font-weight:700;font-size:14px;font-family:'Inter',sans-serif;cursor:pointer;transition:transform 0.15s cubic-bezier(0.22,1,0.36,1),opacity 0.15s;box-shadow:0 4px 16px rgba(26,26,26,0.2);" onmousedown="this.style.transform='scale(0.97)'" onmouseup="this.style.transform='scale(1)'">
+                        Zobacz szczegóły &rarr;
                     </button>
                 </div>
 
@@ -2845,7 +2880,7 @@
                 <div class="home-anim" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; animation-delay: 0.12s;">
                     <!-- 1. Readiness Battery -->
                     <div class="card" onclick="openMetricDetails('BODY ENGINE')"
-                        style="margin: 0; padding: 20px 16px 16px; border-radius: 20px; display: flex; flex-direction: column; align-items: center; justify-content: space-between; height: 200px; text-align: center; cursor: pointer; transition: transform 0.2s; background: var(--surface-color); border: 1px solid #EBEBEB;">
+                        style="margin: 0; padding: 20px 16px 16px; border-radius: 20px; display: flex; flex-direction: column; align-items: center; justify-content: space-between; height: 200px; text-align: center; cursor: pointer; transition: transform 0.22s cubic-bezier(0.22,1,0.36,1); background: var(--surface-color); border: 1px solid rgba(235,235,235,0.5); box-shadow: 0 2px 16px rgba(0,0,0,0.04);">
                         <div style="font-size: 13px; color: #111111; text-transform: uppercase; font-weight: 800; letter-spacing: 0.6px;">Body Engine</div>
                         <div class="battery-shell" style="transform: scale(0.62); margin: -14px 0;">
                             <div class="battery-level">
@@ -2866,7 +2901,7 @@
                     </div>
 
                     <div class="card" onclick="openMetricDetails('Sen')"
-                        style="margin: 0; padding: 20px 16px 16px; border-radius: 20px; display: flex; flex-direction: column; align-items: center; justify-content: space-between; height: 200px; text-align: center; position: relative; overflow: visible; cursor: pointer; transition: transform 0.2s; background: var(--surface-color); border: 1px solid #EBEBEB;">
+                        style="margin: 0; padding: 20px 16px 16px; border-radius: 20px; display: flex; flex-direction: column; align-items: center; justify-content: space-between; height: 200px; text-align: center; position: relative; overflow: visible; cursor: pointer; transition: transform 0.22s cubic-bezier(0.22,1,0.36,1); background: var(--surface-color); border: 1px solid rgba(235,235,235,0.5); box-shadow: 0 2px 16px rgba(0,0,0,0.04);">
                         <!-- Label above -->
                         <div style="font-size: 13px; color: #111111; text-transform: uppercase; font-weight: 800; letter-spacing: 0.6px;">Sen</div>
                         <!-- Sleep Ring -->
@@ -2920,7 +2955,7 @@
 
                     <!-- 3. Resting HR -->
                     <div class="card" onclick="openMetricDetails('Tętno Spoczynkowe')"
-                        style="margin: 0; padding: 16px 16px 14px; border-radius: 20px; display: flex; flex-direction: column; align-items: center; justify-content: space-between; height: 160px; text-align: center; cursor: pointer; transition: transform 0.2s; background: var(--surface-color); border: 1px solid #EBEBEB;">
+                        style="margin: 0; padding: 16px 16px 14px; border-radius: 20px; display: flex; flex-direction: column; align-items: center; justify-content: space-between; height: 160px; text-align: center; cursor: pointer; transition: transform 0.22s cubic-bezier(0.22,1,0.36,1); background: var(--surface-color); border: 1px solid rgba(235,235,235,0.5); box-shadow: 0 2px 16px rgba(0,0,0,0.04);">
                         <div style="font-size: 13px; color: #111111; text-transform: uppercase; font-weight: 800; letter-spacing: 0.6px;">Tętno Spocz.</div>
                         <div class="heartbeat-container">
                             <svg class="heart-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
@@ -2933,13 +2968,13 @@
 
                     <!-- 4. The Grinder Runner (Pro XP) -->
                     <div id="race-countdown-card"
-                        style="margin:0;padding:20px;border-radius:20px;display:flex;flex-direction:column;align-items:center;justify-content:center;height:160px;text-align:center;position:relative;overflow:hidden;background:var(--surface-color);border:1px solid #EBEBEB;">
+                        style="margin:0;padding:20px;border-radius:20px;display:flex;flex-direction:column;align-items:center;justify-content:center;height:160px;text-align:center;position:relative;overflow:hidden;background:var(--surface-color);border:1px solid rgba(235,235,235,0.5);box-shadow:0 2px 16px rgba(0,0,0,0.04);">
                         <!-- filled by updateRaceCountdown() -->
                     </div>
                 </div>
 
                 <!-- STREAK CARD -->
-                <div id="streak-card" class="home-anim" style="display:none;background:white;border-radius:20px;border:1px solid #EBEBEB;padding:16px 20px;margin-bottom:12px;align-items:center;justify-content:space-between;">
+                <div id="streak-card" class="home-anim" style="display:none;background:white;border-radius:20px;border:1px solid rgba(235,235,235,0.5);box-shadow:0 2px 16px rgba(0,0,0,0.04);padding:16px 20px;margin-bottom:12px;align-items:center;justify-content:space-between;">
                     <div>
                         <div style="font-size:11px;font-weight:700;color:#8A8A8A;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px;">Seria check-inów</div>
                         <div id="streak-value" style="font-size:24px;font-weight:800;font-family:'Outfit',sans-serif;color:#1A1A1A;">0 dni</div>
@@ -2950,7 +2985,7 @@
                 <!-- POST CHECK-IN BANNER -->
                 <div id="post-checkin-banner" style="display:none;margin-top:16px;margin-bottom:8px;">
                     <div onclick="openCheckin('post',window._todayTyp,window._todayKm)"
-                        style="background:white;border:1.5px solid #EBEBEB;border-radius:20px;padding:16px 20px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 12px rgba(0,0,0,0.05);">
+                        style="background:white;border:1px solid rgba(235,235,235,0.5);border-radius:20px;padding:16px 20px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;box-shadow:0 4px 20px rgba(0,0,0,0.06);transition:transform 0.22s cubic-bezier(0.22,1,0.36,1);" onmousedown="this.style.transform='scale(0.97)'" onmouseup="this.style.transform='scale(1)'">
                         <div>
                             <div style="font-size:11px;font-weight:700;color:#8A8A8A;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px;">Dzisiejszy trening</div>
                             <div style="font-size:16px;font-weight:700;color:#1A1A1A;">Zrobiłeś trening? Uzupełnij →</div>
@@ -2966,14 +3001,14 @@
             <!-- VIEW: CALENDAR -->
             <div id="view-calendar" class="view" style="padding:0;display:flex;flex-direction:column;">
                 <!-- Sticky header -->
-                <div style="position:sticky;top:0;z-index:10;background:rgba(245,243,240,0.96);backdrop-filter:blur(12px);padding:12px 16px 12px;border-bottom:1px solid #EBEBEB;flex-shrink:0;">
+                <div style="position:sticky;top:0;z-index:10;background:rgba(245,243,240,0.88);backdrop-filter:blur(24px) saturate(1.4);-webkit-backdrop-filter:blur(24px) saturate(1.4);padding:12px 16px 12px;border-bottom:1px solid rgba(235,235,235,0.4);flex-shrink:0;">
                     <h1 style="margin:0 0 12px;font-family:'Outfit',sans-serif;font-weight:800;font-size:26px;color:#111111;">Twój Plan</h1>
                     <!-- View toggle pill switcher -->
-                    <div id="cal-toggle-wrap" style="display:flex;background:#EDE8DC;border-radius:99px;padding:3px;position:relative;">
+                    <div id="cal-toggle-wrap" style="display:flex;background:rgba(237,232,220,0.6);border-radius:99px;padding:3px;position:relative;">
                         <button onclick="switchCalView('month')" id="cal-btn-month" style="flex:1;padding:8px 0;border:none;background:transparent;border-radius:99px;font-size:13px;font-weight:400;color:#888;cursor:pointer;transition:color 0.28s,font-weight 0.28s;position:relative;z-index:1;">Miesiąc</button>
                         <button onclick="switchCalView('week')"  id="cal-btn-week"  style="flex:1;padding:8px 0;border:none;background:transparent;border-radius:99px;font-size:13px;font-weight:400;color:#888;cursor:pointer;transition:color 0.28s,font-weight 0.28s;position:relative;z-index:1;">Tydzień</button>
                         <button onclick="switchCalView('day')"   id="cal-btn-day"   style="flex:1;padding:8px 0;border:none;background:transparent;border-radius:99px;font-size:13px;font-weight:400;color:#888;cursor:pointer;transition:color 0.28s,font-weight 0.28s;position:relative;z-index:1;">Dzień</button>
-                        <div id="cal-toggle-slider" style="position:absolute;top:3px;bottom:3px;left:3px;border-radius:99px;background:#fff;box-shadow:0 1px 4px rgba(17,17,17,0.12);transition:left 0.28s cubic-bezier(0.4,0,0.2,1),width 0.28s cubic-bezier(0.4,0,0.2,1);pointer-events:none;"></div>
+                        <div id="cal-toggle-slider" style="position:absolute;top:3px;bottom:3px;left:3px;border-radius:99px;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,0.08),0 1px 2px rgba(0,0,0,0.04);transition:left 0.28s cubic-bezier(0.22,1,0.36,1),width 0.28s cubic-bezier(0.22,1,0.36,1);pointer-events:none;"></div>
                     </div>
                 </div>
                 <!-- Dynamic content -->
@@ -3042,12 +3077,12 @@
             <!-- VIEW: CHARTS (WIP) -->
             <div id="view-charts" class="view" style="padding:0;display:flex;flex-direction:column;">
                 <!-- Sticky header -->
-                <div style="position:sticky;top:0;z-index:10;background:rgba(245,243,240,0.96);backdrop-filter:blur(12px);padding:12px 16px 12px;border-bottom:1px solid #EBEBEB;flex-shrink:0;">
+                <div style="position:sticky;top:0;z-index:10;background:rgba(245,243,240,0.88);backdrop-filter:blur(24px) saturate(1.4);-webkit-backdrop-filter:blur(24px) saturate(1.4);padding:12px 16px 12px;border-bottom:1px solid rgba(235,235,235,0.4);flex-shrink:0;">
                     <h1 style="margin:0 0 12px;font-family:'Outfit',sans-serif;font-weight:800;font-size:26px;color:#111;">Statystyki</h1>
-                    <div id="stats-toggle-wrap" style="display:flex;background:#EDE8DC;border-radius:99px;padding:3px;position:relative;">
+                    <div id="stats-toggle-wrap" style="display:flex;background:rgba(237,232,220,0.6);border-radius:99px;padding:3px;position:relative;">
                         <button onclick="switchStatsRange('week')" id="stats-btn-week" style="flex:1;border:none;background:transparent;font-size:13px;font-weight:600;color:#888;padding:7px 12px;border-radius:99px;cursor:pointer;position:relative;z-index:1;transition:color 0.2s;">Tydzień</button>
                         <button onclick="switchStatsRange('month')" id="stats-btn-month" style="flex:1;border:none;background:transparent;font-size:13px;font-weight:600;color:#888;padding:7px 12px;border-radius:99px;cursor:pointer;position:relative;z-index:1;transition:color 0.2s;">Miesiąc</button>
-                        <div id="stats-toggle-slider" style="position:absolute;top:3px;bottom:3px;left:3px;border-radius:99px;background:#fff;box-shadow:0 1px 4px rgba(17,17,17,0.12);transition:left 0.28s cubic-bezier(0.4,0,0.2,1),width 0.28s cubic-bezier(0.4,0,0.2,1);pointer-events:none;"></div>
+                        <div id="stats-toggle-slider" style="position:absolute;top:3px;bottom:3px;left:3px;border-radius:99px;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,0.08),0 1px 2px rgba(0,0,0,0.04);transition:left 0.28s cubic-bezier(0.22,1,0.36,1),width 0.28s cubic-bezier(0.22,1,0.36,1);pointer-events:none;"></div>
                     </div>
                 </div>
                 <!-- Chart content -->
@@ -3061,81 +3096,113 @@
                     <div style="font-size:13px;color:#8A8A8A;" id="settings-version">v1.0.0 Beta</div>
                 </div>
 
-                <!-- KONTO -->
-                <div style="background:#fff;border-radius:20px;padding:20px;margin-bottom:16px;border:1.5px solid #EBEBEB;">
+                <!-- SEKCJA 1 — KONTO -->
+                <div class="home-anim" style="background:#fff;border-radius:20px;padding:20px;margin-bottom:16px;border:1px solid rgba(235,235,235,0.5);box-shadow:0 2px 16px rgba(0,0,0,0.04);animation-delay:0.05s;">
                     <div style="font-size:11px;font-weight:700;color:#8A8A8A;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:16px;">Konto</div>
-                    <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #F5F5F5;">
-                        <span style="font-size:14px;color:#1A1A1A;">Email</span>
-                        <span id="settings-email" style="font-size:13px;color:#8A8A8A;">—</span>
+                    <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px;">
+                        <div id="settings-avatar" style="width:48px;height:48px;border-radius:50%;background:#1A1A1A;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                            <span id="settings-initials" style="color:#fff;font-family:'Outfit',sans-serif;font-weight:700;font-size:18px;">?</span>
+                        </div>
+                        <div style="min-width:0;">
+                            <div id="settings-name" style="font-family:'Outfit',sans-serif;font-weight:700;font-size:18px;color:#1A1A1A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">—</div>
+                            <div id="settings-email" style="font-size:13px;color:#8A8A8A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">—</div>
+                        </div>
                     </div>
-                    <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #F5F5F5;">
-                        <span style="font-size:14px;color:#1A1A1A;">Imię</span>
-                        <span id="settings-name" style="font-size:13px;color:#8A8A8A;">—</span>
-                    </div>
-                    <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-top:1px solid #F5F5F5;">
                         <span style="font-size:14px;color:#1A1A1A;">ID konta</span>
-                        <span id="settings-user-id" style="font-size:11px;color:#C4C4C4;font-family:'SF Mono',monospace;">—</span>
+                        <div style="display:flex;align-items:center;gap:8px;">
+                            <span id="settings-user-id" style="font-size:12px;color:#C4C4C4;font-family:'SF Mono','Courier New',monospace;">—</span>
+                            <button onclick="copyUserId()" style="background:none;border:1px solid rgba(235,235,235,0.5);border-radius:8px;padding:4px 8px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:border-color 0.2s;" title="Kopiuj ID">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8A8A8A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+                            </button>
+                        </div>
                     </div>
                 </div>
 
-                <!-- PLAN -->
-                <div style="background:#fff;border-radius:20px;padding:20px;margin-bottom:16px;border:1.5px solid #EBEBEB;">
-                    <div style="font-size:11px;font-weight:700;color:#8A8A8A;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:16px;">Plan treningowy</div>
-                    <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #F5F5F5;">
-                        <span style="font-size:14px;color:#1A1A1A;">Cel</span>
-                        <span id="settings-goal" style="font-size:13px;color:#8A8A8A;">—</span>
-                    </div>
-                    <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #F5F5F5;">
-                        <span style="font-size:14px;color:#1A1A1A;">Dni treningowe / tydzień</span>
-                        <span id="settings-days" style="font-size:13px;color:#8A8A8A;">—</span>
-                    </div>
-                    <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;">
-                        <span style="font-size:14px;color:#1A1A1A;">Data zawodów</span>
-                        <span id="settings-race-date" style="font-size:13px;color:#8A8A8A;">Nie ustawiono</span>
-                    </div>
-                </div>
-
-                <!-- TWÓJ CEL -->
-                <div style="background:white;border-radius:20px;border:1px solid #EBEBEB;padding:20px;margin-bottom:12px;">
+                <!-- SEKCJA 2 — TWÓJ CEL -->
+                <div class="home-anim" style="background:#fff;border-radius:20px;padding:20px;margin-bottom:16px;border:1px solid rgba(235,235,235,0.5);box-shadow:0 2px 16px rgba(0,0,0,0.04);animation-delay:0.10s;">
                     <div style="font-size:11px;font-weight:700;color:#8A8A8A;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:16px;">Twój cel</div>
 
-                    <div style="margin-bottom:12px;">
-                        <div style="font-size:12px;color:#8A8A8A;margin-bottom:4px;">Data zawodów</div>
-                        <input type="date" id="settings-edit-race-date" style="width:100%;padding:12px;border:1.5px solid #EBEBEB;border-radius:12px;font-size:15px;font-family:'Inter',sans-serif;color:#1A1A1A;background:white;outline:none;box-sizing:border-box;">
+                    <div style="margin-bottom:14px;">
+                        <label style="font-size:11px;font-weight:700;color:#8A8A8A;text-transform:uppercase;letter-spacing:0.08em;display:block;margin-bottom:6px;">Data zawodów</label>
+                        <input type="date" id="settings-edit-race-date" style="width:100%;padding:12px;border:1.5px solid #EBEBEB;border-radius:12px;font-size:15px;font-family:'Inter',sans-serif;color:#1A1A1A;background:#fff;outline:none;box-sizing:border-box;transition:border-color 0.2s;" onfocus="this.style.borderColor='#1A1A1A'" onblur="this.style.borderColor='#EBEBEB'">
                     </div>
 
-                    <div style="margin-bottom:12px;">
-                        <div style="font-size:12px;color:#8A8A8A;margin-bottom:4px;">Cel czasowy (MM:SS lub H:MM:SS)</div>
-                        <input type="text" id="settings-edit-time-goal" placeholder="np. 45:00 lub 1:45:00" style="width:100%;padding:12px;border:1.5px solid #EBEBEB;border-radius:12px;font-size:15px;font-family:'Inter',sans-serif;color:#1A1A1A;background:white;outline:none;box-sizing:border-box;">
+                    <div style="margin-bottom:14px;">
+                        <label style="font-size:11px;font-weight:700;color:#8A8A8A;text-transform:uppercase;letter-spacing:0.08em;display:block;margin-bottom:6px;">Cel czasowy</label>
+                        <input type="text" id="settings-edit-time-goal" placeholder="np. 45:00 lub 1:45:00" style="width:100%;padding:12px;border:1.5px solid #EBEBEB;border-radius:12px;font-size:15px;font-family:'Inter',sans-serif;color:#1A1A1A;background:#fff;outline:none;box-sizing:border-box;transition:border-color 0.2s;" onfocus="this.style.borderColor='#1A1A1A'" onblur="this.style.borderColor='#EBEBEB'">
                     </div>
 
-                    <div style="margin-bottom:16px;">
-                        <div style="font-size:12px;color:#8A8A8A;margin-bottom:4px;">Tygodniowy kilometraż (km)</div>
-                        <input type="number" id="settings-edit-weekly-km" min="10" max="200" style="width:100%;padding:12px;border:1.5px solid #EBEBEB;border-radius:12px;font-size:15px;font-family:'Inter',sans-serif;color:#1A1A1A;background:white;outline:none;box-sizing:border-box;">
+                    <div style="margin-bottom:20px;">
+                        <label style="font-size:11px;font-weight:700;color:#8A8A8A;text-transform:uppercase;letter-spacing:0.08em;display:block;margin-bottom:6px;">Km tygodniowo</label>
+                        <input type="number" id="settings-edit-weekly-km" min="10" max="200" style="width:100%;padding:12px;border:1.5px solid #EBEBEB;border-radius:12px;font-size:15px;font-family:'Inter',sans-serif;color:#1A1A1A;background:#fff;outline:none;box-sizing:border-box;transition:border-color 0.2s;" onfocus="this.style.borderColor='#1A1A1A'" onblur="this.style.borderColor='#EBEBEB'">
                     </div>
 
-                    <button onclick="saveGoalSettings()" style="width:100%;padding:14px;background:#1A1A1A;color:white;border:none;border-radius:14px;font-size:15px;font-weight:700;font-family:'Inter',sans-serif;cursor:pointer;">
-                        Zapisz i zaktualizuj plan →
+                    <button onclick="saveGoalSettings()" style="width:100%;height:52px;background:#1A1A1A;color:#fff;border:none;border-radius:14px;font-size:15px;font-weight:700;font-family:'Inter',sans-serif;cursor:pointer;transition:opacity 0.2s;" onmousedown="this.style.opacity='0.85'" onmouseup="this.style.opacity='1'">
+                        Zapisz i zaktualizuj plan &rarr;
                     </button>
-                    <div id="settings-save-msg" style="display:none;text-align:center;font-size:13px;color:#22C55E;margin-top:8px;">✓ Zapisano — trwa generowanie nowego planu</div>
+                    <div id="settings-save-msg" style="display:none;text-align:center;font-size:13px;color:#22C55E;margin-top:10px;font-weight:600;">Zapisano — trwa generowanie nowego planu</div>
                 </div>
 
-                <!-- BEZPIECZEŃSTWO -->
-                <div style="background:#fff;border-radius:20px;padding:20px;margin-bottom:16px;border:1.5px solid #EBEBEB;">
+                <!-- SEKCJA 3 — PLAN TRENINGOWY -->
+                <div class="home-anim" style="background:#fff;border-radius:20px;padding:20px;margin-bottom:16px;border:1px solid rgba(235,235,235,0.5);box-shadow:0 2px 16px rgba(0,0,0,0.04);animation-delay:0.15s;">
+                    <div style="font-size:11px;font-weight:700;color:#8A8A8A;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:12px;">Plan treningowy</div>
+                    <div id="settings-plan-goal" style="font-size:14px;color:#1A1A1A;line-height:1.5;margin-bottom:16px;">Brak aktywnego planu</div>
+                    <button id="settings-generate-plan-btn" onclick="generateNewPlan()" style="width:100%;height:52px;background:transparent;border:1.5px solid #EBEBEB;border-radius:14px;font-size:15px;font-weight:600;font-family:'Inter',sans-serif;color:#1A1A1A;cursor:pointer;transition:border-color 0.2s,background 0.2s;" onmouseenter="this.style.borderColor='#1A1A1A'" onmouseleave="this.style.borderColor='#EBEBEB'">
+                        Wygeneruj nowy plan
+                    </button>
+                </div>
+
+                <!-- SEKCJA 4 — POŁĄCZENIA -->
+                <div class="home-anim" style="background:#fff;border-radius:20px;padding:20px;margin-bottom:16px;border:1px solid rgba(235,235,235,0.5);box-shadow:0 2px 16px rgba(0,0,0,0.04);animation-delay:0.20s;">
+                    <div style="font-size:11px;font-weight:700;color:#8A8A8A;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:16px;">Połączenia</div>
+
+                    <!-- Strava -->
+                    <div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid #F5F5F5;">
+                        <div style="width:10px;height:10px;border-radius:50%;background:#FC4C02;flex-shrink:0;"></div>
+                        <div style="flex:1;min-width:0;">
+                            <div style="font-size:14px;font-weight:600;color:#1A1A1A;">Strava</div>
+                            <div style="font-size:12px;color:#8A8A8A;">Niepołączone</div>
+                        </div>
+                        <button style="padding:8px 16px;border:1.5px solid #EBEBEB;border-radius:10px;background:transparent;font-size:13px;font-weight:600;font-family:'Inter',sans-serif;color:#1A1A1A;cursor:pointer;white-space:nowrap;transition:border-color 0.2s;" onmouseenter="this.style.borderColor='#1A1A1A'" onmouseleave="this.style.borderColor='#EBEBEB'">Połącz</button>
+                    </div>
+
+                    <!-- Garmin -->
+                    <div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid #F5F5F5;">
+                        <div style="width:10px;height:10px;border-radius:50%;background:#007CC3;flex-shrink:0;"></div>
+                        <div style="flex:1;min-width:0;">
+                            <div style="font-size:14px;font-weight:600;color:#1A1A1A;">Garmin Connect</div>
+                            <div style="font-size:12px;color:#8A8A8A;">Niepołączone</div>
+                        </div>
+                        <button disabled style="padding:8px 16px;border:1.5px solid #EBEBEB;border-radius:10px;background:transparent;font-size:13px;font-weight:600;font-family:'Inter',sans-serif;color:#C4C4C4;cursor:not-allowed;white-space:nowrap;">Wkrótce</button>
+                    </div>
+
+                    <!-- Apple Health -->
+                    <div style="display:flex;align-items:center;gap:12px;padding:12px 0;opacity:0.45;">
+                        <div style="width:10px;height:10px;border-radius:50%;background:#C4C4C4;flex-shrink:0;"></div>
+                        <div style="flex:1;min-width:0;">
+                            <div style="font-size:14px;font-weight:600;color:#1A1A1A;">Apple Health</div>
+                            <div style="font-size:12px;color:#8A8A8A;">Niedostępne w PWA</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SEKCJA 5 — BEZPIECZEŃSTWO -->
+                <div class="home-anim" style="background:#fff;border-radius:20px;padding:20px;margin-bottom:16px;border:1px solid rgba(235,235,235,0.5);box-shadow:0 2px 16px rgba(0,0,0,0.04);animation-delay:0.25s;">
                     <div style="font-size:11px;font-weight:700;color:#8A8A8A;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:16px;">Bezpieczeństwo</div>
-                    <button onclick="alert('Funkcja zmiany hasła będzie dostępna wkrótce.')" style="width:100%;padding:13px;background:transparent;border:1.5px solid #EBEBEB;border-radius:12px;color:#1A1A1A;font-family:'Inter',sans-serif;font-size:14px;font-weight:600;cursor:pointer;text-align:left;">
-                        Zmień hasło →
+                    <button onclick="alert('Funkcja wkrótce dostępna')" style="width:100%;height:48px;background:transparent;border:1.5px solid #EBEBEB;border-radius:14px;font-size:14px;font-weight:600;font-family:'Inter',sans-serif;color:#1A1A1A;cursor:pointer;transition:border-color 0.2s;" onmouseenter="this.style.borderColor='#1A1A1A'" onmouseleave="this.style.borderColor='#EBEBEB'">
+                        Zmień hasło
                     </button>
                 </div>
 
-                <!-- STREFA NIEBEZPIECZNA -->
-                <div style="background:#fff;border-radius:20px;padding:20px;margin-bottom:32px;border:1.5px solid #EBEBEB;">
+                <!-- SEKCJA 6 — STREFA NIEBEZPIECZNA -->
+                <div class="home-anim" style="background:#fff;border-radius:20px;padding:20px;margin-bottom:32px;border:1px solid rgba(235,235,235,0.5);border-left:3px solid #ef4444;box-shadow:0 2px 16px rgba(0,0,0,0.04);animation-delay:0.30s;">
                     <div style="font-size:11px;font-weight:700;color:#8A8A8A;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:16px;">Strefa niebezpieczna</div>
-                    <button onclick="doLogout()" style="width:100%;padding:13px;background:transparent;border:1.5px solid #f87171;border-radius:12px;color:#f87171;font-family:'Inter',sans-serif;font-size:14px;font-weight:600;cursor:pointer;margin-bottom:10px;">
+                    <button onclick="doLogout()" style="width:100%;height:48px;background:transparent;border:1.5px solid #ef4444;border-radius:14px;font-size:14px;font-weight:600;font-family:'Inter',sans-serif;color:#ef4444;cursor:pointer;margin-bottom:10px;transition:background 0.2s;" onmouseenter="this.style.background='#fef2f2'" onmouseleave="this.style.background='transparent'">
                         Wyloguj się
                     </button>
-                    <button onclick="if(confirm('Czy na pewno chcesz zacząć od nowa? Wszystkie dane zostaną usunięte z urządzenia.')) { localStorage.clear(); window.location.href=\'index.html\'; }" style="width:100%;padding:13px;background:#fef2f2;border:1.5px solid #fca5a5;border-radius:12px;color:#dc2626;font-family:'Inter',sans-serif;font-size:14px;font-weight:600;cursor:pointer;">
-                        Zacznij od nowa
+                    <button onclick="if(confirm('Czy na pewno? Tej operacji nie można cofnąć.')) { localStorage.clear(); window.location.href='index.html'; }" style="background:none;border:none;font-size:13px;color:#8A8A8A;font-family:'Inter',sans-serif;cursor:pointer;padding:8px 0;width:100%;text-align:center;">
+                        Usuń konto
                     </button>
                 </div>
             </div>
@@ -3960,7 +4027,7 @@
             }).join('');
 
             const chartHTML = `
-                <div style="background:#FFFFFF;border:1px solid #EBEBEB;border-radius:14px;padding:14px 14px 10px;">
+                <div style="background:#FFFFFF;border:1px solid rgba(235,235,235,0.5);border-radius:14px;padding:14px 14px 10px;box-shadow:0 2px 12px rgba(0,0,0,0.03);">
                     <div style="font-size:10px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:#8A8A8A;margin-bottom:10px;">${isSleep ? 'Czas snu' : 'Tętno spoczynkowe'}</div>
                     <svg viewBox="0 0 ${W} ${H}" width="100%" style="overflow:visible;display:block;">
                         <defs>
@@ -4480,7 +4547,7 @@
                 const typeShort = day ? (TYPE_SHORT[day.typ] || day.typ) : '';
                 const dist    = day?.dystans_km ? `${day.dystans_km} km` : '';
                 const activeSt = `background:var(--primary-color);color:#fff;box-shadow:0 6px 18px rgba(17,17,17,0.22);border:1px solid transparent;`;
-                const defSt    = `background:#FFFFFF;color:#111;${isToday ? 'box-shadow:inset 0 0 0 2px var(--primary-color);' : 'border:1px solid #EBEBEB;'}`;
+                const defSt    = `background:#FFFFFF;color:#111;${isToday ? 'box-shadow:inset 0 0 0 2px var(--primary-color);' : 'border:1px solid rgba(235,235,235,0.5);box-shadow:0 2px 12px rgba(0,0,0,0.03);'}`;
                 return `<div onclick="calDayClick('${ds}')"
                     class="week-card-anim"
                     style="flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:4px;
@@ -4646,7 +4713,7 @@
                 const paceGroupStyle = calMetric === 'pace' ? '' : 'opacity:0;pointer-events:none;';
 
                 return `
-                <div class="week-stat-anim" style="margin-top:10px;background:#FFFFFF;border:1px solid #EBEBEB;border-radius:14px;padding:14px 14px 12px;animation-delay:440ms;">
+                <div class="week-stat-anim" style="margin-top:10px;background:#FFFFFF;border:1px solid rgba(235,235,235,0.5);border-radius:14px;padding:14px 14px 12px;box-shadow:0 2px 12px rgba(0,0,0,0.03);animation-delay:440ms;">
                     <div style="margin-bottom:10px;">
                         <span style="font-size:10px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:#8A8A8A;">Rozkład tygodnia</span>
                     </div>
@@ -4691,7 +4758,7 @@
 
             // Cel tygodnia — pod wykresem
             const celBlock = celShort ? `
-                <div class="week-stat-anim" style="margin-top:10px;padding:14px 16px;background:#FFFFFF;border:1px solid #EBEBEB;border-radius:14px;animation-delay:500ms;">
+                <div class="week-stat-anim" style="margin-top:10px;padding:14px 16px;background:#FFFFFF;border:1px solid rgba(235,235,235,0.5);border-radius:14px;box-shadow:0 2px 12px rgba(0,0,0,0.03);animation-delay:500ms;">
                     <div style="font-size:10px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:#8A8A8A;margin-bottom:5px;">Cel tygodnia</div>
                     <div style="font-size:13px;color:#111;line-height:1.55;">${celShort}</div>
                 </div>` : '';
@@ -4784,7 +4851,7 @@
         }
 
         function _section(barColor, labelText, innerHTML) {
-            return `<div style="margin-bottom:14px;border-radius:18px;overflow:hidden;border:1px solid #EBEBEB;box-shadow:0 1px 4px rgba(0,0,0,0.04);">
+            return `<div style="margin-bottom:14px;border-radius:18px;overflow:hidden;border:1px solid rgba(235,235,235,0.5);box-shadow:0 2px 14px rgba(0,0,0,0.04);">
                 <div style="background:var(--surface-color,#fff);padding:16px 16px 14px;">
                     <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
                         <div style="width:10px;height:10px;border-radius:50%;background:${barColor};flex-shrink:0;"></div>
@@ -4866,7 +4933,7 @@
 
             const header = `<div style="margin-bottom:22px;">
                 <div style="font-size:11px;font-weight:700;color:#8A8A8A;text-transform:uppercase;letter-spacing:0.14em;margin-bottom:10px;font-family:'Inter',sans-serif;text-align:center;">Twój trening</div>
-                <div style="background:var(--surface-color,#fff);border-radius:18px;border:1px solid #EBEBEB;padding:20px 20px 18px;text-align:center;box-shadow:0 1px 6px rgba(0,0,0,0.05);">
+                <div style="background:var(--surface-color,#fff);border-radius:18px;border:1px solid rgba(235,235,235,0.5);padding:20px 20px 18px;text-align:center;box-shadow:0 2px 16px rgba(0,0,0,0.05);">
                     <div style="font-size:30px;font-weight:900;color:#111;font-family:'Outfit',sans-serif;letter-spacing:-0.02em;line-height:1.1;">${label}</div>
                     ${day.dystans_km && day.typ !== 'rest' ? `<div style="font-size:14px;color:#8A8A8A;font-weight:600;margin-top:6px;font-family:'Inter',sans-serif;">${day.dystans_km} km</div>` : ''}
                 </div>
@@ -4877,7 +4944,7 @@
                 return `${header}<div style="text-align:center;padding:16px 0;">
                     <div style="font-size:52px;margin-bottom:14px;">⚪</div>
                     <div style="font-size:15px;color:#8A8A8A;line-height:1.7;font-family:'Inter',sans-serif;">Stretching, rolowanie, spacer<br>zadbaj o regenerację</div>
-                    ${day.uwagi ? `<div style="margin-top:18px;padding:14px 16px;background:var(--surface-color,#fff);border-radius:12px;border:1px solid #EBEBEB;font-size:13px;color:#8A8A8A;font-style:italic;text-align:left;font-family:'Inter',sans-serif;">💡 ${day.uwagi}</div>` : ''}
+                    ${day.uwagi ? `<div style="margin-top:18px;padding:14px 16px;background:var(--surface-color,#fff);border-radius:12px;border:1px solid rgba(235,235,235,0.5);font-size:13px;color:#8A8A8A;font-style:italic;text-align:left;font-family:'Inter',sans-serif;">💡 ${day.uwagi}</div>` : ''}
                 </div>`;
             }
 
@@ -5756,31 +5823,86 @@
             const userId = localStorage.getItem('velm_user_id');
             if (!userId) return;
             try {
-                const res = await fetch(`${API_BASE}/api/user/${userId}`);
-                if (!res.ok) return;
-                const { user } = await res.json();
+                const [userRes, planRes] = await Promise.all([
+                    fetch(`${API_BASE}/api/user/${userId}`),
+                    fetch(`${API_BASE}/api/plan/${userId}`)
+                ]);
+                const { user } = userRes.ok ? await userRes.json() : {};
+                const planData = planRes.ok ? await planRes.json() : {};
                 const onb = user?.onboarding_data ?? {};
-                const goalMap = { run5k:'5 km',run10k:'10 km',halfmarathon:'Półmaraton',marathon:'Maraton',lose_weight:'Redukcja wagi',fitness:'Kondycja ogólna' };
                 const raceDate = onb.time_race_date ?? onb.dist_goal_date ?? null;
+
+                // Konto — avatar initials
+                const name = user?.name ?? '—';
+                const sName = document.getElementById('settings-name');
+                if (sName) sName.textContent = name;
+                const sInitials = document.getElementById('settings-initials');
+                if (sInitials) sInitials.textContent = name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2) || '?';
                 const sEmail = document.getElementById('settings-email');
                 if (sEmail) sEmail.textContent = user?.email ?? '—';
-                const sName = document.getElementById('settings-name');
-                if (sName) sName.textContent = user?.name ?? '—';
                 const sId = document.getElementById('settings-user-id');
-                if (sId) sId.textContent = userId.slice(0, 8) + '…';
-                const sGoal = document.getElementById('settings-goal');
-                if (sGoal) sGoal.textContent = goalMap[onb.goalId] ?? onb.goalId ?? '—';
-                const sDays = document.getElementById('settings-days');
-                if (sDays) sDays.textContent = onb.daysPerWeek ? `${onb.daysPerWeek} dni` : '—';
-                const sRace = document.getElementById('settings-race-date');
-                if (sRace) sRace.textContent = raceDate ?? 'Nie ustawiono';
+                if (sId) sId.textContent = userId.slice(0, 8) + '...';
+
+                // Twój cel — inputs
                 const editRaceDate = document.getElementById('settings-edit-race-date');
                 const editTimeGoal = document.getElementById('settings-edit-time-goal');
                 const editWeeklyKm = document.getElementById('settings-edit-weekly-km');
                 if (editRaceDate && raceDate) editRaceDate.value = raceDate;
-                if (editTimeGoal && onb.time_target_mins) editTimeGoal.value = onb.time_target_mins + ':' + String(onb.time_target_secs || 0).padStart(2, '0');
+                if (editTimeGoal && onb.time_target_mins) {
+                    const tg = onb.time_target_hours
+                        ? onb.time_target_hours + ':' + String(onb.time_target_mins).padStart(2,'0') + ':' + String(onb.time_target_secs || 0).padStart(2,'0')
+                        : onb.time_target_mins + ':' + String(onb.time_target_secs || 0).padStart(2,'0');
+                    editTimeGoal.value = tg;
+                }
                 if (editWeeklyKm && onb.weekly_km) editWeeklyKm.value = onb.weekly_km;
+
+                // Plan treningowy — cel tygodnia
+                const planGoalEl = document.getElementById('settings-plan-goal');
+                const plan = planData?.plan?.plan;
+                if (planGoalEl) {
+                    planGoalEl.textContent = plan?.cel_tygodnia || 'Brak aktywnego planu';
+                }
             } catch (e) { /* zostaw placeholdery */ }
+        }
+
+        function copyUserId() {
+            const userId = localStorage.getItem('velm_user_id');
+            if (!userId) return;
+            navigator.clipboard.writeText(userId).then(() => {
+                const el = document.getElementById('settings-user-id');
+                if (el) { const orig = el.textContent; el.textContent = 'Skopiowano!'; setTimeout(() => el.textContent = orig, 1500); }
+            }).catch(() => {});
+        }
+
+        async function generateNewPlan() {
+            const userId = localStorage.getItem('velm_user_id');
+            if (!userId) return;
+            const btn = document.getElementById('settings-generate-plan-btn');
+            if (!btn) return;
+            btn.disabled = true;
+            btn.innerHTML = 'Generowanie planu<span class="generating-dot"></span>';
+            btn.style.color = '#8A8A8A';
+            btn.style.cursor = 'wait';
+            try {
+                const res = await fetch(`${API_BASE}/api/weekly-update`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId: userId })
+                });
+                if (res.ok) {
+                    btn.innerHTML = 'Plan wygenerowany!';
+                    btn.style.color = '#22C55E';
+                    btn.style.borderColor = '#22C55E';
+                    setTimeout(() => { btn.innerHTML = 'Wygeneruj nowy plan'; btn.style.color = '#1A1A1A'; btn.style.borderColor = '#EBEBEB'; btn.disabled = false; btn.style.cursor = 'pointer'; }, 3000);
+                    loadSettings();
+                } else {
+                    throw new Error('fail');
+                }
+            } catch(e) {
+                btn.innerHTML = 'Błąd — spróbuj ponownie';
+                btn.style.color = '#ef4444';
+                setTimeout(() => { btn.innerHTML = 'Wygeneruj nowy plan'; btn.style.color = '#1A1A1A'; btn.style.borderColor = '#EBEBEB'; btn.disabled = false; btn.style.cursor = 'pointer'; }, 3000);
+            }
         }
 
         async function saveGoalSettings() {
@@ -6159,7 +6281,7 @@
                     const toLabel = TYPE_LABEL[c.new_typ] || c.new_typ || '—';
                     const hasChange = c.new_day && c.new_day !== c.original_day;
 
-                    return `<div style="background:var(--surface-color);border:1px solid #EBEBEB;border-left:3px solid var(--primary-color);border-radius:14px;padding:12px 14px;animation:fadeInUp 0.25s ease both;">
+                    return `<div style="background:var(--surface-color);border:1px solid rgba(235,235,235,0.5);border-left:3px solid var(--primary-color);border-radius:14px;box-shadow:0 2px 12px rgba(0,0,0,0.03);padding:12px 14px;animation:fadeInUp 0.25s ease both;">
                         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
                             <span style="font-size:11px;font-weight:700;color:#8A8A8A;text-transform:uppercase;letter-spacing:0.08em;">Zmiana planu</span>
                             <span style="font-size:11px;color:#C8C2B8;">${new Date(c.created_at).toLocaleDateString('pl-PL',{day:'numeric',month:'short'})}</span>
