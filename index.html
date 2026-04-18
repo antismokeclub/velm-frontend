@@ -1413,6 +1413,7 @@ async function done() {
 
       if (data.success && data.userId) {
         localStorage.setItem('velm_user_id', data.userId);
+        if (data.token) localStorage.setItem('velm_token', data.token);
         localStorage.setItem('velm_theme', S.data.colorTheme || 'navy');
         window.location.href = 'dashboard.html';
       } else {
@@ -3867,6 +3868,7 @@ async function handleLogin() {
       return;
     }
     localStorage.setItem('velm_user_id', data.userId);
+    if (data.token) localStorage.setItem('velm_token', data.token);
     if (data.name) localStorage.setItem('velm_user_name', data.name);
     // Fade out and redirect
     const overlay = document.getElementById('auth-overlay');

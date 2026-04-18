@@ -797,6 +797,13 @@ const API_BASE = (window.location.hostname === 'localhost' || window.location.ho
     ? 'http://' + window.location.hostname + ':3000'
     : 'https://velm-backend-production.up.railway.app';
 
+function authHeaders(extra) {
+    return Object.assign({
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('velm_token')}`
+    }, extra || {});
+}
+
 // ── STATE ────────────────────────────────────────────
 let currentMode  = 'morning'; // 'morning' | 'post'
 let currentStep  = 0;
@@ -980,8 +987,22 @@ function sendMorningCheckinToAI() {
 
     fetch(`${API_BASE}/api/chat`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authHeaders(),
         body: JSON.stringify({ userId, message: msg, agent: 'analityk' })
+    }).catch(() => {});
+
+    // Zapisz strukturalnie do health_metrics
+    const sleepVal = sleepIdx >= 0 ? sleepIdx + 1 : null;
+    const energyVal = parseInt(document.getElementById('energySlider')?.value) || null;
+    const readinessVal = readinessEl?.textContent?.trim() ?? null;
+    fetch(`${API_BASE}/api/checkin`, {
+        method: 'POST',
+        headers: authHeaders(),
+        body: JSON.stringify({
+            userId,
+            type: 'morning',
+            data: { sleep: sleepVal, energy: energyVal, readiness: readinessVal }
+        })
     }).catch(() => {});
 }
 
@@ -994,7 +1015,7 @@ function sendPostCheckinToAI() {
     // 1. Wyślij tekst do analityka
     fetch(`${API_BASE}/api/chat`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authHeaders(),
         body: JSON.stringify({ userId, message: msg, agent: 'analityk' })
     }).catch(() => {});
 
@@ -1004,7 +1025,7 @@ function sendPostCheckinToAI() {
 
     fetch(`${API_BASE}/api/workout`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authHeaders(),
         body: JSON.stringify({
             userId,
             workout: {
