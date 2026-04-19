@@ -3815,8 +3815,8 @@ window.addEventListener('pointercancel',spinStop);
 window.addEventListener('blur',spinStop);
 
 // ─── AUTH ─────────────────────────────────────────────────────
-const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname.startsWith('192.168'))
-  ? 'http://' + window.location.hostname + ':3000'
+const API_BASE = (!window.location.hostname || window.location.hostname === 'localhost' || window.location.hostname.startsWith('192.168'))
+  ? 'http://' + (window.location.hostname || 'localhost') + ':3000'
   : 'https://velm-backend-production.up.railway.app';
 
 function showAuthScreen() {
@@ -3856,12 +3856,19 @@ async function handleLogin() {
   if (!pwd) { errEl.textContent = 'Wpisz hasło'; return; }
 
   btn.disabled = true; btn.textContent = 'Logowanie…';
+  console.log('[LOGIN] Próba logowania:', email, 'API:', API_BASE);
   try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 8000);
     const res  = await fetch(`${API_BASE}/api/login`, {
       method: 'POST', headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ email, password: pwd })
+      body: JSON.stringify({ email, password: pwd }),
+      signal: controller.signal
     });
+    clearTimeout(timeout);
+    console.log('[LOGIN] Response status:', res.status);
     const data = await res.json();
+    console.log('[LOGIN] Response data:', JSON.stringify(data));
     if (!res.ok || !data.success) {
       errEl.textContent = data.error || 'Nieprawidłowy email lub hasło';
       btn.disabled = false; btn.textContent = 'Zaloguj';
@@ -3870,12 +3877,13 @@ async function handleLogin() {
     localStorage.setItem('velm_user_id', data.userId);
     if (data.token) localStorage.setItem('velm_token', data.token);
     if (data.name) localStorage.setItem('velm_user_name', data.name);
-    // Fade out and redirect
+    console.log('[LOGIN] OK, redirect to dashboard');
     const overlay = document.getElementById('auth-overlay');
     overlay.classList.add('out');
     setTimeout(() => { window.location.href = 'dashboard.html'; }, 380);
   } catch(e) {
-    errEl.textContent = 'Błąd połączenia z serwerem';
+    console.error('[LOGIN] Fetch error:', e);
+    errEl.textContent = e.name === 'AbortError' ? 'Serwer nie odpowiada — sprawdź czy backend działa' : 'Błąd połączenia: ' + e.message;
     btn.disabled = false; btn.textContent = 'Zaloguj';
   }
 }

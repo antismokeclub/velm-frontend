@@ -6,16 +6,20 @@
     <meta name="viewport"
         content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>AspireFlow Dashboard</title>
-    <!-- KILL SERVICE WORKER: unregister all SWs and wipe all caches -->
+    <!-- Cleanup stale service workers -->
     <script>
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.getRegistrations().then(function (regs) {
-                regs.forEach(function (reg) { reg.unregister(); });
-            });
-            caches.keys().then(function (keys) {
-                keys.forEach(function (key) { caches.delete(key); });
-            });
-        }
+        try {
+            if ('serviceWorker' in navigator && navigator.serviceWorker.getRegistrations) {
+                navigator.serviceWorker.getRegistrations().then(function (regs) {
+                    regs.forEach(function (reg) { reg.unregister(); });
+                }).catch(function () {});
+            }
+            if (typeof caches !== 'undefined') {
+                caches.keys().then(function (keys) {
+                    keys.forEach(function (key) { caches.delete(key); });
+                }).catch(function () {});
+            }
+        } catch (e) {}
     </script>
     <!-- PWA -->
     <link rel="manifest" href="/manifest.json">
@@ -3168,19 +3172,37 @@
                     <div style="font-size:13px;color:#8A8A8A;" id="settings-version">v1.0.0 Beta</div>
                 </div>
 
-                <!-- SEKCJA 1 — KONTO -->
+                <!-- SEKCJA 1 — PROFIL -->
                 <div class="home-anim" style="background:#fff;border-radius:20px;padding:20px;margin-bottom:16px;border:1px solid rgba(235,235,235,0.5);box-shadow:0 2px 16px rgba(0,0,0,0.04);animation-delay:0.05s;">
-                    <div style="font-size:11px;font-weight:700;color:#8A8A8A;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:16px;">Konto</div>
+                    <div style="font-size:11px;font-weight:700;color:#8A8A8A;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:16px;">Profil</div>
                     <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px;">
                         <div id="settings-avatar" style="width:48px;height:48px;border-radius:50%;background:#1A1A1A;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
                             <span id="settings-initials" style="color:#fff;font-family:'Outfit',sans-serif;font-weight:700;font-size:18px;">?</span>
                         </div>
-                        <div style="min-width:0;">
-                            <div id="settings-name" style="font-family:'Outfit',sans-serif;font-weight:700;font-size:18px;color:#1A1A1A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">—</div>
+                        <div style="min-width:0;flex:1;">
+                            <div id="settings-name-display" style="font-family:'Outfit',sans-serif;font-weight:700;font-size:18px;color:#1A1A1A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">—</div>
                             <div id="settings-email" style="font-size:13px;color:#8A8A8A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">—</div>
                         </div>
                     </div>
-                    <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-top:1px solid #F5F5F5;">
+
+                    <div style="margin-bottom:12px;">
+                        <label style="font-size:11px;font-weight:700;color:#8A8A8A;text-transform:uppercase;letter-spacing:0.08em;display:block;margin-bottom:6px;">Imię</label>
+                        <input type="text" id="settings-edit-name" placeholder="Twoje imię" style="width:100%;padding:12px;border:1.5px solid #EBEBEB;border-radius:12px;font-size:15px;font-family:'Inter',sans-serif;color:#1A1A1A;background:#fff;outline:none;box-sizing:border-box;transition:border-color 0.2s;" onfocus="this.style.borderColor='#1A1A1A'" onblur="this.style.borderColor='#EBEBEB'">
+                    </div>
+                    <div style="display:flex;gap:10px;margin-bottom:12px;">
+                        <div style="flex:1;">
+                            <label style="font-size:11px;font-weight:700;color:#8A8A8A;text-transform:uppercase;letter-spacing:0.08em;display:block;margin-bottom:6px;">Waga (kg)</label>
+                            <input type="number" id="settings-edit-weight" placeholder="70" min="30" max="250" style="width:100%;padding:12px;border:1.5px solid #EBEBEB;border-radius:12px;font-size:15px;font-family:'Inter',sans-serif;color:#1A1A1A;background:#fff;outline:none;box-sizing:border-box;transition:border-color 0.2s;" onfocus="this.style.borderColor='#1A1A1A'" onblur="this.style.borderColor='#EBEBEB'">
+                        </div>
+                        <div style="flex:1;">
+                            <label style="font-size:11px;font-weight:700;color:#8A8A8A;text-transform:uppercase;letter-spacing:0.08em;display:block;margin-bottom:6px;">Wzrost (cm)</label>
+                            <input type="number" id="settings-edit-height" placeholder="175" min="100" max="250" style="width:100%;padding:12px;border:1.5px solid #EBEBEB;border-radius:12px;font-size:15px;font-family:'Inter',sans-serif;color:#1A1A1A;background:#fff;outline:none;box-sizing:border-box;transition:border-color 0.2s;" onfocus="this.style.borderColor='#1A1A1A'" onblur="this.style.borderColor='#EBEBEB'">
+                        </div>
+                    </div>
+                    <button onclick="saveProfileSettings()" style="width:100%;height:48px;background:#1A1A1A;color:#fff;border:none;border-radius:14px;font-size:14px;font-weight:700;font-family:'Inter',sans-serif;cursor:pointer;transition:opacity 0.2s;" onmousedown="this.style.opacity='0.85'" onmouseup="this.style.opacity='1'">Zapisz profil</button>
+                    <div id="settings-profile-msg" style="display:none;text-align:center;font-size:13px;margin-top:10px;font-weight:600;"></div>
+
+                    <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-top:1px solid #F5F5F5;margin-top:14px;">
                         <span style="font-size:14px;color:#1A1A1A;">ID konta</span>
                         <div style="display:flex;align-items:center;gap:8px;">
                             <span id="settings-user-id" style="font-size:12px;color:#C4C4C4;font-family:'SF Mono','Courier New',monospace;">—</span>
@@ -3220,8 +3242,11 @@
                 <div class="home-anim" style="background:#fff;border-radius:20px;padding:20px;margin-bottom:16px;border:1px solid rgba(235,235,235,0.5);box-shadow:0 2px 16px rgba(0,0,0,0.04);animation-delay:0.15s;">
                     <div style="font-size:11px;font-weight:700;color:#8A8A8A;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:12px;">Plan treningowy</div>
                     <div id="settings-plan-goal" style="font-size:14px;color:#1A1A1A;line-height:1.5;margin-bottom:16px;">Brak aktywnego planu</div>
-                    <button id="settings-generate-plan-btn" onclick="generateNewPlan()" style="width:100%;height:52px;background:transparent;border:1.5px solid #EBEBEB;border-radius:14px;font-size:15px;font-weight:600;font-family:'Inter',sans-serif;color:#1A1A1A;cursor:pointer;transition:border-color 0.2s,background 0.2s;" onmouseenter="this.style.borderColor='#1A1A1A'" onmouseleave="this.style.borderColor='#EBEBEB'">
+                    <button id="settings-generate-plan-btn" onclick="generateNewPlan()" style="width:100%;height:52px;background:transparent;border:1.5px solid #EBEBEB;border-radius:14px;font-size:15px;font-weight:600;font-family:'Inter',sans-serif;color:#1A1A1A;cursor:pointer;transition:border-color 0.2s,background 0.2s;margin-bottom:10px;" onmouseenter="this.style.borderColor='#1A1A1A'" onmouseleave="this.style.borderColor='#EBEBEB'">
                         Wygeneruj nowy plan
+                    </button>
+                    <button onclick="switchView('history')" style="width:100%;height:48px;background:transparent;border:1.5px solid #EBEBEB;border-radius:14px;font-size:14px;font-weight:600;font-family:'Inter',sans-serif;color:#1A1A1A;cursor:pointer;transition:border-color 0.2s;" onmouseenter="this.style.borderColor='#1A1A1A'" onmouseleave="this.style.borderColor='#EBEBEB'">
+                        Historia treningów →
                     </button>
                 </div>
 
@@ -3261,10 +3286,20 @@
 
                 <!-- SEKCJA 5 — BEZPIECZEŃSTWO -->
                 <div class="home-anim" style="background:#fff;border-radius:20px;padding:20px;margin-bottom:16px;border:1px solid rgba(235,235,235,0.5);box-shadow:0 2px 16px rgba(0,0,0,0.04);animation-delay:0.25s;">
-                    <div style="font-size:11px;font-weight:700;color:#8A8A8A;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:16px;">Bezpieczeństwo</div>
-                    <button onclick="alert('Funkcja wkrótce dostępna')" style="width:100%;height:48px;background:transparent;border:1.5px solid #EBEBEB;border-radius:14px;font-size:14px;font-weight:600;font-family:'Inter',sans-serif;color:#1A1A1A;cursor:pointer;transition:border-color 0.2s;" onmouseenter="this.style.borderColor='#1A1A1A'" onmouseleave="this.style.borderColor='#EBEBEB'">
+                    <div style="font-size:11px;font-weight:700;color:#8A8A8A;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:16px;">Zmiana hasła</div>
+                    <div style="margin-bottom:10px;">
+                        <input type="password" id="settings-pwd-current" placeholder="Obecne hasło" autocomplete="current-password" style="width:100%;padding:12px;border:1.5px solid #EBEBEB;border-radius:12px;font-size:15px;font-family:'Inter',sans-serif;color:#1A1A1A;background:#fff;outline:none;box-sizing:border-box;transition:border-color 0.2s;" onfocus="this.style.borderColor='#1A1A1A'" onblur="this.style.borderColor='#EBEBEB'">
+                    </div>
+                    <div style="margin-bottom:10px;">
+                        <input type="password" id="settings-pwd-new" placeholder="Nowe hasło (min. 6 znaków)" autocomplete="new-password" style="width:100%;padding:12px;border:1.5px solid #EBEBEB;border-radius:12px;font-size:15px;font-family:'Inter',sans-serif;color:#1A1A1A;background:#fff;outline:none;box-sizing:border-box;transition:border-color 0.2s;" onfocus="this.style.borderColor='#1A1A1A'" onblur="this.style.borderColor='#EBEBEB'">
+                    </div>
+                    <div style="margin-bottom:14px;">
+                        <input type="password" id="settings-pwd-confirm" placeholder="Potwierdź nowe hasło" autocomplete="new-password" style="width:100%;padding:12px;border:1.5px solid #EBEBEB;border-radius:12px;font-size:15px;font-family:'Inter',sans-serif;color:#1A1A1A;background:#fff;outline:none;box-sizing:border-box;transition:border-color 0.2s;" onfocus="this.style.borderColor='#1A1A1A'" onblur="this.style.borderColor='#EBEBEB'">
+                    </div>
+                    <button onclick="changePassword()" style="width:100%;height:48px;background:transparent;border:1.5px solid #EBEBEB;border-radius:14px;font-size:14px;font-weight:600;font-family:'Inter',sans-serif;color:#1A1A1A;cursor:pointer;transition:border-color 0.2s;" onmouseenter="this.style.borderColor='#1A1A1A'" onmouseleave="this.style.borderColor='#EBEBEB'">
                         Zmień hasło
                     </button>
+                    <div id="settings-pwd-msg" style="display:none;text-align:center;font-size:13px;margin-top:10px;font-weight:600;"></div>
                 </div>
 
                 <!-- SEKCJA 6 — STREFA NIEBEZPIECZNA -->
@@ -3277,6 +3312,16 @@
                         Usuń konto
                     </button>
                 </div>
+            </div>
+
+            <div id="view-history" class="view">
+                <div style="padding:8px 0 16px;display:flex;align-items:center;gap:12px;">
+                    <button onclick="switchView('home')" style="background:none;border:1.5px solid #EBEBEB;width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;" onmouseenter="this.style.borderColor='#1A1A1A'" onmouseleave="this.style.borderColor='#EBEBEB'">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+                    </button>
+                    <div style="font-family:'Outfit',sans-serif;font-weight:800;font-size:24px;color:#1A1A1A;">Historia treningów</div>
+                </div>
+                <div id="history-list"></div>
             </div>
 
             <div id="view-details" class="view">
@@ -3356,6 +3401,9 @@
     <script>
         // --- Auth Check ---
         if (!localStorage.getItem('velm_token')) {
+            // Clear user_id too to prevent redirect loop with index.html
+            localStorage.removeItem('velm_user_id');
+            localStorage.removeItem('velm_user_name');
             window.location.href = 'index.html';
         }
 
@@ -5884,6 +5932,10 @@
                 if (viewName === 'settings') {
                     loadSettings();
                 }
+
+                if (viewName === 'history') {
+                    loadHistoryView();
+                }
             }
 
             const indexMap = { 'home': 0, 'calendar': 1, 'coach': 2, 'charts': 3, 'settings': 4 };
@@ -5913,10 +5965,16 @@
                 const onb = user?.onboarding_data ?? {};
                 const raceDate = onb.time_race_date ?? onb.dist_goal_date ?? null;
 
-                // Konto — avatar initials
-                const name = user?.name ?? '—';
-                const sName = document.getElementById('settings-name');
+                // Profil — avatar initials + editable fields
+                const name = user?.name ?? onb.name ?? '—';
+                const sName = document.getElementById('settings-name-display');
                 if (sName) sName.textContent = name;
+                const editName = document.getElementById('settings-edit-name');
+                if (editName) editName.value = onb.name ?? user?.name ?? '';
+                const editWeight = document.getElementById('settings-edit-weight');
+                if (editWeight && onb.weight) editWeight.value = onb.weight;
+                const editHeight = document.getElementById('settings-edit-height');
+                if (editHeight && onb.height) editHeight.value = onb.height;
                 const sInitials = document.getElementById('settings-initials');
                 if (sInitials) sInitials.textContent = name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2) || '?';
                 const sEmail = document.getElementById('settings-email');
@@ -5953,6 +6011,168 @@
                 const el = document.getElementById('settings-user-id');
                 if (el) { const orig = el.textContent; el.textContent = 'Skopiowano!'; setTimeout(() => el.textContent = orig, 1500); }
             }).catch(() => {});
+        }
+
+        async function saveProfileSettings() {
+            const userId = localStorage.getItem('velm_user_id');
+            if (!userId) return;
+            const updates = {};
+            const nameVal = document.getElementById('settings-edit-name')?.value?.trim();
+            const weightVal = parseFloat(document.getElementById('settings-edit-weight')?.value);
+            const heightVal = parseFloat(document.getElementById('settings-edit-height')?.value);
+            if (nameVal) updates.name = nameVal;
+            if (weightVal && weightVal > 0) updates.weight = weightVal;
+            if (heightVal && heightVal > 0) updates.height = heightVal;
+            if (Object.keys(updates).length === 0) return;
+            try {
+                const res = await fetch(`${API_BASE}/api/user/${userId}`, {
+                    method: 'PUT', headers: authHeaders(),
+                    body: JSON.stringify(updates)
+                });
+                const data = await res.json();
+                if (!data.success) throw new Error(data.error);
+                showSettingsMsg('settings-profile-msg', 'Zapisano');
+                loadSettings();
+            } catch(e) {
+                showSettingsMsg('settings-profile-msg', 'Błąd: ' + e.message, true);
+            }
+        }
+
+        async function changePassword() {
+            const current = document.getElementById('settings-pwd-current')?.value;
+            const newPwd  = document.getElementById('settings-pwd-new')?.value;
+            const confirmPwd = document.getElementById('settings-pwd-confirm')?.value;
+            if (!current || !newPwd) { showSettingsMsg('settings-pwd-msg', 'Wypełnij wszystkie pola', true); return; }
+            if (newPwd !== confirmPwd) { showSettingsMsg('settings-pwd-msg', 'Hasła nie są zgodne', true); return; }
+            if (newPwd.length < 6) { showSettingsMsg('settings-pwd-msg', 'Min. 6 znaków', true); return; }
+            try {
+                const res = await fetch(`${API_BASE}/api/user/${currentUserId}/change-password`, {
+                    method: 'POST', headers: authHeaders(),
+                    body: JSON.stringify({ currentPassword: current, newPassword: newPwd })
+                });
+                const data = await res.json();
+                if (!data.success) throw new Error(data.error);
+                ['settings-pwd-current','settings-pwd-new','settings-pwd-confirm'].forEach(id => {
+                    const el = document.getElementById(id); if(el) el.value = '';
+                });
+                showSettingsMsg('settings-pwd-msg', 'Hasło zmienione');
+            } catch(e) {
+                showSettingsMsg('settings-pwd-msg', e.message, true);
+            }
+        }
+
+        function showSettingsMsg(elementId, msg, isError) {
+            const el = document.getElementById(elementId);
+            if (!el) return;
+            el.textContent = msg;
+            el.style.color = isError ? '#C07264' : '#6B8F71';
+            el.style.display = 'block';
+            setTimeout(() => { el.style.display = 'none'; }, 3000);
+        }
+
+        // ── HISTORIA TRENINGÓW ──────────────────────────────────
+        let historyWorkouts = [];
+        let historyPage = 0;
+        const HISTORY_PAGE_SIZE = 10;
+
+        async function loadHistoryView() {
+            if (!currentUserId) return;
+            const container = document.getElementById('history-list');
+            if (!container) return;
+            container.innerHTML = '<div style="text-align:center;padding:40px;color:#8A8A8A;">Ładowanie...</div>';
+            try {
+                const res = await fetch(`${API_BASE}/api/workouts/${currentUserId}?days=90`, { headers: authHeaders() });
+                const data = await res.json();
+                historyWorkouts = data.workouts ?? [];
+                historyPage = 0;
+                renderHistoryPage();
+            } catch(e) {
+                container.innerHTML = '<div style="text-align:center;padding:40px;color:#8A8A8A;">Błąd ładowania</div>';
+            }
+        }
+
+        function renderHistoryPage() {
+            const container = document.getElementById('history-list');
+            if (!container) return;
+            const start = historyPage * HISTORY_PAGE_SIZE;
+            const page = historyWorkouts.slice(start, start + HISTORY_PAGE_SIZE);
+
+            if (historyWorkouts.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align:center;padding:60px 20px;color:#8A8A8A;">
+                        <div style="font-size:40px;margin-bottom:12px;">🏃</div>
+                        <div style="font-size:15px;font-weight:600;">Brak zarejestrowanych treningów</div>
+                        <div style="font-size:13px;margin-top:8px;">Użyj check-inu po treningu</div>
+                    </div>`;
+                return;
+            }
+
+            const totalKm = historyWorkouts.reduce((s, w) => s + (parseFloat(w.distance_km) || 0), 0);
+            const totalCount = historyWorkouts.length;
+
+            container.innerHTML = `
+                <div style="display:flex;gap:12px;margin-bottom:20px;">
+                    <div style="flex:1;background:#fff;border:1.5px solid #EBEBEB;border-radius:16px;padding:16px;text-align:center;">
+                        <div style="font-size:24px;font-weight:800;color:#1A1A1A;">${totalCount}</div>
+                        <div style="font-size:11px;color:#8A8A8A;text-transform:uppercase;letter-spacing:0.06em;margin-top:4px;">Treningów</div>
+                    </div>
+                    <div style="flex:1;background:#fff;border:1.5px solid #EBEBEB;border-radius:16px;padding:16px;text-align:center;">
+                        <div style="font-size:24px;font-weight:800;color:#1A1A1A;">${Math.round(totalKm)}</div>
+                        <div style="font-size:11px;color:#8A8A8A;text-transform:uppercase;letter-spacing:0.06em;margin-top:4px;">km łącznie</div>
+                    </div>
+                </div>
+                ${page.map(w => renderWorkoutCard(w)).join('')}
+                ${historyWorkouts.length > HISTORY_PAGE_SIZE ? renderPagination(start) : ''}`;
+        }
+
+        function renderWorkoutCard(w) {
+            const type = w.type || w.typ || 'easy';
+            const color = TYPE_COLORS[type] || '#8A8A8A';
+            const label = TYPE_LABEL[type] || type;
+            const date = w.date || (w.logged_at ? w.logged_at.split('T')[0] : '—');
+            const dateFormatted = date !== '—'
+                ? new Date(date + 'T12:00:00').toLocaleDateString('pl-PL', { weekday:'short', day:'numeric', month:'short' })
+                : '—';
+            let distHtml = w.distance_km ? '<div style="font-size:15px;font-weight:800;color:#1A1A1A;">' + w.distance_km + ' km</div>' : '';
+            let durHtml = w.duration_min ? '<div style="font-size:12px;color:#8A8A8A;">' + w.duration_min + ' min</div>' : '';
+            let rpeHtml = w.rpe ? '<div style="font-size:11px;color:#8A8A8A;">RPE ' + w.rpe + '/10</div>' : '';
+            return '<div style="background:#fff;border:1.5px solid #EBEBEB;border-radius:16px;padding:16px;margin-bottom:10px;display:flex;align-items:center;gap:14px;">'
+                + '<div style="width:10px;height:10px;border-radius:50%;background:' + color + ';flex-shrink:0;"></div>'
+                + '<div style="flex:1;min-width:0;">'
+                + '<div style="font-size:14px;font-weight:700;color:#1A1A1A;">' + label + '</div>'
+                + '<div style="font-size:12px;color:#8A8A8A;margin-top:2px;">' + dateFormatted + '</div>'
+                + '</div>'
+                + '<div style="text-align:right;flex-shrink:0;">' + distHtml + durHtml + rpeHtml + '</div>'
+                + '</div>';
+        }
+
+        function renderPagination(start) {
+            const newerColor = historyPage === 0 ? '#C4C4C4' : '#1A1A1A';
+            const newerDisabled = historyPage === 0 ? 'disabled' : '';
+            const olderColor = start + HISTORY_PAGE_SIZE >= historyWorkouts.length ? '#C4C4C4' : '#1A1A1A';
+            const olderDisabled = start + HISTORY_PAGE_SIZE >= historyWorkouts.length ? 'disabled' : '';
+            const rangeText = (start + 1) + '–' + Math.min(start + HISTORY_PAGE_SIZE, historyWorkouts.length) + ' z ' + historyWorkouts.length;
+            return '<div style="display:flex;justify-content:center;gap:12px;margin-top:8px;margin-bottom:20px;">'
+                + '<button onclick="historyPrev()" style="padding:10px 20px;border:1.5px solid #EBEBEB;border-radius:12px;background:white;font-size:13px;font-weight:600;cursor:pointer;color:' + newerColor + ';" ' + newerDisabled + '>\u2190 Nowsze</button>'
+                + '<span style="display:flex;align-items:center;font-size:12px;color:#8A8A8A;">' + rangeText + '</span>'
+                + '<button onclick="historyNext()" style="padding:10px 20px;border:1.5px solid #EBEBEB;border-radius:12px;background:white;font-size:13px;font-weight:600;cursor:pointer;color:' + olderColor + ';" ' + olderDisabled + '>Starsze \u2192</button>'
+                + '</div>';
+        }
+
+        function historyNext() {
+            if ((historyPage + 1) * HISTORY_PAGE_SIZE < historyWorkouts.length) {
+                historyPage++;
+                renderHistoryPage();
+                document.getElementById('view-history')?.scrollTo(0, 0);
+            }
+        }
+
+        function historyPrev() {
+            if (historyPage > 0) {
+                historyPage--;
+                renderHistoryPage();
+                document.getElementById('view-history')?.scrollTo(0, 0);
+            }
         }
 
         async function generateNewPlan() {
@@ -6488,8 +6708,8 @@
 
         // Init
         // --- Login logic ---
-        const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname.startsWith('192.168'))
-            ? 'http://' + window.location.hostname + ':3000'
+        const API_BASE = (!window.location.hostname || window.location.hostname === 'localhost' || window.location.hostname.startsWith('192.168'))
+            ? 'http://' + (window.location.hostname || 'localhost') + ':3000'
             : 'https://velm-backend-production.up.railway.app';
 
         async function doLogin() {
