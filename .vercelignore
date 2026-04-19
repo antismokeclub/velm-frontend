@@ -1,0 +1,6 @@
+velm-backend/
+.claude/
+*.jsonl
+node_modules/
+.env
+.env.local

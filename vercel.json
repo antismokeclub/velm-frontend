@@ -1,8 +1,10 @@
 {
-  "buildCommand": null,
-  "outputDirectory": ".",
-  "cleanUrls": false,
-  "rewrites": [
-    { "source": "/", "destination": "/index.html" }
+  "version": 2,
+  "builds": [
+    { "src": "*.html", "use": "@vercel/static" }
+  ],
+  "routes": [
+    { "src": "/", "dest": "/index.html" },
+    { "src": "/(.*)", "dest": "/$1" }
   ]
 }
