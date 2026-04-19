@@ -2893,7 +2893,8 @@
 
             <!-- VIEW: HOME (Landing) -->
             <div id="view-home" class="view active">
-                <!-- HERO SECTION -->
+                <!-- RAPORT TYGODNIOWY — pokazuje się gdy istnieje -->
+                <div id="weekly-summary-card" style="display:none;margin-bottom:16px;"></div>
 
                 <!-- MAIN CARD: TODAY'S WORKOUT (dynamic) -->
                 <div class="home-section-title">Dzisiejszy trening</div>
@@ -3312,6 +3313,16 @@
                         Usuń konto
                     </button>
                 </div>
+            </div>
+
+            <div id="view-weekly-report" class="view">
+                <div style="padding:8px 0 16px;display:flex;align-items:center;gap:12px;">
+                    <button onclick="switchView('home')" style="background:none;border:1.5px solid #EBEBEB;width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;" onmouseenter="this.style.borderColor='#1A1A1A'" onmouseleave="this.style.borderColor='#EBEBEB'">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+                    </button>
+                    <div style="font-family:'Outfit',sans-serif;font-weight:800;font-size:24px;color:#1A1A1A;">Raport tygodnia</div>
+                </div>
+                <div id="weekly-report-content"></div>
             </div>
 
             <div id="view-history" class="view">
@@ -5936,6 +5947,10 @@
                 if (viewName === 'history') {
                     loadHistoryView();
                 }
+
+                if (viewName === 'weekly-report') {
+                    loadWeeklyReportView();
+                }
             }
 
             const indexMap = { 'home': 0, 'calendar': 1, 'coach': 2, 'charts': 3, 'settings': 4 };
@@ -6688,22 +6703,61 @@
 
         async function loadWeeklySummary() {
             if (!currentUserId) return;
+            const container = document.getElementById('weekly-summary-card');
+            if (!container) return;
             try {
                 const res = await fetch(`${API_BASE}/api/weekly-summary/${currentUserId}`, { headers: authHeaders() });
                 const data = await res.json();
-                if (!data.summary) return;
-                const existing = document.getElementById('weekly-summary-card');
-                if (existing) existing.remove();
-                const card = document.createElement('div');
-                card.id = 'weekly-summary-card';
-                card.style.cssText = 'background:white;border-radius:20px;border-left:3px solid #1A1A1A;padding:16px 20px;margin-bottom:12px;';
-                card.innerHTML = `
-                    <div style="font-size:11px;font-weight:700;color:#8A8A8A;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;">Podsumowanie tygodnia</div>
-                    <div style="font-size:14px;color:#1A1A1A;line-height:1.6;">${data.summary}</div>
-                `;
-                const homeView = document.getElementById('view-home');
-                if (homeView) homeView.insertBefore(card, homeView.firstChild);
-            } catch(e) {}
+                if (!data.summary) { container.style.display = 'none'; return; }
+                container.style.display = 'block';
+                const preview = sanitizeHTML(data.summary).substring(0, 160) + (data.summary.length > 160 ? '...' : '');
+                container.innerHTML = '<div style="background:#1A1A1A;border-radius:20px;padding:20px;cursor:pointer;" onclick="switchView(\'weekly-report\')">'
+                    + '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;">'
+                    + '<div><div style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px;">Raport tygodnia</div>'
+                    + '<div style="font-size:16px;font-weight:700;color:white;">Od sztabu</div></div>'
+                    + '<div style="font-size:20px;">📋</div></div>'
+                    + '<div style="font-size:13px;color:rgba(255,255,255,0.7);line-height:1.6;">' + preview + '</div>'
+                    + '<div style="margin-top:12px;font-size:12px;color:rgba(255,255,255,0.4);">Czytaj pełny raport →</div>'
+                    + '</div>';
+            } catch(e) { if (container) container.style.display = 'none'; }
+        }
+
+        async function loadWeeklyReportView() {
+            const container = document.getElementById('weekly-report-content');
+            if (!container || !currentUserId) return;
+            container.innerHTML = '<div style="text-align:center;padding:60px 20px;color:#8A8A8A;">Ładowanie...</div>';
+            try {
+                const res = await fetch(`${API_BASE}/api/weekly-summary/${currentUserId}`, { headers: authHeaders() });
+                const data = await res.json();
+                if (!data.summary) {
+                    container.innerHTML = '<div style="text-align:center;padding:60px 20px;">'
+                        + '<div style="font-size:40px;margin-bottom:16px;">📋</div>'
+                        + '<div style="font-size:16px;font-weight:700;color:#1A1A1A;margin-bottom:8px;">Brak raportu</div>'
+                        + '<div style="font-size:14px;color:#8A8A8A;max-width:260px;margin:0 auto;line-height:1.6;">Raport pojawi się po pierwszej niedzielnej naradzie sztabu.</div>'
+                        + '</div>';
+                    return;
+                }
+                const s = data.stats || {};
+                const execPct = s.plan_days > 0 ? Math.round((s.workouts / s.plan_days) * 100) : null;
+                const dateStr = data.date
+                    ? new Date(data.date + 'T12:00:00').toLocaleDateString('pl-PL', { weekday:'long', day:'numeric', month:'long' })
+                    : 'Raport tygodniowy';
+                container.innerHTML = '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:20px;">'
+                    + '<div style="background:#FDFBF7;border:1.5px solid #EBEBEB;border-radius:16px;padding:14px;text-align:center;"><div style="font-size:22px;font-weight:800;color:#1A1A1A;">' + (s.workouts || 0) + '</div><div style="font-size:10px;color:#8A8A8A;text-transform:uppercase;letter-spacing:0.06em;margin-top:4px;">treningów</div></div>'
+                    + '<div style="background:#FDFBF7;border:1.5px solid #EBEBEB;border-radius:16px;padding:14px;text-align:center;"><div style="font-size:22px;font-weight:800;color:#1A1A1A;">' + (s.total_km || 0) + '</div><div style="font-size:10px;color:#8A8A8A;text-transform:uppercase;letter-spacing:0.06em;margin-top:4px;">km</div></div>'
+                    + '<div style="background:#FDFBF7;border:1.5px solid #EBEBEB;border-radius:16px;padding:14px;text-align:center;"><div style="font-size:22px;font-weight:800;color:#1A1A1A;">' + (execPct !== null ? execPct + '%' : '—') + '</div><div style="font-size:10px;color:#8A8A8A;text-transform:uppercase;letter-spacing:0.06em;margin-top:4px;">realizacja</div></div>'
+                    + '</div>'
+                    + '<div style="background:#FDFBF7;border:1.5px solid #EBEBEB;border-radius:20px;padding:20px;margin-bottom:16px;">'
+                    + '<div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">'
+                    + '<div style="width:36px;height:36px;background:#1A1A1A;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:white;">S</div>'
+                    + '<div><div style="font-size:14px;font-weight:700;color:#1A1A1A;">Szef Sztabu</div><div style="font-size:11px;color:#8A8A8A;">' + dateStr + '</div></div>'
+                    + '</div>'
+                    + '<div style="font-size:15px;color:#1A1A1A;line-height:1.75;white-space:pre-wrap;">' + sanitizeHTML(data.summary) + '</div>'
+                    + '</div>'
+                    + '<button onclick="switchView(\'coach\');setTimeout(()=>setAgent(\'szef_sztabu\'),100)" style="width:100%;padding:14px;background:transparent;border:1.5px solid #1A1A1A;border-radius:14px;font-size:14px;font-weight:700;font-family:\'Inter\',sans-serif;cursor:pointer;color:#1A1A1A;margin-bottom:32px;">Zapytaj trenera o plan →</button>';
+            } catch(e) {
+                container.innerHTML = '<div style="text-align:center;padding:40px;color:#8A8A8A;">Nie udało się załadować raportu.</div>';
+            }
         }
 
         // Init

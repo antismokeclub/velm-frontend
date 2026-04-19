@@ -958,19 +958,15 @@ function finish() {
     btn.style.transform = 'scale(0.96)';
     setTimeout(() => { btn.style.transform = ''; }, 150);
 
-    // Zapisz datę ukończenia do localStorage
     const today = new Date().toISOString().split('T')[0];
     if (currentMode === 'morning') {
         localStorage.setItem('velm_checkin_morning_done', today);
         sendMorningCheckinToAI();
+        setTimeout(() => { window.location.href = 'dashboard.html'; }, 300);
     } else {
         localStorage.setItem('velm_checkin_post_done', today);
-        sendPostCheckinToAI();
+        sendPostCheckinAndShowResult();
     }
-
-    setTimeout(() => {
-        window.location.href = 'dashboard.html';
-    }, 300);
 }
 
 function sendMorningCheckinToAI() {
@@ -1006,40 +1002,6 @@ function sendMorningCheckinToAI() {
     }).catch(() => {});
 }
 
-function sendPostCheckinToAI() {
-    const userId = localStorage.getItem('velm_user_id');
-    if (!userId) return;
-
-    const msg = buildAiMessage();
-
-    // 1. Wyślij tekst do analityka
-    fetch(`${API_BASE}/api/chat`, {
-        method: 'POST',
-        headers: authHeaders(),
-        body: JSON.stringify({ userId, message: msg, agent: 'analityk' })
-    }).catch(() => {});
-
-    // 2. Zapisz strukturalnie do workouts
-    const completionEl = document.querySelector('.completion-card.selected .completion-label');
-    const completion   = completionEl?.textContent?.includes('częściowo') ? 'częściowy' : 'pełny';
-
-    fetch(`${API_BASE}/api/workout`, {
-        method: 'POST',
-        headers: authHeaders(),
-        body: JSON.stringify({
-            userId,
-            workout: {
-                date:         new Date().toISOString().split('T')[0],
-                distance_km:  workoutData.dystans_km,
-                duration_min: duration,
-                rpe:          rpeVal,
-                type:         workoutType,
-                completion,
-                notes:        msg
-            }
-        })
-    }).catch(() => {});
-}
 
 // ── PROGRESS ──────────────────────────────────────────
 function updateProgress() {
@@ -1405,6 +1367,138 @@ function showBtn(id) {
     const btn = document.getElementById(id);
     if (btn) btn.classList.add('visible');
 }
+
+// ── EKRAN WYNIKOWY PO TRENINGU ────────────────────────
+const TYPE_LABEL_CI = {
+    easy:'Spokojny bieg', long:'Długi bieg', interval:'Interwały',
+    tempo:'Tempo Run', walkrun:'Marsz-bieg', rest:'Odpoczynek'
+};
+const ANALYZING_SUBTITLES = [
+    'Analityk porównuje Twój trening z planem...',
+    'Sprawdzam trend tempa z ostatnich tygodni...',
+    'Szef Sztabu przegląda raport...',
+    'Obliczam procent realizacji planu...',
+];
+let _subtitleInterval = null;
+
+function skipToDashboard() {
+    window.location.href = 'dashboard.html';
+}
+
+function startAnalyzingAnimation() {
+    let idx = 0;
+    const el = document.getElementById('ci-analyzing-subtitle');
+    el.style.transition = 'opacity 0.2s';
+    _subtitleInterval = setInterval(() => {
+        idx = (idx + 1) % ANALYZING_SUBTITLES.length;
+        if (el) {
+            el.style.opacity = '0';
+            setTimeout(() => {
+                el.textContent = ANALYZING_SUBTITLES[idx];
+                el.style.opacity = '1';
+            }, 200);
+        }
+    }, 2500);
+}
+
+function stopAnalyzingAnimation() {
+    if (_subtitleInterval) { clearInterval(_subtitleInterval); _subtitleInterval = null; }
+}
+
+async function sendPostCheckinAndShowResult() {
+    const userId = localStorage.getItem('velm_user_id');
+    if (!userId) { skipToDashboard(); return; }
+
+    // Pokaż ekran ładowania
+    const resultCard = document.getElementById('ci-result-card');
+    if (resultCard) {
+        resultCard.style.display = 'flex';
+        document.getElementById('ci-analyzing').style.display = 'block';
+        document.getElementById('ci-result-content').style.display = 'none';
+    }
+    startAnalyzingAnimation();
+
+    const msg = buildAiMessage();
+    const completionEl = document.querySelector('.completion-card.selected .completion-label');
+    const completion = completionEl?.textContent?.includes('częściowo') ? 'częściowy' : 'pełny';
+
+    // Zapisz workout (fire-and-forget)
+    fetch(`${API_BASE}/api/workout`, {
+        method: 'POST', headers: authHeaders(),
+        body: JSON.stringify({ userId, workout: {
+            date: new Date().toISOString().split('T')[0],
+            distance_km: workoutData.dystans_km,
+            duration_min: duration,
+            rpe: rpeVal,
+            type: workoutType,
+            completion,
+            notes: msg
+        }})
+    }).catch(() => {});
+
+    // Czekaj na analityka
+    let analystReply = null;
+    try {
+        const res = await fetch(`${API_BASE}/api/chat`, {
+            method: 'POST', headers: authHeaders(),
+            body: JSON.stringify({ userId, message: msg, agent: 'analityk' })
+        });
+        const data = await res.json();
+        analystReply = data.reply ?? null;
+    } catch(e) { analystReply = null; }
+
+    stopAnalyzingAnimation();
+    document.getElementById('ci-analyzing').style.display = 'none';
+    document.getElementById('ci-result-content').style.display = 'block';
+
+    // Podsumowanie treningu
+    const summaryEl = document.getElementById('ci-workout-summary');
+    if (summaryEl) {
+        const distHtml = workoutData.dystans_km ? '<div><div style="font-size:18px;font-weight:800;color:white;">' + workoutData.dystans_km + ' km</div><div style="font-size:11px;color:rgba(255,255,255,0.5);">dystans</div></div>' : '';
+        const durHtml  = duration ? '<div><div style="font-size:18px;font-weight:800;color:white;">' + duration + ' min</div><div style="font-size:11px;color:rgba(255,255,255,0.5);">czas</div></div>' : '';
+        const rpeHtml  = rpeVal ? '<div><div style="font-size:18px;font-weight:800;color:white;">' + rpeVal + '/10</div><div style="font-size:11px;color:rgba(255,255,255,0.5);">RPE</div></div>' : '';
+        const compColor = completion === 'pełny' ? '#6B8F71' : '#C4A35A';
+        const compIcon  = completion === 'pełny' ? '✓' : '~';
+        summaryEl.innerHTML = '<div style="font-size:12px;font-weight:700;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;">Dzisiejszy trening</div>'
+            + '<div style="font-size:22px;font-weight:800;color:white;margin-bottom:12px;">' + (TYPE_LABEL_CI[workoutType] || workoutType) + '</div>'
+            + '<div style="display:flex;gap:20px;">' + distHtml + durHtml + rpeHtml
+            + '<div><div style="font-size:18px;font-weight:800;color:' + compColor + ';">' + compIcon + '</div><div style="font-size:11px;color:rgba(255,255,255,0.5);">' + completion + '</div></div></div>';
+    }
+
+    // Odpowiedź analityka
+    const replyEl = document.getElementById('ci-analyst-reply');
+    if (replyEl) {
+        replyEl.textContent = analystReply || 'Analityk przetwarza dane. Sprawdź chat za chwilę.';
+        if (!analystReply) replyEl.style.color = '#8A8A8A';
+    }
+}
 </script>
+
+<!-- Ekran wynikowy po treningu -->
+<div id="ci-result-card" style="display:none;position:fixed;inset:0;background:#F8F5EE;z-index:1000;flex-direction:column;align-items:center;justify-content:flex-start;overflow-y:auto;">
+    <div style="width:100%;padding:20px 24px 0;display:flex;align-items:center;justify-content:space-between;max-width:480px;margin:0 auto;">
+        <div style="font-size:13px;font-weight:700;color:#8A8A8A;text-transform:uppercase;letter-spacing:0.08em;">Po treningu</div>
+        <button onclick="skipToDashboard()" style="font-size:13px;color:#8A8A8A;background:none;border:none;cursor:pointer;padding:4px 8px;">Pomiń →</button>
+    </div>
+    <div id="ci-analyzing" style="width:100%;max-width:480px;margin:0 auto;padding:60px 24px;text-align:center;">
+        <div style="width:64px;height:64px;border-radius:50%;background:#1A1A1A;display:flex;align-items:center;justify-content:center;margin:0 auto 24px;animation:ciPulse 1.5s ease-in-out infinite;">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+        </div>
+        <div style="font-size:20px;font-weight:700;color:#1A1A1A;margin-bottom:8px;">Sztab analizuje</div>
+        <div id="ci-analyzing-subtitle" style="font-size:14px;color:#8A8A8A;line-height:1.5;max-width:280px;margin:0 auto;">Analityk porównuje Twój trening z planem...</div>
+    </div>
+    <div id="ci-result-content" style="display:none;width:100%;max-width:480px;margin:0 auto;padding:24px;">
+        <div id="ci-workout-summary" style="background:#1A1A1A;border-radius:20px;padding:20px;margin-bottom:16px;color:white;"></div>
+        <div style="background:#FDFBF7;border:1.5px solid #EBEBEB;border-radius:20px;padding:20px;margin-bottom:16px;">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+                <div style="width:32px;height:32px;background:#1A1A1A;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:white;flex-shrink:0;">A</div>
+                <div style="font-size:13px;font-weight:700;color:#1A1A1A;">Analityk</div>
+            </div>
+            <div id="ci-analyst-reply" style="font-size:14px;color:#1A1A1A;line-height:1.7;white-space:pre-wrap;"></div>
+        </div>
+        <button onclick="skipToDashboard()" style="width:100%;padding:16px;background:#1A1A1A;color:white;border:none;border-radius:14px;font-size:15px;font-weight:700;font-family:'Inter',sans-serif;cursor:pointer;margin-bottom:32px;">Przejdź do dashboardu →</button>
+    </div>
+</div>
+<style>@keyframes ciPulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.7;transform:scale(0.95)} }</style>
 </body>
 </html>
