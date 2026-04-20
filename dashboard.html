@@ -6651,7 +6651,12 @@
                 const response = await fetch(`${API_BASE}/api/chat`, {
                     method: 'POST',
                     headers: authHeaders(),
-                    body: JSON.stringify({ userId: currentUserId, message: text, agent: selectedAgent })
+                    body: JSON.stringify({
+                        userId: currentUserId,
+                        message: text,
+                        agent: selectedAgent,
+                        clientTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+                    })
                 });
                 const data = await response.json();
 
