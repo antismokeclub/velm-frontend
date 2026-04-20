@@ -3256,23 +3256,35 @@
                     <div style="font-size:11px;font-weight:700;color:#8A8A8A;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:16px;">Połączenia</div>
 
                     <!-- Strava -->
-                    <div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid #F5F5F5;">
-                        <div style="width:10px;height:10px;border-radius:50%;background:#FC4C02;flex-shrink:0;"></div>
-                        <div style="flex:1;min-width:0;">
-                            <div style="font-size:14px;font-weight:600;color:#1A1A1A;">Strava</div>
-                            <div style="font-size:12px;color:#8A8A8A;">Niepołączone</div>
+                    <div style="padding:12px 0;border-bottom:1px solid #F5F5F5;">
+                        <div style="display:flex;align-items:center;gap:12px;">
+                            <div id="strava-dot" style="width:10px;height:10px;border-radius:50%;background:#C4C4C4;flex-shrink:0;"></div>
+                            <div style="flex:1;min-width:0;">
+                                <div style="font-size:14px;font-weight:600;color:#1A1A1A;">Strava</div>
+                                <div id="strava-status-text" style="font-size:12px;color:#8A8A8A;">Sprawdzam...</div>
+                            </div>
+                            <button id="strava-btn" onclick="stravaConnect()" style="padding:8px 16px;border:1.5px solid #EBEBEB;border-radius:10px;background:transparent;font-size:13px;font-weight:600;font-family:'Inter',sans-serif;color:#1A1A1A;cursor:pointer;white-space:nowrap;transition:border-color 0.2s;" onmouseenter="this.style.borderColor='#1A1A1A'" onmouseleave="this.style.borderColor='#EBEBEB'">Połącz</button>
                         </div>
-                        <button style="padding:8px 16px;border:1.5px solid #EBEBEB;border-radius:10px;background:transparent;font-size:13px;font-weight:600;font-family:'Inter',sans-serif;color:#1A1A1A;cursor:pointer;white-space:nowrap;transition:border-color 0.2s;" onmouseenter="this.style.borderColor='#1A1A1A'" onmouseleave="this.style.borderColor='#EBEBEB'">Połącz</button>
+                        <div id="strava-connected-actions" style="display:none;margin-top:10px;display:none;">
+                            <button onclick="stravaImport()" style="width:100%;height:40px;background:transparent;border:1.5px solid #EBEBEB;border-radius:12px;font-size:13px;font-weight:600;font-family:'Inter',sans-serif;color:#1A1A1A;cursor:pointer;margin-bottom:8px;transition:border-color 0.2s;" onmouseenter="this.style.borderColor='#1A1A1A'" onmouseleave="this.style.borderColor='#EBEBEB'">Importuj treningi teraz</button>
+                            <div id="strava-import-msg" style="font-size:12px;color:#6B8F71;text-align:center;display:none;margin-bottom:8px;font-weight:600;"></div>
+                            <button onclick="stravaDisconnect()" style="width:100%;height:36px;background:transparent;border:none;font-size:12px;color:#C07264;cursor:pointer;font-family:'Inter',sans-serif;">Rozłącz Stravę</button>
+                        </div>
                     </div>
 
                     <!-- Garmin -->
-                    <div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid #F5F5F5;">
-                        <div style="width:10px;height:10px;border-radius:50%;background:#5A7A92;flex-shrink:0;"></div>
-                        <div style="flex:1;min-width:0;">
-                            <div style="font-size:14px;font-weight:600;color:#1A1A1A;">Garmin Connect</div>
-                            <div style="font-size:12px;color:#8A8A8A;">Niepołączone</div>
+                    <!-- Garmin .fit import -->
+                    <div style="padding:12px 0;border-bottom:1px solid #F5F5F5;">
+                        <div style="display:flex;align-items:center;gap:12px;">
+                            <div style="width:10px;height:10px;border-radius:50%;background:#5A7A92;flex-shrink:0;"></div>
+                            <div style="flex:1;min-width:0;">
+                                <div style="font-size:14px;font-weight:600;color:#1A1A1A;">Garmin — import .fit</div>
+                                <div style="font-size:12px;color:#8A8A8A;">Garmin Connect → Aktywność → ⚙ → Eksportuj oryginał</div>
+                            </div>
+                            <button onclick="document.getElementById('fit-file-input').click()" style="padding:8px 16px;background:#1A1A1A;border:none;border-radius:10px;color:#fff;font-size:12px;font-weight:700;font-family:'Inter',sans-serif;cursor:pointer;white-space:nowrap;">Wgraj .fit</button>
                         </div>
-                        <button disabled style="padding:8px 16px;border:1.5px solid #EBEBEB;border-radius:10px;background:transparent;font-size:13px;font-weight:600;font-family:'Inter',sans-serif;color:#C4C4C4;cursor:not-allowed;white-space:nowrap;">Wkrótce</button>
+                        <input type="file" id="fit-file-input" accept=".fit" style="display:none" onchange="handleFitImport(event)">
+                        <div id="fit-import-status" style="display:none;margin-top:8px;font-size:13px;padding:10px 14px;border-radius:10px;"></div>
                     </div>
 
                     <!-- Apple Health -->
@@ -5942,6 +5954,7 @@
 
                 if (viewName === 'settings') {
                     loadSettings();
+                    loadStravaStatus();
                 }
 
                 if (viewName === 'history') {
@@ -6053,6 +6066,150 @@
             }
         }
 
+        // ── STRAVA ───────────────────────────────────────────────
+        async function loadStravaStatus() {
+            const userId = localStorage.getItem('velm_user_id');
+            const token = localStorage.getItem('velm_token');
+            if (!userId || !token) return;
+
+            try {
+                const res = await fetch(API_BASE + '/api/strava/status/' + userId, {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                const data = await res.json();
+                const dot = document.getElementById('strava-dot');
+                const statusText = document.getElementById('strava-status-text');
+                const btn = document.getElementById('strava-btn');
+                const connectedActions = document.getElementById('strava-connected-actions');
+
+                if (data.connected) {
+                    if (dot) dot.style.background = '#FC4C02';
+                    if (statusText) statusText.textContent = 'Połączono — ID: ' + data.athlete_id;
+                    if (btn) { btn.style.display = 'none'; }
+                    if (connectedActions) connectedActions.style.display = 'block';
+                } else {
+                    if (dot) dot.style.background = '#C4C4C4';
+                    if (statusText) statusText.textContent = 'Niepołączone';
+                    if (btn) { btn.style.display = ''; btn.textContent = 'Połącz'; }
+                    if (connectedActions) connectedActions.style.display = 'none';
+                }
+            } catch (e) {
+                const statusText = document.getElementById('strava-status-text');
+                if (statusText) statusText.textContent = 'Błąd połączenia';
+            }
+        }
+
+        function stravaConnect() {
+            const userId = localStorage.getItem('velm_user_id');
+            const token = localStorage.getItem('velm_token');
+            if (!userId || !token) return;
+            // Otwórz OAuth przez backend — backend zrobi redirect do Stravy
+            window.location.href = API_BASE + '/api/strava/connect/' + userId + '?token=' + encodeURIComponent(token);
+        }
+
+        async function stravaDisconnect() {
+            if (!confirm('Rozłączyć Stravę? Zaimportowane treningi zostaną.')) return;
+            const userId = localStorage.getItem('velm_user_id');
+            const token = localStorage.getItem('velm_token');
+            try {
+                await fetch(API_BASE + '/api/strava/disconnect/' + userId, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                loadStravaStatus();
+            } catch (e) {
+                alert('Błąd: ' + e.message);
+            }
+        }
+
+        async function stravaImport() {
+            const userId = localStorage.getItem('velm_user_id');
+            const token = localStorage.getItem('velm_token');
+            const msg = document.getElementById('strava-import-msg');
+            if (msg) { msg.style.display = 'block'; msg.textContent = 'Importuję...'; msg.style.color = '#8A8A8A'; }
+            try {
+                const res = await fetch(API_BASE + '/api/strava/import/' + userId, {
+                    method: 'POST',
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                const data = await res.json();
+                if (msg) { msg.textContent = 'Zaimportowano ' + (data.imported || 0) + ' treningów'; msg.style.color = '#6B8F71'; }
+            } catch (e) {
+                if (msg) { msg.textContent = 'Błąd: ' + e.message; msg.style.color = '#C07264'; }
+            }
+        }
+
+        // ── GARMIN .FIT IMPORT ───────────────────────────────────
+        async function handleFitImport(event) {
+            const file = event.target.files?.[0];
+            if (!file) return;
+
+            if (!file.name.toLowerCase().endsWith('.fit')) {
+                showFitStatus('Tylko pliki .fit są obsługiwane', 'error');
+                return;
+            }
+            if (file.size > 10 * 1024 * 1024) {
+                showFitStatus('Plik za duży (max 10MB)', 'error');
+                return;
+            }
+
+            showFitStatus('Wgrywam i parsuję plik...', 'loading');
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const token = localStorage.getItem('velm_token');
+                const res = await fetch(API_BASE + '/api/import/fit/' + currentUserId, {
+                    method: 'POST',
+                    headers: { 'Authorization': 'Bearer ' + token },
+                    body: formData
+                });
+                const data = await res.json();
+
+                if (res.status === 409) {
+                    showFitStatus('Trening z ' + (data.existing?.date || '?') + ' już istnieje (' + (data.existing?.distance_km || '?') + ' km)', 'warning');
+                    return;
+                }
+                if (!res.ok || !data.success) {
+                    showFitStatus((data.error || 'Błąd importu'), 'error');
+                    return;
+                }
+
+                const p = data.parsed;
+                const details = [
+                    p.distance_km ? p.distance_km + ' km' : null,
+                    p.duration_min ? p.duration_min + ' min' : null,
+                    p.avg_pace ? 'tempo ' + p.avg_pace + '/km' : null,
+                    p.avg_hr ? 'HR ' + p.avg_hr + ' bpm' : null
+                ].filter(Boolean).join(' · ');
+
+                showFitStatus('Zaimportowano ' + p.date + '\n' + details, 'success');
+
+                if (document.getElementById('view-history')?.classList.contains('active')) {
+                    loadHistoryView();
+                }
+                event.target.value = '';
+
+            } catch (e) {
+                showFitStatus('Błąd połączenia: ' + e.message, 'error');
+            }
+        }
+
+        function showFitStatus(msg, type) {
+            const el = document.getElementById('fit-import-status');
+            if (!el) return;
+            const styles = {
+                loading: 'background:#F0EDE8;color:#8A8A8A;',
+                success: 'background:#F0FDF4;color:#166534;',
+                error:   'background:#FEF2F2;color:#991B1B;',
+                warning: 'background:#FFFBEB;color:#92400E;'
+            };
+            el.style.cssText = (styles[type] || styles.loading) + 'display:block;font-size:13px;padding:10px 14px;border-radius:10px;white-space:pre-line;line-height:1.5;';
+            el.textContent = msg;
+            if (type !== 'loading') setTimeout(() => { el.style.display = 'none'; }, 5000);
+        }
+
         async function changePassword() {
             const current = document.getElementById('settings-pwd-current')?.value;
             const newPwd  = document.getElementById('settings-pwd-new')?.value;
@@ -6112,12 +6269,14 @@
             const start = historyPage * HISTORY_PAGE_SIZE;
             const page = historyWorkouts.slice(start, start + HISTORY_PAGE_SIZE);
 
+            const fitBtnHtml = '<div style="display:flex;justify-content:flex-end;margin-bottom:12px;"><button onclick="document.getElementById(\'fit-file-input\').click()" style="padding:8px 14px;background:transparent;border:1.5px solid #EBEBEB;border-radius:10px;font-size:12px;font-weight:600;font-family:Inter,sans-serif;color:#1A1A1A;cursor:pointer;">+ Wgraj .fit</button></div>';
+
             if (historyWorkouts.length === 0) {
-                container.innerHTML = `
+                container.innerHTML = fitBtnHtml + `
                     <div style="text-align:center;padding:60px 20px;color:#8A8A8A;">
                         <div style="font-size:40px;margin-bottom:12px;">🏃</div>
                         <div style="font-size:15px;font-weight:600;">Brak zarejestrowanych treningów</div>
-                        <div style="font-size:13px;margin-top:8px;">Użyj check-inu po treningu</div>
+                        <div style="font-size:13px;margin-top:8px;">Użyj check-inu po treningu lub wgraj plik .fit</div>
                     </div>`;
                 return;
             }
@@ -6125,7 +6284,7 @@
             const totalKm = historyWorkouts.reduce((s, w) => s + (parseFloat(w.distance_km) || 0), 0);
             const totalCount = historyWorkouts.length;
 
-            container.innerHTML = `
+            container.innerHTML = fitBtnHtml + `
                 <div style="display:flex;gap:12px;margin-bottom:20px;">
                     <div style="flex:1;background:#fff;border:1.5px solid #EBEBEB;border-radius:16px;padding:16px;text-align:center;">
                         <div style="font-size:24px;font-weight:800;color:#1A1A1A;">${totalCount}</div>
@@ -6875,6 +7034,32 @@
             if (newUser) {
                 currentUserId = newUser;
                 localStorage.setItem('velm_user_id', newUser);
+            }
+
+            // Strava OAuth callback
+            const stravaResult = urlParams.get('strava');
+            if (stravaResult === 'connected') {
+                switchView('settings');
+                setTimeout(() => {
+                    const msg = document.createElement('div');
+                    msg.style.cssText = 'position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#1A1A1A;color:#fff;padding:12px 24px;border-radius:14px;font-size:14px;font-weight:600;z-index:9999;font-family:Inter,sans-serif;';
+                    msg.textContent = 'Strava połączona! Treningi są importowane.';
+                    document.body.appendChild(msg);
+                    setTimeout(() => msg.remove(), 4000);
+                }, 500);
+                // Clean URL
+                history.replaceState({}, '', window.location.pathname);
+            } else if (stravaResult === 'error') {
+                const reason = urlParams.get('reason') || 'unknown';
+                switchView('settings');
+                setTimeout(() => {
+                    const msg = document.createElement('div');
+                    msg.style.cssText = 'position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#C07264;color:#fff;padding:12px 24px;border-radius:14px;font-size:14px;font-weight:600;z-index:9999;font-family:Inter,sans-serif;';
+                    msg.textContent = 'Błąd połączenia ze Stravą (' + reason + ')';
+                    document.body.appendChild(msg);
+                    setTimeout(() => msg.remove(), 5000);
+                }, 500);
+                history.replaceState({}, '', window.location.pathname);
             }
 
             // Show/hide login overlay
