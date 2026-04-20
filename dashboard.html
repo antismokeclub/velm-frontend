@@ -3297,7 +3297,13 @@
                     </div>
                 </div>
 
-                <!-- SEKCJA 5 — BEZPIECZEŃSTWO -->
+                <!-- SEKCJA 5 — SUBSKRYPCJA -->
+                <div class="home-anim" style="background:#fff;border-radius:20px;padding:20px;margin-bottom:16px;border:1px solid rgba(235,235,235,0.5);box-shadow:0 2px 16px rgba(0,0,0,0.04);animation-delay:0.22s;">
+                    <div style="font-size:11px;font-weight:700;color:#8A8A8A;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:16px;">Subskrypcja</div>
+                    <div id="subscription-section" style="font-size:13px;color:#8A8A8A;">Ładowanie...</div>
+                </div>
+
+                <!-- SEKCJA 6 — BEZPIECZEŃSTWO -->
                 <div class="home-anim" style="background:#fff;border-radius:20px;padding:20px;margin-bottom:16px;border:1px solid rgba(235,235,235,0.5);box-shadow:0 2px 16px rgba(0,0,0,0.04);animation-delay:0.25s;">
                     <div style="font-size:11px;font-weight:700;color:#8A8A8A;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:16px;">Zmiana hasła</div>
                     <div style="margin-bottom:10px;">
@@ -3315,7 +3321,7 @@
                     <div id="settings-pwd-msg" style="display:none;text-align:center;font-size:13px;margin-top:10px;font-weight:600;"></div>
                 </div>
 
-                <!-- SEKCJA 6 — STREFA NIEBEZPIECZNA -->
+                <!-- SEKCJA 7 — STREFA NIEBEZPIECZNA -->
                 <div class="home-anim" style="background:#fff;border-radius:20px;padding:20px;margin-bottom:32px;border:1px solid rgba(235,235,235,0.5);border-left:3px solid #C07264;box-shadow:0 2px 16px rgba(0,0,0,0.04);animation-delay:0.30s;">
                     <div style="font-size:11px;font-weight:700;color:#8A8A8A;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:16px;">Strefa niebezpieczna</div>
                     <button onclick="doLogout()" style="width:100%;height:48px;background:transparent;border:1.5px solid #C07264;border-radius:14px;font-size:14px;font-weight:600;font-family:'Inter',sans-serif;color:#C07264;cursor:pointer;margin-bottom:10px;transition:background 0.2s;" onmouseenter="this.style.background='#F5EEEC'" onmouseleave="this.style.background='transparent'">
@@ -5983,6 +5989,7 @@
         async function loadSettings() {
             const userId = localStorage.getItem('velm_user_id');
             if (!userId) return;
+            loadSubscriptionSection();
             try {
                 const [userRes, planRes] = await Promise.all([
                     fetch(`${API_BASE}/api/user/${userId}`, { headers: authHeaders() }),
@@ -6064,6 +6071,121 @@
             } catch(e) {
                 showSettingsMsg('settings-profile-msg', 'Błąd: ' + e.message, true);
             }
+        }
+
+        // ── SUBSCRIPTION ─────────────────────────────────────────
+        let currentUserPremium = false;
+
+        async function loadSubscriptionStatus() {
+            if (!currentUserId) return;
+            try {
+                const res = await fetch(API_BASE + '/api/subscription/' + currentUserId, { headers: authHeaders() });
+                const data = await res.json();
+                currentUserPremium = data.isPremium ?? false;
+                const badge = document.getElementById('premium-badge');
+                if (badge) {
+                    badge.style.display = currentUserPremium ? 'inline-flex' : 'none';
+                }
+            } catch(e) {
+                currentUserPremium = false;
+            }
+        }
+
+        async function loadSubscriptionSection() {
+            const container = document.getElementById('subscription-section');
+            if (!container || !currentUserId) return;
+            try {
+                const res = await fetch(API_BASE + '/api/subscription/' + currentUserId, { headers: authHeaders() });
+                const data = await res.json();
+                if (data.isPremium) {
+                    const expiry = data.expiresAt
+                        ? new Date(data.expiresAt).toLocaleDateString('pl-PL', { day: 'numeric', month: 'long', year: 'numeric' })
+                        : null;
+                    const statusLabel = { active: '✓ Aktywna', trialing: '⏳ Trial (7 dni)', past_due: '⚠ Płatność nieudana', cancelled: '✗ Anulowana' }[data.status] ?? data.status;
+                    container.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;">' +
+                        '<div><div style="font-size:15px;font-weight:700;color:#1A1A1A;">✦ Premium</div>' +
+                        '<div style="font-size:12px;color:#22C55E;margin-top:2px;">' + statusLabel + '</div>' +
+                        (expiry ? '<div style="font-size:11px;color:#8A8A8A;margin-top:2px;">Odnawia się ' + expiry + '</div>' : '') +
+                        '</div></div>' +
+                        '<button onclick="openBillingPortal()" style="width:100%;padding:12px;background:transparent;border:1.5px solid #EBEBEB;border-radius:12px;font-size:13px;font-weight:600;cursor:pointer;color:#1A1A1A;font-family:Inter,sans-serif;">Zarządzaj subskrypcją →</button>';
+                } else {
+                    container.innerHTML = '<div style="margin-bottom:14px;">' +
+                        '<div style="font-size:15px;font-weight:700;color:#1A1A1A;margin-bottom:4px;">Plan darmowy</div>' +
+                        '<div style="font-size:13px;color:#8A8A8A;line-height:1.5;">1 agent · 7 dni historii · brak raportów</div></div>' +
+                        '<button onclick="showPaywall(\'Odblokuj wszystkie funkcje velm\')" style="width:100%;padding:14px;background:#1A1A1A;border:none;border-radius:14px;color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:Inter,sans-serif;">✦ Przejdź na Premium — 7 dni za darmo</button>';
+                }
+            } catch(e) {
+                container.innerHTML = '';
+            }
+        }
+
+        async function openBillingPortal() {
+            try {
+                const res = await fetch(API_BASE + '/api/subscription/portal', { method: 'POST', headers: authHeaders() });
+                const data = await res.json();
+                if (data.url) window.location.href = data.url;
+                else showVelmToast('Błąd otwarcia portalu', true);
+            } catch(e) {
+                showVelmToast('Błąd połączenia', true);
+            }
+        }
+
+        function showPaywall(message) {
+            const existing = document.getElementById('paywall-modal');
+            if (existing) existing.remove();
+
+            const modal = document.createElement('div');
+            modal.id = 'paywall-modal';
+            modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:flex-end;justify-content:center;padding:20px;';
+            modal.innerHTML = '<div style="background:#F8F5EE;border-radius:24px;padding:28px 24px;width:100%;max-width:480px;text-align:center;">' +
+                '<div style="font-size:32px;margin-bottom:12px;">✦</div>' +
+                '<div style="font-size:20px;font-weight:800;color:#1A1A1A;margin-bottom:8px;">Funkcja Premium</div>' +
+                '<div style="font-size:14px;color:#8A8A8A;line-height:1.6;margin-bottom:24px;">' + (message || 'Ta funkcja wymaga subskrypcji Premium') + '</div>' +
+                '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;">' +
+                    '<div onclick="startCheckout(\'monthly\')" style="border:1.5px solid #EBEBEB;border-radius:16px;padding:16px;cursor:pointer;" onmouseenter="this.style.borderColor=\'#1A1A1A\'" onmouseleave="this.style.borderColor=\'#EBEBEB\'">' +
+                        '<div style="font-size:11px;color:#8A8A8A;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">Miesięcznie</div>' +
+                        '<div style="font-size:22px;font-weight:800;color:#1A1A1A;">29 PLN</div>' +
+                        '<div style="font-size:11px;color:#8A8A8A;margin-top:2px;">/ miesiąc</div>' +
+                    '</div>' +
+                    '<div onclick="startCheckout(\'yearly\')" style="border:1.5px solid #1A1A1A;border-radius:16px;padding:16px;cursor:pointer;position:relative;background:#1A1A1A;">' +
+                        '<div style="position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:#22C55E;color:#fff;font-size:10px;font-weight:700;padding:3px 10px;border-radius:99px;">OSZCZĘDŹ 43%</div>' +
+                        '<div style="font-size:11px;color:rgba(255,255,255,0.6);font-weight:700;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">Rocznie</div>' +
+                        '<div style="font-size:22px;font-weight:800;color:#fff;">199 PLN</div>' +
+                        '<div style="font-size:11px;color:rgba(255,255,255,0.6);margin-top:2px;">/ rok</div>' +
+                    '</div>' +
+                '</div>' +
+                '<div style="font-size:12px;color:#8A8A8A;margin-bottom:20px;">7 dni za darmo · Anuluj kiedy chcesz</div>' +
+                '<button onclick="document.getElementById(\'paywall-modal\').remove()" style="width:100%;padding:14px;background:transparent;border:1.5px solid #EBEBEB;border-radius:12px;font-size:14px;font-weight:600;font-family:Inter,sans-serif;cursor:pointer;color:#8A8A8A;">Może później</button>' +
+                '</div>';
+            modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+            document.body.appendChild(modal);
+        }
+
+        async function startCheckout(plan) {
+            document.getElementById('paywall-modal')?.remove();
+            try {
+                const res = await fetch(API_BASE + '/api/subscription/checkout', {
+                    method: 'POST',
+                    headers: authHeaders(),
+                    body: JSON.stringify({ plan })
+                });
+                const data = await res.json();
+                if (data.url) window.location.href = data.url;
+                else showVelmToast('Błąd płatności: ' + (data.error || 'nieznany'), true);
+            } catch(e) {
+                showVelmToast('Błąd połączenia', true);
+            }
+        }
+
+        function showVelmToast(msg, isError) {
+            const t = document.createElement('div');
+            t.style.cssText = 'position:fixed;top:20px;left:50%;transform:translateX(-50%);' +
+                'background:' + (isError ? '#C07264' : '#1A1A1A') + ';color:#fff;' +
+                'padding:12px 24px;border-radius:14px;font-size:14px;font-weight:600;' +
+                'z-index:9999;font-family:Inter,sans-serif;box-shadow:0 4px 20px rgba(0,0,0,0.2);';
+            t.textContent = msg;
+            document.body.appendChild(t);
+            setTimeout(() => t.remove(), 4000);
         }
 
         // ── STRAVA ───────────────────────────────────────────────
@@ -6533,11 +6655,19 @@
                 });
                 const data = await response.json();
 
-                // 4. Remove loading & Add AI Message
+                // 4. Remove loading
                 removeMessage(loadingId);
-                addMessage('ai', data.reply);
 
-                // 5. Refresh memory in background
+                // Premium paywall
+                if (response.status === 403 && data.error === 'premium_required') {
+                    showPaywall(data.message || 'Ten agent dostępny tylko w Premium');
+                    return;
+                }
+
+                // 5. Add AI Message
+                addMessage('ai', data.reply || data.error || 'Błąd odpowiedzi');
+
+                // 6. Refresh memory in background
                 setTimeout(loadUserMemory, 2000);
 
             } catch (e) {
@@ -7062,6 +7192,20 @@
                 history.replaceState({}, '', window.location.pathname);
             }
 
+            // Stripe Checkout callback
+            const subResult = urlParams.get('subscription');
+            if (subResult === 'success') {
+                history.replaceState({}, '', window.location.pathname);
+                switchView('settings');
+                setTimeout(() => {
+                    showVelmToast('✦ Witaj w Premium! 7 dni próbnych zaczyna się teraz.');
+                    loadSubscriptionStatus();
+                }, 1000);
+            } else if (subResult === 'cancelled') {
+                history.replaceState({}, '', window.location.pathname);
+                showVelmToast('Płatność anulowana — plan darmowy aktywny', true);
+            }
+
             // Show/hide login overlay
             const overlay = document.getElementById('login-overlay');
             if (currentUserId && overlay) {
@@ -7075,6 +7219,7 @@
             updateDate();
             loadUserMemory();
             loadUserProfile();
+            loadSubscriptionStatus();
             updateRaceCountdown();
             loadPlanChanges();
             loadStreak();
