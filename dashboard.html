@@ -2592,6 +2592,47 @@
             align-self: flex-start;
             animation: msgSlideInLeft 220ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
         }
+        .typing-bubble-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            align-self: flex-start;
+            background: #FFFFFF;
+            border: 1px solid #EBEBEB;
+            border-radius: 18px 18px 18px 4px;
+            padding: 12px 16px;
+            max-width: 82%;
+            animation: msgSlideInLeft 220ms cubic-bezier(0.34,1.56,0.64,1) both;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+        }
+        .typing-bubble-status .status-dots {
+            display: flex;
+            gap: 4px;
+        }
+        .typing-bubble-status .status-dots span {
+            width: 6px;
+            height: 6px;
+            background: var(--primary-color, #1A1A1A);
+            border-radius: 50%;
+            animation: dotPulse 1.4s infinite;
+            display: inline-block;
+            opacity: 0.7;
+        }
+        .typing-bubble-status .status-dots span:nth-child(2) { animation-delay: 0.2s; }
+        .typing-bubble-status .status-dots span:nth-child(3) { animation-delay: 0.4s; }
+        .typing-bubble-status .status-text {
+            font-size: 13px;
+            font-weight: 500;
+            color: #6B6B6B;
+            font-family: 'Inter', sans-serif;
+            letter-spacing: -0.005em;
+            min-height: 18px;
+        }
+        @keyframes statusFade {
+            0%   { opacity: 1; transform: translateY(0); }
+            50%  { opacity: 0; transform: translateY(-4px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
 
         /* ── CHECKIN OVERLAY ─────────────────────────────────────── */
         /* ─── CHECK-IN OVERLAY ─────────────────────────────────── */
@@ -6643,7 +6684,7 @@
             if (suggestions) suggestions.style.display = 'none';
 
             // 3. Show Loading
-            const loadingId = addLoadingIndicator();
+            const loadingId = addLoadingIndicator(text, selectedAgent);
             scrollToBottom();
 
             try {
@@ -6698,19 +6739,77 @@
             return div;
         }
 
-        function addLoadingIndicator() {
+        function _guessAIStatus(msg, agent) {
+            const m = (msg || '').toLowerCase();
+            if (/trening|plan|dzi\u015b|jutro|dzisiaj|dzisiejsz/i.test(m)) {
+                return ['Sprawdzam tw\u00f3j plan treningowy', 'Analizuj\u0119 dzie\u0144 w kontek\u015bcie tygodnia', 'Przygotowuj\u0119 odpowied\u017a'];
+            }
+            if (/sen|spa\u0142|wyspa\u0142|zm\u0119czony|regeneracj/i.test(m)) {
+                return ['Sprawdzam dane ze snu z ostatniej nocy', 'Por\u00f3wnuj\u0119 HRV z ostatnich 7 dni', 'Oceniam gotowo\u015b\u0107 do treningu'];
+            }
+            if (/t\u0119tno|puls|hr|bpm|serce/i.test(m)) {
+                return ['Wczytuję dane tętna z ostatnich treningów', 'Analizuję tętno spoczynkowe', 'Porównuję strefy HR'];
+            }
+            if (/tempo|szybciej|wolniej|pace|czas/i.test(m)) {
+                return ['Analizuję tempo z ostatnich treningów', 'Porównuję z miesiącem temu', 'Sprawdzam trend wydajności'];
+            }
+            if (/tydzie\u0144|tygodniowo|podsumow|w tym tyg/i.test(m)) {
+                return ['Zbieram treningi z tego tygodnia', 'Obliczam statystyki', 'Porównuję z poprzednim tygodniem'];
+            }
+            if (agent === 'fizjo' || /boli|b\u00f3l|kontuzj|uraz/i.test(m)) {
+                return ['Przeglądam historię twoich dolegliwości', 'Sprawdzam obciążenie z ostatniego tygodnia', 'Przygotowuję rekomendację'];
+            }
+            if (agent === 'psycholog' || /motywacj|nie chce|boj\u0119|stres/i.test(m)) {
+                return ['Przeglądam naszą ostatnią rozmowę', 'Szukam wzorców w twoich reakcjach', 'Formułuję odpowiedź'];
+            }
+            const defaults = {
+                szef_sztabu: ['Konsultuję się ze sztabem', 'Analizuję twoje dane', 'Przygotowuję odpowiedź'],
+                analityk:    ['Wczytuję dane treningowe', 'Obliczam statystyki', 'Formuję wnioski'],
+                fizjo:       ['Sprawdzam historię obciążenia', 'Oceniam ryzyko', 'Przygotowuję poradę'],
+                psycholog:   ['Przeglądam kontekst rozmowy', 'Analizuję wzorce', 'Formułuję odpowiedź']
+            };
+            return defaults[agent] || defaults.szef_sztabu;
+        }
+
+        function addLoadingIndicator(userMessage, agent) {
             const container = document.getElementById('coach-messages');
             const div = document.createElement('div');
-            div.id = 'loading-' + Date.now();
-            div.className = 'typing-bubble standalone';
-            div.innerHTML = '<span></span><span></span><span></span>';
+            const id = 'loading-' + Date.now();
+            div.id = id;
+            div.className = 'typing-bubble-status';
+
+            const status = _guessAIStatus(userMessage, agent);
+
+            div.innerHTML = `
+                <div class="status-dots">
+                    <span></span><span></span><span></span>
+                </div>
+                <div class="status-text">${status[0]}</div>
+            `;
             container.appendChild(div);
-            return div.id;
+
+            let idx = 1;
+            const interval = setInterval(() => {
+                if (idx >= status.length) { clearInterval(interval); return; }
+                const el = div.querySelector('.status-text');
+                if (el) {
+                    el.style.animation = 'none';
+                    void el.offsetWidth; // reflow
+                    el.style.animation = 'statusFade 0.3s ease';
+                    setTimeout(() => { if (el) { el.textContent = status[idx]; idx++; } }, 150);
+                }
+            }, 1800);
+
+            div._statusInterval = interval;
+            return id;
         }
 
         function removeMessage(id) {
             const el = document.getElementById(id);
-            if (el) el.remove();
+            if (el) {
+                if (el._statusInterval) clearInterval(el._statusInterval);
+                el.remove();
+            }
         }
 
         function scrollToBottom(force) {
