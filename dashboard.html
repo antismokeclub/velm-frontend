@@ -2633,6 +2633,24 @@
             50%  { opacity: 0; transform: translateY(-4px); }
             100% { opacity: 1; transform: translateY(0); }
         }
+        .context-banner {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(26,26,26,0.05);
+            border: 1px solid var(--primary-color, #1A1A1A);
+            border-radius: 12px;
+            padding: 10px 14px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--primary-color, #1A1A1A);
+            font-family: 'Inter', sans-serif;
+            margin-bottom: 12px;
+            align-self: stretch;
+            animation: fadeInUp 280ms cubic-bezier(0.4,0,0.2,1) both;
+        }
+        .context-banner .context-icon { font-weight: 800; }
+        .context-banner .context-label { letter-spacing: -0.01em; }
 
         /* ── CHECKIN OVERLAY ─────────────────────────────────────── */
         /* ─── CHECK-IN OVERLAY ─────────────────────────────────── */
@@ -2975,6 +2993,9 @@
                     <div id="home-main-distance" style="display:none;"></div>
                     <button onclick="event.stopPropagation();calDayClick(toDateStr(new Date()));switchView('calendar');" style="width:100%;padding:14px;background:var(--primary-color);border:none;border-radius:14px;color:white;font-weight:700;font-size:14px;font-family:'Inter',sans-serif;cursor:pointer;transition:transform 0.15s cubic-bezier(0.22,1,0.36,1),opacity 0.15s;box-shadow:0 4px 16px rgba(26,26,26,0.2);" onmousedown="this.style.transform='scale(0.97)'" onmouseup="this.style.transform='scale(1)'">
                         Zobacz szczegóły &rarr;
+                    </button>
+                    <button onclick="event.stopPropagation();enterCoachWithContext({source:'home_today',date:new Date().toISOString().split('T')[0],trainingRef:window._todayTyp&&window._todayTyp!=='rest'?(window._todayKm||'')+'km '+window._todayTyp:null})" style="width:100%;margin-top:10px;padding:13px;background:transparent;border:1.5px solid var(--primary-color);border-radius:14px;color:var(--primary-color);font-weight:700;font-size:14px;font-family:'Inter',sans-serif;cursor:pointer;letter-spacing:0.01em;">
+                        Zapytaj o trening
                     </button>
                 </div>
 
@@ -4537,6 +4558,9 @@
             triggerSlosh(liquid, delta);
         }
 
+        // ── CHAT DEEP-LINK CONTEXT ──────────────────────────────────
+        window.chatContext = null; // { source, date, weekStart, weekEnd, trainingRef }
+
         // ── CALENDAR v2 ─────────────────────────────────────────────
         const TYPE_COLORS = { easy:'#A8C8DC', interval:'#1A3356', tempo:'#1A3356', long:'#6A9BBF', rest:'#EBEBEB', cross:'#6A9BBF', walkrun:'#A8C8DC' };
         const TYPE_EMOJI  = {
@@ -5086,10 +5110,15 @@
             return `<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">${tiles.join('')}</div>`;
         }
 
-        function _askCard() {
+        function _askCard(day) {
+            const dateStr = day?.data || '';
+            const typ = day?.typ || '';
+            const km = day?.dystans_km || '';
+            const ref = (km && typ) ? `${km}km ${typ}` : (typ || '');
+            const ctxJson = JSON.stringify({ source: 'calendar_day', date: dateStr, trainingRef: ref });
             return `<div style="margin-bottom:12px;animation:calFadeIn 0.3s ease 360ms both;">
-                <button onclick="switchView('coach')" style="width:100%;padding:13px;background:var(--primary-color);border:none;border-radius:14px;color:white;font-weight:700;font-size:14px;font-family:'Inter',sans-serif;cursor:pointer;letter-spacing:0.01em;">Zapytaj o trening</button>
-                <div style="margin-top:8px;padding:12px 14px;background:var(--bg-color,#F5F3F0);border-radius:12px;font-size:12px;color:#8A8A8A;line-height:1.65;font-family:'Inter',sans-serif;">Masz kolizję z planami lub ważny powód? Możesz to zgłosić i trener dopasuje sesję. Jeśli jednak po prostu nie masz ochoty — plan zostaje. Trener trzyma się ustalonego programu i zmienia go tylko wtedy, gdy naprawdę ma to sens.</div>
+                <button onclick='enterCoachWithContext(${ctxJson.replace(/'/g,"\\'")})'  style="width:100%;padding:13px;background:var(--primary-color);border:none;border-radius:14px;color:white;font-weight:700;font-size:14px;font-family:'Inter',sans-serif;cursor:pointer;letter-spacing:0.01em;">Zapytaj o trening</button>
+                <div style="margin-top:8px;padding:12px 14px;background:var(--bg-color,#F5F3F0);border-radius:12px;font-size:12px;color:#8A8A8A;line-height:1.65;font-family:'Inter',sans-serif;">Masz kolizję z planami lub ważny powód? Możesz to zgłosić i trener dopasuje sesję. Jeśli jednak po prostu nie masz ochoty — plan zostaje.</div>
             </div>`;
         }
 
@@ -5156,7 +5185,7 @@
                     ${_intensityTile(day, 80)}
                     ${_hrZoneTile(day, 120)}
                 </div>
-                ${_askCard()}
+                ${_askCard(day)}
                 ${_descCard(day, color)}`;
             }
 
@@ -5182,7 +5211,7 @@
                 ${_section('#7B98B0', 'Rozgrzewka', _segBlock(roz, day, 0))}
                 ${_section('#C07264', 'Interwały', intBlock)}
                 ${_section('#6B8F71', 'Schłodzenie', _segBlock(sch, day, 0))}
-                ${_askCard()}
+                ${_askCard(day)}
                 ${_descCard(day, color)}`;
             }
 
@@ -5207,7 +5236,7 @@
                 ${_section('#7B98B0', 'Rozgrzewka', _segBlock(roz, day, 0))}
                 ${_section('#C4A35A', 'Odcinek progowy', odcBlock)}
                 ${_section('#6B8F71', 'Schłodzenie', _segBlock(sch, day, 0))}
-                ${_askCard()}
+                ${_askCard(day)}
                 ${_descCard(day, color)}`;
             }
 
@@ -5238,7 +5267,7 @@
                         ${_tile('Powtórzenia', s.powtorzeenia, 80)}
                         ${_tile('Tempo', day.tempo_min_km || null, 120, 'min/km')}
                     </div>`) : ''}
-                ${_askCard()}
+                ${_askCard(day)}
                 ${_descCard(day, color)}`;
             }
 
@@ -5250,7 +5279,7 @@
                 ${_intensityTile(day, 80)}
                 ${_hrZoneTile(day, 120)}
             </div>
-            ${_askCard()}
+            ${_askCard(day)}
             ${_descCard(day, color)}`;
         }
 
@@ -6674,10 +6703,20 @@
             const text = input.value.trim();
             if (!text) return;
 
-            // 1. Add User Message
+            // 1. Add User Message (display always shows raw text)
             addMessage('user', text);
             input.value = '';
             updateSendBtn();
+
+            // Enrich message for AI with deep-link context (invisible to user)
+            let messageForAI = text;
+            if (window.chatContext) {
+                const ctxBlock = _buildContextBlockForAI(window.chatContext);
+                if (ctxBlock) messageForAI = `${ctxBlock}\n\n${text}`;
+                window.chatContext = null;
+                const banner = document.querySelector('.context-banner');
+                if (banner) banner.remove();
+            }
 
             // 2. Hide suggestions & Welcome Card
             const suggestions = document.getElementById('coach-suggestions');
@@ -6694,7 +6733,7 @@
                     headers: authHeaders(),
                     body: JSON.stringify({
                         userId: currentUserId,
-                        message: text,
+                        message: messageForAI,
                         agent: selectedAgent,
                         clientTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone
                     })
@@ -6737,6 +6776,55 @@
             div.textContent = text;
             container.appendChild(div);
             return div;
+        }
+
+        function enterCoachWithContext(ctx) {
+            window.chatContext = ctx;
+            switchView('coach');
+            setTimeout(() => {
+                const container = document.getElementById('coach-messages');
+                if (!container) return;
+                const intro = document.getElementById('coach-intro');
+                if (intro) intro.style.display = 'none';
+                const quick = document.getElementById('coach-quick-suggestions');
+                if (quick) quick.style.display = 'none';
+
+                // Remove existing banner if any
+                const existing = container.querySelector('.context-banner');
+                if (existing) existing.remove();
+
+                const div = document.createElement('div');
+                div.className = 'context-banner';
+
+                let label = '';
+                if (ctx.source === 'calendar_day') {
+                    const d = new Date(ctx.date + 'T12:00:00');
+                    const dayName = d.toLocaleDateString('pl-PL', { weekday: 'long' });
+                    const dateShort = d.toLocaleDateString('pl-PL', { day: 'numeric', month: 'long' });
+                    label = `Pytasz o trening: ${dayName}, ${dateShort}${ctx.trainingRef ? ` (${ctx.trainingRef})` : ''}`;
+                } else if (ctx.source === 'home_today') {
+                    label = 'Pytasz o dzisiejszy trening';
+                } else if (ctx.source === 'home_week') {
+                    label = 'Pytasz o cały tydzień treningowy';
+                }
+
+                div.innerHTML = `<span class="context-icon">\u2192</span><span class="context-label">${label}</span>`;
+                container.insertBefore(div, container.firstChild);
+            }, 100);
+        }
+
+        function _buildContextBlockForAI(ctx) {
+            if (ctx.source === 'calendar_day') {
+                return `[KONTEKST DEEP-LINK: Użytkownik otworzył chat z widoku kalendarza. Pyta o konkretny dzień: ${ctx.date}.${ctx.trainingRef ? ' Trening w tym dniu: ' + ctx.trainingRef + '.' : ''} Jeśli pytanie jest ogólne ("co mam?"), odpowiedz w kontekście tego dnia.]`;
+            }
+            if (ctx.source === 'home_today') {
+                const today = new Date().toISOString().split('T')[0];
+                return `[KONTEKST DEEP-LINK: Użytkownik otworzył chat z ekranu głównego, sekcja "Dzisiejszy trening". Pyta o dzisiaj: ${today}.]`;
+            }
+            if (ctx.source === 'home_week') {
+                return `[KONTEKST DEEP-LINK: Użytkownik otworzył chat z ekranu głównego, sekcja "Opis tygodnia". Pytanie dotyczy CAŁEGO tygodnia (${ctx.weekStart} do ${ctx.weekEnd}), nie pojedynczego treningu.]`;
+            }
+            return '';
         }
 
         function _guessAIStatus(msg, agent) {
@@ -7147,7 +7235,7 @@
                     + '</div>'
                     + '<div style="font-size:15px;color:#1A1A1A;line-height:1.75;white-space:pre-wrap;">' + sanitizeHTML(data.summary) + '</div>'
                     + '</div>'
-                    + '<button onclick="switchView(\'coach\');setTimeout(()=>setAgent(\'szef_sztabu\'),100)" style="width:100%;padding:14px;background:transparent;border:1.5px solid #1A1A1A;border-radius:14px;font-size:14px;font-weight:700;font-family:\'Inter\',sans-serif;cursor:pointer;color:#1A1A1A;margin-bottom:32px;">Zapytaj trenera o plan →</button>';
+                    + '<button onclick="(()=>{const dni=calendarPlan&&calendarPlan.dni;const ws=dni&&dni[0]?dni[0].data:new Date().toISOString().split(\'T\')[0];const we=dni&&dni[dni.length-1]?dni[dni.length-1].data:ws;enterCoachWithContext({source:\'home_week\',weekStart:ws,weekEnd:we});})()" style="width:100%;padding:14px;background:transparent;border:1.5px solid #1A1A1A;border-radius:14px;font-size:14px;font-weight:700;font-family:\'Inter\',sans-serif;cursor:pointer;color:#1A1A1A;margin-bottom:32px;">Zapytaj trenera o plan →</button>';
             } catch(e) {
                 container.innerHTML = '<div style="text-align:center;padding:40px;color:#8A8A8A;">Nie udało się załadować raportu.</div>';
             }
