@@ -55,6 +55,14 @@
             --shadow-2: 0 4px 20px rgba(0,0,0,0.08);
             --nav-height: 64px;
             --font-display: 'Outfit', sans-serif;
+            /* Informational accents — used only where color = data */
+            --accent-heart: #E63946;
+            --accent-heart-soft: rgba(230, 57, 70, 0.12);
+            --accent-heart-glow: rgba(230, 57, 70, 0.35);
+            --accent-success: #22C55E;
+            --accent-success-soft: rgba(34, 197, 94, 0.12);
+            --accent-warning: #F59E0B;
+            --accent-warning-soft: rgba(245, 158, 11, 0.12);
         }
 
         * {
@@ -529,7 +537,7 @@
             position: absolute;
             top: 4px; right: 22px;
             width: 6px; height: 6px;
-            background: #6B8F71;
+            background: var(--accent-success);
             border-radius: 50%;
             display: none;
         }
@@ -1231,9 +1239,12 @@
         }
 
         .main-heart {
-            fill: #C07264;
+            fill: var(--accent-heart);
             transform-origin: center center;
-            filter: drop-shadow(0 0 6px rgba(192,114,100,0.35));
+            filter: drop-shadow(0 0 6px var(--accent-heart-glow));
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .main-heart { filter: none; }
         }
 
 
@@ -2253,6 +2264,10 @@
             scroll-behavior: smooth;
         }
         #coach-messages::-webkit-scrollbar { display: none; }
+        .chat-history-separator { display:flex; align-items:center; gap:10px; margin:4px 0 8px; }
+        .chat-history-separator span { font-size:11px; font-weight:700; color:#B0A89E; text-transform:uppercase; letter-spacing:0.08em; white-space:nowrap; }
+        .chat-history-separator::before, .chat-history-separator::after { content:''; flex:1; height:1px; background:#EBEBEB; }
+        .msg.msg-history { opacity:0.55; }
 
         /* Welcome Card */
         #coach-welcome-card {
@@ -2772,7 +2787,47 @@
         #checkin-overlay .counter-btn { width:60px; height:60px; border-radius:50%; background:#FFFFFF; border:none; font-size:28px; color:var(--primary); cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all 0.12s cubic-bezier(0.34,1.56,0.64,1); font-family:'Inter',sans-serif; line-height:1; box-shadow:0 2px 12px rgba(0,0,0,0.1), 0 0 0 1px rgba(235,235,235,0.9); }
         #checkin-overlay .counter-btn:active { transform:scale(0.86); background:#F5F3F0; box-shadow:0 1px 4px rgba(0,0,0,0.06); }
         #checkin-overlay .duration-val { font-family:'Outfit',sans-serif; font-weight:800; font-size:54px; color:var(--primary); line-height:1; min-width:160px; text-align:center; letter-spacing:-2px; }
-        #checkin-overlay .duration-pace { text-align:center; font-size:13px; color:var(--text-muted); min-height:20px; line-height:1.5; }
+        #checkin-overlay .pace-input { width:100%; padding:18px 20px; font-family:'Outfit',sans-serif; font-weight:700; font-size:32px; text-align:center; letter-spacing:-0.5px; color:var(--primary); background:#fff; border:2px solid var(--border); border-radius:16px; outline:none; margin:16px 0 8px; box-sizing:border-box; transition:border-color 0.18s; }
+        #checkin-overlay .pace-input:focus { border-color:var(--primary); }
+        #checkin-overlay .hint { text-align:center; font-size:13px; color:var(--text-muted); margin-bottom:8px; line-height:1.5; }
+        #checkin-overlay .counter-row { display:flex; align-items:center; justify-content:center; gap:24px; margin:24px 0 12px; }
+        #checkin-overlay .duration-row { display:flex; align-items:center; justify-content:center; gap:10px; margin:24px 0 16px; flex-wrap:nowrap; }
+        #checkin-overlay .duration-input-wrap { display:flex; align-items:baseline; gap:6px; }
+        #checkin-overlay .duration-number { width:72px; text-align:center; font-family:'Outfit',sans-serif; font-weight:800; font-size:48px; color:var(--primary); border:none; background:transparent; outline:none; letter-spacing:-2px; -moz-appearance:textfield; }
+        #checkin-overlay .duration-number::-webkit-outer-spin-button, #checkin-overlay .duration-number::-webkit-inner-spin-button { -webkit-appearance:none; margin:0; }
+        #checkin-overlay .duration-unit { font-size:18px; font-weight:600; color:var(--text-muted); }
+        #checkin-overlay .counter-btn-small { width:40px; height:40px; border-radius:12px; border:1.5px solid #E5E5E5; background:#FFFFFF; font-size:13px; font-weight:700; color:#6B6B6B; font-family:'Inter',sans-serif; cursor:pointer; transition:all 0.15s ease; display:flex; align-items:center; justify-content:center; }
+        #checkin-overlay .counter-btn-small:active { background:#F5F3F0; transform:scale(0.9); }
+        #checkin-overlay .completion-grid { display:flex; flex-direction:column; gap:10px; margin:16px 0 8px; }
+        #checkin-overlay .completion-btn { display:flex; align-items:center; gap:14px; padding:14px 18px; background:#FFFFFF; border:1.5px solid #EBEBEB; border-radius:14px; cursor:pointer; transition:all 0.18s ease; text-align:left; font-family:'Inter',sans-serif; width:100%; }
+        #checkin-overlay .completion-btn:active { transform:scale(0.97); }
+        #checkin-overlay .completion-btn.selected { border-color:var(--primary); background:rgba(26,26,26,0.03); box-shadow:0 2px 8px rgba(0,0,0,0.06); }
+        #checkin-overlay .completion-icon { width:40px; height:40px; border-radius:50%; background:#F5F3F0; display:flex; align-items:center; justify-content:center; font-size:18px; font-weight:700; color:#6B6B6B; flex-shrink:0; transition:all 0.18s ease; }
+        #checkin-overlay .completion-btn[data-completion="exact"] .completion-icon { background:var(--accent-success-soft); color:var(--accent-success); }
+        #checkin-overlay .completion-btn[data-completion="more"] .completion-icon { background:var(--accent-heart-soft); color:var(--accent-heart); }
+        #checkin-overlay .completion-btn.selected .completion-icon { background:var(--primary); color:#FFFFFF; }
+        #checkin-overlay .completion-btn.selected[data-completion="exact"] .completion-icon { background:var(--accent-success); color:#FFFFFF; }
+        #checkin-overlay .completion-btn.selected[data-completion="more"] .completion-icon { background:var(--accent-heart); color:#FFFFFF; }
+        #checkin-overlay .completion-btn-label { font-size:15px; font-weight:600; color:#1A1A1A; margin-bottom:2px; }
+        #checkin-overlay .completion-btn-desc { font-size:12px; color:#8A8A8A; line-height:1.4; }
+        #checkin-overlay .skip-options { display:flex; flex-direction:column; gap:8px; margin:16px 0; }
+        #checkin-overlay .skip-btn { width:100%; padding:14px 18px; background:#FFFFFF; border:1.5px solid #EBEBEB; border-radius:12px; font-size:14px; font-weight:600; color:var(--primary); font-family:'Inter',sans-serif; cursor:pointer; text-align:left; transition:all 0.15s ease; }
+        #checkin-overlay .skip-btn:active { transform:scale(0.98); }
+        #checkin-overlay .skip-btn.selected { background:#F5F3F0; border-color:var(--primary); }
+        #checkin-overlay .morning-followup-opts { display:flex; flex-direction:column; gap:8px; margin:16px 0; }
+        #checkin-overlay .morning-fu-btn { width:100%; padding:16px 18px; background:#FFFFFF; border:1.5px solid #EBEBEB; border-radius:14px; font-size:15px; font-weight:600; color:var(--primary); font-family:'Inter',sans-serif; cursor:pointer; text-align:left; transition:all 0.15s ease; }
+        #checkin-overlay .morning-fu-btn:active { transform:scale(0.97); }
+        #checkin-overlay .morning-fu-btn.selected { background:#F5F3F0; border-color:var(--primary); }
+        #checkin-overlay .soreness-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin:16px 0; }
+        #checkin-overlay .soreness-chip { padding:13px 10px; background:#FFFFFF; border:1.5px solid #EBEBEB; border-radius:12px; font-size:13px; font-weight:600; color:var(--primary); font-family:'Inter',sans-serif; cursor:pointer; text-align:center; transition:all 0.15s ease; }
+        #checkin-overlay .soreness-chip:active { transform:scale(0.96); }
+        #checkin-overlay .soreness-chip.selected { background:var(--accent-heart-soft); border-color:var(--accent-heart); color:var(--accent-heart); font-weight:600; }
+        #checkin-overlay .soreness-duration-opts { display:flex; flex-direction:column; gap:8px; margin:16px 0; }
+        #checkin-overlay .soreness-dur-btn { width:100%; padding:14px 18px; background:#FFFFFF; border:1.5px solid #EBEBEB; border-radius:12px; font-size:14px; font-weight:600; color:var(--primary); font-family:'Inter',sans-serif; cursor:pointer; text-align:left; transition:all 0.15s ease; }
+        #checkin-overlay .soreness-dur-btn:active { transform:scale(0.97); }
+        #checkin-overlay .soreness-dur-btn.selected { background:#F5F3F0; border-color:var(--primary); }
+        #checkin-overlay .soreness-warning { background:#FFF8F0; border:1.5px solid #FFCB8E; border-radius:12px; padding:14px 16px; font-size:13px; color:#7A4B00; line-height:1.5; margin:16px 0 0; display:none; }
+        #checkin-overlay .soreness-warning.visible { display:block; }
 
         /* RPE */
         #checkin-overlay .rpe-row { display:grid; grid-template-columns:repeat(5,1fr); gap:8px; margin:16px 0; }
@@ -2815,6 +2870,45 @@
 
         /* FOOTER */
         #checkin-overlay .footer { text-align:center; font-size:11px; color:var(--text-light); padding:16px 0 0; letter-spacing:0.1em; text-transform:uppercase; font-weight:600; }
+
+        @keyframes heartbeat {
+            0%, 100% { transform: scale(1); }
+            14%       { transform: scale(1.15); }
+            28%       { transform: scale(1); }
+            42%       { transform: scale(1.12); }
+            56%       { transform: scale(1); }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+                scroll-behavior: auto !important;
+            }
+        }
+
+        /* ── SETTINGS CSS CLASSES ───────────────────────────────── */
+        .s-card { background:#fff; border-radius:20px; padding:20px; margin-bottom:16px; border:1px solid rgba(235,235,235,0.5); box-shadow:0 2px 16px rgba(0,0,0,0.04); }
+        .s-section-title { font-size:11px; font-weight:700; color:#8A8A8A; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:16px; }
+        .s-label { font-size:11px; font-weight:700; color:#8A8A8A; text-transform:uppercase; letter-spacing:0.08em; display:block; margin-bottom:6px; }
+        .s-input { width:100%; padding:12px; border:1.5px solid #EBEBEB; border-radius:12px; font-size:15px; font-family:'Inter',sans-serif; color:#1A1A1A; background:#fff; outline:none; box-sizing:border-box; transition:border-color 0.2s; }
+        .s-input:focus { border-color:#1A1A1A; }
+        .s-field { margin-bottom:12px; }
+        .s-row { display:flex; gap:10px; margin-bottom:12px; }
+        .s-row > div { flex:1; }
+        .s-btn-primary { width:100%; height:48px; background:#1A1A1A; color:#fff; border:none; border-radius:14px; font-size:14px; font-weight:700; font-family:'Inter',sans-serif; cursor:pointer; transition:opacity 0.2s; }
+        .s-btn-primary:active { opacity:0.85; }
+        .s-btn-secondary { width:100%; height:48px; background:transparent; border:1.5px solid #EBEBEB; border-radius:14px; font-size:14px; font-weight:600; font-family:'Inter',sans-serif; color:#1A1A1A; cursor:pointer; transition:border-color 0.2s; }
+        .s-btn-secondary:hover { border-color:#1A1A1A; }
+        .s-msg { display:none; text-align:center; font-size:13px; margin-top:10px; font-weight:600; }
+        .s-divider { padding:12px 0; border-top:1px solid #F5F5F5; margin-top:14px; display:flex; justify-content:space-between; align-items:center; }
+        .s-days-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:5px; margin-bottom:12px; }
+        .s-day-btn { height:36px; border:1.5px solid #EBEBEB; border-radius:10px; background:transparent; font-size:11px; font-weight:600; font-family:'Inter',sans-serif; color:#8A8A8A; cursor:pointer; transition:all 0.2s; padding:0; }
+        .s-day-btn.selected { background:#1A1A1A; border-color:#1A1A1A; color:#fff; }
+        .s-lang-toggle { display:flex; gap:8px; margin-bottom:12px; }
+        .s-lang-btn { flex:1; height:40px; border:1.5px solid #EBEBEB; border-radius:12px; background:transparent; font-size:14px; font-weight:600; font-family:'Inter',sans-serif; color:#8A8A8A; cursor:pointer; transition:all 0.2s; }
+        .s-lang-btn.selected { background:#1A1A1A; border-color:#1A1A1A; color:#fff; }
     </style>
 </head>
 
@@ -2984,7 +3078,7 @@
                         <!-- Strefa tętna -->
                         <div style="background:var(--bg-color);padding:12px 14px;border-radius:14px;">
                             <div style="font-size:11px;color:#8A8A8A;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px;">Strefa tętna</div>
-                            <div id="home-tile-hrbpm" style="font-size:18px;font-weight:900;color:#111;font-family:'Outfit',sans-serif;line-height:1;">—</div>
+                            <div id="home-tile-hrbpm" style="font-size:18px;font-weight:900;color:var(--accent-heart);font-family:'Outfit',sans-serif;line-height:1;">—</div>
                             <div id="home-tile-hrzone" style="font-size:12px;color:#8A8A8A;font-weight:600;margin-top:3px;">—</div>
                         </div>
                     </div>
@@ -3102,7 +3196,7 @@
                                     d="M50 88.9L16.7 55.6C7.2 46.1 7.2 30.9 16.7 21.4s24.7-9.5 33.3 0l0 0c8.6-9.5 23.8-9.5 33.3 0s9.5 24.7 0 34.3L50 88.9z" />
                             </svg>
                         </div>
-                        <div style="font-size: 28px; font-weight: 900; color: #111111; line-height: 1; margin-bottom: 8px;">52 <span style="font-size: 12px; font-weight: 500; color: #8A8A8A;">bpm</span></div>
+                        <div style="font-size: 28px; font-weight: 900; color: var(--accent-heart); line-height: 1; margin-bottom: 8px;"><span id="home-resting-hr-value">—</span> <span style="font-size: 12px; font-weight: 500; color: #8A8A8A;">bpm</span></div>
                     </div>
 
                     <!-- 4. The Grinder Runner (Pro XP) -->
@@ -3236,8 +3330,8 @@
                 </div>
 
                 <!-- SEKCJA 1 — PROFIL -->
-                <div class="home-anim" style="background:#fff;border-radius:20px;padding:20px;margin-bottom:16px;border:1px solid rgba(235,235,235,0.5);box-shadow:0 2px 16px rgba(0,0,0,0.04);animation-delay:0.05s;">
-                    <div style="font-size:11px;font-weight:700;color:#8A8A8A;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:16px;">Profil</div>
+                <div class="home-anim s-card" style="animation-delay:0.05s;">
+                    <div class="s-section-title">Profil</div>
                     <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px;">
                         <div id="settings-avatar" style="width:48px;height:48px;border-radius:50%;background:#1A1A1A;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
                             <span id="settings-initials" style="color:#fff;font-family:'Outfit',sans-serif;font-weight:700;font-size:18px;">?</span>
@@ -3248,28 +3342,60 @@
                         </div>
                     </div>
 
-                    <div style="margin-bottom:12px;">
-                        <label style="font-size:11px;font-weight:700;color:#8A8A8A;text-transform:uppercase;letter-spacing:0.08em;display:block;margin-bottom:6px;">Imię</label>
-                        <input type="text" id="settings-edit-name" placeholder="Twoje imię" style="width:100%;padding:12px;border:1.5px solid #EBEBEB;border-radius:12px;font-size:15px;font-family:'Inter',sans-serif;color:#1A1A1A;background:#fff;outline:none;box-sizing:border-box;transition:border-color 0.2s;" onfocus="this.style.borderColor='#1A1A1A'" onblur="this.style.borderColor='#EBEBEB'">
+                    <div class="s-field">
+                        <label class="s-label">Imię</label>
+                        <input type="text" id="settings-edit-name" placeholder="Twoje imię" class="s-input">
                     </div>
-                    <div style="display:flex;gap:10px;margin-bottom:12px;">
-                        <div style="flex:1;">
-                            <label style="font-size:11px;font-weight:700;color:#8A8A8A;text-transform:uppercase;letter-spacing:0.08em;display:block;margin-bottom:6px;">Waga (kg)</label>
-                            <input type="number" id="settings-edit-weight" placeholder="70" min="30" max="250" style="width:100%;padding:12px;border:1.5px solid #EBEBEB;border-radius:12px;font-size:15px;font-family:'Inter',sans-serif;color:#1A1A1A;background:#fff;outline:none;box-sizing:border-box;transition:border-color 0.2s;" onfocus="this.style.borderColor='#1A1A1A'" onblur="this.style.borderColor='#EBEBEB'">
+                    <div class="s-row">
+                        <div>
+                            <label class="s-label">Waga (kg)</label>
+                            <input type="number" id="settings-edit-weight" placeholder="70" min="30" max="250" class="s-input">
                         </div>
-                        <div style="flex:1;">
-                            <label style="font-size:11px;font-weight:700;color:#8A8A8A;text-transform:uppercase;letter-spacing:0.08em;display:block;margin-bottom:6px;">Wzrost (cm)</label>
-                            <input type="number" id="settings-edit-height" placeholder="175" min="100" max="250" style="width:100%;padding:12px;border:1.5px solid #EBEBEB;border-radius:12px;font-size:15px;font-family:'Inter',sans-serif;color:#1A1A1A;background:#fff;outline:none;box-sizing:border-box;transition:border-color 0.2s;" onfocus="this.style.borderColor='#1A1A1A'" onblur="this.style.borderColor='#EBEBEB'">
+                        <div>
+                            <label class="s-label">Wzrost (cm)</label>
+                            <input type="number" id="settings-edit-height" placeholder="175" min="100" max="250" class="s-input">
                         </div>
                     </div>
-                    <button onclick="saveProfileSettings()" style="width:100%;height:48px;background:#1A1A1A;color:#fff;border:none;border-radius:14px;font-size:14px;font-weight:700;font-family:'Inter',sans-serif;cursor:pointer;transition:opacity 0.2s;" onmousedown="this.style.opacity='0.85'" onmouseup="this.style.opacity='1'">Zapisz profil</button>
-                    <div id="settings-profile-msg" style="display:none;text-align:center;font-size:13px;margin-top:10px;font-weight:600;"></div>
+                    <div class="s-row">
+                        <div>
+                            <label class="s-label">Rok urodzenia</label>
+                            <input type="number" id="settings-edit-dob-y" placeholder="1990" min="1940" max="2010" class="s-input">
+                        </div>
+                        <div>
+                            <label class="s-label">Dni/tydzień</label>
+                            <input type="number" id="settings-edit-days-per-week" placeholder="4" min="1" max="7" class="s-input">
+                        </div>
+                    </div>
 
-                    <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-top:1px solid #F5F5F5;margin-top:14px;">
+                    <div class="s-field">
+                        <label class="s-label">Dni treningowe</label>
+                        <div class="s-days-grid">
+                            <button class="s-day-btn" id="s-day-0" onclick="toggleSettingsDay(this,0)">Pn</button>
+                            <button class="s-day-btn" id="s-day-1" onclick="toggleSettingsDay(this,1)">Wt</button>
+                            <button class="s-day-btn" id="s-day-2" onclick="toggleSettingsDay(this,2)">Śr</button>
+                            <button class="s-day-btn" id="s-day-3" onclick="toggleSettingsDay(this,3)">Cz</button>
+                            <button class="s-day-btn" id="s-day-4" onclick="toggleSettingsDay(this,4)">Pt</button>
+                            <button class="s-day-btn" id="s-day-5" onclick="toggleSettingsDay(this,5)">So</button>
+                            <button class="s-day-btn" id="s-day-6" onclick="toggleSettingsDay(this,6)">Nd</button>
+                        </div>
+                    </div>
+
+                    <div class="s-field">
+                        <label class="s-label">Język aplikacji</label>
+                        <div class="s-lang-toggle">
+                            <button class="s-lang-btn selected" id="s-lang-pl" onclick="selectSettingsLang('pl')">Polski</button>
+                            <button class="s-lang-btn" id="s-lang-en" onclick="selectSettingsLang('en')">English</button>
+                        </div>
+                    </div>
+
+                    <button onclick="saveProfileSettings()" class="s-btn-primary">Zapisz profil</button>
+                    <div id="settings-profile-msg" class="s-msg"></div>
+
+                    <div class="s-divider">
                         <span style="font-size:14px;color:#1A1A1A;">ID konta</span>
                         <div style="display:flex;align-items:center;gap:8px;">
                             <span id="settings-user-id" style="font-size:12px;color:#C4C4C4;font-family:'SF Mono','Courier New',monospace;">—</span>
-                            <button onclick="copyUserId()" style="background:none;border:1px solid rgba(235,235,235,0.5);border-radius:8px;padding:4px 8px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:border-color 0.2s;" title="Kopiuj ID">
+                            <button onclick="copyUserId()" style="background:none;border:1px solid rgba(235,235,235,0.5);border-radius:8px;padding:4px 8px;cursor:pointer;display:flex;align-items:center;justify-content:center;" title="Kopiuj ID">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8A8A8A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
                             </button>
                         </div>
@@ -3277,45 +3403,43 @@
                 </div>
 
                 <!-- SEKCJA 2 — TWÓJ CEL -->
-                <div class="home-anim" style="background:#fff;border-radius:20px;padding:20px;margin-bottom:16px;border:1px solid rgba(235,235,235,0.5);box-shadow:0 2px 16px rgba(0,0,0,0.04);animation-delay:0.10s;">
-                    <div style="font-size:11px;font-weight:700;color:#8A8A8A;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:16px;">Twój cel</div>
+                <div class="home-anim s-card" style="animation-delay:0.10s;">
+                    <div class="s-section-title">Twój cel</div>
 
-                    <div style="margin-bottom:14px;">
-                        <label style="font-size:11px;font-weight:700;color:#8A8A8A;text-transform:uppercase;letter-spacing:0.08em;display:block;margin-bottom:6px;">Data zawodów</label>
-                        <input type="date" id="settings-edit-race-date" style="width:100%;padding:12px;border:1.5px solid #EBEBEB;border-radius:12px;font-size:15px;font-family:'Inter',sans-serif;color:#1A1A1A;background:#fff;outline:none;box-sizing:border-box;transition:border-color 0.2s;" onfocus="this.style.borderColor='#1A1A1A'" onblur="this.style.borderColor='#EBEBEB'">
+                    <div class="s-field">
+                        <label class="s-label">Data zawodów</label>
+                        <input type="date" id="settings-edit-race-date" class="s-input">
+                    </div>
+                    <div class="s-field">
+                        <label class="s-label">Cel czasowy</label>
+                        <input type="text" id="settings-edit-time-goal" placeholder="np. 45:00 lub 1:45:00" class="s-input">
+                    </div>
+                    <div class="s-field" style="margin-bottom:20px;">
+                        <label class="s-label">Km tygodniowo</label>
+                        <input type="number" id="settings-edit-weekly-km" min="10" max="200" class="s-input">
                     </div>
 
-                    <div style="margin-bottom:14px;">
-                        <label style="font-size:11px;font-weight:700;color:#8A8A8A;text-transform:uppercase;letter-spacing:0.08em;display:block;margin-bottom:6px;">Cel czasowy</label>
-                        <input type="text" id="settings-edit-time-goal" placeholder="np. 45:00 lub 1:45:00" style="width:100%;padding:12px;border:1.5px solid #EBEBEB;border-radius:12px;font-size:15px;font-family:'Inter',sans-serif;color:#1A1A1A;background:#fff;outline:none;box-sizing:border-box;transition:border-color 0.2s;" onfocus="this.style.borderColor='#1A1A1A'" onblur="this.style.borderColor='#EBEBEB'">
-                    </div>
-
-                    <div style="margin-bottom:20px;">
-                        <label style="font-size:11px;font-weight:700;color:#8A8A8A;text-transform:uppercase;letter-spacing:0.08em;display:block;margin-bottom:6px;">Km tygodniowo</label>
-                        <input type="number" id="settings-edit-weekly-km" min="10" max="200" style="width:100%;padding:12px;border:1.5px solid #EBEBEB;border-radius:12px;font-size:15px;font-family:'Inter',sans-serif;color:#1A1A1A;background:#fff;outline:none;box-sizing:border-box;transition:border-color 0.2s;" onfocus="this.style.borderColor='#1A1A1A'" onblur="this.style.borderColor='#EBEBEB'">
-                    </div>
-
-                    <button onclick="saveGoalSettings()" style="width:100%;height:52px;background:#1A1A1A;color:#fff;border:none;border-radius:14px;font-size:15px;font-weight:700;font-family:'Inter',sans-serif;cursor:pointer;transition:opacity 0.2s;" onmousedown="this.style.opacity='0.85'" onmouseup="this.style.opacity='1'">
+                    <button onclick="saveGoalSettings()" class="s-btn-primary" style="height:52px;font-size:15px;">
                         Zapisz i zaktualizuj plan &rarr;
                     </button>
-                    <div id="settings-save-msg" style="display:none;text-align:center;font-size:13px;color:#6B8F71;margin-top:10px;font-weight:600;">Zapisano — trwa generowanie nowego planu</div>
+                    <div id="settings-save-msg" class="s-msg" style="color:#6B8F71;">Zapisano — trwa generowanie nowego planu</div>
                 </div>
 
                 <!-- SEKCJA 3 — PLAN TRENINGOWY -->
-                <div class="home-anim" style="background:#fff;border-radius:20px;padding:20px;margin-bottom:16px;border:1px solid rgba(235,235,235,0.5);box-shadow:0 2px 16px rgba(0,0,0,0.04);animation-delay:0.15s;">
-                    <div style="font-size:11px;font-weight:700;color:#8A8A8A;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:12px;">Plan treningowy</div>
+                <div class="home-anim s-card" style="animation-delay:0.15s;">
+                    <div class="s-section-title">Plan treningowy</div>
                     <div id="settings-plan-goal" style="font-size:14px;color:#1A1A1A;line-height:1.5;margin-bottom:16px;">Brak aktywnego planu</div>
-                    <button id="settings-generate-plan-btn" onclick="generateNewPlan()" style="width:100%;height:52px;background:transparent;border:1.5px solid #EBEBEB;border-radius:14px;font-size:15px;font-weight:600;font-family:'Inter',sans-serif;color:#1A1A1A;cursor:pointer;transition:border-color 0.2s,background 0.2s;margin-bottom:10px;" onmouseenter="this.style.borderColor='#1A1A1A'" onmouseleave="this.style.borderColor='#EBEBEB'">
+                    <button id="settings-generate-plan-btn" onclick="generateNewPlan()" class="s-btn-secondary" style="height:52px;font-size:15px;margin-bottom:10px;">
                         Wygeneruj nowy plan
                     </button>
-                    <button onclick="switchView('history')" style="width:100%;height:48px;background:transparent;border:1.5px solid #EBEBEB;border-radius:14px;font-size:14px;font-weight:600;font-family:'Inter',sans-serif;color:#1A1A1A;cursor:pointer;transition:border-color 0.2s;" onmouseenter="this.style.borderColor='#1A1A1A'" onmouseleave="this.style.borderColor='#EBEBEB'">
+                    <button onclick="switchView('history')" class="s-btn-secondary">
                         Historia treningów →
                     </button>
                 </div>
 
                 <!-- SEKCJA 4 — POŁĄCZENIA -->
-                <div class="home-anim" style="background:#fff;border-radius:20px;padding:20px;margin-bottom:16px;border:1px solid rgba(235,235,235,0.5);box-shadow:0 2px 16px rgba(0,0,0,0.04);animation-delay:0.20s;">
-                    <div style="font-size:11px;font-weight:700;color:#8A8A8A;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:16px;">Połączenia</div>
+                <div class="home-anim s-card" style="animation-delay:0.20s;">
+                    <div class="s-section-title">Połączenia</div>
 
                     <!-- Strava -->
                     <div style="padding:12px 0;border-bottom:1px solid #F5F5F5;">
@@ -3327,14 +3451,13 @@
                             </div>
                             <button id="strava-btn" onclick="stravaConnect()" style="padding:8px 16px;border:1.5px solid #EBEBEB;border-radius:10px;background:transparent;font-size:13px;font-weight:600;font-family:'Inter',sans-serif;color:#1A1A1A;cursor:pointer;white-space:nowrap;transition:border-color 0.2s;" onmouseenter="this.style.borderColor='#1A1A1A'" onmouseleave="this.style.borderColor='#EBEBEB'">Połącz</button>
                         </div>
-                        <div id="strava-connected-actions" style="display:none;margin-top:10px;display:none;">
+                        <div id="strava-connected-actions" style="display:none;margin-top:10px;">
                             <button onclick="stravaImport()" style="width:100%;height:40px;background:transparent;border:1.5px solid #EBEBEB;border-radius:12px;font-size:13px;font-weight:600;font-family:'Inter',sans-serif;color:#1A1A1A;cursor:pointer;margin-bottom:8px;transition:border-color 0.2s;" onmouseenter="this.style.borderColor='#1A1A1A'" onmouseleave="this.style.borderColor='#EBEBEB'">Importuj treningi teraz</button>
                             <div id="strava-import-msg" style="font-size:12px;color:#6B8F71;text-align:center;display:none;margin-bottom:8px;font-weight:600;"></div>
                             <button onclick="stravaDisconnect()" style="width:100%;height:36px;background:transparent;border:none;font-size:12px;color:#C07264;cursor:pointer;font-family:'Inter',sans-serif;">Rozłącz Stravę</button>
                         </div>
                     </div>
 
-                    <!-- Garmin -->
                     <!-- Garmin .fit import -->
                     <div style="padding:12px 0;border-bottom:1px solid #F5F5F5;">
                         <div style="display:flex;align-items:center;gap:12px;">
@@ -3360,32 +3483,30 @@
                 </div>
 
                 <!-- SEKCJA 5 — SUBSKRYPCJA -->
-                <div class="home-anim" style="background:#fff;border-radius:20px;padding:20px;margin-bottom:16px;border:1px solid rgba(235,235,235,0.5);box-shadow:0 2px 16px rgba(0,0,0,0.04);animation-delay:0.22s;">
-                    <div style="font-size:11px;font-weight:700;color:#8A8A8A;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:16px;">Subskrypcja</div>
+                <div class="home-anim s-card" style="animation-delay:0.22s;">
+                    <div class="s-section-title">Subskrypcja</div>
                     <div id="subscription-section" style="font-size:13px;color:#8A8A8A;">Ładowanie...</div>
                 </div>
 
-                <!-- SEKCJA 6 — BEZPIECZEŃSTWO -->
-                <div class="home-anim" style="background:#fff;border-radius:20px;padding:20px;margin-bottom:16px;border:1px solid rgba(235,235,235,0.5);box-shadow:0 2px 16px rgba(0,0,0,0.04);animation-delay:0.25s;">
-                    <div style="font-size:11px;font-weight:700;color:#8A8A8A;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:16px;">Zmiana hasła</div>
-                    <div style="margin-bottom:10px;">
-                        <input type="password" id="settings-pwd-current" placeholder="Obecne hasło" autocomplete="current-password" style="width:100%;padding:12px;border:1.5px solid #EBEBEB;border-radius:12px;font-size:15px;font-family:'Inter',sans-serif;color:#1A1A1A;background:#fff;outline:none;box-sizing:border-box;transition:border-color 0.2s;" onfocus="this.style.borderColor='#1A1A1A'" onblur="this.style.borderColor='#EBEBEB'">
+                <!-- SEKCJA 6 — ZMIANA HASŁA -->
+                <div class="home-anim s-card" style="animation-delay:0.25s;">
+                    <div class="s-section-title">Zmiana hasła</div>
+                    <div class="s-field">
+                        <input type="password" id="settings-pwd-current" placeholder="Obecne hasło" autocomplete="current-password" class="s-input">
                     </div>
-                    <div style="margin-bottom:10px;">
-                        <input type="password" id="settings-pwd-new" placeholder="Nowe hasło (min. 6 znaków)" autocomplete="new-password" style="width:100%;padding:12px;border:1.5px solid #EBEBEB;border-radius:12px;font-size:15px;font-family:'Inter',sans-serif;color:#1A1A1A;background:#fff;outline:none;box-sizing:border-box;transition:border-color 0.2s;" onfocus="this.style.borderColor='#1A1A1A'" onblur="this.style.borderColor='#EBEBEB'">
+                    <div class="s-field">
+                        <input type="password" id="settings-pwd-new" placeholder="Nowe hasło (min. 6 znaków)" autocomplete="new-password" class="s-input">
                     </div>
-                    <div style="margin-bottom:14px;">
-                        <input type="password" id="settings-pwd-confirm" placeholder="Potwierdź nowe hasło" autocomplete="new-password" style="width:100%;padding:12px;border:1.5px solid #EBEBEB;border-radius:12px;font-size:15px;font-family:'Inter',sans-serif;color:#1A1A1A;background:#fff;outline:none;box-sizing:border-box;transition:border-color 0.2s;" onfocus="this.style.borderColor='#1A1A1A'" onblur="this.style.borderColor='#EBEBEB'">
+                    <div class="s-field" style="margin-bottom:14px;">
+                        <input type="password" id="settings-pwd-confirm" placeholder="Potwierdź nowe hasło" autocomplete="new-password" class="s-input">
                     </div>
-                    <button onclick="changePassword()" style="width:100%;height:48px;background:transparent;border:1.5px solid #EBEBEB;border-radius:14px;font-size:14px;font-weight:600;font-family:'Inter',sans-serif;color:#1A1A1A;cursor:pointer;transition:border-color 0.2s;" onmouseenter="this.style.borderColor='#1A1A1A'" onmouseleave="this.style.borderColor='#EBEBEB'">
-                        Zmień hasło
-                    </button>
-                    <div id="settings-pwd-msg" style="display:none;text-align:center;font-size:13px;margin-top:10px;font-weight:600;"></div>
+                    <button onclick="changePassword()" class="s-btn-secondary">Zmień hasło</button>
+                    <div id="settings-pwd-msg" class="s-msg"></div>
                 </div>
 
                 <!-- SEKCJA 7 — STREFA NIEBEZPIECZNA -->
-                <div class="home-anim" style="background:#fff;border-radius:20px;padding:20px;margin-bottom:32px;border:1px solid rgba(235,235,235,0.5);border-left:3px solid #C07264;box-shadow:0 2px 16px rgba(0,0,0,0.04);animation-delay:0.30s;">
-                    <div style="font-size:11px;font-weight:700;color:#8A8A8A;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:16px;">Strefa niebezpieczna</div>
+                <div class="home-anim s-card" style="margin-bottom:32px;border-left:3px solid #C07264;animation-delay:0.30s;">
+                    <div class="s-section-title">Strefa niebezpieczna</div>
                     <button onclick="doLogout()" style="width:100%;height:48px;background:transparent;border:1.5px solid #C07264;border-radius:14px;font-size:14px;font-weight:600;font-family:'Inter',sans-serif;color:#C07264;cursor:pointer;margin-bottom:10px;transition:background 0.2s;" onmouseenter="this.style.background='#F5EEEC'" onmouseleave="this.style.background='transparent'">
                         Wyloguj się
                     </button>
@@ -3587,6 +3708,40 @@
             } catch(e) { /* zostaje domyślne 190 */ }
             updateSleepRing();
             loadReadinessDelta();
+            loadSleepFromAPI();
+            loadRestingHRFromAPI();
+        }
+
+        async function loadSleepFromAPI() {
+            if (!currentUserId) return;
+            try {
+                const res = await fetch(`${API_BASE}/api/health/${currentUserId}?type=sleep&days=1`, { headers: authHeaders() });
+                const data = await res.json();
+                const metrics = data?.metrics;
+                if (!metrics?.length) return;
+                const latest = metrics[metrics.length - 1];
+                const score = Math.round((latest.value ?? 0) / 20); // value=score*20
+                const sleepTimes = [null, '5h 0m', '6h 0m', '7h 0m', '7h 45m', '8h 30m'];
+                const timeStr = sleepTimes[score] || null;
+                if (!timeStr) return;
+                const el = document.getElementById('sleep-today');
+                if (el) { el.textContent = timeStr; updateSleepRing(); }
+            } catch(e) { /* zostaje domyślne */ }
+        }
+
+        async function loadRestingHRFromAPI() {
+            if (!currentUserId) return;
+            try {
+                const res = await fetch(`${API_BASE}/api/health/${currentUserId}?type=hr&days=7`, { headers: authHeaders() });
+                const data = await res.json();
+                const metrics = data?.metrics;
+                if (!metrics?.length) return;
+                const latest = metrics[metrics.length - 1];
+                const bpm = Math.round(latest.value);
+                if (!bpm || bpm <= 0) return;
+                const el = document.getElementById('home-resting-hr-value');
+                if (el) el.textContent = bpm;
+            } catch(e) { /* zostaje domyślne */ }
         }
 
         async function loadReadinessDelta() {
@@ -3688,6 +3843,8 @@
             if (introTitle) introTitle.textContent = AGENT_LABELS[agent] || 'Trener';
             _renderSuggestions(agent);
             updateAgentSlider();
+            // Load history for newly selected agent (skip if already has messages)
+            setTimeout(() => loadChatHistory(agent), 100);
         }
 
         function updateAgentSlider() {
@@ -5159,9 +5316,16 @@
             const label = TYPE_LABEL[day.typ]  || day.typ;
             const s     = day.struktura || null;
 
+            const optionalBadge = day.optional === true
+                ? `<div style="display:inline-flex;align-items:center;gap:5px;background:#F5F5F5;border:1px solid #E0E0E0;border-radius:20px;padding:4px 12px;margin-bottom:10px;font-size:11px;font-weight:700;color:#8A8A8A;letter-spacing:0.08em;font-family:'Inter',sans-serif;text-transform:uppercase;">
+                    <span style="font-size:10px;">◦</span> OPCJONALNIE
+                   </div>
+                   <div style="font-size:12px;color:#ABABAB;margin-bottom:8px;font-family:'Inter',sans-serif;">Możesz ten trening pominąć bez szkody dla planu</div>`
+                : '';
             const header = `<div style="margin-bottom:22px;">
                 <div style="font-size:11px;font-weight:700;color:#8A8A8A;text-transform:uppercase;letter-spacing:0.14em;margin-bottom:10px;font-family:'Inter',sans-serif;text-align:center;">Twój trening</div>
                 <div style="background:var(--surface-color,#fff);border-radius:18px;border:1px solid rgba(235,235,235,0.5);padding:20px 20px 18px;text-align:center;box-shadow:0 2px 16px rgba(0,0,0,0.05);">
+                    ${optionalBadge}
                     <div style="font-size:30px;font-weight:900;color:#111;font-family:'Outfit',sans-serif;letter-spacing:-0.02em;line-height:1.1;">${label}</div>
                     ${day.dystans_km && day.typ !== 'rest' ? `<div style="font-size:14px;color:#8A8A8A;font-weight:600;margin-top:6px;font-family:'Inter',sans-serif;">${day.dystans_km} km</div>` : ''}
                 </div>
@@ -5999,7 +6163,11 @@
                 if (viewName === 'coach') {
                     targetView.style.display = 'flex';
                     loadUserMemory();
-                    setTimeout(() => { updateAgentSlider(); _renderSuggestions(selectedAgent || 'szef_sztabu'); }, 50);
+                    setTimeout(() => {
+                        updateAgentSlider();
+                        _renderSuggestions(selectedAgent || 'szef_sztabu');
+                        loadChatHistory(selectedAgent || 'szef_sztabu');
+                    }, 50);
                     document.querySelectorAll('#coach-header-title .velm-anim-letter').forEach(el => {
                         el.style.animation = 'none';
                         el.offsetHeight;
@@ -6087,6 +6255,19 @@
                 const sId = document.getElementById('settings-user-id');
                 if (sId) sId.textContent = userId.slice(0, 8) + '...';
 
+                // Nowe pola profilu
+                const editDobY = document.getElementById('settings-edit-dob-y');
+                if (editDobY && onb.dob_y) editDobY.value = onb.dob_y;
+                const editDPW = document.getElementById('settings-edit-days-per-week');
+                if (editDPW && onb.daysPerWeek) editDPW.value = onb.daysPerWeek;
+                _settingsSelectedDays = Array.isArray(onb.selectedDays) ? [...onb.selectedDays] : [];
+                document.querySelectorAll('.s-day-btn').forEach((btn, i) => {
+                    btn.classList.toggle('selected', _settingsSelectedDays.includes(i));
+                });
+                _settingsLang = onb.language ?? 'pl';
+                document.getElementById('s-lang-pl')?.classList.toggle('selected', _settingsLang === 'pl');
+                document.getElementById('s-lang-en')?.classList.toggle('selected', _settingsLang === 'en');
+
                 // Twój cel — inputs
                 const editRaceDate = document.getElementById('settings-edit-race-date');
                 const editTimeGoal = document.getElementById('settings-edit-time-goal');
@@ -6128,6 +6309,12 @@
             if (nameVal) updates.name = nameVal;
             if (weightVal && weightVal > 0) updates.weight = weightVal;
             if (heightVal && heightVal > 0) updates.height = heightVal;
+            const dobY = parseInt(document.getElementById('settings-edit-dob-y')?.value);
+            const dpw = parseInt(document.getElementById('settings-edit-days-per-week')?.value);
+            if (dobY > 1940 && dobY < 2010) updates.dob_y = dobY;
+            if (dpw >= 1 && dpw <= 7) updates.daysPerWeek = dpw;
+            if (_settingsSelectedDays.length > 0) updates.selectedDays = _settingsSelectedDays;
+            if (_settingsLang) updates.language = _settingsLang;
             if (Object.keys(updates).length === 0) return;
             try {
                 const res = await fetch(`${API_BASE}/api/user/${userId}`, {
@@ -6141,6 +6328,19 @@
             } catch(e) {
                 showSettingsMsg('settings-profile-msg', 'Błąd: ' + e.message, true);
             }
+        }
+
+        function toggleSettingsDay(btn, idx) {
+            const pos = _settingsSelectedDays.indexOf(idx);
+            if (pos >= 0) _settingsSelectedDays.splice(pos, 1);
+            else _settingsSelectedDays.push(idx);
+            btn.classList.toggle('selected', _settingsSelectedDays.includes(idx));
+        }
+
+        function selectSettingsLang(lang) {
+            _settingsLang = lang;
+            document.getElementById('s-lang-pl')?.classList.toggle('selected', lang === 'pl');
+            document.getElementById('s-lang-en')?.classList.toggle('selected', lang === 'en');
         }
 
         // ── SUBSCRIPTION ─────────────────────────────────────────
@@ -6174,7 +6374,7 @@
                     const statusLabel = { active: '✓ Aktywna', trialing: '⏳ Trial (7 dni)', past_due: '⚠ Płatność nieudana', cancelled: '✗ Anulowana' }[data.status] ?? data.status;
                     container.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;">' +
                         '<div><div style="font-size:15px;font-weight:700;color:#1A1A1A;">✦ Premium</div>' +
-                        '<div style="font-size:12px;color:#22C55E;margin-top:2px;">' + statusLabel + '</div>' +
+                        '<div style="font-size:12px;color:var(--accent-success);margin-top:2px;">' + statusLabel + '</div>' +
                         (expiry ? '<div style="font-size:11px;color:#8A8A8A;margin-top:2px;">Odnawia się ' + expiry + '</div>' : '') +
                         '</div></div>' +
                         '<button onclick="openBillingPortal()" style="width:100%;padding:12px;background:transparent;border:1.5px solid #EBEBEB;border-radius:12px;font-size:13px;font-weight:600;cursor:pointer;color:#1A1A1A;font-family:Inter,sans-serif;">Zarządzaj subskrypcją →</button>';
@@ -6218,7 +6418,7 @@
                         '<div style="font-size:11px;color:#8A8A8A;margin-top:2px;">/ miesiąc</div>' +
                     '</div>' +
                     '<div onclick="startCheckout(\'yearly\')" style="border:1.5px solid #1A1A1A;border-radius:16px;padding:16px;cursor:pointer;position:relative;background:#1A1A1A;">' +
-                        '<div style="position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:#22C55E;color:#fff;font-size:10px;font-weight:700;padding:3px 10px;border-radius:99px;">OSZCZĘDŹ 43%</div>' +
+                        '<div style="position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:var(--accent-success);color:#fff;font-size:10px;font-weight:700;padding:3px 10px;border-radius:99px;">OSZCZĘDŹ 43%</div>' +
                         '<div style="font-size:11px;color:rgba(255,255,255,0.6);font-weight:700;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">Rocznie</div>' +
                         '<div style="font-size:22px;font-weight:800;color:#fff;">199 PLN</div>' +
                         '<div style="font-size:11px;color:rgba(255,255,255,0.6);margin-top:2px;">/ rok</div>' +
@@ -6499,14 +6699,37 @@
             const dateFormatted = date !== '—'
                 ? new Date(date + 'T12:00:00').toLocaleDateString('pl-PL', { weekday:'short', day:'numeric', month:'short' })
                 : '—';
+
+            // Main stats (right column)
             let distHtml = w.distance_km ? '<div style="font-size:15px;font-weight:800;color:#1A1A1A;">' + w.distance_km + ' km</div>' : '';
-            let durHtml = w.duration_min ? '<div style="font-size:12px;color:#8A8A8A;">' + w.duration_min + ' min</div>' : '';
-            let rpeHtml = w.rpe ? '<div style="font-size:11px;color:#8A8A8A;">RPE ' + w.rpe + '/10</div>' : '';
+            let durHtml  = w.duration_min ? '<div style="font-size:12px;color:#8A8A8A;">' + w.duration_min + ' min</div>' : '';
+            let rpeHtml  = w.rpe ? '<div style="font-size:11px;color:#8A8A8A;">RPE ' + w.rpe + '/10</div>' : '';
+
+            // Extra detail row (below title)
+            const extras = [];
+            if (type === 'interval') {
+                if (w.completed_repeats != null && w.planned_repeats != null)
+                    extras.push(w.completed_repeats + '/' + w.planned_repeats + ' pow.');
+                else if (w.completed_repeats != null)
+                    extras.push(w.completed_repeats + ' pow.');
+                if (w.interval_avg_pace) extras.push(w.interval_avg_pace + '/km');
+            } else if (type === 'tempo') {
+                if (w.working_pace) extras.push('odcinek: ' + w.working_pace + '/km');
+                else if (w.avg_pace) extras.push(w.avg_pace + '/km');
+            } else {
+                if (w.avg_pace) extras.push(w.avg_pace + '/km');
+            }
+            if (w.avg_hr) extras.push(w.avg_hr + ' bpm');
+            const extraHtml = extras.length
+                ? '<div style="font-size:11px;color:#8A8A8A;margin-top:3px;">' + extras.join(' · ') + '</div>'
+                : '';
+
             return '<div style="background:#fff;border:1.5px solid #EBEBEB;border-radius:16px;padding:16px;margin-bottom:10px;display:flex;align-items:center;gap:14px;">'
-                + '<div style="width:10px;height:10px;border-radius:50%;background:' + color + ';flex-shrink:0;"></div>'
+                + '<div style="width:10px;height:10px;border-radius:50%;background:' + color + ';flex-shrink:0;margin-top:2px;"></div>'
                 + '<div style="flex:1;min-width:0;">'
                 + '<div style="font-size:14px;font-weight:700;color:#1A1A1A;">' + label + '</div>'
                 + '<div style="font-size:12px;color:#8A8A8A;margin-top:2px;">' + dateFormatted + '</div>'
+                + extraHtml
                 + '</div>'
                 + '<div style="text-align:right;flex-shrink:0;">' + distHtml + durHtml + rpeHtml + '</div>'
                 + '</div>';
@@ -6776,6 +6999,39 @@
             div.textContent = text;
             container.appendChild(div);
             return div;
+        }
+
+        let _chatHistoryLoaded = {};
+        let _settingsSelectedDays = [];
+        let _settingsLang = 'pl';
+        async function loadChatHistory(agent) {
+            if (!currentUserId) return;
+            if (_chatHistoryLoaded[agent]) return;
+            const container = document.getElementById('coach-messages');
+            if (!container) return;
+            // Only inject history if conversation is empty (no msg divs yet)
+            if (container.querySelectorAll('.msg').length > 0) return;
+            try {
+                const res = await fetch(`${API_BASE}/api/messages/${currentUserId}?agent=${agent}&limit=10`, { headers: authHeaders() });
+                const data = await res.json();
+                const msgs = data?.messages;
+                if (!msgs?.length) return;
+                _chatHistoryLoaded[agent] = true;
+                const sep = document.createElement('div');
+                sep.className = 'chat-history-separator';
+                sep.innerHTML = '<span>Poprzednia rozmowa</span>';
+                container.insertBefore(sep, container.firstChild);
+                for (const m of msgs) {
+                    const div = document.createElement('div');
+                    div.className = (m.role === 'user' ? 'msg msg-user' : 'msg msg-ai') + ' msg-history';
+                    div.textContent = m.content;
+                    container.appendChild(div);
+                }
+                const sep2 = document.createElement('div');
+                sep2.className = 'chat-history-separator';
+                sep2.innerHTML = '<span>Teraz</span>';
+                container.appendChild(sep2);
+            } catch(e) { /* historia niedostępna — kontynuuj bez niej */ }
         }
 
         function enterCoachWithContext(ctx) {
@@ -7453,6 +7709,7 @@
 
         // --- Heartbeat Logic ---
         function startHeartAnimation() {
+            if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
             // 1. Thump-Thump Timeline
             const beatTl = gsap.timeline({ repeat: -1, repeatDelay: 0.8 });
 
@@ -7638,17 +7895,44 @@
         let fuSingleObstacle = null;
         let fuCounterVal     = 1;
         let fuKmVal          = 5;
+        // Per-segment state
+        let inSegmentStep    = null;
+        let segmentRepeats   = 0;
+        let segmentSeries    = 0;
+        let segmentWorkKm    = 0;
+        // New completion + skip + morning follow-up state
+        let selectedCompletion   = null;
+        let skippedParts         = new Set();
+        let readinessFollowup    = null;
+        let inReadinessFollowup  = false;
+        let inSorenessDetail     = false;
+        let sorenessLocation     = null;
+        let sorenessDuration     = null;
 
         function openCheckin(mode, typ, km) {
             // Reset state
             currentMode  = mode || 'morning';
             currentStep  = 0;
             inFollowUp   = false;
+            inSegmentStep = null;
             rpeVal       = null;
             duration     = 45;
             followUpSelections = new Set();
             fuSingleObstacle   = null;
             fuCounterVal = 1;
+            segmentRepeats = 0; segmentSeries = 0; segmentWorkKm = 0;
+            selectedCompletion = null; skippedParts = new Set();
+            readinessFollowup = null; inReadinessFollowup = false;
+            inSorenessDetail = false; sorenessLocation = null; sorenessDuration = null;
+            const intervalPaceEl = document.getElementById('intervalPaceInput');
+            const workPaceEl = document.getElementById('workPaceInput');
+            if (intervalPaceEl) intervalPaceEl.value = '';
+            if (workPaceEl) workPaceEl.value = '';
+            const durationInput = document.getElementById('durationInput');
+            if (durationInput) durationInput.value = 45;
+            document.querySelectorAll('#checkin-overlay .completion-btn').forEach(b => b.classList.remove('selected'));
+            document.querySelectorAll('#checkin-overlay .skip-btn').forEach(b => b.classList.remove('selected'));
+            document.querySelectorAll('#checkin-overlay .morning-fu-btn').forEach(b => b.classList.remove('selected'));
             if (typ) workoutType = typ;
             if (km)  { workoutData.dystans_km = parseFloat(km); workoutData.odcinek_km = Math.round(parseFloat(km) * 0.6 * 10) / 10; }
             fuKmVal = workoutData.dystans_km / 2;
@@ -7748,7 +8032,7 @@
 
         function setMode(mode) {
             if (mode === currentMode) return;
-            const oldId = inFollowUp ? 'step-post-2b' : `step-${currentMode}-${currentStep}`;
+            const oldId = inSorenessDetail ? 'step-soreness-detail' : inReadinessFollowup ? 'step-morning-followup' : inFollowUp ? 'step-post-2b' : `step-${currentMode}-${currentStep}`;
             const oldStepEl = document.getElementById(oldId);
             if (oldStepEl) {
                 oldStepEl.style.animation = 'ciStepExit 180ms ease-in forwards';
@@ -7771,23 +8055,135 @@
         }
 
         function goNext() {
+            if (inSorenessDetail) {
+                inSorenessDetail = false;
+                if (_shouldShowStrava()) {
+                    animateStep('step-soreness-detail', 'step-morning-3');
+                    currentStep = 3; updateProgress();
+                    setTimeout(() => updateStepsHeight(), 420);
+                } else { _sendCheckinData(); }
+                return;
+            }
+            if (inReadinessFollowup) {
+                inReadinessFollowup = false;
+                if (readinessFollowup === 'soreness') {
+                    inSorenessDetail = true;
+                    animateStep('step-morning-followup', 'step-soreness-detail');
+                    setTimeout(() => updateStepsHeight(), 420);
+                } else if (_shouldShowStrava()) {
+                    animateStep('step-morning-followup', 'step-morning-3');
+                    currentStep = 3; updateProgress();
+                    setTimeout(() => updateStepsHeight(), 420);
+                } else { _sendCheckinData(); }
+                return;
+            }
             if (inFollowUp) {
                 inFollowUp = false;
-                animateStep('step-post-2b', 'step-post-3');
-                currentStep = 3; updateProgress();
+                if (_shouldShowStrava()) {
+                    animateStep('step-post-2b', 'step-post-3');
+                    currentStep = 3; updateProgress();
+                    setTimeout(() => updateStepsHeight(), 420);
+                } else { _sendCheckinData(); }
+                return;
+            }
+            // Segment step transitions (interval → reps → pace → completion)
+            if (currentMode === 'post' && inSegmentStep === 'interval-reps') {
+                inSegmentStep = 'interval-pace';
+                animateStep('step-post-interval-reps', 'step-post-interval-pace');
                 setTimeout(() => updateStepsHeight(), 420);
                 return;
             }
-            if (currentMode === 'post' && currentStep === 2 && isPartialCompletion()) {
-                buildFollowUp(); inFollowUp = true;
-                animateStep(`step-${currentMode}-${currentStep}`, 'step-post-2b');
+            if (currentMode === 'post' && inSegmentStep === 'interval-pace') {
+                inSegmentStep = null;
+                animateStep('step-post-interval-pace', 'step-post-2');
+                currentStep = 2; updateProgress();
                 setTimeout(() => updateStepsHeight(), 420);
+                return;
+            }
+            if (currentMode === 'post' && inSegmentStep === 'tempo-work') {
+                inSegmentStep = null;
+                animateStep('step-post-tempo-work', 'step-post-2');
+                currentStep = 2; updateProgress();
+                setTimeout(() => updateStepsHeight(), 420);
+                return;
+            }
+            if (currentMode === 'post' && inSegmentStep === 'walkrun-series') {
+                inSegmentStep = null;
+                animateStep('step-post-walkrun-series', 'step-post-2');
+                currentStep = 2; updateProgress();
+                setTimeout(() => updateStepsHeight(), 420);
+                return;
+            }
+            // After RPE (step 1) — route interval/tempo/walkrun to segment steps
+            if (currentMode === 'post' && currentStep === 1) {
+                if (workoutType === 'interval') {
+                    inSegmentStep = 'interval-reps';
+                    segmentRepeats = workoutData.powtorzenia || 8;
+                    const repsEl = document.getElementById('repsVal');
+                    const repsPlanned = document.getElementById('repsPlanned');
+                    if (repsEl) repsEl.textContent = segmentRepeats;
+                    if (repsPlanned) repsPlanned.textContent = workoutData.powtorzenia || '—';
+                    animateStep('step-post-1', 'step-post-interval-reps');
+                    setTimeout(() => updateStepsHeight(), 420);
+                    return;
+                }
+                if (workoutType === 'tempo') {
+                    inSegmentStep = 'tempo-work';
+                    segmentWorkKm = workoutData.odcinek_km || 6;
+                    const workKmEl = document.getElementById('workKmVal');
+                    const workPlanned = document.getElementById('tempoWorkPlanned');
+                    if (workKmEl) workKmEl.textContent = segmentWorkKm.toFixed(1) + ' km';
+                    if (workPlanned) workPlanned.textContent = (workoutData.odcinek_km || '—');
+                    animateStep('step-post-1', 'step-post-tempo-work');
+                    setTimeout(() => updateStepsHeight(), 420);
+                    return;
+                }
+                if (workoutType === 'walkrun') {
+                    inSegmentStep = 'walkrun-series';
+                    segmentSeries = workoutData.serie || 6;
+                    const seriesEl = document.getElementById('seriesVal');
+                    const seriesPlanned = document.getElementById('seriesPlanned');
+                    if (seriesEl) seriesEl.textContent = segmentSeries;
+                    if (seriesPlanned) seriesPlanned.textContent = workoutData.serie || '—';
+                    animateStep('step-post-1', 'step-post-walkrun-series');
+                    setTimeout(() => updateStepsHeight(), 420);
+                    return;
+                }
+            }
+            // Morning: after readiness step, insert followup if "fighting"
+            if (currentMode === 'morning' && currentStep === 2 && isFightingReadiness()) {
+                inReadinessFollowup = true;
+                animateStep('step-morning-2', 'step-morning-followup');
+                setTimeout(() => updateStepsHeight(), 420);
+                return;
+            }
+            // Completion routing
+            if (currentMode === 'post' && currentStep === 2) {
+                if (selectedCompletion === 'less') {
+                    skippedParts = new Set();
+                    document.querySelectorAll('#checkin-overlay .skip-btn').forEach(b => b.classList.remove('selected'));
+                    inFollowUp = true;
+                    animateStep('step-post-2', 'step-post-2b');
+                    setTimeout(() => updateStepsHeight(), 420);
+                    return;
+                }
+                // 'exact' or 'more' — skip straight to Strava/done
+                if (_shouldShowStrava()) {
+                    animateStep('step-post-2', 'step-post-3');
+                    currentStep = 3; updateProgress();
+                    setTimeout(() => updateStepsHeight(), 420);
+                } else { _sendCheckinData(); }
                 return;
             }
             if (currentStep >= TOTAL_STEPS - 1) return;
             const fromId   = `step-${currentMode}-${currentStep}`;
             const nextStep = currentStep + 1;
-            const toId     = `step-${currentMode}-${nextStep}`;
+            // Intercept transition to Strava step (last step)
+            if (nextStep === TOTAL_STEPS - 1 && !_shouldShowStrava()) {
+                _sendCheckinData();
+                return;
+            }
+            const toId = `step-${currentMode}-${nextStep}`;
             animateStep(fromId, toId);
             currentStep = nextStep; updateProgress();
             setTimeout(() => updateStepsHeight(), 420);
@@ -7809,41 +8205,10 @@
             }, 180);
         }
 
-        function finish() {
-            const btn = event.target;
-            btn.style.transform = 'scale(0.96)';
-            setTimeout(() => { btn.style.transform = ''; }, 150);
-            const today = new Date().toISOString().split('T')[0];
-            if (currentMode === 'morning') {
-                localStorage.setItem('velm_checkin_morning_done', today);
-                sendMorningCheckinToAI();
-                fetch(`${API_BASE}/api/checkin`, {
-                    method: 'POST',
-                    headers: authHeaders(),
-                    body: JSON.stringify({
-                        userId: localStorage.getItem('velm_user_id'),
-                        type: currentMode,
-                        data: { sleep: state.morning.sleep, energy: state.morning.energy, readiness: state.morning.readiness }
-                    })
-                }).catch(e => console.error('checkin save błąd:', e));
-            } else {
-                localStorage.setItem('velm_checkin_post_done', today);
-                sendPostCheckinToAI();
-                fetch(`${API_BASE}/api/checkin`, {
-                    method: 'POST',
-                    headers: authHeaders(),
-                    body: JSON.stringify({
-                        userId: localStorage.getItem('velm_user_id'),
-                        type: currentMode,
-                        data: { duration: state.post.duration, rpe: state.post.rpe, completion: state.post.completion }
-                    })
-                }).catch(e => console.error('checkin save błąd:', e));
-            }
-            setTimeout(() => {
-                closeCheckin();
-                loadTodayCard();
-                updatePostCheckinBanner();
-            }, 300);
+        function finish(evt) {
+            const btn = (evt?.target) || (typeof event !== 'undefined' ? event?.target : null);
+            if (btn) { btn.style.transform = 'scale(0.96)'; setTimeout(() => { btn.style.transform = ''; }, 150); }
+            _sendCheckinData();
         }
 
         function sendMorningCheckinToAI() {
@@ -7869,7 +8234,7 @@
                 body: JSON.stringify({
                     userId,
                     type: 'morning',
-                    data: { sleep: sleepVal, energy: energyVal, readiness: readinessVal }
+                    data: { sleep: sleepVal, energy: energyVal, readiness: readinessVal, readiness_followup: readinessFollowup || null, soreness_location: sorenessLocation || null, soreness_duration: sorenessDuration || null }
                 })
             }).catch(() => {});
         }
@@ -7882,17 +8247,33 @@
                 method:'POST', headers: authHeaders(),
                 body: JSON.stringify({ userId, message: msg, agent: 'analityk' })
             }).catch(() => {});
-            const completionEl = document.querySelector('#checkin-overlay .completion-card.selected .completion-label');
-            const completionTxtSend = completionEl?.textContent?.toLowerCase() ?? '';
-            const completion = (completionTxtSend.includes('częściowo') || completionTxtSend.includes('częściowy')) ? 'częściowy' : 'pełny';
+            const completion = selectedCompletion || 'exact';
+            const intervalPaceInput = document.getElementById('intervalPaceInput')?.value?.trim();
+            const workPaceInput = document.getElementById('workPaceInput')?.value?.trim();
+            const workoutPayload = {
+                date: new Date().toISOString().split('T')[0],
+                distance_km: workoutData.dystans_km,
+                duration_min: duration, rpe: rpeVal,
+                type: workoutType, completion, notes: msg,
+                source: 'manual',
+                skipped_parts: skippedParts.size > 0 ? [...skippedParts] : null
+            };
+            if (workoutType === 'interval') {
+                if (segmentRepeats > 0) workoutPayload.completed_repeats = segmentRepeats;
+                if (workoutData.powtorzenia) workoutPayload.planned_repeats = workoutData.powtorzenia;
+                if (intervalPaceInput) workoutPayload.interval_avg_pace = intervalPaceInput;
+            }
+            if (workoutType === 'tempo') {
+                if (segmentWorkKm > 0) workoutPayload.working_distance_km = segmentWorkKm;
+                if (workPaceInput) workoutPayload.working_pace = workPaceInput;
+            }
+            if (workoutType === 'walkrun') {
+                if (segmentSeries > 0) workoutPayload.completed_series = segmentSeries;
+                if (workoutData.serie) workoutPayload.planned_series = workoutData.serie;
+            }
             fetch(`${API_BASE}/api/workout`, {
                 method:'POST', headers: authHeaders(),
-                body: JSON.stringify({ userId, workout: {
-                    date: new Date().toISOString().split('T')[0],
-                    distance_km: workoutData.dystans_km,
-                    duration_min: duration, rpe: rpeVal,
-                    type: workoutType, completion, notes: msg
-                }})
+                body: JSON.stringify({ userId, workout: workoutPayload })
             }).catch(() => {});
         }
 
@@ -7913,7 +8294,7 @@
         function updateStepsHeight() {
             const outer = document.getElementById('stepsOuter');
             if (!outer) return;
-            const id = inFollowUp ? 'step-post-2b' : `step-${currentMode}-${currentStep}`;
+            const id = inSorenessDetail ? 'step-soreness-detail' : inReadinessFollowup ? 'step-morning-followup' : inFollowUp ? 'step-post-2b' : `step-${currentMode}-${currentStep}`;
             const activeEl = document.getElementById(id);
             if (!activeEl) return;
             outer.style.minHeight = activeEl.scrollHeight + 'px';
@@ -7951,28 +8332,53 @@
         }
 
         function connectStrava() { alert('Strava OAuth — w produkcji otworzy się okno autoryzacji'); }
-        function skipStrava() {
+
+        function _shouldShowStrava() {
+            const skipCount = parseInt(localStorage.getItem('velm_strava_skip_count') || '0', 10);
+            const connected = !!localStorage.getItem('velm_strava_connected');
+            return !connected && skipCount < 3;
+        }
+
+        function _sendCheckinData() {
             const today = new Date().toISOString().split('T')[0];
-            if (currentMode === 'morning') localStorage.setItem('velm_checkin_morning_done', today);
-            else localStorage.setItem('velm_checkin_post_done', today);
-            closeCheckin();
-            loadTodayCard();
-            updatePostCheckinBanner();
+            if (currentMode === 'morning') {
+                localStorage.setItem('velm_checkin_morning_done', today);
+                sendMorningCheckinToAI(); // saves to /api/chat + /api/checkin internally
+            } else {
+                const userId = localStorage.getItem('velm_user_id');
+                localStorage.setItem('velm_checkin_post_done', today);
+                sendPostCheckinToAI(); // saves to /api/chat + /api/workout internally
+                if (userId) {
+                    const dur = parseInt(document.getElementById('durationInput')?.value, 10) || duration;
+                    fetch(`${API_BASE}/api/checkin`, {
+                        method:'POST', headers: authHeaders(),
+                        body: JSON.stringify({ userId, type:'post', data:{ duration:dur, rpe:rpeVal, completion:selectedCompletion }})
+                    }).catch(e => console.error('checkin save:', e));
+                }
+            }
+            setTimeout(() => { closeCheckin(); loadTodayCard(); updatePostCheckinBanner(); }, 300);
+        }
+
+        function skipStrava() {
+            const count = parseInt(localStorage.getItem('velm_strava_skip_count') || '0', 10);
+            localStorage.setItem('velm_strava_skip_count', String(count + 1));
+            _sendCheckinData();
         }
 
         function adjustDuration(delta) {
-            duration = Math.max(5, Math.min(300, duration + delta));
-            updateDuration();
+            const input = document.getElementById('durationInput');
+            let v = parseInt(input?.value, 10) || duration;
+            v = Math.max(1, Math.min(600, v + delta));
+            if (input) input.value = v;
+            duration = v;
         }
-        function updateDuration() {
-            const durationVal = document.getElementById('durationVal');
-            if (durationVal) durationVal.textContent = `${duration} min`;
-            const km = workoutData.dystans_km || 10;
-            const paceSec = Math.round((duration / km) * 60);
-            const m = Math.floor(paceSec / 60);
-            const s = String(paceSec % 60).padStart(2, '0');
-            const durationPace = document.getElementById('durationPace');
-            if (durationPace) durationPace.textContent = `Szacowane tempo: ${m}:${s} min/km`;
+        function onDurationChange() {
+            const input = document.getElementById('durationInput');
+            let v = parseInt(input.value, 10);
+            if (isNaN(v) || v < 1) v = 1;
+            if (v > 600) v = 600;
+            input.value = v;
+            duration = v;
         }
 
         function buildRpeRow() {
@@ -8001,34 +8407,44 @@
             showBtn('next-post-1');
         }
 
-        function selectCompletion(card) {
-            document.querySelectorAll('#checkin-overlay .completion-card').forEach(c => { c.classList.remove('selected'); c.style.borderColor = ''; });
-            card.classList.add('selected');
-            card.style.borderColor = card.querySelector('.completion-dot').style.background;
+        function selectCompletion(btn, type) {
+            document.querySelectorAll('#checkin-overlay .completion-btn').forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+            selectedCompletion = type;
             showBtn('next-post-2');
         }
         function isPartialCompletion() {
-            const sel = document.querySelector('#checkin-overlay .completion-card.selected');
-            const txt = sel?.querySelector('.completion-label').textContent || '';
-            return txt.includes('częściowo') || txt.includes('Częściowo');
+            return selectedCompletion === 'less';
+        }
+        function toggleSkip(btn, key) {
+            if (skippedParts.has(key)) { skippedParts.delete(key); btn.classList.remove('selected'); }
+            else { skippedParts.add(key); btn.classList.add('selected'); }
+        }
+        function isFightingReadiness() {
+            const sel = document.querySelector('#checkin-overlay .readiness-btn.selected');
+            return sel?.textContent?.toLowerCase().includes('mimo wszystko') ?? false;
+        }
+        function selectMorningFollowup(btn, key) {
+            document.querySelectorAll('#checkin-overlay .morning-fu-btn').forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+            readinessFollowup = key;
+        }
+        function selectSorenessLocation(btn, key) {
+            document.querySelectorAll('#checkin-overlay .soreness-chip').forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+            sorenessLocation = key;
+        }
+        function selectSorenessDuration(btn, key) {
+            document.querySelectorAll('#checkin-overlay .soreness-dur-btn').forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+            sorenessDuration = key;
+            const warn = document.getElementById('soreness-week-warning');
+            if (warn) warn.classList.toggle('visible', key === 'longer');
+            document.getElementById('next-soreness-detail')?.classList.add('visible');
         }
 
         function buildFollowUp() {
-            followUpSelections = new Set(); fuSingleObstacle = null; fuCounterVal = 1;
-            fuKmVal = workoutData.dystans_km / 2;
-            document.getElementById('next-post-2b').classList.remove('visible');
-            const content = document.getElementById('followup-content');
-            const t = workoutType;
-            if (t === 'easy' || t === 'long') {
-                content.innerHTML = `<div class="followup-question">Ile km udało się zrealizować?</div><div class="fu-counter"><button class="counter-btn" onclick="adjustFuKm(-0.5)">−</button><div class="fu-counter-val" id="fuKmVal">${fuKmVal.toFixed(1)} km</div><button class="counter-btn" onclick="adjustFuKm(0.5)">+</button></div><div class="followup-hint">Plan zakładał ${workoutData.dystans_km} km</div><div class="followup-question">Co Ci przeszkodziło?</div><div class="followup-cards">${fuCard('#C07264','Zmęczenie','obstacle')}${fuCard('#C4A35A','Brak czasu','obstacle')}${fuCard('#7B98B0','Złe samopoczucie','obstacle')}</div>`;
-            } else if (t === 'interval') {
-                content.innerHTML = `<div class="followup-question">Co poszło nie tak?</div><div class="followup-cards" id="fuCards">${fuCard('#C07264','Zrobiłem mniej powtórzeń','multi','mniej_powtorzen')}${fuCard('#C4A35A','Tempo było za wolne','multi','za_wolne')}${fuCard('#7B98B0','Skróciłem rozgrzewkę/schłodzenie','multi','rozgrzewka')}${fuCard('#8A8A8A','Przerwy były za długie','multi','przerwy')}</div><div class="fu-counter-wrap" id="fuCounterWrap"><div class="followup-question">Ile powtórzeń zrobiłem?</div><div class="fu-counter"><button class="counter-btn" onclick="adjustFuCounter(-1)">−</button><div class="fu-counter-val" id="fuCounterVal">1</div><button class="counter-btn" onclick="adjustFuCounter(1)">+</button></div><div class="followup-hint">Plan zakładał ${workoutData.powtorzenia} powtórzeń</div></div>`;
-            } else if (t === 'tempo') {
-                content.innerHTML = `<div class="followup-question">Gdzie był problem?</div><div class="followup-cards" id="fuCards">${fuCard('#C4A35A','Tempo było za wolne','multi','za_wolne')}${fuCard('#C07264','Skróciłem odcinek progowy','multi','skrocony_odcinek')}${fuCard('#7B98B0','Pominąłem rozgrzewkę','multi','brak_rozgrzewki')}${fuCard('#6B8F71','Pominąłem schłodzenie','multi','brak_schlodzenia')}</div><div class="fu-counter-wrap" id="fuCounterWrap"><div class="followup-question">Ile km udało się w tempie?</div><div class="fu-counter"><button class="counter-btn" onclick="adjustFuKm(-0.5)">−</button><div class="fu-counter-val" id="fuKmVal">${(workoutData.odcinek_km/2).toFixed(1)} km</div><button class="counter-btn" onclick="adjustFuKm(0.5)">+</button></div><div class="followup-hint">Plan zakładał ${workoutData.odcinek_km} km w tempie</div></div>`;
-                fuKmVal = workoutData.odcinek_km / 2;
-            } else if (t === 'walkrun') {
-                content.innerHTML = `<div class="followup-question">Co zmieniłeś w strukturze?</div><div class="followup-cards" id="fuCards">${fuCard('#C07264','Zrobiłem mniej serii','multi','mniej_serii')}${fuCard('#C4A35A','Wydłużyłem przerwy na marsz','multi','dluzsze_przerwy')}${fuCard('#7B98B0','Skróciłem czas biegu','multi','krotszy_bieg')}${fuCard('#8A8A8A','Zmieszałem kilka rzeczy','multi','mieszane')}</div><div class="fu-counter-wrap" id="fuCounterWrap"><div class="followup-question">Ile serii zrobiłem?</div><div class="fu-counter"><button class="counter-btn" onclick="adjustFuCounter(-1)">−</button><div class="fu-counter-val" id="fuCounterVal">1</div><button class="counter-btn" onclick="adjustFuCounter(1)">+</button></div><div class="followup-hint">Plan zakładał ${workoutData.serie} serii</div></div>`;
-            }
+            // Kept for compatibility — actual skip step is static HTML in step-post-2b
             setTimeout(() => updateStepsHeight(), 50);
         }
         function fuCard(color, label, mode, key) {
@@ -8066,18 +8482,54 @@
             const el = document.getElementById('fuCounterVal');
             if (el) el.textContent = fuCounterVal;
         }
+        function adjustRepeats(delta) {
+            segmentRepeats = Math.max(1, Math.min(99, segmentRepeats + delta));
+            const el = document.getElementById('repsVal');
+            if (el) el.textContent = segmentRepeats;
+        }
+        function adjustSeries(delta) {
+            segmentSeries = Math.max(1, Math.min(99, segmentSeries + delta));
+            const el = document.getElementById('seriesVal');
+            if (el) el.textContent = segmentSeries;
+        }
+        function adjustWorkKm(delta) {
+            segmentWorkKm = Math.max(0.5, Math.round((segmentWorkKm + delta) * 10) / 10);
+            const el = document.getElementById('workKmVal');
+            if (el) el.textContent = segmentWorkKm.toFixed(1) + ' km';
+        }
+        function formatPaceInput(el) {
+            // Auto-format: insert ':' after 1-2 digits
+            let v = el.value.replace(/[^0-9]/g, '');
+            if (v.length > 2) v = v.slice(0, 2) + ':' + v.slice(2, 4);
+            el.value = v;
+        }
+        function validatePaceInput(el) {
+            const v = el.value;
+            if (!v) return;
+            if (!/^\d{1,2}:\d{2}$/.test(v)) el.value = '';
+        }
         function buildAiMessage() {
-            const completionEl = document.querySelector('#checkin-overlay .completion-card.selected .completion-label');
-            const completionTxt = completionEl?.textContent?.toLowerCase() ?? '';
-            const completion = (completionTxt.includes('częściowo') || completionTxt.includes('częściowy')) ? 'częściowy' : 'pełny';
-            const base = `CHECK-IN POTRENINGOWY: typ=${workoutType}, plan=${workoutData.dystans_km}km, czas=${duration}min, RPE=${rpeVal??'?'}/10, realizacja=${completion}`;
-            if (completion === 'pełny') return base;
-            if (workoutType === 'easy' || workoutType === 'long') return `${base}, ukończono=${fuKmVal.toFixed(1)}km, przeszkoda=${fuSingleObstacle??'?'}`;
-            const onlyWarmCool = [...followUpSelections].every(k => k==='rozgrzewka'||k==='brak_rozgrzewki'||k==='brak_schlodzenia');
-            if (onlyWarmCool) return `${base}, pominięto rozgrzewkę/schłodzenie`;
-            const details = [...followUpSelections].join(', ');
-            const extra = (workoutType==='interval' && followUpSelections.has('mniej_powtorzen')) ? `, powtorzenia=${fuCounterVal}/${workoutData.powtorzenia}` : (workoutType==='tempo' && followUpSelections.has('skrocony_odcinek')) ? `, odcinek=${fuKmVal.toFixed(1)}/${workoutData.odcinek_km}km` : (workoutType==='walkrun' && followUpSelections.has('mniej_serii')) ? `, serie=${fuCounterVal}/${workoutData.serie}` : '';
-            return `${base}, problemy=${details}${extra}`;
+            const completionLabel = selectedCompletion === 'less' ? 'mniej_niż_plan'
+                : selectedCompletion === 'more' ? 'więcej_niż_plan' : 'zgodnie_z_planem';
+            let base = `CHECK-IN POTRENINGOWY: typ=${workoutType}, plan=${workoutData.dystans_km}km, czas=${duration}min, RPE=${rpeVal??'?'}/10, realizacja=${completionLabel}`;
+            // Per-segment data
+            const intervalPaceVal = document.getElementById('intervalPaceInput')?.value?.trim();
+            const workPaceVal = document.getElementById('workPaceInput')?.value?.trim();
+            if (workoutType === 'interval' && segmentRepeats) {
+                base += `, powtórzenia=${segmentRepeats}/${workoutData.powtorzenia||'?'}`;
+                if (intervalPaceVal) base += `, tempo_interwałów=${intervalPaceVal}`;
+            }
+            if (workoutType === 'tempo' && segmentWorkKm) {
+                base += `, odcinek=${segmentWorkKm.toFixed(1)}/${workoutData.odcinek_km||'?'}km`;
+                if (workPaceVal) base += `, tempo_odcinka=${workPaceVal}`;
+            }
+            if (workoutType === 'walkrun' && segmentSeries) {
+                base += `, serie=${segmentSeries}/${workoutData.serie||'?'}`;
+            }
+            if (selectedCompletion === 'less' && skippedParts.size > 0) {
+                base += `, pominięto=[${[...skippedParts].join(',')}]`;
+            }
+            return base;
         }
         function showBtn(id) { const btn = document.getElementById(id); if (btn) btn.classList.add('visible'); }
         // ── END CHECKIN OVERLAY JS ───────────────────────────────
@@ -8199,6 +8651,48 @@
                     <div class="nav-area"><button class="btn-next" id="next-morning-2" onclick="goNext()">Dalej →</button></div>
                 </div>
 
+                <!-- M3b: Follow-up dla "Trening zrobię mimo wszystko" -->
+                <div class="step" id="step-morning-followup">
+                    <div class="step-title">Co ci dziś przeszkadza?</div>
+                    <div class="step-desc">Pomoże mi dostosować dzisiejszy trening.</div>
+                    <div class="morning-followup-opts">
+                        <button class="morning-fu-btn" onclick="selectMorningFollowup(this, 'sleep')">Słabo spałem</button>
+                        <button class="morning-fu-btn" onclick="selectMorningFollowup(this, 'soreness')">Coś mnie pobolewa (lekko)</button>
+                        <button class="morning-fu-btn" onclick="selectMorningFollowup(this, 'stress')">Stres / zmęczenie psychiczne</button>
+                        <button class="morning-fu-btn" onclick="selectMorningFollowup(this, 'motivation')">Brak motywacji</button>
+                        <button class="morning-fu-btn" onclick="selectMorningFollowup(this, 'other')">Coś innego</button>
+                    </div>
+                    <div class="nav-area"><button class="btn-next visible" onclick="goNext()">Dalej →</button></div>
+                </div>
+
+                <!-- M3c: Soreness detail -->
+                <div class="step" id="step-soreness-detail">
+                    <div class="step-title">Gdzie odczuwasz ból?</div>
+                    <div class="step-desc">Powiedz mi więcej — dostosujemy trening.</div>
+                    <div class="soreness-grid">
+                        <button class="soreness-chip" onclick="selectSorenessLocation(this,'kolano')">Kolano</button>
+                        <button class="soreness-chip" onclick="selectSorenessLocation(this,'łydka')">Łydka</button>
+                        <button class="soreness-chip" onclick="selectSorenessLocation(this,'achilles')">Achilles</button>
+                        <button class="soreness-chip" onclick="selectSorenessLocation(this,'stopa')">Stopa / podeszwa</button>
+                        <button class="soreness-chip" onclick="selectSorenessLocation(this,'udo')">Udo / biodro</button>
+                        <button class="soreness-chip" onclick="selectSorenessLocation(this,'plecy')">Plecy / lędźwie</button>
+                        <button class="soreness-chip" onclick="selectSorenessLocation(this,'bark')">Bark / ramię</button>
+                        <button class="soreness-chip" onclick="selectSorenessLocation(this,'inne')">Inne</button>
+                    </div>
+                    <div class="step-title" style="margin-top:8px;">Jak długo trwa?</div>
+                    <div class="soreness-duration-opts">
+                        <button class="soreness-dur-btn" onclick="selectSorenessDuration(this,'today')">Dopiero dziś rano</button>
+                        <button class="soreness-dur-btn" onclick="selectSorenessDuration(this,'days')">Kilka dni</button>
+                        <button class="soreness-dur-btn" onclick="selectSorenessDuration(this,'week')">Około tygodnia</button>
+                        <button class="soreness-dur-btn" onclick="selectSorenessDuration(this,'longer')">Dłużej niż tydzień</button>
+                    </div>
+                    <div class="soreness-warning" id="soreness-week-warning">Ból trwający ponad tydzień warto skonsultować ze specjalistą — fizjoterapeutą lub ortopedą — zanim wrócimy do pełnych obciążeń.</div>
+                    <div class="nav-area">
+                        <button class="btn-next" id="next-soreness-detail" onclick="goNext()">Dalej →</button>
+                        <div style="text-align:center;margin-top:10px;"><span style="font-size:13px;color:#8A8A8A;cursor:pointer;text-decoration:underline;" onclick="goNext()">Pomiń</span></div>
+                    </div>
+                </div>
+
                 <!-- M4: Strava -->
                 <div class="step" id="step-morning-3">
                     <div class="step-title">Ułatw sobie życie</div>
@@ -8216,13 +8710,17 @@
                 <!-- P1: Czas -->
                 <div class="step" id="step-post-0">
                     <div class="step-title">Ile trwał trening?</div>
-                    <div class="step-desc">Na podstawie czasu i dystansu obliczymy Twoje tempo.</div>
-                    <div class="duration-counter">
-                        <button class="counter-btn" onclick="adjustDuration(-5)">−</button>
-                        <div class="duration-val" id="durationVal">45 min</div>
-                        <button class="counter-btn" onclick="adjustDuration(5)">+</button>
+                    <div class="step-desc">Wpisz dokładny czas lub użyj przycisków.</div>
+                    <div class="duration-row">
+                        <button class="counter-btn" onclick="adjustDuration(-5)">−5</button>
+                        <button class="counter-btn-small" onclick="adjustDuration(-1)">−1</button>
+                        <div class="duration-input-wrap">
+                            <input type="number" id="durationInput" class="duration-number" min="1" max="600" value="45" inputmode="numeric" oninput="onDurationChange()">
+                            <span class="duration-unit">min</span>
+                        </div>
+                        <button class="counter-btn-small" onclick="adjustDuration(1)">+1</button>
+                        <button class="counter-btn" onclick="adjustDuration(5)">+5</button>
                     </div>
-                    <div class="duration-pace" id="durationPace">Szacowane tempo: 5:30 min/km</div>
                     <div class="nav-area"><button class="btn-next visible" onclick="goNext()">Dalej →</button></div>
                 </div>
 
@@ -8239,29 +8737,92 @@
                     <div class="nav-area"><button class="btn-next" id="next-post-1" onclick="goNext()">Dalej →</button></div>
                 </div>
 
+                <!-- P2a: Interwały — liczba powtórzeń -->
+                <div class="step" id="step-post-interval-reps">
+                    <div class="step-title">Ile powtórzeń?</div>
+                    <div class="step-desc" id="repsDesc">Plan zakładał <span id="repsPlanned">—</span> powtórzeń</div>
+                    <div class="counter-row">
+                        <button class="counter-btn" onclick="adjustRepeats(-1)">−</button>
+                        <div class="duration-val" id="repsVal">8</div>
+                        <button class="counter-btn" onclick="adjustRepeats(1)">+</button>
+                    </div>
+                    <div class="hint">Jeśli zrobiłeś wszystkie — zostaw bez zmian</div>
+                    <div class="nav-area"><button class="btn-next visible" onclick="goNext()">Dalej →</button></div>
+                </div>
+
+                <!-- P2b: Interwały — tempo roboczych odcinków -->
+                <div class="step" id="step-post-interval-pace">
+                    <div class="step-title">Tempo interwałów</div>
+                    <div class="step-desc">Średnie tempo roboczych odcinków (bez rozgrzewki)</div>
+                    <input type="text" id="intervalPaceInput" class="pace-input" placeholder="4:15"
+                           inputmode="numeric" maxlength="5"
+                           oninput="formatPaceInput(this)" onblur="validatePaceInput(this)">
+                    <div class="hint">Format MM:SS — np. 4:15 na km. Zostaw puste jeśli nie pamiętasz.</div>
+                    <div class="nav-area"><button class="btn-next visible" onclick="goNext()">Dalej →</button></div>
+                </div>
+
+                <!-- P2c: Tempo run — odcinek roboczy -->
+                <div class="step" id="step-post-tempo-work">
+                    <div class="step-title">Odcinek roboczy</div>
+                    <div class="step-desc" id="tempoWorkDesc">Ile km udało się w tempie? Plan: <span id="tempoWorkPlanned">—</span> km</div>
+                    <div class="counter-row">
+                        <button class="counter-btn" onclick="adjustWorkKm(-0.5)">−</button>
+                        <div class="duration-val" id="workKmVal">6.0 km</div>
+                        <button class="counter-btn" onclick="adjustWorkKm(0.5)">+</button>
+                    </div>
+                    <input type="text" id="workPaceInput" class="pace-input" placeholder="4:45"
+                           inputmode="numeric" maxlength="5"
+                           oninput="formatPaceInput(this)" onblur="validatePaceInput(this)">
+                    <div class="hint">Tempo odcinka (bez rozgrzewki). Zostaw puste jeśli nie pamiętasz.</div>
+                    <div class="nav-area"><button class="btn-next visible" onclick="goNext()">Dalej →</button></div>
+                </div>
+
+                <!-- P2d: Walkrun — serie -->
+                <div class="step" id="step-post-walkrun-series">
+                    <div class="step-title">Ile serii?</div>
+                    <div class="step-desc" id="seriesDesc">Plan zakładał <span id="seriesPlanned">—</span> serii</div>
+                    <div class="counter-row">
+                        <button class="counter-btn" onclick="adjustSeries(-1)">−</button>
+                        <div class="duration-val" id="seriesVal">6</div>
+                        <button class="counter-btn" onclick="adjustSeries(1)">+</button>
+                    </div>
+                    <div class="hint">Seria = odcinek biegu + odpoczynek marszu</div>
+                    <div class="nav-area"><button class="btn-next visible" onclick="goNext()">Dalej →</button></div>
+                </div>
+
                 <!-- P3: Realizacja -->
                 <div class="step" id="step-post-2">
                     <div class="step-title">Jak poszło?</div>
-                    <div class="step-desc">Czy udało się zrealizować plan?</div>
-                    <div class="completion-cards">
-                        <div class="completion-card" onclick="selectCompletion(this)">
-                            <div class="completion-dot" style="background:#6B8F71;"></div>
-                            <div class="completion-label">Tak, zrealizowałem plan</div>
-                        </div>
-                        <div class="completion-card" onclick="selectCompletion(this)">
-                            <div class="completion-dot" style="background:#C4A35A;"></div>
-                            <div class="completion-label">Zrealizowałem częściowo</div>
-                        </div>
+                    <div class="step-desc">Porównaj z tym co planowałeś.</div>
+                    <div class="completion-grid">
+                        <button class="completion-btn" data-completion="less" onclick="selectCompletion(this, 'less')">
+                            <div class="completion-icon">−</div>
+                            <div><div class="completion-btn-label">Mniej niż w planie</div><div class="completion-btn-desc">np. mniejszy dystans lub pominięty element</div></div>
+                        </button>
+                        <button class="completion-btn" data-completion="exact" onclick="selectCompletion(this, 'exact')">
+                            <div class="completion-icon">✓</div>
+                            <div><div class="completion-btn-label">Zgodnie z planem</div><div class="completion-btn-desc">wykonane jak zaplanowane</div></div>
+                        </button>
+                        <button class="completion-btn" data-completion="more" onclick="selectCompletion(this, 'more')">
+                            <div class="completion-icon">+</div>
+                            <div><div class="completion-btn-label">Więcej niż w planie</div><div class="completion-btn-desc">np. dorzuciłem km bo czułem się dobrze</div></div>
+                        </button>
                     </div>
                     <div class="nav-area"><button class="btn-next" id="next-post-2" onclick="goNext()">Dalej →</button></div>
                 </div>
 
-                <!-- P3b: Follow-up -->
+                <!-- P3b: Co pominięto (tylko gdy "mniej niż w planie") -->
                 <div class="step" id="step-post-2b">
-                    <div class="step-title">Co poszło inaczej?</div>
-                    <div class="step-desc">Pomaga nam poprawić następny trening.</div>
-                    <div id="followup-content"></div>
-                    <div class="nav-area"><button class="btn-next" id="next-post-2b" onclick="goNext()">Dalej →</button></div>
+                    <div class="step-title">Co zostało pominięte?</div>
+                    <div class="step-desc">Zaznacz wszystko co pasuje — zostaw puste jeśli nie wiesz.</div>
+                    <div class="skip-options">
+                        <button class="skip-btn" data-skip="warmup" onclick="toggleSkip(this, 'warmup')">Pominięta rozgrzewka</button>
+                        <button class="skip-btn" data-skip="cooldown" onclick="toggleSkip(this, 'cooldown')">Pominięte schłodzenie</button>
+                        <button class="skip-btn" data-skip="distance" onclick="toggleSkip(this, 'distance')">Mniejszy dystans niż planowany</button>
+                        <button class="skip-btn" data-skip="repeats" onclick="toggleSkip(this, 'repeats')">Mniej powtórzeń (interwały)</button>
+                        <button class="skip-btn" data-skip="intensity" onclick="toggleSkip(this, 'intensity')">Mniejsza intensywność / wolniejsze tempo</button>
+                    </div>
+                    <div class="nav-area"><button class="btn-next visible" id="next-post-2b" onclick="goNext()">Dalej →</button></div>
                 </div>
 
                 <!-- P4: Strava -->
