@@ -4299,6 +4299,7 @@
                 const apiType = isSleep ? 'sleep' : 'hr';
                 const uid = localStorage.getItem('velm_user_id') || currentUserId;
                 const response = await fetch(`${API_BASE}/api/health/${uid}?type=${apiType}&days=7`, { headers: authHeaders() });
+                if (!response.ok) throw new Error('HTTP ' + response.status);
                 const result = await response.json();
                 if (result.metrics && result.metrics.length > 0) {
                     data = result.metrics.map(m => m.value);
@@ -4308,9 +4309,22 @@
                     longDayLabels = result.metrics.map(m => plLongDays[new Date(m.metric_date+'T12:00:00').getDay()]);
                     todayLongName = plLongDays[new Date(result.metrics[result.metrics.length-1].metric_date+'T12:00:00').getDay()].toUpperCase();
                 }
-            } catch(e) {}
+            } catch(e) { console.error('chart fetch:', e?.message || e); }
 
-            if (!data.length) data = isSleep ? [6.5,7.2,5.8,7.5,8.1,7.0,7.4] : [54,52,55,51,53,50,52];
+            // No fake data — show empty state if backend has no metrics yet
+            if (!data.length) {
+                container.style.display = 'flex';
+                container.style.flexDirection = 'column';
+                container.style.alignItems = 'center';
+                container.style.justifyContent = 'center';
+                container.style.height = '260px';
+                container.innerHTML = `
+                    <div style="font-size:32px;margin-bottom:12px;opacity:0.5;">📊</div>
+                    <div style="color:#fff;font-weight:600;font-size:15px;margin-bottom:4px;">Brak danych</div>
+                    <div style="color:rgba(255,255,255,0.6);font-size:13px;text-align:center;max-width:240px;">${isSleep ? 'Połącz Stravę lub zaimportuj plik z zegarka, by zobaczyć dane snu.' : 'Połącz Stravę lub zaimportuj plik z zegarka, by zobaczyć tętno spoczynkowe.'}</div>
+                `;
+                return;
+            }
 
             currentChartData = data;
             currentChartLabels = dayLabels;
@@ -4540,11 +4554,12 @@
 
         async function renderBigBattery(container) {
             let days = ['Pon', 'Wt', 'Śr', 'Czw', 'Pt', 'Sob', 'Ndz'];
-            let values = [65, 82, 45, 90, 75, 60, 74]; // Fallback
+            let values = [];
 
             // Fetch readiness data from API
             try {
                 const response = await fetch(`${API_BASE}/api/health/${currentUserId}?type=readiness&days=7`, { headers: authHeaders() });
+                if (!response.ok) throw new Error('HTTP ' + response.status);
                 const result = await response.json();
 
                 if (result.metrics && result.metrics.length > 0) {
@@ -4556,7 +4571,22 @@
                     });
                 }
             } catch (e) {
-                console.warn('API fetch for readiness failed, using fallback:', e);
+                console.warn('API fetch for readiness failed:', e?.message || e);
+            }
+
+            // No fake fallback — show empty state when there is no readiness history
+            if (!values.length) {
+                container.style.display = 'flex';
+                container.style.flexDirection = 'column';
+                container.style.alignItems = 'center';
+                container.style.justifyContent = 'center';
+                container.style.height = '320px';
+                container.innerHTML = `
+                    <div style="font-size:36px;margin-bottom:12px;opacity:0.5;">🔋</div>
+                    <div style="color:#fff;font-weight:600;font-size:16px;margin-bottom:6px;">Brak danych gotowości</div>
+                    <div style="color:rgba(255,255,255,0.65);font-size:13px;text-align:center;max-width:260px;">Wykonaj poranny check-in, by zacząć budować historię gotowości organizmu.</div>
+                `;
+                return;
             }
 
             const lastIdx = values.length - 1;
@@ -6961,7 +6991,9 @@
                         clientTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone
                     })
                 });
-                const data = await response.json();
+                let data;
+                try { data = await response.json(); }
+                catch (parseErr) { data = {}; }
 
                 // 4. Remove loading
                 removeMessage(loadingId);
@@ -6969,6 +7001,17 @@
                 // Premium paywall
                 if (response.status === 403 && data.error === 'premium_required') {
                     showPaywall(data.message || 'Ten agent dostępny tylko w Premium');
+                    return;
+                }
+
+                // Auth expired — trigger relogin
+                if (response.status === 401) {
+                    addMessage('ai', 'Sesja wygasła. Zaloguj się ponownie.');
+                    return;
+                }
+
+                if (!response.ok) {
+                    addMessage('ai', data.error || `Błąd serwera (${response.status})`);
                     return;
                 }
 
