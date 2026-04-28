@@ -3510,7 +3510,7 @@
                     <button onclick="doLogout()" style="width:100%;height:48px;background:transparent;border:1.5px solid #C07264;border-radius:14px;font-size:14px;font-weight:600;font-family:'Inter',sans-serif;color:#C07264;cursor:pointer;margin-bottom:10px;transition:background 0.2s;" onmouseenter="this.style.background='#F5EEEC'" onmouseleave="this.style.background='transparent'">
                         Wyloguj się
                     </button>
-                    <button onclick="if(confirm('Czy na pewno? Tej operacji nie można cofnąć.')) { localStorage.clear(); window.location.href='index.html'; }" style="background:none;border:none;font-size:13px;color:#8A8A8A;font-family:'Inter',sans-serif;cursor:pointer;padding:8px 0;width:100%;text-align:center;">
+                    <button onclick="deleteAccount()" style="background:none;border:none;font-size:13px;color:#8A8A8A;font-family:'Inter',sans-serif;cursor:pointer;padding:8px 0;width:100%;text-align:center;">
                         Usuń konto
                     </button>
                 </div>
@@ -7607,6 +7607,32 @@
             localStorage.removeItem('velm_user_name');
             localStorage.removeItem('velm_token');
             window.location.href = 'index.html';
+        }
+
+        async function deleteAccount() {
+            const ok = confirm('Czy na pewno chcesz USUNĄĆ swoje konto? Tej operacji nie można cofnąć.\n\nWszystkie Twoje treningi, plany, czaty i ustawienia zostaną trwale usunięte.');
+            if (!ok) return;
+            const password = prompt('Potwierdź swoim hasłem, by usunąć konto:');
+            if (password === null) return;
+            try {
+                const res = await fetch(`${API_BASE}/api/user/${currentUserId}`, {
+                    method: 'DELETE',
+                    headers: authHeaders(),
+                    body: JSON.stringify({ password })
+                });
+                let data = {};
+                try { data = await res.json(); } catch (e) {}
+                if (!res.ok) {
+                    alert(data.error || `Błąd serwera (${res.status})`);
+                    return;
+                }
+                alert('Konto zostało usunięte.');
+                localStorage.clear();
+                window.location.href = 'index.html';
+            } catch (e) {
+                alert('Błąd połączenia z serwerem. Spróbuj ponownie.');
+                console.error('deleteAccount:', e);
+            }
         }
 
         // ── CHECK-IN REDIRECT ─────────────────────────────────
