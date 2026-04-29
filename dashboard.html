@@ -3638,6 +3638,53 @@
             }, extra || {});
         }
 
+        // --- API Fetch Helper ---
+        // Wraps fetch() with: authHeaders, .ok check, JSON parse with safe fallback,
+        // and global 401 handling (token invalidated → force re-login).
+        async function apiFetch(path, opts = {}) {
+            const url = path.startsWith('http') ? path : `${window.API_BASE || ''}${path}`;
+            const init = {
+                method: opts.method || 'GET',
+                headers: authHeaders(opts.headers),
+                ...opts
+            };
+            if (init.headers === undefined) init.headers = authHeaders();
+            if (init.body && typeof init.body !== 'string') init.body = JSON.stringify(init.body);
+            let res;
+            try {
+                res = await fetch(url, init);
+            } catch (e) {
+                const err = new Error('Brak połączenia z serwerem');
+                err.cause = e;
+                throw err;
+            }
+            // Parse body once — safely
+            let data = null;
+            const ct = res.headers.get('content-type') || '';
+            if (ct.includes('application/json')) {
+                try { data = await res.json(); } catch (e) { data = null; }
+            } else {
+                try { data = { _text: await res.text() }; } catch (e) { data = null; }
+            }
+            if (res.status === 401) {
+                // Token invalidated/expired — clear and reshow login overlay
+                localStorage.removeItem('velm_token');
+                const overlay = document.getElementById('login-overlay');
+                if (overlay) overlay.classList.remove('hidden');
+                const err = new Error((data && data.error) || 'Sesja wygasła');
+                err.status = 401;
+                err.data = data;
+                throw err;
+            }
+            if (!res.ok) {
+                const err = new Error((data && data.error) || `Błąd serwera (${res.status})`);
+                err.status = res.status;
+                err.data = data;
+                throw err;
+            }
+            return data;
+        }
+
         // --- State ---
         let currentUserId = localStorage.getItem('velm_user_id') || null;
         let selectedAgent = 'szef_sztabu';
@@ -7545,6 +7592,7 @@
         const API_BASE = (!window.location.hostname || window.location.hostname === 'localhost' || window.location.hostname.startsWith('192.168'))
             ? 'http://' + (window.location.hostname || 'localhost') + ':3000'
             : 'https://velm-backend-production.up.railway.app';
+        window.API_BASE = API_BASE;
 
         async function doLogin() {
             const emailEl = document.getElementById('login-email');
@@ -7577,12 +7625,15 @@
                     return;
                 }
 
-                currentUserId = data.userId;
+                // Hard reload so all in-memory state (chat history, plan, workouts,
+                // selected agent, etc.) is fully reset for the new user. Prevents
+                // user B from seeing user A's data when login happens after a
+                // session expiry without page navigation.
                 localStorage.setItem('velm_user_id', data.userId);
                 if (data.token) localStorage.setItem('velm_token', data.token);
                 if (data.name) localStorage.setItem('velm_user_name', data.name);
-
-                dismissLoginOverlay();
+                window.location.reload();
+                return;
             } catch (e) {
                 errEl.textContent = 'Błąd połączenia z serwerem';
                 btn.disabled = false;
