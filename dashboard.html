@@ -3128,7 +3128,7 @@
                             <div class="battery-cap"></div>
                         </div>
                         <div id="readiness-percent" style="font-size: 28px; font-weight: 900; color: #111111; display: flex; align-items: baseline; line-height: 1;">
-                            <span class="ticker" id="readiness-ticker" data-value="74">74</span><span class="rolling-unit">%</span>
+                            <span class="ticker" id="readiness-ticker" data-value="0">—</span><span class="rolling-unit" style="display:none;">%</span>
                         </div>
                         <div id="readiness-delta" style="font-size: 11px; font-weight: 700; color: #8A8A8A; letter-spacing: 0.02em;">—</div>
                     </div>
@@ -4055,6 +4055,10 @@
             const liquidEl = document.querySelector('.liquid');
             const root = document.documentElement;
 
+            // Reveal the % unit once we have real data (placeholder shows "—" without %)
+            const unitEl = ticker?.parentElement?.querySelector('.rolling-unit');
+            if (unitEl) unitEl.style.display = '';
+
             let color, status;
 
             // 3-Tier matte color system
@@ -4262,7 +4266,7 @@
             init3DLogo();
 
             // Initialize Systems
-            setTimeout(() => updateReadiness(74), 300);
+            // readiness populated from real data via loadReadinessDelta() — no placeholder fill
             updateRunnerUI(true, true);
             startRunnerIdle();
 
@@ -7652,8 +7656,12 @@
             loadTodayCard();
         }
 
-        function doLogout() {
+        async function doLogout() {
             if (!confirm('Czy na pewno chcesz się wylogować?')) return;
+            // Best-effort backend invalidation (bumps token_version) — never block logout on failure
+            try {
+                await fetch(`${API_BASE}/api/logout`, { method: 'POST', headers: authHeaders() });
+            } catch (e) { /* network down — local cleanup still happens */ }
             localStorage.removeItem('velm_user_id');
             localStorage.removeItem('velm_user_name');
             localStorage.removeItem('velm_token');
@@ -7802,7 +7810,7 @@
             startChaosLiquid(); // New Chaos Init
 
             // Initialize Systems
-            setTimeout(() => updateReadiness(74), 300);
+            // readiness populated from real data via loadReadinessDelta() — no placeholder fill
             updateRunnerUI(true, true);
             startRunnerIdle();
 
@@ -7992,8 +8000,7 @@
             startChaosLiquid();
             startHeartAnimation();
             initGrinderRunner();
-            // Set battery to 74% after a short delay for the fill animation effect
-            setTimeout(() => updateReadiness(74), 300);
+            // readiness populated from real data via loadReadinessDelta() — no placeholder fill
             // Init rolling counters
             document.querySelectorAll('.ticker').forEach(el => initPremiumCounter(el));
             // Start Zzz animation
@@ -8451,7 +8458,17 @@
             showBtn('next-morning-2');
         }
 
-        function connectStrava() { alert('Strava OAuth — w produkcji otworzy się okno autoryzacji'); }
+        function connectStrava() {
+            const userId = localStorage.getItem('velm_user_id') || currentUserId;
+            const token = localStorage.getItem('velm_token');
+            if (!userId || !token) {
+                alert('Zaloguj się ponownie, żeby połączyć Stravę.');
+                return;
+            }
+            // Browser redirect — backend /api/strava/connect verifies token in query param
+            // (browser redirects can't carry Authorization header), then forwards to Strava OAuth.
+            window.location.href = `${API_BASE}/api/strava/connect/${encodeURIComponent(userId)}?token=${encodeURIComponent(token)}`;
+        }
 
         function _shouldShowStrava() {
             const skipCount = parseInt(localStorage.getItem('velm_strava_skip_count') || '0', 10);
