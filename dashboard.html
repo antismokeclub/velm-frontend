@@ -7745,6 +7745,9 @@
             // Strava OAuth callback
             const stravaResult = urlParams.get('strava');
             if (stravaResult === 'connected') {
+                // User connected — clear skip counter and remember connected state
+                localStorage.setItem('velm_strava_connected', '1');
+                localStorage.removeItem('velm_strava_skip_count');
                 switchView('settings');
                 setTimeout(() => {
                     const msg = document.createElement('div');
@@ -8471,9 +8474,14 @@
         }
 
         function _shouldShowStrava() {
-            const skipCount = parseInt(localStorage.getItem('velm_strava_skip_count') || '0', 10);
             const connected = !!localStorage.getItem('velm_strava_connected');
-            return !connected && skipCount < 3;
+            if (connected) return false;
+            const skipCount = parseInt(localStorage.getItem('velm_strava_skip_count') || '0', 10);
+            if (skipCount < 3) return true;
+            // After 3 skips, only re-prompt every 30 days (not "never")
+            const lastSkip = parseInt(localStorage.getItem('velm_strava_last_skip_at') || '0', 10);
+            const daysSince = (Date.now() - lastSkip) / (24 * 60 * 60 * 1000);
+            return daysSince >= 30;
         }
 
         function _sendCheckinData() {
@@ -8498,7 +8506,9 @@
 
         function skipStrava() {
             const count = parseInt(localStorage.getItem('velm_strava_skip_count') || '0', 10);
-            localStorage.setItem('velm_strava_skip_count', String(count + 1));
+            const newCount = count >= 3 ? 0 : count + 1; // re-arm the cooldown after 30 days
+            localStorage.setItem('velm_strava_skip_count', String(newCount));
+            localStorage.setItem('velm_strava_last_skip_at', String(Date.now()));
             _sendCheckinData();
         }
 
