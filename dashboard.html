@@ -8322,6 +8322,13 @@
         function animateStep(fromId, toId) {
             const fromEl = document.getElementById(fromId);
             const toEl   = document.getElementById(toId);
+            if (!fromEl || !toEl) {
+                console.warn('animateStep: missing element', { fromId, toId, hasFrom: !!fromEl, hasTo: !!toEl });
+                // Best-effort fallback: still flip active state if at least one end exists
+                if (fromEl) fromEl.classList.remove('active');
+                if (toEl) toEl.classList.add('active');
+                return;
+            }
             fromEl.style.animation = 'ciStepExit 180ms ease-in forwards';
             setTimeout(() => {
                 fromEl.classList.remove('active'); fromEl.style.animation = '';
