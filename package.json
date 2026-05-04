@@ -1,0 +1,25 @@
+{
+  "name": "velm-frontend",
+  "version": "1.0.0",
+  "description": "velm — AI running coach (frontend PWA + Capacitor wrapper)",
+  "scripts": {
+    "build": "mkdir -p dist && cp index.html dashboard.html privacy.html terms.html sw.js manifest.json icon-192.png icon-512.png dist/ 2>/dev/null || true",
+    "cap:init": "npx cap init velm app.velm --web-dir=dist",
+    "cap:add:android": "npx cap add android",
+    "cap:add:ios": "npx cap add ios",
+    "cap:sync": "npm run build && npx cap sync",
+    "cap:open:android": "npx cap open android",
+    "cap:open:ios": "npx cap open ios"
+  },
+  "dependencies": {
+    "@capacitor/android": "^7.0.0",
+    "@capacitor/app": "^7.0.0",
+    "@capacitor/core": "^7.0.0",
+    "@capacitor/ios": "^7.0.0",
+    "@capacitor/splash-screen": "^7.0.0",
+    "@capacitor/status-bar": "^7.0.0"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^7.0.0"
+  }
+}

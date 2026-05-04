@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Regulamin — velm</title>
+<style>
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Inter,Helvetica,Arial,sans-serif;color:#1A1A1A;background:#F5F3F0;margin:0;padding:32px 20px;line-height:1.6;}
+.wrap{max-width:720px;margin:0 auto;background:#fff;padding:40px 32px;border-radius:20px;box-shadow:0 4px 24px rgba(0,0,0,0.06);}
+h1{font-size:28px;margin:0 0 8px 0;letter-spacing:-0.02em;}
+.updated{font-size:13px;color:#8A8A8A;margin-bottom:32px;}
+h2{font-size:18px;margin:32px 0 12px 0;letter-spacing:-0.01em;}
+p,li{font-size:15px;color:#3A3A3A;margin:0 0 12px 0;}
+ul{padding-left:20px;}
+a{color:#1A1A1A;}
+.back{display:inline-block;margin-top:32px;font-size:14px;color:#8A8A8A;text-decoration:none;}
+.back:hover{color:#1A1A1A;}
+strong{color:#1A1A1A;}
+.warn{background:#FFF7ED;border:1px solid #FED7AA;color:#9A3412;padding:12px 16px;border-radius:12px;font-size:14px;margin:16px 0;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Regulamin korzystania z velm</h1>
+  <p class="updated">Ostatnia aktualizacja: <!-- TODO: WSTAW DATĘ --></p>
+
+  <h2>1. Czym jest velm</h2>
+  <p>velm to aplikacja AI-coachingu biegowego oferowana przez <!-- TODO: TWOJE IMIĘ / NAZWA FIRMY -->. Aplikacja generuje plany treningowe i komunikuje się z użytkownikiem przez agentów AI (Trener, Analityk, Fizjo, Psycholog). Plany generowane są przez sztuczną inteligencję (Anthropic Claude).</p>
+
+  <div class="warn"><strong>WAŻNE:</strong> velm <strong>nie zastępuje</strong> profesjonalnego trenera, lekarza ani fizjoterapeuty. Plany treningowe generowane przez AI są ogólnymi zaleceniami — przed rozpoczęciem skonsultuj się z lekarzem, szczególnie jeśli masz problemy zdrowotne lub historię kontuzji.</div>
+
+  <h2>2. Konto użytkownika</h2>
+  <ul>
+    <li>Aby korzystać z aplikacji musisz mieć ukończone 16 lat.</li>
+    <li>Rejestrując się oświadczasz że dane (waga, wiek, cele) są prawdziwe.</li>
+    <li>Jesteś odpowiedzialny za bezpieczeństwo hasła i danych logowania.</li>
+    <li>Możesz w każdej chwili usunąć konto przez Ustawienia → Strefa niebezpieczna.</li>
+  </ul>
+
+  <h2>3. Subskrypcja Premium</h2>
+  <ul>
+    <li>Plan darmowy zawiera podstawowe funkcje (chat z Trenerem, plan tygodniowy).</li>
+    <li>Plan Premium odblokowuje dostęp do agentów Fizjo, Analityk, Psycholog oraz import .fit.</li>
+    <li>Subskrypcja jest miesięczna lub roczna, automatycznie odnawiana.</li>
+    <li>Możesz anulować subskrypcję w każdej chwili przez panel Stripe (link w Ustawieniach).</li>
+    <li>Po anulowaniu zachowujesz dostęp do końca opłaconego okresu.</li>
+    <li>Próbny okres 7 dni — bez opłaty jeśli anulujesz przed końcem trial.</li>
+  </ul>
+
+  <h2>4. Zakres odpowiedzialności</h2>
+  <ul>
+    <li>velm jest narzędziem doradczym, <strong>nie usługą medyczną</strong>.</li>
+    <li>Nie ponosimy odpowiedzialności za kontuzje, urazy ani problemy zdrowotne wynikające z realizacji planów.</li>
+    <li>Nie gwarantujemy osiągnięcia konkretnych wyników sportowych.</li>
+    <li>AI może popełniać błędy — zawsze używaj zdrowego rozsądku.</li>
+    <li>Jeśli masz wątpliwości — skonsultuj się z lekarzem, fizjoterapeutą lub trenerem.</li>
+  </ul>
+
+  <h2>5. Co możesz a czego nie</h2>
+  <p><strong>Możesz:</strong></p>
+  <ul>
+    <li>Korzystać z aplikacji do własnych potrzeb treningowych</li>
+    <li>Dzielić się postępami w mediach społecznościowych</li>
+    <li>Eksportować swoje dane treningowe</li>
+  </ul>
+  <p><strong>Nie możesz:</strong></p>
+  <ul>
+    <li>Sprzedawać dostępu do swojego konta</li>
+    <li>Używać aplikacji do celów komercyjnych (np. coaching innych osób za pieniądze)</li>
+    <li>Próbować obchodzić mechanizmy bezpieczeństwa (rate limiting, autoryzacja)</li>
+    <li>Używać aplikacji do treści nielegalnych, obraźliwych lub naruszających prawa innych</li>
+    <li>Skrobać API lub inżynierować odwrotnie kod aplikacji</li>
+  </ul>
+
+  <h2>6. Własność intelektualna</h2>
+  <p>Cały kod, design, logo i skill files agentów są własnością <!-- TODO: TWOJE IMIĘ / NAZWA FIRMY -->. Twoje dane (treningi, konwersacje, profil) są Twoje — udzielasz nam licencji na ich przechowywanie i przetwarzanie aby aplikacja działała.</p>
+
+  <h2>7. Zawieszenie / blokada konta</h2>
+  <p>Zastrzegamy sobie prawo do zawieszenia konta w przypadku naruszenia regulaminu, w szczególności:</p>
+  <ul>
+    <li>Próby ataku na infrastrukturę</li>
+    <li>Spam / nadużycia</li>
+    <li>Wprowadzanie w błąd (np. wielokrotne konta dla obejścia limitów)</li>
+  </ul>
+
+  <h2>8. Zmiany regulaminu</h2>
+  <p>Możemy aktualizować regulamin. O istotnych zmianach poinformujemy emailem 30 dni przed wejściem w życie. Korzystanie z aplikacji po tej dacie oznacza akceptację zmian.</p>
+
+  <h2>9. Prawo właściwe i sąd</h2>
+  <p>Regulamin podlega prawu polskiemu. Spory rozstrzyga sąd właściwy dla siedziby administratora.</p>
+
+  <h2>10. Kontakt</h2>
+  <p>Pytania? <!-- TODO: EMAIL KONTAKTOWY NP. hello@velm.app --></p>
+
+  <p>Zobacz też: <a href="/privacy.html">Polityka prywatności</a></p>
+
+  <a href="/index.html" class="back">← Wróć do aplikacji</a>
+</div>
+</body>
+</html>

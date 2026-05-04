@@ -8,18 +8,13 @@
     <title>AspireFlow Dashboard</title>
     <!-- Cleanup stale service workers -->
     <script>
-        try {
-            if ('serviceWorker' in navigator && navigator.serviceWorker.getRegistrations) {
-                navigator.serviceWorker.getRegistrations().then(function (regs) {
-                    regs.forEach(function (reg) { reg.unregister(); });
-                }).catch(function () {});
-            }
-            if (typeof caches !== 'undefined') {
-                caches.keys().then(function (keys) {
-                    keys.forEach(function (key) { caches.delete(key); });
-                }).catch(function () {});
-            }
-        } catch (e) {}
+        // Register service worker — required for TWA / Play Store, enables offline + caching
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .catch(err => console.warn('[velm] SW register failed:', err.message));
+            });
+        }
     </script>
     <!-- PWA -->
     <link rel="manifest" href="/manifest.json">
@@ -2677,7 +2672,7 @@
         @keyframes ciBtnShine   { from{box-shadow:0 6px 24px rgba(26,26,26,0.18);} to{box-shadow:0 8px 32px rgba(26,26,26,0.28);} }
 
         #checkin-overlay {
-            --bg:#F7F4F0; --surface:#FFFFFF; --border:#EBEBEB; --primary:#1A1A1A;
+            --bg:#F5F3F0; --surface:#FFFFFF; --border:#EBEBEB; --primary:#1A1A1A;
             --text-muted:#8A8A8A; --text-light:#C4C4C4; --strava:#FC4C02;
             font-family:'Inter',sans-serif; color:#1A1A1A; -webkit-font-smoothing:antialiased;
             position:fixed; inset:0; z-index:9500; align-items:center; justify-content:center;
@@ -2685,8 +2680,8 @@
         #ci-card {
             position:fixed; left:50%; top:50%; transform:translate(-50%,-50%);
             width:calc(100% - 32px); max-width:448px; background:#FFFFFF;
-            border-radius:28px; padding:0;
-            box-shadow:0 32px 80px rgba(0,0,0,0.26), 0 8px 24px rgba(0,0,0,0.1), 0 0 0 1px rgba(0,0,0,0.04);
+            border-radius:24px; padding:0;
+            box-shadow:0 24px 60px rgba(0,0,0,0.18), 0 0 0 1px rgba(0,0,0,0.05);
             overflow-y:auto; max-height:88vh;
             scrollbar-width:none; -ms-overflow-style:none;
             display:flex; flex-direction:column;
@@ -2696,9 +2691,9 @@
         /* Header: drag handle + close button */
         .ci-header-bar {
             display:flex; align-items:center; justify-content:space-between;
-            padding:18px 20px 0; flex-shrink:0;
+            padding:16px 20px 0; flex-shrink:0;
             position:sticky; top:0; background:#fff; z-index:10;
-            border-radius:28px 28px 0 0;
+            border-radius:24px 24px 0 0;
         }
         #ci-handle {
             display:block; width:44px; height:5px;
@@ -2717,16 +2712,16 @@
         #ci-inner { padding:20px 24px 36px; flex:1; }
 
         /* MODE TOGGLE */
-        #checkin-overlay .mode-toggle { display:flex; background:#EDE8DC; border-radius:99px; padding:3px; position:relative; margin-bottom:24px; height:44px; }
-        #checkin-overlay .mode-btn { flex:1; padding:0; border:none; background:transparent; border-radius:99px; font-size:13px; font-weight:600; color:var(--text-muted); cursor:pointer; position:relative; z-index:1; transition:color 0.25s cubic-bezier(0.4,0,0.2,1); font-family:'Inter',sans-serif; }
+        #checkin-overlay .mode-toggle { display:flex; background:#EFEAE0; border-radius:99px; padding:3px; position:relative; margin-bottom:28px; height:44px; }
+        #checkin-overlay .mode-btn { flex:1; padding:0; border:none; background:transparent; border-radius:99px; font-size:13px; font-weight:600; color:var(--text-muted); cursor:pointer; position:relative; z-index:1; transition:color 0.32s cubic-bezier(0.22,1,0.36,1); font-family:'Inter',sans-serif; letter-spacing:0.01em; }
         #checkin-overlay .mode-btn.active { color:var(--primary); font-weight:700; }
-        #checkin-overlay .mode-slider { position:absolute; top:3px; bottom:3px; left:3px; border-radius:99px; background:#fff; box-shadow:0 2px 8px rgba(17,17,17,0.14); transition:left 0.28s cubic-bezier(0.4,0,0.2,1),width 0.28s cubic-bezier(0.4,0,0.2,1); pointer-events:none; }
+        #checkin-overlay .mode-slider { position:absolute; top:3px; bottom:3px; left:3px; border-radius:99px; background:#fff; box-shadow:0 2px 10px rgba(17,17,17,0.12); transition:left 0.32s cubic-bezier(0.22,1,0.36,1),width 0.32s cubic-bezier(0.22,1,0.36,1); pointer-events:none; }
 
         /* PROGRESS BAR */
         #checkin-overlay .progress-bar { display:flex; align-items:center; margin-bottom:28px; gap:0; }
-        #checkin-overlay .progress-dot { width:10px; height:10px; border-radius:50%; border:2px solid var(--border); background:transparent; flex-shrink:0; transition:all 0.32s cubic-bezier(0.34,1.56,0.64,1); position:relative; z-index:1; }
+        #checkin-overlay .progress-dot { width:8px; height:8px; border-radius:50%; border:1.5px solid var(--border); background:transparent; flex-shrink:0; transition:all 0.32s cubic-bezier(0.34,1.56,0.64,1); position:relative; z-index:1; }
         #checkin-overlay .progress-dot.done { border-color:var(--primary); background:var(--primary); }
-        #checkin-overlay .progress-dot.active { width:12px; height:12px; border-color:var(--primary); background:var(--primary); box-shadow:0 0 0 4px rgba(26,26,26,0.1); }
+        #checkin-overlay .progress-dot.active { width:10px; height:10px; border-color:var(--primary); background:var(--primary); box-shadow:0 0 0 5px rgba(26,26,26,0.08); }
         #checkin-overlay .progress-line { flex:1; height:2px; background:var(--border); position:relative; overflow:hidden; border-radius:2px; }
         #checkin-overlay .progress-line-fill { position:absolute; left:0; top:0; bottom:0; background:var(--primary); width:0%; transition:width 0.36s cubic-bezier(0.4,0,0.2,1); border-radius:2px; }
 
@@ -2734,61 +2729,68 @@
         #checkin-overlay .steps-outer { position:relative; overflow:hidden; }
         #checkin-overlay .step { position:absolute; top:0; left:0; right:0; opacity:0; transform:translateX(20px); pointer-events:none; transition:none; }
         #checkin-overlay .step.active { opacity:1; transform:translateX(0); pointer-events:auto; position:relative; }
-        #checkin-overlay .step-title { font-family:'Outfit',sans-serif; font-weight:800; font-size:30px; color:var(--primary); line-height:1.1; margin-bottom:6px; letter-spacing:-0.02em; }
-        #checkin-overlay .step-desc { font-size:14px; color:var(--text-muted); margin-bottom:24px; line-height:1.6; }
+        #checkin-overlay .step-title { font-family:'Outfit',sans-serif; font-weight:700; font-size:32px; color:var(--primary); line-height:1.1; margin-bottom:8px; letter-spacing:-0.025em; }
+        #checkin-overlay .step-desc { font-size:15px; color:var(--text-muted); margin-bottom:28px; line-height:1.55; }
 
         /* SLEEP CARDS */
-        #checkin-overlay .sleep-cards { display:flex; flex-direction:row; gap:7px; margin-bottom:8px; }
-        #checkin-overlay .sleep-card { flex:1; min-width:0; height:92px; display:flex; flex-direction:column; align-items:center; justify-content:center; border-radius:18px; border:2px solid transparent; background:#FFFFFF; gap:7px; cursor:pointer; transition:all 0.18s cubic-bezier(0.34,1.56,0.64,1); box-shadow:0 0 0 1.5px #EBEBEB, 0 2px 6px rgba(0,0,0,0.04); }
+        #checkin-overlay .sleep-cards { display:flex; flex-direction:row; gap:8px; margin-bottom:8px; }
+        #checkin-overlay .sleep-card { flex:1; min-width:0; height:100px; display:flex; flex-direction:column; align-items:center; justify-content:center; border-radius:20px; border:2px solid transparent; background:#FFFFFF; gap:8px; cursor:pointer; transition:all 0.22s cubic-bezier(0.34,1.56,0.64,1); box-shadow:0 0 0 1px #EBEBEB, 0 2px 8px rgba(0,0,0,0.03); }
+        #checkin-overlay .sleep-card:hover { transform:translateY(-2px); box-shadow:0 0 0 1px #DCDCDC, 0 6px 16px rgba(0,0,0,0.06); }
         #checkin-overlay .sleep-card:active { transform:scale(0.93); }
-        #checkin-overlay .sleep-card.selected { background:#F7F4F0; transform:scale(1.05); box-shadow:0 6px 20px rgba(0,0,0,0.1); }
-        #checkin-overlay .sleep-emoji { font-size:26px; line-height:1; }
+        #checkin-overlay .sleep-card.selected { background:#F5F3F0; transform:scale(1.04); box-shadow:0 8px 24px rgba(26,26,26,0.08), 0 0 0 1.5px var(--primary); }
+        #checkin-overlay .sleep-emoji { font-size:28px; line-height:1; }
         #checkin-overlay .sleep-dot { display:none; }
-        #checkin-overlay .sleep-card .label { font-size:11px; font-weight:700; text-align:center; color:var(--primary); line-height:1; letter-spacing:0.02em; }
+        #checkin-overlay .sleep-card .label { font-size:12px; font-weight:600; text-align:center; color:var(--primary); line-height:1; letter-spacing:0.01em; }
 
         /* ENERGY SLIDER */
         #checkin-overlay .slider-wrap { margin-bottom:20px; }
-        #checkin-overlay input[type=range] { -webkit-appearance:none; width:100%; height:8px; border-radius:8px; background:var(--border); outline:none; cursor:pointer; }
-        #checkin-overlay input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; width:30px; height:30px; border-radius:50%; background:var(--primary); cursor:pointer; border:3px solid #fff; box-shadow:0 3px 12px rgba(0,0,0,0.22); transition:transform 0.12s cubic-bezier(0.34,1.56,0.64,1); }
+        #checkin-overlay input[type=range] { -webkit-appearance:none; width:100%; height:6px; border-radius:8px; background:var(--border); outline:none; cursor:pointer; }
+        #checkin-overlay input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; width:28px; height:28px; border-radius:50%; background:var(--primary); cursor:pointer; border:3px solid #fff; box-shadow:0 4px 14px rgba(26,26,26,0.22); transition:transform 0.12s cubic-bezier(0.34,1.56,0.64,1); }
         #checkin-overlay input[type=range]:active::-webkit-slider-thumb { transform:scale(1.2); }
-        #checkin-overlay .slider-big-val { font-family:'Outfit',sans-serif; font-weight:900; font-size:64px; text-align:center; color:var(--primary); line-height:1; margin:20px 0 0; letter-spacing:-2px; }
-        #checkin-overlay .slider-desc { text-align:center; font-size:14px; color:var(--text-muted); min-height:24px; margin-top:8px; transition:opacity 0.2s ease; line-height:1.5; }
+        #checkin-overlay .slider-big-val { font-family:'Outfit',sans-serif; font-weight:800; font-size:64px; text-align:center; color:var(--primary); line-height:1; margin:24px 0 0; letter-spacing:-2.5px; }
+        #checkin-overlay .slider-desc { text-align:center; font-size:14px; color:var(--text-muted); min-height:24px; margin-top:10px; transition:opacity 0.2s ease; line-height:1.5; }
 
         /* SECTION LABEL */
-        #checkin-overlay .section-label { font-size:11px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--text-muted); margin-bottom:10px; }
+        #checkin-overlay .section-label { font-size:11px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-muted); margin-bottom:12px; }
 
         /* WORKOUT PREVIEW CARD */
-        #checkin-overlay .workout-preview-card { display:flex; align-items:center; gap:14px; margin-bottom:20px; background:var(--bg); border-radius:16px; padding:16px 18px; }
-        #checkin-overlay .workout-preview-dot { width:10px; height:10px; border-radius:50%; background:#C4A35A; flex-shrink:0; box-shadow:0 0 0 3px rgba(196,163,90,0.2); }
+        #checkin-overlay .workout-preview-card { display:flex; align-items:center; gap:14px; margin-bottom:24px; background:var(--bg); border-radius:18px; padding:16px 20px; }
+        #checkin-overlay .workout-preview-dot { width:10px; height:10px; border-radius:50%; background:#C4A35A; flex-shrink:0; box-shadow:0 0 0 4px rgba(196,163,90,0.18); }
         #checkin-overlay .workout-preview-title { font-weight:700; font-size:15px; color:var(--primary); }
         #checkin-overlay .workout-preview-sub { font-size:13px; color:var(--text-muted); margin-left:2px; }
 
         /* READINESS BUTTONS */
-        #checkin-overlay .readiness-btns { display:flex; flex-direction:column; gap:10px; }
-        #checkin-overlay .readiness-btn { width:100%; min-height:64px; border-radius:16px; font-size:15px; font-weight:600; font-family:'Inter',sans-serif; cursor:pointer; transition:all 0.18s cubic-bezier(0.34,1.56,0.64,1); border:2px solid transparent; background:#FFFFFF; color:var(--primary); display:flex; align-items:center; gap:14px; padding:0 20px; text-align:left; box-shadow:0 0 0 1.5px #EBEBEB, 0 2px 6px rgba(0,0,0,0.04); }
-        #checkin-overlay .readiness-btn:active { transform:scale(0.97); }
+        #checkin-overlay .readiness-btns { display:flex; flex-direction:column; gap:12px; }
+        #checkin-overlay .readiness-btn { width:100%; min-height:64px; border-radius:20px; font-size:15px; font-weight:600; font-family:'Inter',sans-serif; cursor:pointer; transition:all 0.22s cubic-bezier(0.34,1.56,0.64,1); border:2px solid transparent; background:#FFFFFF; color:var(--primary); display:flex; align-items:center; gap:14px; padding:0 20px; text-align:left; box-shadow:0 0 0 1px #EBEBEB, 0 2px 8px rgba(0,0,0,0.03); }
+        #checkin-overlay .readiness-btn:hover { transform:translateY(-1px); box-shadow:0 0 0 1px #DCDCDC, 0 6px 16px rgba(0,0,0,0.05); }
+        #checkin-overlay .readiness-btn:active { transform:scale(0.98); }
         #checkin-overlay .readiness-btn .rd-dot { width:12px; height:12px; border-radius:50%; flex-shrink:0; display:block; }
-        #checkin-overlay .readiness-btn.selected { background:#F7F4F0; box-shadow:0 4px 18px rgba(0,0,0,0.08); }
-        #checkin-overlay .readiness-btn::after { content:'→'; margin-left:auto; font-size:18px; color:var(--text-light); transition:color 0.18s,transform 0.18s; }
-        #checkin-overlay .readiness-btn.selected::after { color:var(--primary); transform:translateX(3px); }
+        #checkin-overlay .readiness-btn.selected { background:#F5F3F0; box-shadow:0 8px 24px rgba(26,26,26,0.08), 0 0 0 1.5px var(--primary); }
+        #checkin-overlay .readiness-btn .rd-arrow { margin-left:auto; flex-shrink:0; color:var(--text-light); transition:color 0.18s,transform 0.18s; }
+        #checkin-overlay .readiness-btn.selected .rd-arrow { color:var(--primary); transform:translateX(3px); }
+        /* Legacy unicode arrow fallback */
+        #checkin-overlay .readiness-btn:not(:has(.rd-arrow))::after { content:'→'; margin-left:auto; font-size:18px; color:var(--text-light); transition:color 0.18s,transform 0.18s; }
+        #checkin-overlay .readiness-btn:not(:has(.rd-arrow)).selected::after { color:var(--primary); transform:translateX(3px); }
 
         /* STRAVA */
         #checkin-overlay .strava-content { text-align:center; margin-bottom:16px; }
-        #checkin-overlay .strava-logo { width:64px; height:64px; border-radius:50%; background:var(--strava); display:flex; align-items:center; justify-content:center; margin:0 auto 16px; font-family:'Outfit',sans-serif; font-weight:800; font-size:30px; color:#fff; box-shadow:0 8px 28px rgba(252,76,2,0.32); }
-        #checkin-overlay .strava-name { font-family:'Outfit',sans-serif; font-weight:800; font-size:22px; margin-bottom:4px; }
+        #checkin-overlay .strava-logo { width:64px; height:64px; border-radius:50%; background:linear-gradient(135deg, #FC4C02 0%, #E8430A 100%); display:flex; align-items:center; justify-content:center; margin:0 auto 16px; font-family:'Outfit',sans-serif; font-weight:800; font-size:30px; color:#fff; box-shadow:0 10px 28px rgba(252,76,2,0.28), 0 0 0 1px rgba(232,67,10,0.1); }
+        #checkin-overlay .strava-name { font-family:'Outfit',sans-serif; font-weight:700; font-size:22px; margin-bottom:4px; letter-spacing:-0.01em; }
         #checkin-overlay .strava-sub { font-size:14px; color:var(--text-muted); max-width:280px; margin:8px auto 24px; line-height:1.6; }
-        #checkin-overlay .strava-btn { width:100%; height:56px; background:var(--strava); color:#fff; border:none; border-radius:16px; font-size:15px; font-weight:700; font-family:'Inter',sans-serif; cursor:pointer; transition:transform 0.08s,filter 0.12s; box-shadow:0 6px 24px rgba(252,76,2,0.3); }
-        #checkin-overlay .strava-btn:active { transform:scale(0.97); filter:brightness(0.92); }
+        #checkin-overlay .strava-btn { width:100%; height:56px; background:linear-gradient(180deg, #FC4C02 0%, #E8430A 100%); color:#fff; border:none; border-radius:18px; font-size:15px; font-weight:700; font-family:'Inter',sans-serif; cursor:pointer; transition:transform 0.08s,filter 0.18s,box-shadow 0.18s; box-shadow:0 8px 24px rgba(252,76,2,0.28); letter-spacing:0.01em; }
+        #checkin-overlay .strava-btn:hover { filter:brightness(1.05); box-shadow:0 12px 32px rgba(252,76,2,0.32); }
+        #checkin-overlay .strava-btn:active { transform:scale(0.98); filter:brightness(0.92); }
         #checkin-overlay .skip-link { display:block; text-align:center; font-size:13px; color:var(--text-light); margin-top:16px; cursor:pointer; transition:color 0.15s; }
         #checkin-overlay .skip-link:hover { color:var(--primary); }
 
         /* DURATION COUNTER */
         #checkin-overlay .duration-counter { display:flex; align-items:center; justify-content:center; gap:24px; margin:24px 0 12px; }
-        #checkin-overlay .counter-btn { width:60px; height:60px; border-radius:50%; background:#FFFFFF; border:none; font-size:28px; color:var(--primary); cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all 0.12s cubic-bezier(0.34,1.56,0.64,1); font-family:'Inter',sans-serif; line-height:1; box-shadow:0 2px 12px rgba(0,0,0,0.1), 0 0 0 1px rgba(235,235,235,0.9); }
-        #checkin-overlay .counter-btn:active { transform:scale(0.86); background:#F5F3F0; box-shadow:0 1px 4px rgba(0,0,0,0.06); }
+        #checkin-overlay .counter-btn { width:60px; height:60px; border-radius:50%; background:#FFFFFF; border:none; font-size:28px; color:var(--primary); cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all 0.18s cubic-bezier(0.34,1.56,0.64,1); font-family:'Inter',sans-serif; line-height:1; box-shadow:0 4px 16px rgba(0,0,0,0.06), inset 0 0 0 1px #EBEBEB; }
+        #checkin-overlay .counter-btn:hover { transform:translateY(-1px); box-shadow:0 6px 20px rgba(0,0,0,0.08), inset 0 0 0 1px #DCDCDC; }
+        #checkin-overlay .counter-btn:active { transform:scale(0.88); background:#F5F3F0; box-shadow:0 1px 4px rgba(0,0,0,0.06); }
         #checkin-overlay .duration-val { font-family:'Outfit',sans-serif; font-weight:800; font-size:54px; color:var(--primary); line-height:1; min-width:160px; text-align:center; letter-spacing:-2px; }
-        #checkin-overlay .pace-input { width:100%; padding:18px 20px; font-family:'Outfit',sans-serif; font-weight:700; font-size:32px; text-align:center; letter-spacing:-0.5px; color:var(--primary); background:#fff; border:2px solid var(--border); border-radius:16px; outline:none; margin:16px 0 8px; box-sizing:border-box; transition:border-color 0.18s; }
-        #checkin-overlay .pace-input:focus { border-color:var(--primary); }
+        #checkin-overlay .pace-input { width:100%; padding:20px 20px; font-family:'Outfit',sans-serif; font-weight:700; font-size:32px; text-align:center; letter-spacing:-0.5px; color:var(--primary); background:#fff; border:1.5px solid var(--border); border-radius:18px; outline:none; margin:16px 0 8px; box-sizing:border-box; transition:border-color 0.18s,box-shadow 0.18s; }
+        #checkin-overlay .pace-input:focus { border-color:var(--primary); box-shadow:0 0 0 4px rgba(26,26,26,0.06); }
         #checkin-overlay .hint { text-align:center; font-size:13px; color:var(--text-muted); margin-bottom:8px; line-height:1.5; }
         #checkin-overlay .counter-row { display:flex; align-items:center; justify-content:center; gap:24px; margin:24px 0 12px; }
         #checkin-overlay .duration-row { display:flex; align-items:center; justify-content:center; gap:10px; margin:24px 0 16px; flex-wrap:nowrap; }
@@ -2798,10 +2800,11 @@
         #checkin-overlay .duration-unit { font-size:18px; font-weight:600; color:var(--text-muted); }
         #checkin-overlay .counter-btn-small { width:40px; height:40px; border-radius:12px; border:1.5px solid #E5E5E5; background:#FFFFFF; font-size:13px; font-weight:700; color:#6B6B6B; font-family:'Inter',sans-serif; cursor:pointer; transition:all 0.15s ease; display:flex; align-items:center; justify-content:center; }
         #checkin-overlay .counter-btn-small:active { background:#F5F3F0; transform:scale(0.9); }
-        #checkin-overlay .completion-grid { display:flex; flex-direction:column; gap:10px; margin:16px 0 8px; }
-        #checkin-overlay .completion-btn { display:flex; align-items:center; gap:14px; padding:14px 18px; background:#FFFFFF; border:1.5px solid #EBEBEB; border-radius:14px; cursor:pointer; transition:all 0.18s ease; text-align:left; font-family:'Inter',sans-serif; width:100%; }
-        #checkin-overlay .completion-btn:active { transform:scale(0.97); }
-        #checkin-overlay .completion-btn.selected { border-color:var(--primary); background:rgba(26,26,26,0.03); box-shadow:0 2px 8px rgba(0,0,0,0.06); }
+        #checkin-overlay .completion-grid { display:flex; flex-direction:column; gap:12px; margin:16px 0 8px; }
+        #checkin-overlay .completion-btn { display:flex; align-items:center; gap:14px; padding:16px 20px; background:#FFFFFF; border:1.5px solid #EBEBEB; border-radius:18px; cursor:pointer; transition:all 0.22s cubic-bezier(0.34,1.56,0.64,1); text-align:left; font-family:'Inter',sans-serif; width:100%; }
+        #checkin-overlay .completion-btn:hover { transform:translateY(-1px); box-shadow:0 6px 16px rgba(0,0,0,0.05); }
+        #checkin-overlay .completion-btn:active { transform:scale(0.98); }
+        #checkin-overlay .completion-btn.selected { border-color:var(--primary); background:rgba(26,26,26,0.03); box-shadow:0 8px 20px rgba(26,26,26,0.06); }
         #checkin-overlay .completion-icon { width:40px; height:40px; border-radius:50%; background:#F5F3F0; display:flex; align-items:center; justify-content:center; font-size:18px; font-weight:700; color:#6B6B6B; flex-shrink:0; transition:all 0.18s ease; }
         #checkin-overlay .completion-btn[data-completion="exact"] .completion-icon { background:var(--accent-success-soft); color:var(--accent-success); }
         #checkin-overlay .completion-btn[data-completion="more"] .completion-icon { background:var(--accent-heart-soft); color:var(--accent-heart); }
@@ -2810,20 +2813,24 @@
         #checkin-overlay .completion-btn.selected[data-completion="more"] .completion-icon { background:var(--accent-heart); color:#FFFFFF; }
         #checkin-overlay .completion-btn-label { font-size:15px; font-weight:600; color:#1A1A1A; margin-bottom:2px; }
         #checkin-overlay .completion-btn-desc { font-size:12px; color:#8A8A8A; line-height:1.4; }
-        #checkin-overlay .skip-options { display:flex; flex-direction:column; gap:8px; margin:16px 0; }
-        #checkin-overlay .skip-btn { width:100%; padding:14px 18px; background:#FFFFFF; border:1.5px solid #EBEBEB; border-radius:12px; font-size:14px; font-weight:600; color:var(--primary); font-family:'Inter',sans-serif; cursor:pointer; text-align:left; transition:all 0.15s ease; }
+        #checkin-overlay .skip-options { display:flex; flex-direction:column; gap:10px; margin:16px 0; }
+        #checkin-overlay .skip-btn { width:100%; padding:14px 20px; background:#FFFFFF; border:1.5px solid #EBEBEB; border-radius:14px; font-size:14px; font-weight:600; color:var(--primary); font-family:'Inter',sans-serif; cursor:pointer; text-align:left; transition:all 0.18s ease; }
+        #checkin-overlay .skip-btn:hover { border-color:#DCDCDC; }
         #checkin-overlay .skip-btn:active { transform:scale(0.98); }
         #checkin-overlay .skip-btn.selected { background:#F5F3F0; border-color:var(--primary); }
-        #checkin-overlay .morning-followup-opts { display:flex; flex-direction:column; gap:8px; margin:16px 0; }
-        #checkin-overlay .morning-fu-btn { width:100%; padding:16px 18px; background:#FFFFFF; border:1.5px solid #EBEBEB; border-radius:14px; font-size:15px; font-weight:600; color:var(--primary); font-family:'Inter',sans-serif; cursor:pointer; text-align:left; transition:all 0.15s ease; }
-        #checkin-overlay .morning-fu-btn:active { transform:scale(0.97); }
-        #checkin-overlay .morning-fu-btn.selected { background:#F5F3F0; border-color:var(--primary); }
-        #checkin-overlay .soreness-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin:16px 0; }
-        #checkin-overlay .soreness-chip { padding:13px 10px; background:#FFFFFF; border:1.5px solid #EBEBEB; border-radius:12px; font-size:13px; font-weight:600; color:var(--primary); font-family:'Inter',sans-serif; cursor:pointer; text-align:center; transition:all 0.15s ease; }
+        #checkin-overlay .morning-followup-opts { display:flex; flex-direction:column; gap:10px; margin:16px 0; }
+        #checkin-overlay .morning-fu-btn { width:100%; padding:16px 20px; background:#FFFFFF; border:1.5px solid #EBEBEB; border-radius:18px; font-size:15px; font-weight:600; color:var(--primary); font-family:'Inter',sans-serif; cursor:pointer; text-align:left; transition:all 0.22s cubic-bezier(0.34,1.56,0.64,1); }
+        #checkin-overlay .morning-fu-btn:hover { transform:translateY(-1px); border-color:#DCDCDC; box-shadow:0 4px 12px rgba(0,0,0,0.04); }
+        #checkin-overlay .morning-fu-btn:active { transform:scale(0.98); }
+        #checkin-overlay .morning-fu-btn.selected { background:#F5F3F0; border-color:var(--primary); box-shadow:0 6px 18px rgba(26,26,26,0.06); }
+        #checkin-overlay .soreness-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:16px 0; }
+        #checkin-overlay .soreness-chip { padding:14px 10px; background:#FFFFFF; border:1.5px solid #EBEBEB; border-radius:14px; font-size:13px; font-weight:600; color:var(--primary); font-family:'Inter',sans-serif; cursor:pointer; text-align:center; transition:all 0.18s ease; }
+        #checkin-overlay .soreness-chip:hover { border-color:#DCDCDC; }
         #checkin-overlay .soreness-chip:active { transform:scale(0.96); }
         #checkin-overlay .soreness-chip.selected { background:var(--accent-heart-soft); border-color:var(--accent-heart); color:var(--accent-heart); font-weight:600; }
-        #checkin-overlay .soreness-duration-opts { display:flex; flex-direction:column; gap:8px; margin:16px 0; }
-        #checkin-overlay .soreness-dur-btn { width:100%; padding:14px 18px; background:#FFFFFF; border:1.5px solid #EBEBEB; border-radius:12px; font-size:14px; font-weight:600; color:var(--primary); font-family:'Inter',sans-serif; cursor:pointer; text-align:left; transition:all 0.15s ease; }
+        #checkin-overlay .soreness-duration-opts { display:flex; flex-direction:column; gap:10px; margin:16px 0; }
+        #checkin-overlay .soreness-dur-btn { width:100%; padding:14px 20px; background:#FFFFFF; border:1.5px solid #EBEBEB; border-radius:14px; font-size:14px; font-weight:600; color:var(--primary); font-family:'Inter',sans-serif; cursor:pointer; text-align:left; transition:all 0.18s ease; }
+        #checkin-overlay .soreness-dur-btn:hover { border-color:#DCDCDC; }
         #checkin-overlay .soreness-dur-btn:active { transform:scale(0.97); }
         #checkin-overlay .soreness-dur-btn.selected { background:#F5F3F0; border-color:var(--primary); }
         #checkin-overlay .soreness-warning { background:#FFF8F0; border:1.5px solid #FFCB8E; border-radius:12px; padding:14px 16px; font-size:13px; color:#7A4B00; line-height:1.5; margin:16px 0 0; display:none; }
@@ -2831,28 +2838,30 @@
 
         /* RPE */
         #checkin-overlay .rpe-row { display:grid; grid-template-columns:repeat(5,1fr); gap:8px; margin:16px 0; }
-        #checkin-overlay .rpe-circle { width:100%; min-height:60px; border-radius:14px; border:2px solid; display:flex; align-items:center; justify-content:center; font-size:18px; font-weight:800; cursor:pointer; transition:all 0.14s cubic-bezier(0.34,1.56,0.64,1); background:transparent; font-family:'Outfit',sans-serif; }
+        #checkin-overlay .rpe-circle { width:100%; min-height:60px; border-radius:16px; border:2px solid; display:flex; align-items:center; justify-content:center; font-size:18px; font-weight:700; cursor:pointer; transition:all 0.18s cubic-bezier(0.34,1.56,0.64,1); background:transparent; font-family:'Outfit',sans-serif; letter-spacing:-0.02em; }
         #checkin-overlay .rpe-circle:active { transform:scale(0.88); }
-        #checkin-overlay .rpe-circle.selected { color:#fff; transform:scale(1.08); box-shadow:0 6px 20px rgba(0,0,0,0.2); }
+        #checkin-overlay .rpe-circle.selected { color:#fff; transform:scale(1.08); box-shadow:0 8px 24px rgba(0,0,0,0.18); }
         #checkin-overlay .rpe-labels { display:flex; justify-content:space-between; margin:-4px 0 16px; padding:0 2px; }
-        #checkin-overlay .rpe-label-text { font-size:11px; color:var(--text-muted); font-weight:600; letter-spacing:0.04em; }
+        #checkin-overlay .rpe-label-text { font-size:11px; color:var(--text-muted); font-weight:600; letter-spacing:0.05em; }
         #checkin-overlay .rpe-desc { text-align:center; font-size:14px; color:var(--text-muted); min-height:24px; transition:opacity 0.2s; line-height:1.5; }
 
         /* COMPLETION CARDS */
-        #checkin-overlay .completion-cards { display:flex; flex-direction:column; gap:10px; margin-bottom:8px; }
-        #checkin-overlay .completion-card { min-height:72px; border-radius:16px; border:2px solid transparent; background:#FFFFFF; display:flex; flex-direction:row; align-items:center; gap:16px; padding:18px 20px; cursor:pointer; transition:all 0.18s cubic-bezier(0.34,1.56,0.64,1); box-shadow:0 0 0 1.5px #EBEBEB, 0 2px 6px rgba(0,0,0,0.04); }
-        #checkin-overlay .completion-card:active { transform:scale(0.97); }
-        #checkin-overlay .completion-card.selected { background:#F7F4F0; box-shadow:0 4px 18px rgba(0,0,0,0.08); }
+        #checkin-overlay .completion-cards { display:flex; flex-direction:column; gap:12px; margin-bottom:8px; }
+        #checkin-overlay .completion-card { min-height:72px; border-radius:20px; border:2px solid transparent; background:#FFFFFF; display:flex; flex-direction:row; align-items:center; gap:16px; padding:18px 20px; cursor:pointer; transition:all 0.22s cubic-bezier(0.34,1.56,0.64,1); box-shadow:0 0 0 1px #EBEBEB, 0 2px 8px rgba(0,0,0,0.03); }
+        #checkin-overlay .completion-card:hover { transform:translateY(-1px); box-shadow:0 0 0 1px #DCDCDC, 0 6px 16px rgba(0,0,0,0.05); }
+        #checkin-overlay .completion-card:active { transform:scale(0.98); }
+        #checkin-overlay .completion-card.selected { background:#F5F3F0; box-shadow:0 8px 24px rgba(26,26,26,0.08), 0 0 0 1.5px var(--primary); }
         #checkin-overlay .completion-dot { width:12px; height:12px; border-radius:50%; flex-shrink:0; }
-        #checkin-overlay .completion-label { font-size:15px; font-weight:700; color:var(--primary); line-height:1.3; }
+        #checkin-overlay .completion-label { font-size:15px; font-weight:600; color:var(--primary); line-height:1.3; }
 
         /* FOLLOW-UP */
-        #checkin-overlay .followup-question { font-size:15px; font-weight:700; color:var(--primary); margin:20px 0 12px; font-family:'Outfit',sans-serif; }
+        #checkin-overlay .followup-question { font-size:15px; font-weight:700; color:var(--primary); margin:24px 0 12px; font-family:'Outfit',sans-serif; letter-spacing:-0.01em; }
         #checkin-overlay .followup-question:first-child { margin-top:0; }
-        #checkin-overlay .followup-cards { display:flex; flex-direction:column; gap:8px; margin-bottom:4px; }
-        #checkin-overlay .followup-card { background:#FFFFFF; border:2px solid transparent; border-radius:14px; padding:16px 18px; display:flex; align-items:center; gap:14px; cursor:pointer; transition:all 0.18s cubic-bezier(0.34,1.56,0.64,1); box-shadow:0 0 0 1.5px #EBEBEB, 0 1px 4px rgba(0,0,0,0.04); }
-        #checkin-overlay .followup-card:active { transform:scale(0.97); }
-        #checkin-overlay .followup-card.selected { background:#F7F4F0; box-shadow:0 4px 16px rgba(0,0,0,0.07); }
+        #checkin-overlay .followup-cards { display:flex; flex-direction:column; gap:10px; margin-bottom:4px; }
+        #checkin-overlay .followup-card { background:#FFFFFF; border:2px solid transparent; border-radius:18px; padding:16px 20px; display:flex; align-items:center; gap:14px; cursor:pointer; transition:all 0.22s cubic-bezier(0.34,1.56,0.64,1); box-shadow:0 0 0 1px #EBEBEB, 0 1px 4px rgba(0,0,0,0.03); }
+        #checkin-overlay .followup-card:hover { transform:translateY(-1px); box-shadow:0 0 0 1px #DCDCDC, 0 4px 12px rgba(0,0,0,0.05); }
+        #checkin-overlay .followup-card:active { transform:scale(0.98); }
+        #checkin-overlay .followup-card.selected { background:#F5F3F0; box-shadow:0 6px 18px rgba(26,26,26,0.07), 0 0 0 1.5px var(--primary); }
         #checkin-overlay .fu-dot { width:12px; height:12px; border-radius:50%; display:block; flex-shrink:0; }
         #checkin-overlay .fu-label { font-size:15px; font-weight:500; color:var(--primary); }
         #checkin-overlay .followup-hint { font-size:13px; color:var(--text-muted); text-align:center; margin:6px 0 0; line-height:1.5; }
@@ -2862,14 +2871,16 @@
         #checkin-overlay .fu-counter-wrap.visible { max-height:180px; opacity:1; }
 
         /* NEXT BUTTON */
-        #checkin-overlay .nav-area { margin-top:28px; }
-        #checkin-overlay .btn-next { width:100%; height:56px; background:#EBEBEB; color:#C4C4C4; border:none; border-radius:16px; font-size:16px; font-weight:700; font-family:'Inter',sans-serif; cursor:pointer; opacity:0; pointer-events:none; transition:opacity 0.22s ease,transform 0.1s ease,background 0.22s ease,color 0.22s ease,box-shadow 0.22s ease; }
-        #checkin-overlay .btn-next.visible { opacity:1; pointer-events:auto; background:var(--primary); color:#fff; animation:ciFadeIn 0.22s ease forwards; box-shadow:0 8px 28px rgba(26,26,26,0.22); }
-        #checkin-overlay .btn-next.done-btn { background:#6B8F71; color:#fff; opacity:1; pointer-events:auto; box-shadow:0 8px 28px rgba(107,143,113,0.28); }
-        #checkin-overlay .btn-next:active { transform:scale(0.97); }
+        #checkin-overlay .nav-area { margin-top:32px; }
+        #checkin-overlay .btn-next { width:100%; height:56px; background:#EBEBEB; color:#C4C4C4; border:none; border-radius:18px; font-size:16px; font-weight:700; font-family:'Inter',sans-serif; cursor:pointer; opacity:0; pointer-events:none; transition:opacity 0.22s ease,transform 0.1s ease,background 0.22s ease,color 0.22s ease,box-shadow 0.22s ease,filter 0.18s; letter-spacing:0.01em; }
+        #checkin-overlay .btn-next.visible { opacity:1; pointer-events:auto; background:var(--primary); color:#fff; animation:ciFadeIn 0.22s ease forwards; box-shadow:0 10px 28px rgba(26,26,26,0.22); }
+        #checkin-overlay .btn-next.visible:hover { filter:brightness(1.1); box-shadow:0 14px 36px rgba(26,26,26,0.28); }
+        #checkin-overlay .btn-next.done-btn { background:#6B8F71; color:#fff; opacity:1; pointer-events:auto; box-shadow:0 10px 28px rgba(107,143,113,0.28); }
+        #checkin-overlay .btn-next.done-btn:hover { filter:brightness(1.06); box-shadow:0 14px 36px rgba(107,143,113,0.32); }
+        #checkin-overlay .btn-next:active { transform:scale(0.98); }
 
         /* FOOTER */
-        #checkin-overlay .footer { text-align:center; font-size:11px; color:var(--text-light); padding:16px 0 0; letter-spacing:0.1em; text-transform:uppercase; font-weight:600; }
+        #checkin-overlay .footer { text-align:center; font-size:11px; color:var(--text-light); padding:20px 0 0; letter-spacing:0.12em; text-transform:uppercase; font-weight:600; }
 
         @keyframes heartbeat {
             0%, 100% { transform: scale(1); }
@@ -3495,13 +3506,26 @@
                         <input type="password" id="settings-pwd-current" placeholder="Obecne hasło" autocomplete="current-password" class="s-input">
                     </div>
                     <div class="s-field">
-                        <input type="password" id="settings-pwd-new" placeholder="Nowe hasło (min. 6 znaków)" autocomplete="new-password" class="s-input">
+                        <input type="password" id="settings-pwd-new" placeholder="Nowe hasło (min. 8 znaków)" autocomplete="new-password" class="s-input">
                     </div>
                     <div class="s-field" style="margin-bottom:14px;">
                         <input type="password" id="settings-pwd-confirm" placeholder="Potwierdź nowe hasło" autocomplete="new-password" class="s-input">
                     </div>
                     <button onclick="changePassword()" class="s-btn-secondary">Zmień hasło</button>
                     <div id="settings-pwd-msg" class="s-msg"></div>
+                </div>
+
+                <!-- SEKCJA 6.5 — TWOJE DANE (GDPR) -->
+                <div class="home-anim s-card" style="margin-bottom:16px;animation-delay:0.27s;">
+                    <div class="s-section-title">Twoje dane</div>
+                    <p style="font-size:13px;color:#8A8A8A;line-height:1.5;margin:0 0 14px 0;">Pobierz wszystkie swoje dane (treningi, plany, czaty, ustawienia) jako plik JSON.</p>
+                    <button onclick="exportMyData()" id="export-data-btn" style="width:100%;height:44px;background:transparent;border:1.5px solid #EBEBEB;border-radius:12px;font-size:14px;font-weight:600;font-family:'Inter',sans-serif;color:#1A1A1A;cursor:pointer;transition:border-color 0.2s;" onmouseenter="this.style.borderColor='#1A1A1A'" onmouseleave="this.style.borderColor='#EBEBEB'">
+                        Pobierz moje dane
+                    </button>
+                    <div style="display:flex;gap:14px;margin-top:14px;font-size:12px;">
+                        <a href="/privacy.html" target="_blank" style="color:#8A8A8A;text-decoration:none;border-bottom:1px solid #EBEBEB;">Polityka prywatności</a>
+                        <a href="/terms.html" target="_blank" style="color:#8A8A8A;text-decoration:none;border-bottom:1px solid #EBEBEB;">Regulamin</a>
+                    </div>
                 </div>
 
                 <!-- SEKCJA 7 — STREFA NIEBEZPIECZNA -->
@@ -3638,10 +3662,39 @@
             }, extra || {});
         }
 
+        // --- Refresh Token Flow ---
+        // Single in-flight refresh promise — multiple parallel 401s share one refresh attempt.
+        let _refreshPromise = null;
+        async function refreshAccessToken() {
+            if (_refreshPromise) return _refreshPromise;
+            _refreshPromise = (async () => {
+                const refreshToken = localStorage.getItem('velm_refresh_token');
+                if (!refreshToken) return null;
+                try {
+                    const res = await fetch(`${window.API_BASE || ''}/api/refresh`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ refreshToken })
+                    });
+                    if (!res.ok) return null;
+                    const data = await res.json().catch(() => ({}));
+                    if (!data.accessToken || !data.refreshToken) return null;
+                    localStorage.setItem('velm_token', data.accessToken);
+                    localStorage.setItem('velm_refresh_token', data.refreshToken);
+                    return data.accessToken;
+                } catch (e) {
+                    return null;
+                } finally {
+                    _refreshPromise = null;
+                }
+            })();
+            return _refreshPromise;
+        }
+
         // --- API Fetch Helper ---
         // Wraps fetch() with: authHeaders, .ok check, JSON parse with safe fallback,
-        // and global 401 handling (token invalidated → force re-login).
-        async function apiFetch(path, opts = {}) {
+        // 401 → auto-refresh + retry once, then force re-login.
+        async function apiFetch(path, opts = {}, _retried = false) {
             const url = path.startsWith('http') ? path : `${window.API_BASE || ''}${path}`;
             const init = {
                 method: opts.method || 'GET',
@@ -3666,9 +3719,19 @@
             } else {
                 try { data = { _text: await res.text() }; } catch (e) { data = null; }
             }
+            if (res.status === 401 && !_retried) {
+                // Try refresh once
+                const newToken = await refreshAccessToken();
+                if (newToken) {
+                    // Retry original request with new access token
+                    return apiFetch(path, opts, true);
+                }
+                // Refresh failed — fall through to logout flow
+            }
             if (res.status === 401) {
-                // Token invalidated/expired — clear and reshow login overlay
+                // Refresh exhausted — force re-login
                 localStorage.removeItem('velm_token');
+                localStorage.removeItem('velm_refresh_token');
                 const overlay = document.getElementById('login-overlay');
                 if (overlay) overlay.classList.remove('hidden');
                 const err = new Error((data && data.error) || 'Sesja wygasła');
@@ -3752,11 +3815,58 @@
                     const name = u.onboarding_data?.name || u.name || '';
                     avatarEl.textContent = name ? name.charAt(0).toUpperCase() : '?';
                 }
+                // Email verification banner — only if user has email_verified=false (column may not exist on legacy rows → undefined; treat undefined as verified)
+                if (u && u.email_verified === false) {
+                    showEmailVerifyBanner(u.email);
+                } else {
+                    hideEmailVerifyBanner();
+                }
             } catch(e) { /* zostaje domyślne 190 */ }
             updateSleepRing();
             loadReadinessDelta();
             loadSleepFromAPI();
             loadRestingHRFromAPI();
+        }
+
+        function showEmailVerifyBanner(email) {
+            if (document.getElementById('email-verify-banner')) return;
+            if (sessionStorage.getItem('velm_email_verify_dismissed') === '1') return;
+            const banner = document.createElement('div');
+            banner.id = 'email-verify-banner';
+            banner.style.cssText = 'position:fixed;top:0;left:0;right:0;background:#FFF7ED;border-bottom:1px solid #FED7AA;color:#9A3412;padding:10px 16px;font-size:13px;font-weight:500;z-index:9998;display:flex;align-items:center;gap:12px;font-family:Inter,sans-serif;';
+            banner.innerHTML = `
+                <span style="flex:1;line-height:1.4;">Potwierdź adres email <strong style="font-weight:600;">${(email || '').replace(/[<>"']/g, '')}</strong> żeby aktywować konto.</span>
+                <button id="email-verify-resend-btn" style="background:#1A1A1A;color:#fff;border:none;padding:6px 14px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Wyślij link</button>
+                <button id="email-verify-dismiss-btn" style="background:none;border:none;color:#9A3412;font-size:18px;cursor:pointer;padding:0 4px;line-height:1;" aria-label="Zamknij">&times;</button>`;
+            document.body.appendChild(banner);
+            document.getElementById('email-verify-resend-btn').onclick = async () => {
+                const btn = document.getElementById('email-verify-resend-btn');
+                btn.disabled = true; btn.textContent = '…';
+                try {
+                    const res = await fetch(`${API_BASE}/api/email/send-verification`, { method: 'POST', headers: authHeaders() });
+                    const data = await res.json().catch(() => ({}));
+                    if (res.ok) {
+                        btn.textContent = 'Wysłano ✓';
+                        setTimeout(() => hideEmailVerifyBanner(), 2500);
+                    } else {
+                        btn.textContent = 'Błąd';
+                        btn.disabled = false;
+                        console.warn('verify resend błąd:', data);
+                    }
+                } catch (e) {
+                    btn.textContent = 'Błąd';
+                    btn.disabled = false;
+                }
+            };
+            document.getElementById('email-verify-dismiss-btn').onclick = () => {
+                sessionStorage.setItem('velm_email_verify_dismissed', '1');
+                hideEmailVerifyBanner();
+            };
+        }
+
+        function hideEmailVerifyBanner() {
+            const el = document.getElementById('email-verify-banner');
+            if (el) el.remove();
         }
 
         async function loadSleepFromAPI() {
@@ -6572,12 +6682,23 @@
             }
         }
 
-        function stravaConnect() {
+        async function stravaConnect() {
             const userId = localStorage.getItem('velm_user_id');
             const token = localStorage.getItem('velm_token');
             if (!userId || !token) return;
-            // Otwórz OAuth przez backend — backend zrobi redirect do Stravy
-            window.location.href = API_BASE + '/api/strava/connect/' + userId + '?token=' + encodeURIComponent(token);
+            try {
+                const res = await fetch(API_BASE + '/api/strava/connect/' + userId, {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                const data = await res.json();
+                if (!res.ok || !data.redirectUrl) {
+                    alert(data.error || 'Nie udało się rozpocząć połączenia ze Stravą');
+                    return;
+                }
+                window.location.href = data.redirectUrl;
+            } catch (e) {
+                alert('Błąd połączenia z serwerem');
+            }
         }
 
         async function stravaDisconnect() {
@@ -6689,7 +6810,7 @@
             const confirmPwd = document.getElementById('settings-pwd-confirm')?.value;
             if (!current || !newPwd) { showSettingsMsg('settings-pwd-msg', 'Wypełnij wszystkie pola', true); return; }
             if (newPwd !== confirmPwd) { showSettingsMsg('settings-pwd-msg', 'Hasła nie są zgodne', true); return; }
-            if (newPwd.length < 6) { showSettingsMsg('settings-pwd-msg', 'Min. 6 znaków', true); return; }
+            if (newPwd.length < 8) { showSettingsMsg('settings-pwd-msg', 'Min. 8 znaków', true); return; }
             try {
                 const res = await fetch(`${API_BASE}/api/user/${currentUserId}/change-password`, {
                     method: 'POST', headers: authHeaders(),
@@ -6697,6 +6818,9 @@
                 });
                 const data = await res.json();
                 if (!data.success) throw new Error(data.error);
+                // Save new token pair — bumping token_version invalidated the old ones
+                if (data.accessToken || data.token) localStorage.setItem('velm_token', data.accessToken || data.token);
+                if (data.refreshToken) localStorage.setItem('velm_refresh_token', data.refreshToken);
                 ['settings-pwd-current','settings-pwd-new','settings-pwd-confirm'].forEach(id => {
                     const el = document.getElementById(id); if(el) el.value = '';
                 });
@@ -7100,7 +7224,8 @@
         let _settingsLang = 'pl';
         async function loadChatHistory(agent) {
             if (!currentUserId) return;
-            if (_chatHistoryLoaded[agent]) return;
+            const cacheKey = `${currentUserId}::${agent}`;
+            if (_chatHistoryLoaded[cacheKey]) return;
             const container = document.getElementById('coach-messages');
             if (!container) return;
             // Only inject history if conversation is empty (no msg divs yet)
@@ -7110,7 +7235,7 @@
                 const data = await res.json();
                 const msgs = data?.messages;
                 if (!msgs?.length) return;
-                _chatHistoryLoaded[agent] = true;
+                _chatHistoryLoaded[cacheKey] = true;
                 const sep = document.createElement('div');
                 sep.className = 'chat-history-separator';
                 sep.innerHTML = '<span>Poprzednia rozmowa</span>';
@@ -7634,7 +7759,8 @@
                 // user B from seeing user A's data when login happens after a
                 // session expiry without page navigation.
                 localStorage.setItem('velm_user_id', data.userId);
-                if (data.token) localStorage.setItem('velm_token', data.token);
+                if (data.accessToken || data.token) localStorage.setItem('velm_token', data.accessToken || data.token);
+                if (data.refreshToken) localStorage.setItem('velm_refresh_token', data.refreshToken);
                 if (data.name) localStorage.setItem('velm_user_name', data.name);
                 window.location.reload();
                 return;
@@ -7656,6 +7782,63 @@
             loadTodayCard();
         }
 
+        // ── PASSWORD RESET MODAL (gdy user przyszedł z linku w mailu) ─────
+        function openPasswordResetModal(token) {
+            const existing = document.getElementById('pwd-reset-modal');
+            if (existing) existing.remove();
+            const modal = document.createElement('div');
+            modal.id = 'pwd-reset-modal';
+            modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:99999;display:flex;align-items:center;justify-content:center;padding:24px;font-family:Inter,sans-serif;';
+            modal.innerHTML = `
+                <div style="background:#fff;border-radius:20px;padding:32px 26px;max-width:380px;width:100%;box-shadow:0 8px 40px rgba(0,0,0,0.18);">
+                  <h2 style="margin:0 0 8px 0;font-size:20px;font-weight:700;color:#1A1A1A;">Ustaw nowe hasło</h2>
+                  <p style="margin:0 0 20px 0;font-size:13.5px;color:#5A5A5A;line-height:1.5;">Wpisz nowe hasło (min. 8 znaków). Po zapisie zaloguj się ponownie.</p>
+                  <input id="pwd-reset-new" type="password" placeholder="Nowe hasło" autocomplete="new-password" style="width:100%;height:48px;border:1.5px solid #EBEBEB;border-radius:12px;padding:0 16px;font-size:15px;margin-bottom:10px;box-sizing:border-box;font-family:inherit;"/>
+                  <input id="pwd-reset-new2" type="password" placeholder="Powtórz hasło" autocomplete="new-password" style="width:100%;height:48px;border:1.5px solid #EBEBEB;border-radius:12px;padding:0 16px;font-size:15px;margin-bottom:14px;box-sizing:border-box;font-family:inherit;"/>
+                  <div id="pwd-reset-err" style="color:#C07264;font-size:13px;min-height:16px;margin-bottom:10px;line-height:1.4;"></div>
+                  <button id="pwd-reset-btn" style="width:100%;height:48px;background:#1A1A1A;color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;">Zapisz hasło</button>
+                  <button id="pwd-reset-cancel" style="width:100%;height:40px;background:none;border:none;color:#8A8A8A;font-size:13px;margin-top:8px;cursor:pointer;font-family:inherit;">Anuluj</button>
+                </div>`;
+            document.body.appendChild(modal);
+            const btn = document.getElementById('pwd-reset-btn');
+            const err = document.getElementById('pwd-reset-err');
+            const p1 = document.getElementById('pwd-reset-new');
+            const p2 = document.getElementById('pwd-reset-new2');
+            p1.focus();
+            const submit = async () => {
+                err.textContent = '';
+                if (!p1.value || p1.value.length < 8) { err.textContent = 'Hasło musi mieć min. 8 znaków'; return; }
+                if (p1.value !== p2.value) { err.textContent = 'Hasła nie są zgodne'; return; }
+                btn.disabled = true; btn.textContent = '…';
+                try {
+                    const res = await fetch(`${API_BASE}/api/password-reset/verify`, {
+                        method: 'POST', headers: {'Content-Type':'application/json'},
+                        body: JSON.stringify({ token, newPassword: p1.value })
+                    });
+                    let data = {};
+                    try { data = await res.json(); } catch(e) {}
+                    if (!res.ok) {
+                        err.textContent = data.error || 'Błąd serwera';
+                        btn.disabled = false; btn.textContent = 'Zapisz hasło';
+                        return;
+                    }
+                    // Wyczyść lokalną sesję i wyrzuć na index z toastem
+                    localStorage.removeItem('velm_token');
+                    localStorage.removeItem('velm_user_id');
+                    localStorage.removeItem('velm_user_name');
+                    modal.remove();
+                    alert('Hasło zostało zmienione. Zaloguj się ponownie.');
+                    window.location.href = 'index.html';
+                } catch (e) {
+                    err.textContent = 'Błąd połączenia z serwerem';
+                    btn.disabled = false; btn.textContent = 'Zapisz hasło';
+                }
+            };
+            btn.onclick = submit;
+            p2.onkeydown = (e) => { if (e.key === 'Enter') submit(); };
+            document.getElementById('pwd-reset-cancel').onclick = () => modal.remove();
+        }
+
         async function doLogout() {
             if (!confirm('Czy na pewno chcesz się wylogować?')) return;
             // Best-effort backend invalidation (bumps token_version) — never block logout on failure
@@ -7665,7 +7848,37 @@
             localStorage.removeItem('velm_user_id');
             localStorage.removeItem('velm_user_name');
             localStorage.removeItem('velm_token');
+            localStorage.removeItem('velm_refresh_token');
+            _chatHistoryLoaded = {};
             window.location.href = 'index.html';
+        }
+
+        async function exportMyData() {
+            const btn = document.getElementById('export-data-btn');
+            if (!btn) return;
+            const orig = btn.textContent;
+            btn.disabled = true;
+            btn.textContent = 'Pobieranie…';
+            try {
+                const res = await fetch(`${API_BASE}/api/user/${currentUserId}/export`, {
+                    headers: authHeaders()
+                });
+                if (!res.ok) throw new Error('Błąd serwera');
+                const blob = await res.blob();
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `velm-export-${new Date().toISOString().split('T')[0]}.json`;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                URL.revokeObjectURL(url);
+                btn.textContent = 'Pobrano ✓';
+                setTimeout(() => { btn.textContent = orig; btn.disabled = false; }, 2000);
+            } catch (e) {
+                btn.textContent = 'Błąd — spróbuj ponownie';
+                setTimeout(() => { btn.textContent = orig; btn.disabled = false; }, 2500);
+            }
         }
 
         async function deleteAccount() {
@@ -7768,6 +7981,29 @@
                     document.body.appendChild(msg);
                     setTimeout(() => msg.remove(), 5000);
                 }, 500);
+                history.replaceState({}, '', window.location.pathname);
+            }
+
+            // Password reset link from email
+            const resetToken = urlParams.get('reset_token');
+            if (resetToken) {
+                openPasswordResetModal(resetToken);
+                history.replaceState({}, '', window.location.pathname);
+            }
+
+            // Email verification result (from /api/email/verify redirect)
+            const verifiedResult = urlParams.get('email_verified');
+            if (verifiedResult) {
+                const map = {
+                    ok: { msg: 'Email potwierdzony — dziękujemy!', err: false },
+                    already: { msg: 'Email już potwierdzony.', err: false },
+                    expired: { msg: 'Link wygasł — wyślij nowy z ustawień konta.', err: true },
+                    invalid: { msg: 'Nieprawidłowy link — wyślij nowy z ustawień konta.', err: true },
+                    missing: { msg: 'Brakuje tokenu w linku.', err: true },
+                    error: { msg: 'Błąd weryfikacji — spróbuj ponownie.', err: true }
+                };
+                const r = map[verifiedResult] || map.error;
+                setTimeout(() => showVelmToast(r.msg, r.err), 800);
                 history.replaceState({}, '', window.location.pathname);
             }
 
@@ -8468,16 +8704,26 @@
             showBtn('next-morning-2');
         }
 
-        function connectStrava() {
+        async function connectStrava() {
             const userId = localStorage.getItem('velm_user_id') || currentUserId;
             const token = localStorage.getItem('velm_token');
             if (!userId || !token) {
                 alert('Zaloguj się ponownie, żeby połączyć Stravę.');
                 return;
             }
-            // Browser redirect — backend /api/strava/connect verifies token in query param
-            // (browser redirects can't carry Authorization header), then forwards to Strava OAuth.
-            window.location.href = `${API_BASE}/api/strava/connect/${encodeURIComponent(userId)}?token=${encodeURIComponent(token)}`;
+            try {
+                const res = await fetch(`${API_BASE}/api/strava/connect/${encodeURIComponent(userId)}`, {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                const data = await res.json();
+                if (!res.ok || !data.redirectUrl) {
+                    alert(data.error || 'Nie udało się rozpocząć połączenia ze Stravą');
+                    return;
+                }
+                window.location.href = data.redirectUrl;
+            } catch (e) {
+                alert('Błąd połączenia z serwerem');
+            }
         }
 
         function _shouldShowStrava() {
@@ -8741,22 +8987,22 @@
                     <div class="step-desc">Jakość snu wpływa na intensywność dzisiejszego treningu.</div>
                     <div class="sleep-cards">
                         <div class="sleep-card" onclick="selectSleep(0)">
-                            <span class="sleep-emoji">😩</span>
+                            <span class="sleep-emoji">🌑</span>
                             <span class="label">Słabo</span>
                             <span class="sleep-dot" style="background:#C07264;"></span>
                         </div>
                         <div class="sleep-card" onclick="selectSleep(1)">
-                            <span class="sleep-emoji">😑</span>
+                            <span class="sleep-emoji">🌒</span>
                             <span class="label">Średnio</span>
                             <span class="sleep-dot" style="background:#C4A35A;"></span>
                         </div>
                         <div class="sleep-card" onclick="selectSleep(2)">
-                            <span class="sleep-emoji">🙂</span>
+                            <span class="sleep-emoji">🌓</span>
                             <span class="label">Dobrze</span>
                             <span class="sleep-dot" style="background:#6B8F71;"></span>
                         </div>
                         <div class="sleep-card" onclick="selectSleep(3)">
-                            <span class="sleep-emoji">😊</span>
+                            <span class="sleep-emoji">🌕</span>
                             <span class="label">Bardzo</span>
                             <span class="sleep-dot" style="background:#6B8F71;"></span>
                         </div>
@@ -8796,10 +9042,12 @@
                     <div class="section-label" style="margin-top:20px;">Twoja odpowiedź</div>
                     <div class="readiness-btns">
                         <button class="readiness-btn" data-color="#6B8F71" onclick="selectReadiness(this)">
-                            <span class="rd-dot" style="background:#6B8F71;"></span>Tak, jestem gotowy
+                            <span class="rd-dot" style="background:#6B8F71;"></span><span style="flex:1;">Tak, jestem gotowy</span>
+                            <svg class="rd-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
                         </button>
                         <button class="readiness-btn" data-color="#C4A35A" onclick="selectReadiness(this)">
-                            <span class="rd-dot" style="background:#C4A35A;"></span>Trening zrobię mimo wszystko
+                            <span class="rd-dot" style="background:#C4A35A;"></span><span style="flex:1;">Trening zrobię mimo wszystko</span>
+                            <svg class="rd-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
                         </button>
                     </div>
                     <div class="nav-area"><button class="btn-next" id="next-morning-2" onclick="goNext()">Dalej →</button></div>

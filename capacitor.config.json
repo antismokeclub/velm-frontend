@@ -1,0 +1,33 @@
+{
+  "appId": "app.velm",
+  "appName": "velm",
+  "webDir": "dist",
+  "server": {
+    "url": "https://velm-frontend.vercel.app",
+    "cleartext": false,
+    "androidScheme": "https"
+  },
+  "ios": {
+    "contentInset": "automatic",
+    "limitsNavigationsToAppBoundDomains": false,
+    "scheme": "velm",
+    "backgroundColor": "#F5F3F0"
+  },
+  "android": {
+    "backgroundColor": "#F5F3F0",
+    "allowMixedContent": false
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 1500,
+      "backgroundColor": "#F5F3F0",
+      "androidScaleType": "CENTER_CROP",
+      "showSpinner": false,
+      "splashFullScreen": true,
+      "splashImmersive": true
+    },
+    "App": {
+      "deepLinkScheme": "velm"
+    }
+  }
+}

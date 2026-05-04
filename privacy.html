@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Polityka prywatności — velm</title>
+<style>
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Inter,Helvetica,Arial,sans-serif;color:#1A1A1A;background:#F5F3F0;margin:0;padding:32px 20px;line-height:1.6;}
+.wrap{max-width:720px;margin:0 auto;background:#fff;padding:40px 32px;border-radius:20px;box-shadow:0 4px 24px rgba(0,0,0,0.06);}
+h1{font-size:28px;margin:0 0 8px 0;letter-spacing:-0.02em;}
+.updated{font-size:13px;color:#8A8A8A;margin-bottom:32px;}
+h2{font-size:18px;margin:32px 0 12px 0;letter-spacing:-0.01em;}
+p,li{font-size:15px;color:#3A3A3A;margin:0 0 12px 0;}
+ul{padding-left:20px;}
+a{color:#1A1A1A;}
+.back{display:inline-block;margin-top:32px;font-size:14px;color:#8A8A8A;text-decoration:none;}
+.back:hover{color:#1A1A1A;}
+strong{color:#1A1A1A;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Polityka prywatności</h1>
+  <p class="updated">Ostatnia aktualizacja: <!-- TODO: WSTAW DATĘ NP. 3 maja 2026 --></p>
+
+  <h2>1. Kto jest administratorem danych</h2>
+  <p>Administratorem danych osobowych zbieranych przez aplikację <strong>velm</strong> jest:</p>
+  <ul>
+    <li><!-- TODO: TWOJE IMIĘ I NAZWISKO LUB NAZWA FIRMY --></li>
+    <li><!-- TODO: ADRES REJESTROWY --></li>
+    <li>Email: <!-- TODO: EMAIL KONTAKTOWY NP. privacy@velm.app --></li>
+  </ul>
+
+  <h2>2. Jakie dane zbieramy</h2>
+  <ul>
+    <li><strong>Konto:</strong> email, imię, hasło (zaszyfrowane bcrypt)</li>
+    <li><strong>Profil treningowy:</strong> wiek, waga, wzrost, cele, doświadczenie biegowe, dni dostępne</li>
+    <li><strong>Dane treningowe:</strong> dystans, tempo, tętno, RPE, notatki z check-inów</li>
+    <li><strong>Health metrics:</strong> sen, energia, gotowość (z porannych check-inów)</li>
+    <li><strong>Strava (opcjonalnie):</strong> jeśli połączysz konto, importujemy historię biegów</li>
+    <li><strong>Garmin .fit (opcjonalnie):</strong> ręcznie przesyłane pliki treningowe</li>
+    <li><strong>Konwersacje z agentami AI:</strong> historia chat z trenerem, fizjo, analitykiem, psychologiem</li>
+  </ul>
+
+  <h2>3. Po co używamy danych</h2>
+  <ul>
+    <li>Generowanie spersonalizowanego planu treningowego (AI Claude od Anthropic)</li>
+    <li>Analiza progresu i wykrywanie wzorców (np. "najlepiej biegasz we wtorki")</li>
+    <li>Ostrzeganie przed kontuzjami (analiza RPE, tętna spoczynkowego)</li>
+    <li>Wysyłka emaili transakcyjnych (reset hasła, potwierdzenie konta) — przez Resend</li>
+    <li>Płatności subskrypcyjne — przez Stripe</li>
+  </ul>
+
+  <h2>4. Komu udostępniamy dane (procesory)</h2>
+  <ul>
+    <li><strong>Anthropic (Claude API):</strong> wysyłamy fragmenty profilu i danych treningowych do generowania odpowiedzi AI. Anthropic nie używa tych danych do trenowania modeli (zgodnie z ich polityką enterprise).</li>
+    <li><strong>Supabase:</strong> hosting bazy danych (PostgreSQL).</li>
+    <li><strong>Railway:</strong> hosting backendu (serwer Node.js).</li>
+    <li><strong>Vercel:</strong> hosting frontendu.</li>
+    <li><strong>Resend:</strong> wysyłka emaili transakcyjnych.</li>
+    <li><strong>Stripe:</strong> obsługa płatności subskrypcyjnych.</li>
+    <li><strong>Strava (opcjonalnie):</strong> tylko jeśli połączysz konto.</li>
+  </ul>
+  <p>Nie sprzedajemy danych osobowych firmom trzecim. Nie używamy danych do reklam.</p>
+
+  <h2>5. Jak długo przechowujemy dane</h2>
+  <p>Dane przechowujemy do momentu usunięcia konta. Po usunięciu konta wszystkie dane są kasowane w ciągu 30 dni. Backupy są usuwane w cyklu 90 dni.</p>
+
+  <h2>6. Twoje prawa (RODO)</h2>
+  <ul>
+    <li><strong>Dostęp:</strong> możesz pobrać kopię swoich danych przez Ustawienia → Eksport danych</li>
+    <li><strong>Sprostowanie:</strong> możesz edytować profil w Ustawieniach</li>
+    <li><strong>Usunięcie:</strong> możesz usunąć konto w Ustawieniach → Strefa niebezpieczna → Usuń konto</li>
+    <li><strong>Sprzeciw:</strong> możesz cofnąć zgodę na przetwarzanie wysyłając email na <!-- TODO: EMAIL KONTAKTOWY --></li>
+    <li><strong>Skarga:</strong> masz prawo złożyć skargę do PUODO (Prezes Urzędu Ochrony Danych Osobowych) — uodo.gov.pl</li>
+  </ul>
+
+  <h2>7. Bezpieczeństwo</h2>
+  <ul>
+    <li>Wszystkie połączenia są szyfrowane (HTTPS / TLS)</li>
+    <li>Hasła są hashowane (bcrypt cost 12)</li>
+    <li>Tokeny sesyjne wygasają po 1 godzinie (z refresh tokenem 30 dni)</li>
+    <li>Zmiana hasła unieważnia wszystkie aktywne sesje</li>
+  </ul>
+
+  <h2>8. Cookies / localStorage</h2>
+  <p>Aplikacja używa <code>localStorage</code> przeglądarki do przechowywania tokenu sesyjnego i ID użytkownika. Nie używamy cookies śledzących ani analitycznych firm trzecich.</p>
+
+  <h2>9. Dzieci poniżej 16 lat</h2>
+  <p>Aplikacja nie jest przeznaczona dla osób poniżej 16. roku życia. Jeśli jesteś rodzicem i myślisz że Twoje dziecko podało nam dane bez zgody — napisz na <!-- TODO: EMAIL KONTAKTOWY --></p>
+
+  <h2>10. Zmiany polityki</h2>
+  <p>Zastrzegamy sobie prawo do aktualizacji tej polityki. O zmianach informujemy emailem (jeśli mają znaczący wpływ).</p>
+
+  <h2>11. Kontakt</h2>
+  <p>Pytania? Napisz na <!-- TODO: EMAIL KONTAKTOWY NP. privacy@velm.app --></p>
+
+  <a href="/index.html" class="back">← Wróć do aplikacji</a>
+</div>
+</body>
+</html>

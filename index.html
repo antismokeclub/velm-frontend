@@ -6,6 +6,21 @@
   <meta name="color-scheme" content="light only">
   <meta name="supported-color-schemes" content="light">
   <title>velm</title>
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#F8F5EE">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="velm">
+  <link rel="apple-touch-icon" href="/icon-192.png">
+  <script>
+    // Service Worker — wymagany dla TWA / Play Store
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').catch(() => {});
+      });
+    }
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
@@ -1436,7 +1451,8 @@ async function done() {
 
       if (response.ok && data.success && data.userId) {
         localStorage.setItem('velm_user_id', data.userId);
-        if (data.token) localStorage.setItem('velm_token', data.token);
+        if (data.accessToken || data.token) localStorage.setItem('velm_token', data.accessToken || data.token);
+        if (data.refreshToken) localStorage.setItem('velm_refresh_token', data.refreshToken);
         localStorage.setItem('velm_theme', S.data.colorTheme || 'navy');
         window.location.href = 'dashboard.html';
       } else if (response.status === 409) {
@@ -3865,19 +3881,21 @@ function showAuthScreen() {
 const AUTH_T = {
   pl: { title:'Zacznij trenować', subtitle:'Utwórz konto lub zaloguj się do istniejącego.', create:'Utwórz konto', haveAccount:'Mam już konto',
         regTitle:'Utwórz konto', regSubtitle:'Podaj email i hasło — użyjesz ich do logowania.',
-        emailPh:'Twój email', pwdPh:'Hasło (min. 6 znaków)', pwd2Ph:'Powtórz hasło', next:'Dalej →',
+        emailPh:'Twój email', pwdPh:'Hasło (min. 8 znaków)', pwd2Ph:'Powtórz hasło', next:'Dalej →',
         loginTitle:'Zaloguj się', loginSubtitle:'Wpisz dane konta, którym się rejestrowałeś', loginPwdPh:'Hasło', loginBtn:'Zaloguj', back:'← Wróć',
-        errEmail:'Wpisz prawidłowy adres email', errPwd:'Hasło musi mieć min. 6 znaków', errMatch:'Hasła nie są zgodne' },
+        forgot:'Zapomniałeś hasła?', resetTitle:'Reset hasła', resetSubtitle:'Wyślemy link do resetu na podany adres email.', resetBtn:'Wyślij link', resetSent:'Jeśli konto istnieje, wysłaliśmy instrukcje na podany adres email.',
+        errEmail:'Wpisz prawidłowy adres email', errPwd:'Hasło musi mieć min. 8 znaków', errMatch:'Hasła nie są zgodne' },
   en: { title:'Start training', subtitle:'Create an account or sign in to an existing one.', create:'Create account', haveAccount:'I have an account',
         regTitle:'Create account', regSubtitle:'Enter email and password — you\'ll use them to sign in.',
-        emailPh:'Your email', pwdPh:'Password (min. 6 chars)', pwd2Ph:'Repeat password', next:'Next →',
+        emailPh:'Your email', pwdPh:'Password (min. 8 chars)', pwd2Ph:'Repeat password', next:'Next →',
         loginTitle:'Sign in', loginSubtitle:'Enter the account details you registered with', loginPwdPh:'Password', loginBtn:'Sign in', back:'← Back',
-        errEmail:'Enter a valid email address', errPwd:'Password must be at least 6 characters', errMatch:'Passwords don\'t match' },
+        forgot:'Forgot password?', resetTitle:'Reset password', resetSubtitle:'We\'ll send a reset link to your email.', resetBtn:'Send link', resetSent:'If an account exists, we\'ve sent reset instructions to your email.',
+        errEmail:'Enter a valid email address', errPwd:'Password must be at least 8 characters', errMatch:'Passwords don\'t match' },
   fr: { title:'Commencer à courir', subtitle:'Créez un compte ou connectez-vous à un compte existant.', create:'Créer un compte', haveAccount:'J\'ai déjà un compte',
         regTitle:'Créer un compte', regSubtitle:'Saisissez votre email et mot de passe — vous les utiliserez pour vous connecter.',
         emailPh:'Votre email', pwdPh:'Mot de passe (min. 6 car.)', pwd2Ph:'Répéter le mot de passe', next:'Suivant →',
         loginTitle:'Se connecter', loginSubtitle:'Saisissez les identifiants de votre compte', loginPwdPh:'Mot de passe', loginBtn:'Se connecter', back:'← Retour',
-        errEmail:'Saisissez une adresse email valide', errPwd:'Le mot de passe doit comporter au moins 6 caractères', errMatch:'Les mots de passe ne correspondent pas' },
+        errEmail:'Saisissez une adresse email valide', errPwd:'Le mot de passe doit comporter au moins 8 caractères', errMatch:'Les mots de passe ne correspondent pas' },
   es: { title:'Empieza a entrenar', subtitle:'Crea una cuenta o inicia sesión en una existente.', create:'Crear cuenta', haveAccount:'Ya tengo cuenta',
         regTitle:'Crear cuenta', regSubtitle:'Introduce email y contraseña — los usarás para iniciar sesión.',
         emailPh:'Tu email', pwdPh:'Contraseña (mín. 6 caracteres)', pwd2Ph:'Repite la contraseña', next:'Siguiente →',
@@ -3925,7 +3943,7 @@ function _confirmRegister() {
   const btn   = document.getElementById('reg-btn');
   err.textContent = '';
   if (!email || !email.includes('@')) { err.textContent = t.errEmail; return; }
-  if (p1.length < 6) { err.textContent = t.errPwd; return; }
+  if (p1.length < 8) { err.textContent = t.errPwd; return; }
   if (p1 !== p2)     { err.textContent = t.errMatch; return; }
   btn.disabled = true;
   S.data.email    = email;
@@ -3942,8 +3960,55 @@ function showLoginForm() {
     <input class="auth-inp" id="li-pwd" type="password" placeholder="${t.loginPwdPh}" autocomplete="current-password" onkeydown="if(event.key==='Enter')handleLogin()"/>
     <button class="btn-p" id="li-btn" onclick="handleLogin()" style="margin-top:4px;">${t.loginBtn}</button>
     <div class="auth-err" id="li-err"></div>
+    <span class="auth-link" onclick="showPasswordResetForm()" style="display:block;margin-top:6px;font-size:13px;">${t.forgot}</span>
     <span class="auth-link" onclick="_renderAuthChoice()">${t.back}</span>`;
   document.getElementById('li-email').focus();
+}
+
+function showPasswordResetForm() {
+  const t = _authT();
+  document.getElementById('auth-card').innerHTML = `
+    <h2>${t.resetTitle}</h2>
+    <p>${t.resetSubtitle}</p>
+    <input class="auth-inp" id="pr-email" type="email" placeholder="${t.emailPh}" autocomplete="email" onkeydown="if(event.key==='Enter')handlePasswordResetRequest()"/>
+    <button class="btn-p" id="pr-btn" onclick="handlePasswordResetRequest()" style="margin-top:4px;">${t.resetBtn}</button>
+    <div class="auth-err" id="pr-err"></div>
+    <div class="auth-ok" id="pr-ok" style="color:#2A7F4F;font-size:13px;line-height:1.45;margin-top:6px;display:none;"></div>
+    <span class="auth-link" onclick="showLoginForm()">${t.back}</span>`;
+  document.getElementById('pr-email').focus();
+}
+
+async function handlePasswordResetRequest() {
+  const t = _authT();
+  const emailEl = document.getElementById('pr-email');
+  const errEl = document.getElementById('pr-err');
+  const okEl = document.getElementById('pr-ok');
+  const btn = document.getElementById('pr-btn');
+  const email = emailEl?.value.trim();
+  errEl.textContent = '';
+  okEl.style.display = 'none';
+  if (!email || !email.includes('@')) { errEl.textContent = t.errEmail; return; }
+  btn.disabled = true; btn.textContent = '…';
+  try {
+    const res = await fetch(`${API_BASE}/api/password-reset/request`, {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ email })
+    });
+    let data = {};
+    try { data = await res.json(); } catch(e) {}
+    if (res.ok) {
+      okEl.textContent = t.resetSent;
+      okEl.style.display = 'block';
+      emailEl.disabled = true;
+      btn.style.display = 'none';
+    } else {
+      errEl.textContent = data.error || 'Błąd serwera';
+      btn.disabled = false; btn.textContent = t.resetBtn;
+    }
+  } catch (e) {
+    errEl.textContent = 'Błąd połączenia z serwerem';
+    btn.disabled = false; btn.textContent = t.resetBtn;
+  }
 }
 
 async function handleLogin() {
@@ -3976,7 +4041,8 @@ async function handleLogin() {
       return;
     }
     localStorage.setItem('velm_user_id', data.userId);
-    if (data.token) localStorage.setItem('velm_token', data.token);
+    if (data.accessToken || data.token) localStorage.setItem('velm_token', data.accessToken || data.token);
+    if (data.refreshToken) localStorage.setItem('velm_refresh_token', data.refreshToken);
     if (data.name) localStorage.setItem('velm_user_name', data.name);
     console.log('[LOGIN] OK, redirect to dashboard');
     const overlay = document.getElementById('auth-overlay');
@@ -4003,7 +4069,7 @@ function showPasswordSetup(onConfirm) {
     <div class="pwd-card">
       <h2>Utwórz hasło</h2>
       <p>Będziesz go używać przy następnym logowaniu</p>
-      <input class="auth-inp" id="pm-pwd" type="password" placeholder="Hasło (min. 6 znaków)" autocomplete="new-password" onkeydown="if(event.key==='Enter')document.getElementById('pm-pwd2').focus()"/>
+      <input class="auth-inp" id="pm-pwd" type="password" placeholder="Hasło (min. 8 znaków)" autocomplete="new-password" onkeydown="if(event.key==='Enter')document.getElementById('pm-pwd2').focus()"/>
       <input class="auth-inp" id="pm-pwd2" type="password" placeholder="Powtórz hasło" autocomplete="new-password" onkeydown="if(event.key==='Enter')_confirmPwd()"/>
       <button class="btn-p" id="pm-btn" onclick="_confirmPwd()" style="margin-top:4px;">Utwórz konto i wygeneruj plan</button>
       <div class="auth-err" id="pm-err"></div>
@@ -4019,7 +4085,7 @@ function _confirmPwd() {
   const err = document.getElementById('pm-err');
   const btn = document.getElementById('pm-btn');
   err.textContent = '';
-  if (p1.length < 6) { err.textContent = 'Hasło musi mieć min. 6 znaków'; return; }
+  if (p1.length < 8) { err.textContent = 'Hasło musi mieć min. 8 znaków'; return; }
   if (p1 !== p2)     { err.textContent = 'Hasła nie są zgodne'; return; }
   btn.disabled = true; btn.textContent = 'Generuję plan…';
   document.getElementById('pwd-modal').remove();
