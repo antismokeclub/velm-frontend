@@ -2297,6 +2297,17 @@
         }
         .conv-item.conv-new svg { color: #1A1A1A; }
         .conv-empty { padding: 20px 14px; text-align: center; font-size: 13px; color: #8A8A8A; line-height: 1.5; }
+        .conv-confirm-overlay { display: none; align-items: center; gap: 8px; width: 100%; }
+        .conv-item.conv-confirming .conv-confirm-overlay { display: flex; }
+        .conv-item.conv-confirming .conv-text,
+        .conv-item.conv-confirming .conv-delete { display: none; }
+        .conv-confirm-label { font-size: 13px; color: #1A1A1A; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; }
+        .conv-confirm-btns { display: flex; gap: 6px; flex-shrink: 0; }
+        .conv-confirm-yes { padding: 5px 12px; border-radius: 8px; border: none; font-size: 12px; font-weight: 600; font-family: 'Inter', sans-serif; cursor: pointer; background: #C07264; color: #fff; }
+        .conv-confirm-no  { padding: 5px 12px; border-radius: 8px; border: none; font-size: 12px; font-weight: 600; font-family: 'Inter', sans-serif; cursor: pointer; background: #EBEBEB; color: #1A1A1A; }
+        #coach-messages.conv-switching { opacity: 0; transition: opacity 0.12s ease; pointer-events: none; }
+        #coach-messages.conv-ready { opacity: 1; transition: opacity 0.18s ease; }
+        #coach-messages.bulk-loading .msg { animation: none !important; }
 
         /* Messages Area */
         #coach-messages {
@@ -3999,6 +4010,11 @@
 
         const AGENT_LABELS = { szef_sztabu: 'Trener', fizjo: 'Fizjo', psycholog: 'Psycholog' };
         const AGENT_INITIALS = { szef_sztabu: 'T', fizjo: 'F', psycholog: 'P' };
+        const AGENT_DESCS = {
+            szef_sztabu: 'Twój główny trener — planuje treningi, analizuje postępy i koordynuje całą pracę sztabu.',
+            fizjo:       'Specjalista od biomechaniki i regeneracji — ocenia ryzyko kontuzji i dobiera zalecenia.',
+            psycholog:   'Coach mentalny — motywacja, nawyki i wsparcie w trudnych momentach treningowych.',
+        };
 
         const AGENT_SUGGESTIONS = {
             szef_sztabu: [
@@ -4066,6 +4082,8 @@
             if (nameEl) nameEl.textContent = AGENT_LABELS[agent] || 'Trener';
             const introTitle = document.getElementById('coach-intro-title');
             if (introTitle) introTitle.textContent = AGENT_LABELS[agent] || 'Trener';
+            const introDesc = document.getElementById('coach-intro-desc');
+            if (introDesc) introDesc.textContent = AGENT_DESCS[agent] || AGENT_DESCS.szef_sztabu;
             _renderSuggestions(agent);
             updateAgentSlider();
             // Multi-conversation: switch to this agent's last active conversation (or new if none)
@@ -4135,36 +4153,69 @@
         function renderConversationsList() {
             const list = document.getElementById('conv-list');
             if (!list) return;
-            list.innerHTML = '<div class="conv-empty">Ładowanie…</div>';
+            const cached = _conversationsCache[selectedAgent];
+            if (cached && cached.length) {
+                _renderConvItems(list, cached);
+            } else {
+                list.innerHTML = '<div class="conv-empty">Ładowanie…</div>';
+            }
             loadConversationsForAgent(selectedAgent).then((convs) => {
                 if (!convs.length) {
                     list.innerHTML = '<div class="conv-empty">Brak rozmów. Napisz coś, żeby zacząć.</div>';
                     return;
                 }
-                list.innerHTML = '';
-                convs.forEach((c) => {
-                    const item = document.createElement('button');
-                    item.type = 'button';
-                    item.className = 'conv-item' + (c.id === currentConversationId ? ' active' : '');
-                    item.innerHTML = `
-                        <div class="conv-text">
-                            <div class="conv-title"></div>
-                            <div class="conv-date">${_formatConvDate(c.last_message_at)}</div>
+                _renderConvItems(list, convs);
+            });
+        }
+
+        function _renderConvItems(list, convs) {
+            list.innerHTML = '';
+            convs.forEach((c) => {
+                const item = document.createElement('button');
+                item.type = 'button';
+                item.className = 'conv-item' + (c.id === currentConversationId ? ' active' : '');
+                item.innerHTML = `
+                    <div class="conv-text">
+                        <div class="conv-title"></div>
+                        <div class="conv-date">${_formatConvDate(c.last_message_at)}</div>
+                    </div>
+                    <button class="conv-delete" title="Usuń rozmowę" aria-label="Usuń rozmowę">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                    </button>
+                    <div class="conv-confirm-overlay">
+                        <span class="conv-confirm-label"></span>
+                        <div class="conv-confirm-btns">
+                            <button class="conv-confirm-yes" type="button">Usuń</button>
+                            <button class="conv-confirm-no" type="button">Anuluj</button>
                         </div>
-                        <button class="conv-delete" title="Usuń rozmowę" aria-label="Usuń rozmowę">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-                        </button>`;
-                    item.querySelector('.conv-title').textContent = c.title || 'Rozmowa';
-                    item.addEventListener('click', (e) => {
-                        if (e.target.closest('.conv-delete')) return;
-                        selectConversation(c.id, c.title);
-                    });
-                    item.querySelector('.conv-delete').addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        deleteConversationConfirm(c.id, c.title);
-                    });
-                    list.appendChild(item);
+                    </div>`;
+                item.querySelector('.conv-title').textContent = c.title || 'Rozmowa';
+                item.querySelector('.conv-confirm-label').textContent = c.title || 'Rozmowa';
+                item.addEventListener('click', (e) => {
+                    if (e.target.closest('.conv-delete') || e.target.closest('.conv-confirm-overlay')) return;
+                    selectConversation(c.id, c.title);
                 });
+                item.querySelector('.conv-delete').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    item.classList.add('conv-confirming');
+                });
+                item.querySelector('.conv-confirm-no').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    item.classList.remove('conv-confirming');
+                });
+                item.querySelector('.conv-confirm-yes').addEventListener('click', async (e) => {
+                    e.stopPropagation();
+                    try {
+                        const res = await fetch(`${API_BASE}/api/conversation/${c.id}`, { method: 'DELETE', headers: authHeaders() });
+                        if (!res.ok) { item.classList.remove('conv-confirming'); return; }
+                        if (c.id === currentConversationId) startNewConversation();
+                        _conversationsCache[selectedAgent] = (_conversationsCache[selectedAgent] || []).filter(x => x.id !== c.id);
+                        renderConversationsList();
+                    } catch (ex) {
+                        item.classList.remove('conv-confirming');
+                    }
+                });
+                list.appendChild(item);
             });
         }
 
@@ -4178,9 +4229,10 @@
             localStorage.setItem(`velm_active_conv_${selectedAgent}`, convId);
             _setCurrentConvTitle(title);
             _closeConvDrawer();
-            // Wyczyść wiadomości i załaduj z konwersacji
             const container = document.getElementById('coach-messages');
             if (container) {
+                container.classList.add('conv-switching');
+                container.classList.remove('conv-ready');
                 container.querySelectorAll('.msg, .chat-history-separator').forEach(n => n.remove());
                 const intro = document.getElementById('coach-intro');
                 const quick = document.getElementById('coach-quick-suggestions');
@@ -4189,12 +4241,26 @@
             }
             try {
                 const res = await fetch(`${API_BASE}/api/conversation/${convId}/messages?limit=50`, { headers: authHeaders() });
-                if (!res.ok) return;
+                if (!res.ok) {
+                    if (container) { container.classList.remove('conv-switching'); container.classList.add('conv-ready'); }
+                    return;
+                }
                 const data = await res.json();
                 const msgs = data.messages || [];
+                if (container) container.classList.add('bulk-loading');
                 for (const m of msgs) addMessage(m.role === 'user' ? 'user' : 'ai', m.content);
-                scrollToBottom();
-            } catch (e) { /* ignore */ }
+                if (container) {
+                    container.classList.remove('bulk-loading', 'conv-switching');
+                    requestAnimationFrame(() => container.classList.add('conv-ready'));
+                }
+                scrollToBottom(true);
+                if (!('ontouchstart' in window)) {
+                    const input = document.getElementById('chat-input');
+                    if (input) input.focus();
+                }
+            } catch (e) {
+                if (container) { container.classList.remove('conv-switching', 'bulk-loading'); container.classList.add('conv-ready'); }
+            }
         }
 
         function startNewConversation() {
@@ -4209,18 +4275,6 @@
                 const quick = document.getElementById('coach-quick-suggestions');
                 if (intro) intro.style.display = '';
                 if (quick) quick.style.display = '';
-            }
-        }
-
-        async function deleteConversationConfirm(convId, title) {
-            if (!confirm(`Usunąć rozmowę "${title || 'Rozmowa'}"?\n\nNotatki agenta nie zostaną usunięte.`)) return;
-            try {
-                const res = await fetch(`${API_BASE}/api/conversation/${convId}`, { method: 'DELETE', headers: authHeaders() });
-                if (!res.ok) { alert('Nie udało się usunąć'); return; }
-                if (convId === currentConversationId) startNewConversation();
-                renderConversationsList();
-            } catch (e) {
-                alert('Błąd połączenia');
             }
         }
 
