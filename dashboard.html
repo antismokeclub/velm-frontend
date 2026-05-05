@@ -2498,7 +2498,7 @@
             padding: 14px 16px calc(env(safe-area-inset-bottom, 8px) + 10px);
             display: flex !important;
             flex-direction: row;
-            align-items: center;
+            align-items: flex-end;
             gap: 12px;
             position: static;
             bottom: unset;
@@ -2510,18 +2510,29 @@
             background: #FFFFFF !important;
             border: 1.5px solid #EBEBEB !important;
             border-radius: 22px !important;
-            padding: 16px 22px !important;
+            padding: 14px 20px !important;
             font-family: 'Inter', sans-serif;
             font-size: 16px !important;
             color: #1A1A1A !important;
             outline: none;
             transition: border-color 0.2s, box-shadow 0.2s;
+            resize: none;
+            overflow: hidden;
+            max-height: 130px;
+            overflow-y: auto;
+            line-height: 1.5;
+            display: block;
         }
         #chat-input:focus {
             border-color: #1A1A1A !important;
             box-shadow: 0 0 0 3px rgba(0,0,0,0.06) !important;
         }
         #chat-input::placeholder { color: #C4C4C4 !important; }
+        #conv-drawer-agent-label {
+            font-size: 11px; font-weight: 700; letter-spacing: 0.08em;
+            text-transform: uppercase; color: #8A8A8A;
+            padding: 8px 16px 2px;
+        }
         #send-btn {
             width: 52px !important;
             height: 52px !important;
@@ -3398,6 +3409,7 @@
                         <svg id="conv-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
                     </button>
                     <div id="conv-drawer" class="hidden" role="menu">
+                        <div id="conv-drawer-agent-label">Trener</div>
                         <button class="conv-item conv-new" type="button" onclick="startNewConversation()">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                             <span>Nowa rozmowa</span>
@@ -3423,10 +3435,10 @@
 
                 <!-- Input Area (bottom) -->
                 <div id="coach-input-area">
-                    <input type="text" id="chat-input" placeholder="Napisz wiadomość..."
-                        onkeypress="handleEnter(event)"
-                        oninput="updateSendBtn()"
-                        autocomplete="off">
+                    <textarea id="chat-input" placeholder="Napisz wiadomość..."
+                        onkeydown="handleEnterTA(event)"
+                        oninput="updateSendBtn(); autoResizeInput(this)"
+                        autocomplete="off" rows="1"></textarea>
                     <button id="send-btn" onclick="sendMessage()" disabled>
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -4063,6 +4075,7 @@
             fizjo:       'Specjalista od biomechaniki i regeneracji — ocenia ryzyko kontuzji i dobiera zalecenia.',
             psycholog:   'Coach mentalny — motywacja, nawyki i wsparcie w trudnych momentach treningowych.',
         };
+        const AGENT_NAMES = { szef_sztabu: 'Trener', fizjo: 'Fizjo', psycholog: 'Psycholog' };
 
         const AGENT_SUGGESTIONS = {
             szef_sztabu: [
@@ -4201,6 +4214,8 @@
         function renderConversationsList() {
             const list = document.getElementById('conv-list');
             if (!list) return;
+            const agentLabel = document.getElementById('conv-drawer-agent-label');
+            if (agentLabel) agentLabel.textContent = AGENT_NAMES[selectedAgent] || selectedAgent;
             const cached = _conversationsCache[selectedAgent];
             if (cached && cached.length) {
                 _renderConvItems(list, cached);
@@ -4218,7 +4233,12 @@
 
         function _renderConvItems(list, convs) {
             list.innerHTML = '';
-            convs.forEach((c) => {
+            const filtered = convs.filter(c => c.last_message_at);
+            if (!filtered.length) {
+                list.innerHTML = '<div class="conv-empty">Brak rozmów. Napisz coś, żeby zacząć.</div>';
+                return;
+            }
+            filtered.forEach((c) => {
                 const item = document.createElement('button');
                 item.type = 'button';
                 item.className = 'conv-item' + (c.id === currentConversationId ? ' active' : '');
@@ -4269,7 +4289,7 @@
 
         function _setCurrentConvTitle(title) {
             const el = document.getElementById('conv-current-title');
-            if (el) el.textContent = title || 'Nowa rozmowa';
+            if (el) el.textContent = title || (AGENT_NAMES[selectedAgent] || 'Nowa rozmowa');
         }
 
         async function selectConversation(convId, title) {
@@ -4314,7 +4334,7 @@
         function startNewConversation() {
             currentConversationId = null;
             localStorage.removeItem(`velm_active_conv_${selectedAgent}`);
-            _setCurrentConvTitle('Nowa rozmowa');
+            _setCurrentConvTitle(null);
             _closeConvDrawer();
             const container = document.getElementById('coach-messages');
             if (container) {
@@ -4327,15 +4347,8 @@
         }
 
         async function switchAgentConversation(agent) {
-            // Próba wczytania ostatniej aktywnej rozmowy dla tego agenta
-            const lastConvId = localStorage.getItem(`velm_active_conv_${agent}`);
-            const convs = await loadConversationsForAgent(agent);
-            const target = lastConvId ? convs.find(c => c.id === lastConvId) : convs[0];
-            if (target) {
-                selectConversation(target.id, target.title);
-            } else {
-                startNewConversation();
-            }
+            startNewConversation();
+            loadConversationsForAgent(agent); // cache w tle dla szuflady
         }
 
         function updateAgentSlider() {
@@ -7467,6 +7480,19 @@
             if (e.key === 'Enter') sendMessage();
         }
 
+        function handleEnterTA(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        }
+
+        function autoResizeInput(el) {
+            el.style.height = 'auto';
+            el.style.height = Math.min(el.scrollHeight, 130) + 'px';
+            el.style.overflowY = el.scrollHeight > 130 ? 'auto' : 'hidden';
+        }
+
         async function sendMessage() {
             const input = document.getElementById('chat-input');
             const text = input.value.trim();
@@ -7475,6 +7501,8 @@
             // 1. Add User Message (display always shows raw text)
             addMessage('user', text);
             input.value = '';
+            input.style.height = 'auto';
+            input.style.overflowY = 'hidden';
             updateSendBtn();
 
             // Enrich message for AI with deep-link context (invisible to user)
