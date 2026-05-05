@@ -2245,6 +2245,59 @@
             pointer-events: none;
         }
 
+        /* Conversations drawer */
+        #conv-drawer-wrap { position: relative; padding: 0 20px; margin-bottom: 8px; flex-shrink: 0; z-index: 50; }
+        #conv-drawer-toggle {
+            width: 100%; height: 40px; background: transparent; border: none; border-radius: 14px;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; color: #5A5A5A;
+            cursor: pointer; transition: background 0.15s, color 0.15s;
+        }
+        #conv-drawer-toggle:hover { background: rgba(26,26,26,0.04); color: #1A1A1A; }
+        #conv-drawer-toggle:active { transform: scale(0.98); }
+        #conv-drawer-toggle[aria-expanded="true"] #conv-chevron { transform: rotate(180deg); }
+        #conv-chevron { transition: transform 0.22s cubic-bezier(0.4,0,0.2,1); color: #8A8A8A; }
+        #conv-current-title { max-width: 240px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+        #conv-drawer {
+            position: absolute; top: calc(100% + 4px); left: 16px; right: 16px;
+            background: #FFFFFF; border-radius: 18px; padding: 6px;
+            box-shadow: 0 12px 32px rgba(0,0,0,0.14), 0 0 0 1px rgba(0,0,0,0.04);
+            max-height: 360px; overflow-y: auto; scrollbar-width: thin;
+            transform-origin: top center;
+            animation: convDrawerIn 0.22s cubic-bezier(0.34,1.56,0.64,1) forwards;
+        }
+        #conv-drawer.hidden { display: none; }
+        @keyframes convDrawerIn {
+            from { opacity: 0; transform: translateY(-6px) scale(0.97); }
+            to   { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .conv-item {
+            width: 100%; min-height: 52px; padding: 10px 14px;
+            background: transparent; border: none; border-radius: 12px;
+            display: flex; align-items: center; gap: 10px; text-align: left;
+            font-family: 'Inter', sans-serif; cursor: pointer;
+            transition: background 0.15s; color: #1A1A1A;
+        }
+        .conv-item:hover { background: #F5F3F0; }
+        .conv-item.active { background: #F0EBE2; }
+        .conv-item .conv-text { flex: 1; min-width: 0; }
+        .conv-item .conv-title { font-size: 14px; font-weight: 600; line-height: 1.3; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; }
+        .conv-item .conv-date { font-size: 11px; color: #8A8A8A; margin-top: 2px; letter-spacing: 0.02em; }
+        .conv-item .conv-delete {
+            opacity: 0; width: 28px; height: 28px; border-radius: 8px; background: transparent; border: none;
+            display: flex; align-items: center; justify-content: center; cursor: pointer; color: #8A8A8A;
+            transition: opacity 0.15s, background 0.15s, color 0.15s; flex-shrink: 0;
+        }
+        .conv-item:hover .conv-delete { opacity: 1; }
+        .conv-item .conv-delete:hover { background: #F5EEEC; color: #C07264; }
+        .conv-item.conv-new {
+            color: #1A1A1A; font-weight: 600; border-bottom: 1px solid #EBEBEB; border-radius: 12px 12px 0 0; margin-bottom: 4px;
+        }
+        .conv-item.conv-new svg { color: #1A1A1A; }
+        .conv-empty { padding: 20px 14px; text-align: center; font-size: 13px; color: #8A8A8A; line-height: 1.5; }
+
         /* Messages Area */
         #coach-messages {
             flex: 1;
@@ -3287,6 +3340,21 @@
                     </div>
                 </div>
 
+                <!-- Conversations drawer -->
+                <div id="conv-drawer-wrap">
+                    <button id="conv-drawer-toggle" type="button" onclick="toggleConvDrawer()" aria-expanded="false">
+                        <span id="conv-current-title">Nowa rozmowa</span>
+                        <svg id="conv-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+                    <div id="conv-drawer" class="hidden" role="menu">
+                        <button class="conv-item conv-new" type="button" onclick="startNewConversation()">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                            <span>Nowa rozmowa</span>
+                        </button>
+                        <div id="conv-list"></div>
+                    </div>
+                </div>
+
                 <!-- Messages -->
                 <div id="coach-messages">
                     <div id="coach-intro">
@@ -4000,8 +4068,172 @@
             if (introTitle) introTitle.textContent = AGENT_LABELS[agent] || 'Trener';
             _renderSuggestions(agent);
             updateAgentSlider();
-            // Load history for newly selected agent (skip if already has messages)
-            setTimeout(() => loadChatHistory(agent), 100);
+            // Multi-conversation: switch to this agent's last active conversation (or new if none)
+            switchAgentConversation(agent);
+        }
+
+        // ── KONWERSACJE (multi-rozmowa) ─────────────────────────
+        let currentConversationId = null;
+        let _conversationsCache = {}; // agent -> [conv]
+
+        function _convDrawerEl() { return document.getElementById('conv-drawer'); }
+        function _convToggleEl() { return document.getElementById('conv-drawer-toggle'); }
+
+        function toggleConvDrawer() {
+            const drawer = _convDrawerEl();
+            const toggle = _convToggleEl();
+            if (!drawer || !toggle) return;
+            const isOpen = !drawer.classList.contains('hidden');
+            if (isOpen) {
+                drawer.classList.add('hidden');
+                toggle.setAttribute('aria-expanded', 'false');
+            } else {
+                renderConversationsList();
+                drawer.classList.remove('hidden');
+                toggle.setAttribute('aria-expanded', 'true');
+            }
+        }
+
+        function _closeConvDrawer() {
+            const drawer = _convDrawerEl();
+            const toggle = _convToggleEl();
+            if (drawer) drawer.classList.add('hidden');
+            if (toggle) toggle.setAttribute('aria-expanded', 'false');
+        }
+
+        // Click outside drawer → close
+        document.addEventListener('click', (e) => {
+            const drawer = _convDrawerEl();
+            const toggle = _convToggleEl();
+            if (!drawer || drawer.classList.contains('hidden')) return;
+            if (drawer.contains(e.target) || toggle.contains(e.target)) return;
+            _closeConvDrawer();
+        });
+
+        async function loadConversationsForAgent(agent) {
+            if (!currentUserId || !agent) return [];
+            try {
+                const res = await fetch(`${API_BASE}/api/conversations/${currentUserId}/${agent}?limit=10`, { headers: authHeaders() });
+                if (!res.ok) return [];
+                const data = await res.json();
+                _conversationsCache[agent] = data.conversations || [];
+                return _conversationsCache[agent];
+            } catch (e) {
+                return [];
+            }
+        }
+
+        function _formatConvDate(iso) {
+            const d = new Date(iso);
+            const now = new Date();
+            const diffH = (now - d) / 36e5;
+            if (diffH < 24) return d.toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit' });
+            if (diffH < 24 * 7) return d.toLocaleDateString('pl-PL', { weekday: 'short' });
+            return d.toLocaleDateString('pl-PL', { day: 'numeric', month: 'short' });
+        }
+
+        function renderConversationsList() {
+            const list = document.getElementById('conv-list');
+            if (!list) return;
+            list.innerHTML = '<div class="conv-empty">Ładowanie…</div>';
+            loadConversationsForAgent(selectedAgent).then((convs) => {
+                if (!convs.length) {
+                    list.innerHTML = '<div class="conv-empty">Brak rozmów. Napisz coś, żeby zacząć.</div>';
+                    return;
+                }
+                list.innerHTML = '';
+                convs.forEach((c) => {
+                    const item = document.createElement('button');
+                    item.type = 'button';
+                    item.className = 'conv-item' + (c.id === currentConversationId ? ' active' : '');
+                    item.innerHTML = `
+                        <div class="conv-text">
+                            <div class="conv-title"></div>
+                            <div class="conv-date">${_formatConvDate(c.last_message_at)}</div>
+                        </div>
+                        <button class="conv-delete" title="Usuń rozmowę" aria-label="Usuń rozmowę">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                        </button>`;
+                    item.querySelector('.conv-title').textContent = c.title || 'Rozmowa';
+                    item.addEventListener('click', (e) => {
+                        if (e.target.closest('.conv-delete')) return;
+                        selectConversation(c.id, c.title);
+                    });
+                    item.querySelector('.conv-delete').addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        deleteConversationConfirm(c.id, c.title);
+                    });
+                    list.appendChild(item);
+                });
+            });
+        }
+
+        function _setCurrentConvTitle(title) {
+            const el = document.getElementById('conv-current-title');
+            if (el) el.textContent = title || 'Nowa rozmowa';
+        }
+
+        async function selectConversation(convId, title) {
+            currentConversationId = convId;
+            localStorage.setItem(`velm_active_conv_${selectedAgent}`, convId);
+            _setCurrentConvTitle(title);
+            _closeConvDrawer();
+            // Wyczyść wiadomości i załaduj z konwersacji
+            const container = document.getElementById('coach-messages');
+            if (container) {
+                container.querySelectorAll('.msg, .chat-history-separator').forEach(n => n.remove());
+                const intro = document.getElementById('coach-intro');
+                const quick = document.getElementById('coach-quick-suggestions');
+                if (intro) intro.style.display = 'none';
+                if (quick) quick.style.display = 'none';
+            }
+            try {
+                const res = await fetch(`${API_BASE}/api/conversation/${convId}/messages?limit=50`, { headers: authHeaders() });
+                if (!res.ok) return;
+                const data = await res.json();
+                const msgs = data.messages || [];
+                for (const m of msgs) addMessage(m.role === 'user' ? 'user' : 'ai', m.content);
+                scrollToBottom();
+            } catch (e) { /* ignore */ }
+        }
+
+        function startNewConversation() {
+            currentConversationId = null;
+            localStorage.removeItem(`velm_active_conv_${selectedAgent}`);
+            _setCurrentConvTitle('Nowa rozmowa');
+            _closeConvDrawer();
+            const container = document.getElementById('coach-messages');
+            if (container) {
+                container.querySelectorAll('.msg, .chat-history-separator').forEach(n => n.remove());
+                const intro = document.getElementById('coach-intro');
+                const quick = document.getElementById('coach-quick-suggestions');
+                if (intro) intro.style.display = '';
+                if (quick) quick.style.display = '';
+            }
+        }
+
+        async function deleteConversationConfirm(convId, title) {
+            if (!confirm(`Usunąć rozmowę "${title || 'Rozmowa'}"?\n\nNotatki agenta nie zostaną usunięte.`)) return;
+            try {
+                const res = await fetch(`${API_BASE}/api/conversation/${convId}`, { method: 'DELETE', headers: authHeaders() });
+                if (!res.ok) { alert('Nie udało się usunąć'); return; }
+                if (convId === currentConversationId) startNewConversation();
+                renderConversationsList();
+            } catch (e) {
+                alert('Błąd połączenia');
+            }
+        }
+
+        async function switchAgentConversation(agent) {
+            // Próba wczytania ostatniej aktywnej rozmowy dla tego agenta
+            const lastConvId = localStorage.getItem(`velm_active_conv_${agent}`);
+            const convs = await loadConversationsForAgent(agent);
+            const target = lastConvId ? convs.find(c => c.id === lastConvId) : convs[0];
+            if (target) {
+                selectConversation(target.id, target.title);
+            } else {
+                startNewConversation();
+            }
         }
 
         function updateAgentSlider() {
@@ -6357,7 +6589,10 @@
                     setTimeout(() => {
                         updateAgentSlider();
                         _renderSuggestions(selectedAgent || 'szef_sztabu');
-                        loadChatHistory(selectedAgent || 'szef_sztabu');
+                        // Multi-conversation: ładuj ostatnią aktywną rozmowę dla tego agenta
+                        if (typeof switchAgentConversation === 'function') {
+                            switchAgentConversation(selectedAgent || 'szef_sztabu');
+                        }
                     }, 50);
                     document.querySelectorAll('#coach-header-title .velm-anim-letter').forEach(el => {
                         el.style.animation = 'none';
@@ -7163,6 +7398,7 @@
                         userId: currentUserId,
                         message: messageForAI,
                         agent: selectedAgent,
+                        conversationId: currentConversationId,
                         clientTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone
                     })
                 });
@@ -7192,6 +7428,17 @@
 
                 // 5. Add AI Message
                 addMessage('ai', data.reply || data.error || 'Błąd odpowiedzi');
+
+                // 5b. Save conversationId — backend creates new convo if missing
+                if (data.conversationId && data.conversationId !== currentConversationId) {
+                    currentConversationId = data.conversationId;
+                    localStorage.setItem(`velm_active_conv_${selectedAgent}`, data.conversationId);
+                    // Refresh title from first user message (truncate 60)
+                    const titleText = text.length > 60 ? text.slice(0, 57).trim() + '…' : text;
+                    _setCurrentConvTitle(titleText);
+                    // Invalidate cache to refresh next time drawer opens
+                    delete _conversationsCache[selectedAgent];
+                }
 
                 // 6. Refresh memory in background
                 setTimeout(loadUserMemory, 2000);
@@ -7224,6 +7471,10 @@
         let _settingsLang = 'pl';
         async function loadChatHistory(agent) {
             if (!currentUserId) return;
+            // Multi-conversation flow ładuje historię przez selectConversation/switchAgentConversation.
+            // Zostawiamy ten helper jako no-op żeby nie nadpisywał wiadomości.
+            return;
+            // eslint-disable-next-line no-unreachable
             const cacheKey = `${currentUserId}::${agent}`;
             if (_chatHistoryLoaded[cacheKey]) return;
             const container = document.getElementById('coach-messages');
