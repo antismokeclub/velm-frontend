@@ -2866,11 +2866,21 @@
         #checkin-overlay .sleep-ico { width:42px; height:42px; border-radius:12px; background:#EDE8DC; display:flex; align-items:center; justify-content:center; color:var(--primary); transition:all 0.22s cubic-bezier(0.34,1.56,0.64,1); flex-shrink:0; }
         #checkin-overlay .sleep-card.selected .sleep-ico { background:var(--primary); color:#fff; }
         #checkin-overlay .sleep-card .label { font-size:11px; font-weight:700; text-align:center; color:var(--primary); line-height:1; letter-spacing:0.01em; font-family:var(--font); }
-        /* SLEEP HOURS PILLS */
-        #checkin-overlay .sleep-hours-row { display:flex; gap:8px; flex-wrap:wrap; margin:4px 0 0; }
-        #checkin-overlay .sleep-hours-pill { flex:1; min-width:0; padding:10px 6px; border-radius:99px; border:1.5px solid var(--border); background:var(--surface); font-size:13px; font-weight:600; color:var(--primary); cursor:pointer; transition:all 0.18s cubic-bezier(0.34,1.56,0.64,1); font-family:var(--font); text-align:center; }
+        /* SLEEP HOURS PILLS — big card style for step-morning-0 */
+        #checkin-overlay .sleep-hours-row { display:flex; gap:8px; margin:4px 0 8px; }
+        #checkin-overlay .sleep-hours-pill { flex:1; min-width:0; padding:14px 4px 10px; border-radius:18px; border:1.5px solid var(--border); background:var(--surface); cursor:pointer; transition:all 0.22s cubic-bezier(0.34,1.56,0.64,1); display:flex; flex-direction:column; align-items:center; gap:4px; font-family:var(--font); box-shadow:0 2px 6px rgba(0,0,0,0.03); }
         #checkin-overlay .sleep-hours-pill:active { transform:scale(0.93); }
-        #checkin-overlay .sleep-hours-pill.selected { background:var(--primary); border-color:var(--primary); color:#fff; }
+        #checkin-overlay .sleep-hours-pill.optimal { border-color:#6B8F71; }
+        #checkin-overlay .sleep-hours-pill.selected { background:var(--primary); border-color:var(--primary); transform:scale(1.04); box-shadow:0 6px 20px rgba(26,26,26,0.1); }
+        #checkin-overlay .sleep-hours-pill.optimal.selected { background:#4A6B50; border-color:#4A6B50; }
+        #checkin-overlay .shp-val { font-family:'Outfit',sans-serif; font-weight:800; font-size:20px; color:var(--primary); line-height:1.1; transition:color 0.18s; }
+        #checkin-overlay .shp-label { font-size:10px; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.04em; transition:color 0.18s; line-height:1; }
+        #checkin-overlay .sleep-hours-pill.optimal .shp-label { color:#6B8F71; }
+        #checkin-overlay .sleep-hours-pill.selected .shp-val,
+        #checkin-overlay .sleep-hours-pill.selected .shp-label { color:#fff; }
+        /* Sleep recommendation banner */
+        #checkin-overlay .sleep-rec-box { display:flex; align-items:center; gap:9px; padding:11px 16px; background:#EDF5EE; border-radius:14px; font-size:13px; color:#4A6B50; margin:4px 0 20px; line-height:1.5; }
+        #checkin-overlay .sleep-rec-box strong { font-weight:700; color:#3A5B40; }
 
         /* ENERGY SLIDER */
         #checkin-overlay .slider-wrap { margin-bottom:20px; }
@@ -8665,7 +8675,7 @@
         // ── CHECKIN OVERLAY JS ───────────────────────────────────
         let currentMode  = 'morning';
         let currentStep  = 0;
-        const TOTAL_STEPS = 4;
+        const TOTAL_STEPS = 5;
         let duration = 45;
         let rpeVal   = null;
         let workoutType = 'easy';
@@ -8744,7 +8754,7 @@
             const previewSub   = document.getElementById('ci-preview-sub');
             if (previewTitle) previewTitle.textContent = TYPE_LABEL_CI[workoutType] || workoutType;
             if (previewSub)   previewSub.textContent   = workoutData.dystans_km + ' km';
-            const m2desc = document.getElementById('step-morning-2-desc');
+            const m2desc = document.getElementById('step-morning-4-desc');
             if (m2desc) m2desc.textContent = `Twój trener czeka. Dziś masz: ${TYPE_LABEL_CI[workoutType] || workoutType} · ${workoutData.dystans_km} km.`;
 
             // Reset all steps to inactive
@@ -8761,8 +8771,10 @@
             // Reset all next buttons in overlay
             document.querySelectorAll('#checkin-overlay .btn-next:not(.done-btn)').forEach(b => b.classList.remove('visible'));
             document.querySelectorAll('#checkin-overlay .btn-next.visible:not(.done-btn)').forEach(b => b.classList.add('visible'));
-            // M2 is always visible (slider always has a value)
-            const m2btn = document.querySelector('#step-morning-1 .btn-next');
+            // M0 sleep hours and M2 energy are always visible (no selection required / slider always has a value)
+            const m0btn = document.querySelector('#step-morning-0 .btn-next');
+            if (m0btn) m0btn.classList.add('visible');
+            const m2btn = document.querySelector('#step-morning-2 .btn-next');
             if (m2btn) m2btn.classList.add('visible');
             const p1btn = document.querySelector('#step-post-0 .btn-next');
             if (p1btn) p1btn.classList.add('visible');
@@ -8772,14 +8784,14 @@
             document.querySelectorAll('#checkin-overlay .rpe-circle').forEach(c => { c.classList.remove('selected'); c.style.background='transparent'; c.style.color=c.dataset.color||'var(--primary)'; });
             document.querySelectorAll('#checkin-overlay .readiness-btn').forEach(b => { b.classList.remove('selected'); b.style.borderColor=''; });
             document.querySelectorAll('#checkin-overlay .completion-card').forEach(c => { c.classList.remove('selected'); c.style.borderColor=''; });
-            document.getElementById('next-morning-0')?.classList.remove('visible');
-            document.getElementById('next-morning-2')?.classList.remove('visible');
+            document.getElementById('next-morning-1')?.classList.remove('visible');
             document.getElementById('next-morning-3')?.classList.remove('visible');
+            document.getElementById('next-morning-4')?.classList.remove('visible');
             document.getElementById('next-post-1')?.classList.remove('visible');
             document.getElementById('next-post-2')?.classList.remove('visible');
             // Reset body recovery and sleep hours selections
             document.querySelectorAll('#checkin-overlay .sleep-hours-pill').forEach(p => p.classList.remove('selected'));
-            document.querySelectorAll('#step-morning-2 .readiness-btn').forEach(b => { b.classList.remove('selected'); b.style.borderColor = ''; });
+            document.querySelectorAll('#step-morning-3 .readiness-btn').forEach(b => { b.classList.remove('selected'); b.style.borderColor = ''; });
             // Reset feeling chips, distance pills, avg pace
             document.querySelectorAll('#checkin-overlay .feeling-chip').forEach(c => c.classList.remove('selected'));
             document.querySelectorAll('#checkin-overlay .distance-pill').forEach(p => p.classList.remove('selected'));
@@ -8890,11 +8902,11 @@
                 setTimeout(() => updateStepsHeight(), 420);
                 return;
             }
-            // Morning: after readiness step (step 3), handle followup or send
-            if (currentMode === 'morning' && currentStep === 3) {
+            // Morning: after readiness step (step 4), handle followup or send
+            if (currentMode === 'morning' && currentStep === 4) {
                 if (isFightingReadiness()) {
                     inReadinessFollowup = true;
-                    animateStep('step-morning-3', 'step-morning-followup');
+                    animateStep('step-morning-4', 'step-morning-followup');
                     setTimeout(() => updateStepsHeight(), 420);
                 } else {
                     _sendCheckinData();
@@ -8961,7 +8973,7 @@
             const sleepIdx = [...document.querySelectorAll('#checkin-overlay .sleep-card')].findIndex(c => c.classList.contains('selected'));
             const sleep    = sleepIdx >= 0 ? sleepIdx + 1 : '?';
             const energy   = document.getElementById('energySlider')?.value ?? '?';
-            const readinessEl = document.querySelector('#step-morning-3 .readiness-btn.selected');
+            const readinessEl = document.querySelector('#step-morning-4 .readiness-btn.selected');
             const readiness   = readinessEl?.textContent?.trim() ?? '?';
             const hoursStr = sleepHours ? `${sleepHours}h` : '?';
             const recoveryStr = muscleRecovery || '?';
@@ -9031,14 +9043,19 @@
         }
 
         function updateProgress() {
-            for (let i = 0; i < TOTAL_STEPS; i++) {
+            const steps = currentMode === 'morning' ? TOTAL_STEPS : 4;
+            const dot4 = document.getElementById('dot-4');
+            const line3wrap = document.getElementById('line-3-wrap');
+            if (dot4) dot4.style.display = currentMode === 'morning' ? '' : 'none';
+            if (line3wrap) line3wrap.style.display = currentMode === 'morning' ? '' : 'none';
+            for (let i = 0; i < steps; i++) {
                 const dot = document.getElementById(`dot-${i}`);
                 if (!dot) continue;
                 dot.classList.remove('active', 'done');
                 if (i < currentStep) dot.classList.add('done');
                 else if (i === currentStep) dot.classList.add('active');
             }
-            for (let i = 0; i < TOTAL_STEPS - 1; i++) {
+            for (let i = 0; i < steps - 1; i++) {
                 const fill = document.getElementById(`line-${i}`);
                 if (fill) fill.style.width = i < currentStep ? '100%' : '0%';
             }
@@ -9060,7 +9077,7 @@
                 c.classList.toggle('selected', sel);
                 c.style.borderColor = sel ? SLEEP_COLORS[i] : '';
             });
-            showBtn('next-morning-0');
+            showBtn('next-morning-1');
         }
 
         function updateSlider() {
@@ -9078,24 +9095,24 @@
         }
 
         function selectReadiness(btn) {
-            document.querySelectorAll('#step-morning-3 .readiness-btn').forEach(b => { b.classList.remove('selected'); b.style.borderColor = ''; });
+            document.querySelectorAll('#step-morning-4 .readiness-btn').forEach(b => { b.classList.remove('selected'); b.style.borderColor = ''; });
             btn.classList.add('selected');
             btn.style.borderColor = btn.dataset.color;
-            showBtn('next-morning-3');
+            showBtn('next-morning-4');
         }
 
         function selectBodyRecovery(btn) {
-            document.querySelectorAll('#step-morning-2 .readiness-btn').forEach(b => { b.classList.remove('selected'); b.style.borderColor = ''; });
+            document.querySelectorAll('#step-morning-3 .readiness-btn').forEach(b => { b.classList.remove('selected'); b.style.borderColor = ''; });
             btn.classList.add('selected');
             btn.style.borderColor = btn.dataset.color;
             muscleRecovery = btn.dataset.recovery || null;
-            showBtn('next-morning-2');
+            showBtn('next-morning-3');
         }
 
         function selectSleepHours(h) {
             sleepHours = h;
             document.querySelectorAll('#checkin-overlay .sleep-hours-pill').forEach(p => {
-                p.classList.toggle('selected', parseInt(p.textContent) === h || (h === 9 && p.textContent === '9h+'));
+                p.classList.toggle('selected', parseInt(p.dataset.hours) === h);
             });
         }
 
@@ -9273,7 +9290,7 @@
             else { skippedParts.add(key); btn.classList.add('selected'); }
         }
         function isFightingReadiness() {
-            const sel = document.querySelector('#step-morning-3 .readiness-btn.selected');
+            const sel = document.querySelector('#step-morning-4 .readiness-btn.selected');
             if (!sel) return false;
             const color = sel.dataset.color;
             return color === '#C4A35A' || color === '#C07264';
@@ -9433,50 +9450,101 @@
                 <div class="progress-dot" id="dot-2"></div>
                 <div class="progress-line"><div class="progress-line-fill" id="line-2"></div></div>
                 <div class="progress-dot" id="dot-3"></div>
+                <div class="progress-line" id="line-3-wrap"><div class="progress-line-fill" id="line-3"></div></div>
+                <div class="progress-dot" id="dot-4"></div>
             </div>
 
             <!-- STEPS OUTER -->
             <div class="steps-outer" id="stepsOuter">
 
-                <!-- M1: Sen -->
+                <!-- M1: Ile godzin snu? (NOWY) -->
                 <div class="step active" id="step-morning-0">
+                    <div class="step-title">Ile godzin snu?</div>
+                    <div class="step-desc">Ilość snu to kluczowy czynnik regeneracji biegacza.</div>
+                    <div class="sleep-rec-box">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l2.5 2.5"/></svg>
+                        Zalecane dla biegaczy: <strong>7–9 godzin</strong>
+                    </div>
+                    <div class="sleep-hours-row">
+                        <button class="sleep-hours-pill" data-hours="5" onclick="selectSleepHours(5)">
+                            <span class="shp-val">5h</span>
+                            <span class="shp-label">za mało</span>
+                        </button>
+                        <button class="sleep-hours-pill" data-hours="6" onclick="selectSleepHours(6)">
+                            <span class="shp-val">6h</span>
+                            <span class="shp-label">poniżej</span>
+                        </button>
+                        <button class="sleep-hours-pill optimal" data-hours="7" onclick="selectSleepHours(7)">
+                            <span class="shp-val">7h</span>
+                            <span class="shp-label">optymalne</span>
+                        </button>
+                        <button class="sleep-hours-pill optimal" data-hours="8" onclick="selectSleepHours(8)">
+                            <span class="shp-val">8h</span>
+                            <span class="shp-label">optymalne</span>
+                        </button>
+                        <button class="sleep-hours-pill" data-hours="9" onclick="selectSleepHours(9)">
+                            <span class="shp-val">9h+</span>
+                            <span class="shp-label">dużo snu</span>
+                        </button>
+                    </div>
+                    <div class="nav-area"><button class="btn-next visible" id="next-morning-0" onclick="goNext()">Dalej →</button></div>
+                </div>
+
+                <!-- M2: Jakość snu (ikony) -->
+                <div class="step" id="step-morning-1">
                     <div class="step-title">Jak spałeś?</div>
-                    <div class="step-desc">Jakość snu wpływa na intensywność dzisiejszego treningu.</div>
+                    <div class="step-desc">Jakość snu wpływa na intensywność treningu.</div>
                     <div class="sleep-cards">
                         <div class="sleep-card" onclick="selectSleep(0)">
-                            <div class="sleep-ico"><svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M21 12.79A9 9 0 1 1 11.21 3a8.3 8.3 0 0 0 0 9.79z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-                            <span class="label">Kiepsko</span>
+                            <div class="sleep-ico" style="background:#F5E9E9;">
+                                <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+                                    <path d="M22 15A10 10 0 1 1 9 2a8 8 0 0 0 13 13z" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </div>
+                            <span class="label">Okropnie</span>
                         </div>
                         <div class="sleep-card" onclick="selectSleep(1)">
-                            <div class="sleep-ico"><svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="19" cy="5.5" r="1.2" fill="currentColor"/></svg></div>
-                            <span class="label">Słabo</span>
+                            <div class="sleep-ico" style="background:#F5EDE4;">
+                                <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+                                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M18 4.5l.38 1.12 1.12.38-1.12.38L18 7.5l-.38-1.12-1.12-.38 1.12-.38z" fill="currentColor"/>
+                                </svg>
+                            </div>
+                            <span class="label">Kiepsko</span>
                         </div>
                         <div class="sleep-card" onclick="selectSleep(2)">
-                            <div class="sleep-ico"><svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M12 3a9 9 0 0 1 0 18V3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                            <div class="sleep-ico" style="background:#EDE8DC;">
+                                <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+                                    <path d="M12 3a9 9 0 0 1 0 18V3" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </div>
                             <span class="label">Nieźle</span>
                         </div>
                         <div class="sleep-card" onclick="selectSleep(3)">
-                            <div class="sleep-ico"><svg width="26" height="26" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/><circle cx="19" cy="5.5" r="1.2" fill="currentColor"/><circle cx="21" cy="10" r="0.8" fill="currentColor"/></svg></div>
+                            <div class="sleep-ico" style="background:#E8EFF0;">
+                                <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+                                    <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.9"/>
+                                    <path d="M20 4.5l.38 1.12 1.12.38-1.12.38L20 7.5l-.38-1.12-1.12-.38 1.12-.38z" fill="currentColor"/>
+                                    <circle cx="22" cy="11" r="0.9" fill="currentColor"/>
+                                </svg>
+                            </div>
                             <span class="label">Dobrze</span>
                         </div>
                         <div class="sleep-card" onclick="selectSleep(4)">
-                            <div class="sleep-ico"><svg width="26" height="26" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="1.8"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></div>
-                            <span class="label">Super!</span>
+                            <div class="sleep-ico" style="background:#FFF4D6;">
+                                <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+                                    <circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="1.9"/>
+                                    <path d="M12 1.5v2M12 20.5v2M3.4 3.4l1.42 1.42M19.18 19.18l1.42 1.42M1.5 12h2M20.5 12h2M3.4 20.6l1.42-1.42M19.18 4.82l1.42-1.42" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/>
+                                </svg>
+                            </div>
+                            <span class="label">Świetnie</span>
                         </div>
                     </div>
-                    <div class="section-label" style="margin-top:18px;">Ile godzin snu?</div>
-                    <div class="sleep-hours-row">
-                        <button class="sleep-hours-pill" onclick="selectSleepHours(5)">5h</button>
-                        <button class="sleep-hours-pill" onclick="selectSleepHours(6)">6h</button>
-                        <button class="sleep-hours-pill" onclick="selectSleepHours(7)">7h</button>
-                        <button class="sleep-hours-pill" onclick="selectSleepHours(8)">8h</button>
-                        <button class="sleep-hours-pill" onclick="selectSleepHours(9)">9h+</button>
-                    </div>
-                    <div class="nav-area"><button class="btn-next" id="next-morning-0" onclick="goNext()">Dalej →</button></div>
+                    <div class="nav-area"><button class="btn-next" id="next-morning-1" onclick="goNext()">Dalej →</button></div>
                 </div>
 
-                <!-- M2: Energia -->
-                <div class="step" id="step-morning-1">
+                <!-- M3: Energia -->
+                <div class="step" id="step-morning-2">
                     <div class="step-title">Poziom energii</div>
                     <div class="step-desc">Jak oceniasz swój poziom energii w tej chwili?</div>
                     <div class="slider-wrap">
@@ -9487,8 +9555,8 @@
                     <div class="nav-area"><button class="btn-next visible" onclick="goNext()">Dalej →</button></div>
                 </div>
 
-                <!-- M3: Stan ciała (regeneracja) -->
-                <div class="step" id="step-morning-2">
+                <!-- M4: Stan ciała (regeneracja) -->
+                <div class="step" id="step-morning-3">
                     <div class="step-title">Stan ciała</div>
                     <div class="step-desc">Jak czujesz się fizycznie po ostatnim treningu?</div>
                     <div class="readiness-btns">
@@ -9513,7 +9581,7 @@
                             <svg class="rd-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
                         </button>
                     </div>
-                    <div class="nav-area"><button class="btn-next" id="next-morning-2" onclick="goNext()">Dalej →</button></div>
+                    <div class="nav-area"><button class="btn-next" id="next-morning-3" onclick="goNext()">Dalej →</button></div>
                 </div>
 
                 <!-- M3b: Follow-up dla "Trening zrobię mimo wszystko" -->
@@ -9559,9 +9627,9 @@
                 </div>
 
                 <!-- M4: Gotowość -->
-                <div class="step" id="step-morning-3">
+                <div class="step" id="step-morning-4">
                     <div class="step-title">Gotowy?</div>
-                    <div class="step-desc" id="step-morning-2-desc">Twój trener czeka.</div>
+                    <div class="step-desc" id="step-morning-4-desc">Twój trener czeka.</div>
                     <div class="section-label">Dzisiejszy plan</div>
                     <div class="workout-preview-card">
                         <div class="workout-preview-dot"></div>
@@ -9593,7 +9661,7 @@
                             <svg class="rd-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
                         </button>
                     </div>
-                    <div class="nav-area"><button class="btn-next" id="next-morning-3" onclick="goNext()">Dalej →</button></div>
+                    <div class="nav-area"><button class="btn-next" id="next-morning-4" onclick="goNext()">Dalej →</button></div>
                 </div>
 
                 <!-- P0: Trening — zależy od typu -->
