@@ -2786,20 +2786,30 @@
         }
 
         #checkin-overlay {
-            --bg:#F5F3F0; --surface:#FFFFFF; --border:#EBEBEB; --primary:#1A1A1A;
-            --text-muted:#8A8A8A; --text-light:#C4C4C4; --strava:#FC4C02;
-            font-family:'Inter',sans-serif; color:#1A1A1A; -webkit-font-smoothing:antialiased;
-            position:fixed; inset:0; z-index:9500; align-items:center; justify-content:center;
+            --bg:#F8F5EE; --surface:#FDFBF7; --border:#D8D2C4; --primary:#111111;
+            --text-muted:#5C6B85; --text-light:#8A97AD; --strava:#FC4C02;
+            font-family:'DM Sans',sans-serif; color:#111111; -webkit-font-smoothing:antialiased;
+            position:fixed; inset:0; z-index:9500; display:flex; align-items:center; justify-content:center;
+            background: rgba(248, 245, 238, 0.4);
+            backdrop-filter: blur(16px) saturate(180%);
+            -webkit-backdrop-filter: blur(16px) saturate(180%);
+            transition: opacity 0.4s cubic-bezier(0.22, 1, 0.36, 1);
         }
         #ci-card {
-            position:fixed; left:50%; bottom:max(14px, env(safe-area-inset-bottom)); top:auto;
-            transform:translateX(-50%);
-            width:calc(100% - 32px); max-width:448px; background:#FFFFFF;
-            border-radius:28px 28px 22px 22px; padding:0;
-            box-shadow:0 -2px 24px rgba(0,0,0,0.06), 0 20px 60px rgba(0,0,0,0.18), 0 0 0 1px rgba(0,0,0,0.05);
-            overflow-y:auto; max-height:88vh;
+            position:relative;
+            width:calc(100% - 32px); max-width:420px; background:var(--surface);
+            border-radius:24px; padding:0;
+            border: 1.5px solid var(--border);
+            box-shadow: 0 10px 40px rgba(17,17,17,0.08), 0 2px 10px rgba(17,17,17,0.04);
+            overflow:hidden; max-height:85vh;
             scrollbar-width:none; -ms-overflow-style:none;
             display:flex; flex-direction:column;
+            animation: ciEntrance 0.4s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+            will-change: transform, opacity;
+        }
+        @keyframes ciEntrance {
+            from { opacity: 0; transform: scale(0.96) translateY(10px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
         }
         #ci-card::-webkit-scrollbar { display:none; }
 
@@ -2827,43 +2837,48 @@
         #ci-inner { padding:20px 24px 36px; flex:1; }
 
         /* MODE TOGGLE */
-        #checkin-overlay .mode-toggle { display:flex; background:#EFEAE0; border-radius:99px; padding:3px; position:relative; margin-bottom:28px; height:44px; }
-        #checkin-overlay .mode-btn { flex:1; padding:0; border:none; background:transparent; border-radius:99px; font-size:13px; font-weight:600; color:var(--text-muted); cursor:pointer; position:relative; z-index:1; transition:color 0.32s cubic-bezier(0.22,1,0.36,1); font-family:'Inter',sans-serif; letter-spacing:0.01em; }
+        #checkin-overlay .mode-toggle { display:flex; background:var(--border); border-radius:99px; padding:3px; position:relative; margin-bottom:28px; height:44px; }
+        #checkin-overlay .mode-btn { flex:1; padding:0; border:none; background:transparent; border-radius:99px; font-size:13px; font-weight:600; color:var(--text-muted); cursor:pointer; position:relative; z-index:1; transition:color 0.32s cubic-bezier(0.22,1,0.36,1); font-family:var(--font); letter-spacing:0.01em; }
         #checkin-overlay .mode-btn.active { color:var(--primary); font-weight:700; }
-        #checkin-overlay .mode-slider { position:absolute; top:3px; bottom:3px; left:3px; border-radius:99px; background:#fff; box-shadow:0 2px 10px rgba(17,17,17,0.12); transition:left 0.32s cubic-bezier(0.22,1,0.36,1),width 0.32s cubic-bezier(0.22,1,0.36,1); pointer-events:none; }
+        #checkin-overlay .mode-slider { position:absolute; top:3px; bottom:3px; left:3px; border-radius:99px; background:var(--surface); box-shadow:0 2px 10px rgba(17,17,17,0.08); transition:left 0.32s cubic-bezier(0.22,1,0.36,1),width 0.32s cubic-bezier(0.22,1,0.36,1); pointer-events:none; }
 
         /* PROGRESS BAR */
         #checkin-overlay .progress-bar { display:flex; align-items:center; margin-bottom:28px; gap:0; }
         #checkin-overlay .progress-dot { width:8px; height:8px; border-radius:50%; border:1.5px solid var(--border); background:transparent; flex-shrink:0; transition:all 0.32s cubic-bezier(0.34,1.56,0.64,1); position:relative; z-index:1; }
         #checkin-overlay .progress-dot.done { border-color:var(--primary); background:var(--primary); }
-        #checkin-overlay .progress-dot.active { width:10px; height:10px; border-color:var(--primary); background:var(--primary); box-shadow:0 0 0 5px rgba(26,26,26,0.08); }
+        #checkin-overlay .progress-dot.active { width:10px; height:10px; border-color:var(--primary); background:var(--primary); box-shadow:0 0 0 5px rgba(17,17,17,0.06); }
         #checkin-overlay .progress-line { flex:1; height:2px; background:var(--border); position:relative; overflow:hidden; border-radius:2px; }
         #checkin-overlay .progress-line-fill { position:absolute; left:0; top:0; bottom:0; background:var(--primary); width:0%; transition:width 0.36s cubic-bezier(0.4,0,0.2,1); border-radius:2px; }
 
         /* STEPS */
         #checkin-overlay .steps-outer { position:relative; overflow:hidden; }
         #checkin-overlay .step { position:absolute; top:0; left:0; right:0; opacity:0; transform:translateX(20px); pointer-events:none; transition:none; }
-        #checkin-overlay .step.active { opacity:1; transform:translateX(0); pointer-events:auto; position:relative; }
-        #checkin-overlay .step-title { font-family:'Outfit',sans-serif; font-weight:700; font-size:32px; color:var(--primary); line-height:1.1; margin-bottom:8px; letter-spacing:-0.025em; }
-        #checkin-overlay .step-desc { font-size:15px; color:var(--text-muted); margin-bottom:28px; line-height:1.55; }
+        #checkin-overlay .step.active { opacity:1; transform:translateX(0); pointer-events:auto; position:relative; animation: ciStepIn 0.4s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+        @keyframes ciStepIn { from { opacity:0; transform:translateX(15px); } to { opacity:1; transform:translateX(0); } }
+        #checkin-overlay .step-title { font-family:var(--font-d); font-weight:800; font-size:32px; color:var(--primary); line-height:1.1; margin-bottom:8px; letter-spacing:-0.025em; }
+        #checkin-overlay .step-desc { font-size:15px; color:var(--text-muted); margin-bottom:28px; line-height:1.55; font-family:var(--font); }
 
         /* SLEEP CARDS */
-        #checkin-overlay .sleep-cards { display:flex; flex-direction:row; gap:8px; margin-bottom:8px; }
-        #checkin-overlay .sleep-card { flex:1; min-width:0; height:100px; display:flex; flex-direction:column; align-items:center; justify-content:center; border-radius:20px; border:2px solid transparent; background:#FFFFFF; gap:8px; cursor:pointer; transition:all 0.22s cubic-bezier(0.34,1.56,0.64,1); box-shadow:0 0 0 1px #EBEBEB, 0 2px 8px rgba(0,0,0,0.03); }
-        #checkin-overlay .sleep-card:hover { transform:translateY(-2px); box-shadow:0 0 0 1px #DCDCDC, 0 6px 16px rgba(0,0,0,0.06); }
-        #checkin-overlay .sleep-card:active { transform:scale(0.93); }
-        #checkin-overlay .sleep-card.selected { background:#F5F3F0; transform:scale(1.04); box-shadow:0 8px 24px rgba(26,26,26,0.08), 0 0 0 1.5px var(--primary); }
-        #checkin-overlay .sleep-emoji { font-size:28px; line-height:1; }
-        #checkin-overlay .sleep-dot { display:none; }
-        #checkin-overlay .sleep-card .label { font-size:12px; font-weight:600; text-align:center; color:var(--primary); line-height:1; letter-spacing:0.01em; }
+        #checkin-overlay .sleep-cards { display:flex; flex-direction:row; gap:7px; margin-bottom:8px; }
+        #checkin-overlay .sleep-card { flex:1; min-width:0; height:96px; display:flex; flex-direction:column; align-items:center; justify-content:center; border-radius:18px; border:1.5px solid var(--border); background:var(--surface); gap:9px; cursor:pointer; transition:all 0.22s cubic-bezier(0.34,1.56,0.64,1); box-shadow:0 2px 8px rgba(0,0,0,0.03); }
+        #checkin-overlay .sleep-card:active { transform:scale(0.94); }
+        #checkin-overlay .sleep-card.selected { border-color:var(--primary); transform:scale(1.05); box-shadow:0 8px 24px rgba(17,17,17,0.1), 0 0 0 1px var(--primary); }
+        #checkin-overlay .sleep-ico { width:42px; height:42px; border-radius:12px; background:#EDE8DC; display:flex; align-items:center; justify-content:center; color:var(--primary); transition:all 0.22s cubic-bezier(0.34,1.56,0.64,1); flex-shrink:0; }
+        #checkin-overlay .sleep-card.selected .sleep-ico { background:var(--primary); color:#fff; }
+        #checkin-overlay .sleep-card .label { font-size:11px; font-weight:700; text-align:center; color:var(--primary); line-height:1; letter-spacing:0.01em; font-family:var(--font); }
+        /* SLEEP HOURS PILLS */
+        #checkin-overlay .sleep-hours-row { display:flex; gap:8px; flex-wrap:wrap; margin:4px 0 0; }
+        #checkin-overlay .sleep-hours-pill { flex:1; min-width:0; padding:10px 6px; border-radius:99px; border:1.5px solid var(--border); background:var(--surface); font-size:13px; font-weight:600; color:var(--primary); cursor:pointer; transition:all 0.18s cubic-bezier(0.34,1.56,0.64,1); font-family:var(--font); text-align:center; }
+        #checkin-overlay .sleep-hours-pill:active { transform:scale(0.93); }
+        #checkin-overlay .sleep-hours-pill.selected { background:var(--primary); border-color:var(--primary); color:#fff; }
 
         /* ENERGY SLIDER */
         #checkin-overlay .slider-wrap { margin-bottom:20px; }
         #checkin-overlay input[type=range] { -webkit-appearance:none; width:100%; height:6px; border-radius:8px; background:var(--border); outline:none; cursor:pointer; }
-        #checkin-overlay input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; width:28px; height:28px; border-radius:50%; background:var(--primary); cursor:pointer; border:3px solid #fff; box-shadow:0 4px 14px rgba(26,26,26,0.22); transition:transform 0.12s cubic-bezier(0.34,1.56,0.64,1); }
-        #checkin-overlay input[type=range]:active::-webkit-slider-thumb { transform:scale(1.2); }
-        #checkin-overlay .slider-big-val { font-family:'Outfit',sans-serif; font-weight:800; font-size:64px; text-align:center; color:var(--primary); line-height:1; margin:24px 0 0; letter-spacing:-2.5px; }
-        #checkin-overlay .slider-desc { text-align:center; font-size:14px; color:var(--text-muted); min-height:24px; margin-top:10px; transition:opacity 0.2s ease; line-height:1.5; }
+        #checkin-overlay input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; width:26px; height:26px; border-radius:50%; background:var(--primary); cursor:pointer; border:3px solid var(--surface); box-shadow:0 4px 12px rgba(17,17,17,0.15); transition:transform 0.12s cubic-bezier(0.34,1.56,0.64,1); }
+        #checkin-overlay input[type=range]:active::-webkit-slider-thumb { transform:scale(1.15); }
+        #checkin-overlay .slider-big-val { font-family:var(--font-d); font-weight:800; font-size:64px; text-align:center; color:var(--primary); line-height:1; margin:24px 0 0; letter-spacing:-2px; }
+        #checkin-overlay .slider-desc { text-align:center; font-size:14px; color:var(--text-muted); min-height:24px; margin-top:10px; transition:opacity 0.2s ease; line-height:1.5; font-family:var(--font); }
 
         /* SECTION LABEL */
         #checkin-overlay .section-label { font-size:11px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-muted); margin-bottom:12px; }
@@ -2932,6 +2947,20 @@
         #checkin-overlay .skip-btn { width:100%; padding:14px 20px; background:#FFFFFF; border:1.5px solid #EBEBEB; border-radius:14px; font-size:14px; font-weight:600; color:var(--primary); font-family:'Inter',sans-serif; cursor:pointer; text-align:left; transition:all 0.18s ease; }
         #checkin-overlay .skip-btn:hover { border-color:#DCDCDC; }
         #checkin-overlay .skip-btn:active { transform:scale(0.98); }
+
+        /* FEELING CHIPS */
+        #checkin-overlay .feeling-grid { display:flex; flex-wrap:wrap; gap:10px; margin:16px 0 20px; }
+        #checkin-overlay .feeling-chip { padding:11px 16px; border-radius:99px; border:1.5px solid #EBEBEB; background:#FFFFFF; font-size:14px; font-weight:600; color:var(--primary); font-family:'Inter',sans-serif; cursor:pointer; transition:all 0.18s cubic-bezier(0.34,1.56,0.64,1); }
+        #checkin-overlay .feeling-chip:active { transform:scale(0.93); }
+        #checkin-overlay .feeling-chip.selected { background:var(--primary); border-color:var(--primary); color:#fff; }
+        /* DISTANCE PILLS */
+        #checkin-overlay .distance-pills-row { display:flex; gap:6px; flex-wrap:nowrap; margin:10px 0 12px; overflow-x:auto; -webkit-overflow-scrolling:touch; }
+        #checkin-overlay .distance-pill { flex:1; min-width:0; padding:10px 4px; border-radius:12px; border:1.5px solid var(--border); background:var(--surface); font-size:13px; font-weight:700; color:var(--primary); cursor:pointer; transition:all 0.18s cubic-bezier(0.34,1.56,0.64,1); font-family:var(--font); text-align:center; white-space:nowrap; }
+        #checkin-overlay .distance-pill:active { transform:scale(0.93); }
+        #checkin-overlay .distance-pill.selected { background:var(--primary); border-color:var(--primary); color:#fff; }
+        /* POST0 TYPE SECTIONS */
+        #checkin-overlay .post0-section { display:none; }
+        #checkin-overlay .post0-section.active { display:block; }
         #checkin-overlay .skip-btn.selected { background:#F5F3F0; border-color:var(--primary); }
         #checkin-overlay .morning-followup-opts { display:flex; flex-direction:column; gap:10px; margin:16px 0; }
         #checkin-overlay .morning-fu-btn { width:100%; padding:16px 20px; background:#FFFFFF; border:1.5px solid #EBEBEB; border-radius:18px; font-size:15px; font-weight:600; color:var(--primary); font-family:'Inter',sans-serif; cursor:pointer; text-align:left; transition:all 0.22s cubic-bezier(0.34,1.56,0.64,1); }
@@ -8659,6 +8688,13 @@
         let inSorenessDetail     = false;
         let sorenessLocation     = null;
         let sorenessDuration     = null;
+        // Sleep + body recovery state
+        let sleepHours       = null;
+        let muscleRecovery   = null;
+        // Post-workout feelings + avg pace + interval distance
+        let feelings           = new Set();
+        let avgPaceVal         = '';
+        let intervalDistanceM  = 400;
 
         function openCheckinSmart() {
             const today = todayStr();
@@ -8685,18 +8721,22 @@
             selectedCompletion = null; skippedParts = new Set();
             readinessFollowup = null; inReadinessFollowup = false;
             inSorenessDetail = false; sorenessLocation = null; sorenessDuration = null;
+            sleepHours = null; muscleRecovery = null;
+            feelings = new Set(); avgPaceVal = ''; intervalDistanceM = 400;
             const intervalPaceEl = document.getElementById('intervalPaceInput');
             const workPaceEl = document.getElementById('workPaceInput');
             if (intervalPaceEl) intervalPaceEl.value = '';
             if (workPaceEl) workPaceEl.value = '';
             const durationInput = document.getElementById('durationInput');
             if (durationInput) durationInput.value = 45;
+            document.querySelectorAll('#checkin-overlay .duration-display-val').forEach(el => el.textContent = '45');
             document.querySelectorAll('#checkin-overlay .completion-btn').forEach(b => b.classList.remove('selected'));
             document.querySelectorAll('#checkin-overlay .skip-btn').forEach(b => b.classList.remove('selected'));
             document.querySelectorAll('#checkin-overlay .morning-fu-btn').forEach(b => b.classList.remove('selected'));
             if (typ) workoutType = typ;
             if (km)  { workoutData.dystans_km = parseFloat(km); workoutData.odcinek_km = Math.round(parseFloat(km) * 0.6 * 10) / 10; }
             fuKmVal = workoutData.dystans_km / 2;
+            if (currentMode === 'post') showPost0Section();
 
             // Update workout preview card
             const TYPE_LABEL_CI = {easy:'Spokojny bieg',long:'Długi bieg',interval:'Interwały',tempo:'Tempo Run',walkrun:'Marsz-bieg',rest:'Odpoczynek'};
@@ -8734,8 +8774,19 @@
             document.querySelectorAll('#checkin-overlay .completion-card').forEach(c => { c.classList.remove('selected'); c.style.borderColor=''; });
             document.getElementById('next-morning-0')?.classList.remove('visible');
             document.getElementById('next-morning-2')?.classList.remove('visible');
+            document.getElementById('next-morning-3')?.classList.remove('visible');
             document.getElementById('next-post-1')?.classList.remove('visible');
             document.getElementById('next-post-2')?.classList.remove('visible');
+            // Reset body recovery and sleep hours selections
+            document.querySelectorAll('#checkin-overlay .sleep-hours-pill').forEach(p => p.classList.remove('selected'));
+            document.querySelectorAll('#step-morning-2 .readiness-btn').forEach(b => { b.classList.remove('selected'); b.style.borderColor = ''; });
+            // Reset feeling chips, distance pills, avg pace
+            document.querySelectorAll('#checkin-overlay .feeling-chip').forEach(c => c.classList.remove('selected'));
+            document.querySelectorAll('#checkin-overlay .distance-pill').forEach(p => p.classList.remove('selected'));
+            const avgPaceEl = document.getElementById('avgPaceInput');
+            if (avgPaceEl) avgPaceEl.value = '';
+            const post3PaceWrap = document.getElementById('post3-pace-wrap');
+            if (post3PaceWrap) post3PaceWrap.style.display = 'none';
 
             // Hide mode toggle if mode is fixed
             document.getElementById('modeToggle').style.display = 'none';
@@ -8817,11 +8868,7 @@
         function goNext() {
             if (inSorenessDetail) {
                 inSorenessDetail = false;
-                if (_shouldShowStrava()) {
-                    animateStep('step-soreness-detail', 'step-morning-3');
-                    currentStep = 3; updateProgress();
-                    setTimeout(() => updateStepsHeight(), 420);
-                } else { _sendCheckinData(); }
+                _sendCheckinData();
                 return;
             }
             if (inReadinessFollowup) {
@@ -8830,94 +8877,31 @@
                     inSorenessDetail = true;
                     animateStep('step-morning-followup', 'step-soreness-detail');
                     setTimeout(() => updateStepsHeight(), 420);
-                } else if (_shouldShowStrava()) {
-                    animateStep('step-morning-followup', 'step-morning-3');
-                    currentStep = 3; updateProgress();
-                    setTimeout(() => updateStepsHeight(), 420);
-                } else { _sendCheckinData(); }
+                } else {
+                    _sendCheckinData();
+                }
                 return;
             }
             if (inFollowUp) {
                 inFollowUp = false;
-                if (_shouldShowStrava()) {
-                    animateStep('step-post-2b', 'step-post-3');
-                    currentStep = 3; updateProgress();
+                _showPost3PaceWrap();
+                animateStep('step-post-2b', 'step-post-3');
+                currentStep = 3; updateProgress();
+                setTimeout(() => updateStepsHeight(), 420);
+                return;
+            }
+            // Morning: after readiness step (step 3), handle followup or send
+            if (currentMode === 'morning' && currentStep === 3) {
+                if (isFightingReadiness()) {
+                    inReadinessFollowup = true;
+                    animateStep('step-morning-3', 'step-morning-followup');
                     setTimeout(() => updateStepsHeight(), 420);
-                } else { _sendCheckinData(); }
-                return;
-            }
-            // Segment step transitions (interval → reps → pace → completion)
-            if (currentMode === 'post' && inSegmentStep === 'interval-reps') {
-                inSegmentStep = 'interval-pace';
-                animateStep('step-post-interval-reps', 'step-post-interval-pace');
-                setTimeout(() => updateStepsHeight(), 420);
-                return;
-            }
-            if (currentMode === 'post' && inSegmentStep === 'interval-pace') {
-                inSegmentStep = null;
-                animateStep('step-post-interval-pace', 'step-post-2');
-                currentStep = 2; updateProgress();
-                setTimeout(() => updateStepsHeight(), 420);
-                return;
-            }
-            if (currentMode === 'post' && inSegmentStep === 'tempo-work') {
-                inSegmentStep = null;
-                animateStep('step-post-tempo-work', 'step-post-2');
-                currentStep = 2; updateProgress();
-                setTimeout(() => updateStepsHeight(), 420);
-                return;
-            }
-            if (currentMode === 'post' && inSegmentStep === 'walkrun-series') {
-                inSegmentStep = null;
-                animateStep('step-post-walkrun-series', 'step-post-2');
-                currentStep = 2; updateProgress();
-                setTimeout(() => updateStepsHeight(), 420);
-                return;
-            }
-            // After RPE (step 1) — route interval/tempo/walkrun to segment steps
-            if (currentMode === 'post' && currentStep === 1) {
-                if (workoutType === 'interval') {
-                    inSegmentStep = 'interval-reps';
-                    segmentRepeats = workoutData.powtorzenia || 8;
-                    const repsEl = document.getElementById('repsVal');
-                    const repsPlanned = document.getElementById('repsPlanned');
-                    if (repsEl) repsEl.textContent = segmentRepeats;
-                    if (repsPlanned) repsPlanned.textContent = workoutData.powtorzenia || '—';
-                    animateStep('step-post-1', 'step-post-interval-reps');
-                    setTimeout(() => updateStepsHeight(), 420);
-                    return;
+                } else {
+                    _sendCheckinData();
                 }
-                if (workoutType === 'tempo') {
-                    inSegmentStep = 'tempo-work';
-                    segmentWorkKm = workoutData.odcinek_km || 6;
-                    const workKmEl = document.getElementById('workKmVal');
-                    const workPlanned = document.getElementById('tempoWorkPlanned');
-                    if (workKmEl) workKmEl.textContent = segmentWorkKm.toFixed(1) + ' km';
-                    if (workPlanned) workPlanned.textContent = (workoutData.odcinek_km || '—');
-                    animateStep('step-post-1', 'step-post-tempo-work');
-                    setTimeout(() => updateStepsHeight(), 420);
-                    return;
-                }
-                if (workoutType === 'walkrun') {
-                    inSegmentStep = 'walkrun-series';
-                    segmentSeries = workoutData.serie || 6;
-                    const seriesEl = document.getElementById('seriesVal');
-                    const seriesPlanned = document.getElementById('seriesPlanned');
-                    if (seriesEl) seriesEl.textContent = segmentSeries;
-                    if (seriesPlanned) seriesPlanned.textContent = workoutData.serie || '—';
-                    animateStep('step-post-1', 'step-post-walkrun-series');
-                    setTimeout(() => updateStepsHeight(), 420);
-                    return;
-                }
-            }
-            // Morning: after readiness step, insert followup if "fighting"
-            if (currentMode === 'morning' && currentStep === 2 && isFightingReadiness()) {
-                inReadinessFollowup = true;
-                animateStep('step-morning-2', 'step-morning-followup');
-                setTimeout(() => updateStepsHeight(), 420);
                 return;
             }
-            // Completion routing
+            // Completion routing (post)
             if (currentMode === 'post' && currentStep === 2) {
                 if (selectedCompletion === 'less') {
                     skippedParts = new Set();
@@ -8927,22 +8911,15 @@
                     setTimeout(() => updateStepsHeight(), 420);
                     return;
                 }
-                // 'exact' or 'more' — skip straight to Strava/done
-                if (_shouldShowStrava()) {
-                    animateStep('step-post-2', 'step-post-3');
-                    currentStep = 3; updateProgress();
-                    setTimeout(() => updateStepsHeight(), 420);
-                } else { _sendCheckinData(); }
+                _showPost3PaceWrap();
+                animateStep('step-post-2', 'step-post-3');
+                currentStep = 3; updateProgress();
+                setTimeout(() => updateStepsHeight(), 420);
                 return;
             }
             if (currentStep >= TOTAL_STEPS - 1) return;
             const fromId   = `step-${currentMode}-${currentStep}`;
             const nextStep = currentStep + 1;
-            // Intercept transition to Strava step (last step)
-            if (nextStep === TOTAL_STEPS - 1 && !_shouldShowStrava()) {
-                _sendCheckinData();
-                return;
-            }
             const toId = `step-${currentMode}-${nextStep}`;
             animateStep(fromId, toId);
             currentStep = nextStep; updateProgress();
@@ -8984,9 +8961,11 @@
             const sleepIdx = [...document.querySelectorAll('#checkin-overlay .sleep-card')].findIndex(c => c.classList.contains('selected'));
             const sleep    = sleepIdx >= 0 ? sleepIdx + 1 : '?';
             const energy   = document.getElementById('energySlider')?.value ?? '?';
-            const readinessEl = document.querySelector('#checkin-overlay .readiness-btn.selected');
+            const readinessEl = document.querySelector('#step-morning-3 .readiness-btn.selected');
             const readiness   = readinessEl?.textContent?.trim() ?? '?';
-            const msg = `CHECK-IN PORANNY: sen=${sleep}/5, energia=${energy}/10, gotowość=${readiness}`;
+            const hoursStr = sleepHours ? `${sleepHours}h` : '?';
+            const recoveryStr = muscleRecovery || '?';
+            const msg = `CHECK-IN PORANNY: sen=${sleep}/5, godziny_snu=${hoursStr}, energia=${energy}/10, regeneracja_miesni=${recoveryStr}, gotowosc=${readiness}`;
             fetch(`${API_BASE}/api/chat`, {
                 method:'POST', headers: authHeaders(),
                 body: JSON.stringify({ userId, message: msg, agent: 'analityk' })
@@ -9001,7 +8980,12 @@
                 body: JSON.stringify({
                     userId,
                     type: 'morning',
-                    data: { sleep: sleepVal, energy: energyVal, readiness: readinessVal, readiness_followup: readinessFollowup || null, soreness_location: sorenessLocation || null, soreness_duration: sorenessDuration || null }
+                    data: {
+                        sleep: sleepVal, energy: energyVal, readiness: readinessVal,
+                        readiness_followup: readinessFollowup || null,
+                        soreness_location: sorenessLocation || null, soreness_duration: sorenessDuration || null,
+                        sleep_hours: sleepHours || null, muscle_recovery: muscleRecovery || null
+                    }
                 })
             }).catch(() => {});
         }
@@ -9038,6 +9022,8 @@
                 if (segmentSeries > 0) workoutPayload.completed_series = segmentSeries;
                 if (workoutData.serie) workoutPayload.planned_series = workoutData.serie;
             }
+            const avgPaceEl2 = document.getElementById('avgPaceInput');
+            if (avgPaceEl2?.value?.trim()) workoutPayload.avg_pace = avgPaceEl2.value.trim();
             fetch(`${API_BASE}/api/workout`, {
                 method:'POST', headers: authHeaders(),
                 body: JSON.stringify({ userId, workout: workoutPayload })
@@ -9092,10 +9078,80 @@
         }
 
         function selectReadiness(btn) {
-            document.querySelectorAll('#checkin-overlay .readiness-btn').forEach(b => { b.classList.remove('selected'); b.style.borderColor = ''; });
+            document.querySelectorAll('#step-morning-3 .readiness-btn').forEach(b => { b.classList.remove('selected'); b.style.borderColor = ''; });
             btn.classList.add('selected');
             btn.style.borderColor = btn.dataset.color;
+            showBtn('next-morning-3');
+        }
+
+        function selectBodyRecovery(btn) {
+            document.querySelectorAll('#step-morning-2 .readiness-btn').forEach(b => { b.classList.remove('selected'); b.style.borderColor = ''; });
+            btn.classList.add('selected');
+            btn.style.borderColor = btn.dataset.color;
+            muscleRecovery = btn.dataset.recovery || null;
             showBtn('next-morning-2');
+        }
+
+        function selectSleepHours(h) {
+            sleepHours = h;
+            document.querySelectorAll('#checkin-overlay .sleep-hours-pill').forEach(p => {
+                p.classList.toggle('selected', parseInt(p.textContent) === h || (h === 9 && p.textContent === '9h+'));
+            });
+        }
+
+        function showPost0Section() {
+            ['duration', 'interval', 'tempo', 'walkrun'].forEach(id => {
+                const el = document.getElementById('post0-' + id);
+                if (el) el.classList.remove('active');
+            });
+            const map = { easy: 'duration', long: 'duration', rest: 'duration', interval: 'interval', tempo: 'tempo', walkrun: 'walkrun' };
+            const sectionEl = document.getElementById('post0-' + (map[workoutType] || 'duration'));
+            if (sectionEl) sectionEl.classList.add('active');
+            if (workoutType === 'interval') {
+                segmentRepeats = workoutData.powtorzenia || 8;
+                const repsEl = document.getElementById('repsVal');
+                const repsPlanned = document.getElementById('repsPlanned');
+                if (repsEl) repsEl.textContent = segmentRepeats;
+                if (repsPlanned) repsPlanned.textContent = workoutData.powtorzenia || '—';
+                document.querySelectorAll('#checkin-overlay .distance-pill').forEach(p => {
+                    p.classList.toggle('selected', p.dataset.dist === '400');
+                });
+                intervalDistanceM = 400;
+                const distDesc = document.getElementById('intervalDistDesc');
+                if (distDesc) distDesc.textContent = '400m';
+            } else if (workoutType === 'tempo') {
+                segmentWorkKm = workoutData.odcinek_km || 6;
+                const workKmEl = document.getElementById('workKmVal');
+                const workPlanned = document.getElementById('tempoWorkPlanned');
+                if (workKmEl) workKmEl.textContent = segmentWorkKm.toFixed(1) + ' km';
+                if (workPlanned) workPlanned.textContent = workoutData.odcinek_km || '—';
+            } else if (workoutType === 'walkrun') {
+                segmentSeries = workoutData.serie || 6;
+                const seriesEl = document.getElementById('seriesVal');
+                const seriesPlanned = document.getElementById('seriesPlanned');
+                if (seriesEl) seriesEl.textContent = segmentSeries;
+                if (seriesPlanned) seriesPlanned.textContent = workoutData.serie || '—';
+            }
+            setTimeout(() => updateStepsHeight(), 50);
+        }
+
+        function toggleFeeling(btn) {
+            const key = btn.dataset.feeling;
+            if (feelings.has(key)) { feelings.delete(key); btn.classList.remove('selected'); }
+            else { feelings.add(key); btn.classList.add('selected'); }
+        }
+
+        function selectIntervalDist(btn, m) {
+            intervalDistanceM = m;
+            document.querySelectorAll('#checkin-overlay .distance-pill').forEach(p => p.classList.remove('selected'));
+            btn.classList.add('selected');
+            const distDesc = document.getElementById('intervalDistDesc');
+            if (distDesc) distDesc.textContent = m >= 1000 ? '1km' : m + 'm';
+        }
+
+        function _showPost3PaceWrap() {
+            const pw = document.getElementById('post3-pace-wrap');
+            if (pw) pw.style.display = (workoutType === 'easy' || workoutType === 'long') ? '' : 'none';
         }
 
         async function connectStrava() {
@@ -9165,6 +9221,7 @@
             v = Math.max(1, Math.min(600, v + delta));
             if (input) input.value = v;
             duration = v;
+            document.querySelectorAll('#checkin-overlay .duration-display-val').forEach(el => el.textContent = v);
         }
         function onDurationChange() {
             const input = document.getElementById('durationInput');
@@ -9173,6 +9230,7 @@
             if (v > 600) v = 600;
             input.value = v;
             duration = v;
+            document.querySelectorAll('#checkin-overlay .duration-display-val').forEach(el => el.textContent = v);
         }
 
         function buildRpeRow() {
@@ -9215,8 +9273,10 @@
             else { skippedParts.add(key); btn.classList.add('selected'); }
         }
         function isFightingReadiness() {
-            const sel = document.querySelector('#checkin-overlay .readiness-btn.selected');
-            return sel?.textContent?.toLowerCase().includes('mimo wszystko') ?? false;
+            const sel = document.querySelector('#step-morning-3 .readiness-btn.selected');
+            if (!sel) return false;
+            const color = sel.dataset.color;
+            return color === '#C4A35A' || color === '#C07264';
         }
         function selectMorningFollowup(btn, key) {
             document.querySelectorAll('#checkin-overlay .morning-fu-btn').forEach(b => b.classList.remove('selected'));
@@ -9310,7 +9370,7 @@
             const intervalPaceVal = document.getElementById('intervalPaceInput')?.value?.trim();
             const workPaceVal = document.getElementById('workPaceInput')?.value?.trim();
             if (workoutType === 'interval' && segmentRepeats) {
-                base += `, powtórzenia=${segmentRepeats}/${workoutData.powtorzenia||'?'}`;
+                base += `, powtórzenia=${segmentRepeats}/${workoutData.powtorzenia||'?'}, dystans_odcinka=${intervalDistanceM}m`;
                 if (intervalPaceVal) base += `, tempo_interwałów=${intervalPaceVal}`;
             }
             if (workoutType === 'tempo' && segmentWorkKm) {
@@ -9323,6 +9383,9 @@
             if (selectedCompletion === 'less' && skippedParts.size > 0) {
                 base += `, pominięto=[${[...skippedParts].join(',')}]`;
             }
+            if (feelings.size > 0) base += `, odczucia=[${[...feelings].join(',')}]`;
+            const avgPaceInputEl = document.getElementById('avgPaceInput');
+            if (avgPaceInputEl?.value?.trim()) base += `, avg_pace=${avgPaceInputEl.value.trim()}`;
             return base;
         }
         function showBtn(id) { const btn = document.getElementById(id); if (btn) btn.classList.add('visible'); }
@@ -9381,30 +9444,33 @@
                     <div class="step-desc">Jakość snu wpływa na intensywność dzisiejszego treningu.</div>
                     <div class="sleep-cards">
                         <div class="sleep-card" onclick="selectSleep(0)">
-                            <span class="sleep-emoji">🌑</span>
-                            <span class="label">Słabo</span>
-                            <span class="sleep-dot" style="background:#C07264;"></span>
+                            <div class="sleep-ico"><svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M21 12.79A9 9 0 1 1 11.21 3a8.3 8.3 0 0 0 0 9.79z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                            <span class="label">Kiepsko</span>
                         </div>
                         <div class="sleep-card" onclick="selectSleep(1)">
-                            <span class="sleep-emoji">🌒</span>
-                            <span class="label">Średnio</span>
-                            <span class="sleep-dot" style="background:#C4A35A;"></span>
+                            <div class="sleep-ico"><svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="19" cy="5.5" r="1.2" fill="currentColor"/></svg></div>
+                            <span class="label">Słabo</span>
                         </div>
                         <div class="sleep-card" onclick="selectSleep(2)">
-                            <span class="sleep-emoji">🌓</span>
-                            <span class="label">Dobrze</span>
-                            <span class="sleep-dot" style="background:#6B8F71;"></span>
+                            <div class="sleep-ico"><svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M12 3a9 9 0 0 1 0 18V3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                            <span class="label">Nieźle</span>
                         </div>
                         <div class="sleep-card" onclick="selectSleep(3)">
-                            <span class="sleep-emoji">🌕</span>
-                            <span class="label">Bardzo</span>
-                            <span class="sleep-dot" style="background:#6B8F71;"></span>
+                            <div class="sleep-ico"><svg width="26" height="26" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/><circle cx="19" cy="5.5" r="1.2" fill="currentColor"/><circle cx="21" cy="10" r="0.8" fill="currentColor"/></svg></div>
+                            <span class="label">Dobrze</span>
                         </div>
                         <div class="sleep-card" onclick="selectSleep(4)">
-                            <span class="sleep-emoji">⚡</span>
-                            <span class="label">Świetnie</span>
-                            <span class="sleep-dot" style="background:#4A6B50;"></span>
+                            <div class="sleep-ico"><svg width="26" height="26" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="1.8"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></div>
+                            <span class="label">Super!</span>
                         </div>
+                    </div>
+                    <div class="section-label" style="margin-top:18px;">Ile godzin snu?</div>
+                    <div class="sleep-hours-row">
+                        <button class="sleep-hours-pill" onclick="selectSleepHours(5)">5h</button>
+                        <button class="sleep-hours-pill" onclick="selectSleepHours(6)">6h</button>
+                        <button class="sleep-hours-pill" onclick="selectSleepHours(7)">7h</button>
+                        <button class="sleep-hours-pill" onclick="selectSleepHours(8)">8h</button>
+                        <button class="sleep-hours-pill" onclick="selectSleepHours(9)">9h+</button>
                     </div>
                     <div class="nav-area"><button class="btn-next" id="next-morning-0" onclick="goNext()">Dalej →</button></div>
                 </div>
@@ -9421,26 +9487,29 @@
                     <div class="nav-area"><button class="btn-next visible" onclick="goNext()">Dalej →</button></div>
                 </div>
 
-                <!-- M3: Gotowość -->
+                <!-- M3: Stan ciała (regeneracja) -->
                 <div class="step" id="step-morning-2">
-                    <div class="step-title">Gotowy?</div>
-                    <div class="step-desc" id="step-morning-2-desc">Twój trener czeka.</div>
-                    <div class="section-label">Dzisiejszy plan</div>
-                    <div class="workout-preview-card">
-                        <div class="workout-preview-dot"></div>
-                        <div>
-                            <div class="workout-preview-title" id="ci-preview-title">Tempo Run</div>
-                            <div class="workout-preview-sub" id="ci-preview-sub">10 km · ~55 min · 4:50/km</div>
-                        </div>
-                    </div>
-                    <div class="section-label" style="margin-top:20px;">Twoja odpowiedź</div>
+                    <div class="step-title">Stan ciała</div>
+                    <div class="step-desc">Jak czujesz się fizycznie po ostatnim treningu?</div>
                     <div class="readiness-btns">
-                        <button class="readiness-btn" data-color="#6B8F71" onclick="selectReadiness(this)">
-                            <span class="rd-dot" style="background:#6B8F71;"></span><span style="flex:1;">Tak, jestem gotowy</span>
+                        <button class="readiness-btn" data-recovery="full" data-color="#4A6B50" onclick="selectBodyRecovery(this)">
+                            <span class="rd-dot" style="background:#4A6B50;"></span>
+                            <span style="flex:1;">Pełna regeneracja — czuję się świetnie</span>
                             <svg class="rd-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
                         </button>
-                        <button class="readiness-btn" data-color="#C4A35A" onclick="selectReadiness(this)">
-                            <span class="rd-dot" style="background:#C4A35A;"></span><span style="flex:1;">Trening zrobię mimo wszystko</span>
+                        <button class="readiness-btn" data-recovery="mild" data-color="#6B8F71" onclick="selectBodyRecovery(this)">
+                            <span class="rd-dot" style="background:#6B8F71;"></span>
+                            <span style="flex:1;">Lekka sztywność, ale wszystko gra</span>
+                            <svg class="rd-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
+                        </button>
+                        <button class="readiness-btn" data-recovery="moderate" data-color="#C4A35A" onclick="selectBodyRecovery(this)">
+                            <span class="rd-dot" style="background:#C4A35A;"></span>
+                            <span style="flex:1;">Wyraźne zmęczenie mięśni</span>
+                            <svg class="rd-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
+                        </button>
+                        <button class="readiness-btn" data-recovery="heavy" data-color="#C07264" onclick="selectBodyRecovery(this)">
+                            <span class="rd-dot" style="background:#C07264;"></span>
+                            <span style="flex:1;">Duży ból mięśni / zakwasy</span>
                             <svg class="rd-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
                         </button>
                     </div>
@@ -9489,38 +9558,135 @@
                     </div>
                 </div>
 
-                <!-- M4: Strava -->
+                <!-- M4: Gotowość -->
                 <div class="step" id="step-morning-3">
-                    <div class="step-title">Ułatw sobie życie</div>
-                    <div class="step-desc">Połącz raz — zero pytań każdego ranka.</div>
-                    <div class="strava-content">
-                        <div class="strava-logo">S</div>
-                        <div class="strava-name">Połącz Stravę</div>
-                        <div class="strava-sub">Synchronizuj treningi automatycznie i odbierz pełną analizę AI po każdym biegu.</div>
-                        <button class="strava-btn" onclick="connectStrava()">Połącz Stravę →</button>
+                    <div class="step-title">Gotowy?</div>
+                    <div class="step-desc" id="step-morning-2-desc">Twój trener czeka.</div>
+                    <div class="section-label">Dzisiejszy plan</div>
+                    <div class="workout-preview-card">
+                        <div class="workout-preview-dot"></div>
+                        <div>
+                            <div class="workout-preview-title" id="ci-preview-title">Tempo Run</div>
+                            <div class="workout-preview-sub" id="ci-preview-sub">10 km · ~55 min · 4:50/km</div>
+                        </div>
                     </div>
-                    <div class="skip-link" onclick="skipStrava()">Pomiń na teraz</div>
-                    <div class="nav-area"><button class="btn-next done-btn visible" onclick="finish()">Gotowe ✓</button></div>
+                    <div class="section-label" style="margin-top:20px;">Twoja odpowiedź</div>
+                    <div class="readiness-btns">
+                        <button class="readiness-btn" data-color="#4A6B50" onclick="selectReadiness(this)">
+                            <span class="rd-dot" style="background:#4A6B50;"></span>
+                            <span style="flex:1;">Jestem wypoczęty i gotowy na pełny trening</span>
+                            <svg class="rd-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
+                        </button>
+                        <button class="readiness-btn" data-color="#6B8F71" onclick="selectReadiness(this)">
+                            <span class="rd-dot" style="background:#6B8F71;"></span>
+                            <span style="flex:1;">Czuję się dobrze, dam radę</span>
+                            <svg class="rd-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
+                        </button>
+                        <button class="readiness-btn" data-color="#C4A35A" onclick="selectReadiness(this)">
+                            <span class="rd-dot" style="background:#C4A35A;"></span>
+                            <span style="flex:1;">Jestem trochę zmęczony, ale trening zrobię</span>
+                            <svg class="rd-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
+                        </button>
+                        <button class="readiness-btn" data-color="#C07264" onclick="selectReadiness(this)">
+                            <span class="rd-dot" style="background:#C07264;"></span>
+                            <span style="flex:1;">Dziś wolę odpuścić lub zrobię lżejszy trening</span>
+                            <svg class="rd-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
+                        </button>
+                    </div>
+                    <div class="nav-area"><button class="btn-next" id="next-morning-3" onclick="goNext()">Dalej →</button></div>
                 </div>
 
-                <!-- P1: Czas -->
+                <!-- P0: Trening — zależy od typu -->
                 <div class="step" id="step-post-0">
-                    <div class="step-title">Ile trwał trening?</div>
-                    <div class="step-desc">Wpisz dokładny czas lub użyj przycisków.</div>
-                    <div class="duration-row">
-                        <button class="counter-btn" onclick="adjustDuration(-5)">−5</button>
-                        <button class="counter-btn-small" onclick="adjustDuration(-1)">−1</button>
-                        <div class="duration-input-wrap">
-                            <input type="number" id="durationInput" class="duration-number" min="1" max="600" value="45" inputmode="numeric" oninput="onDurationChange()">
-                            <span class="duration-unit">min</span>
+                    <!-- Easy / Long / Rest -->
+                    <div class="post0-section active" id="post0-duration">
+                        <div class="step-title">Ile trwał trening?</div>
+                        <div class="step-desc">Wpisz dokładny czas lub użyj przycisków.</div>
+                        <div class="duration-row">
+                            <button class="counter-btn" onclick="adjustDuration(-5)">−5</button>
+                            <button class="counter-btn-small" onclick="adjustDuration(-1)">−1</button>
+                            <div class="duration-input-wrap">
+                                <input type="number" id="durationInput" class="duration-number" min="1" max="600" value="45" inputmode="numeric" oninput="onDurationChange()">
+                                <span class="duration-unit">min</span>
+                            </div>
+                            <button class="counter-btn-small" onclick="adjustDuration(1)">+1</button>
+                            <button class="counter-btn" onclick="adjustDuration(5)">+5</button>
                         </div>
-                        <button class="counter-btn-small" onclick="adjustDuration(1)">+1</button>
-                        <button class="counter-btn" onclick="adjustDuration(5)">+5</button>
+                    </div>
+                    <!-- Interval -->
+                    <div class="post0-section" id="post0-interval">
+                        <div class="step-title">Odcinki robocze</div>
+                        <div class="step-desc">Plan: <span id="repsPlanned">—</span> powtórzeń · <span id="intervalDistDesc">400m</span></div>
+                        <div class="section-label" style="margin-top:4px;">Dystans odcinka</div>
+                        <div class="distance-pills-row">
+                            <button class="distance-pill" data-dist="100" onclick="selectIntervalDist(this,100)">100m</button>
+                            <button class="distance-pill" data-dist="200" onclick="selectIntervalDist(this,200)">200m</button>
+                            <button class="distance-pill selected" data-dist="400" onclick="selectIntervalDist(this,400)">400m</button>
+                            <button class="distance-pill" data-dist="600" onclick="selectIntervalDist(this,600)">600m</button>
+                            <button class="distance-pill" data-dist="800" onclick="selectIntervalDist(this,800)">800m</button>
+                            <button class="distance-pill" data-dist="1000" onclick="selectIntervalDist(this,1000)">1km</button>
+                        </div>
+                        <div class="section-label">Liczba powtórzeń</div>
+                        <div class="counter-row">
+                            <button class="counter-btn" onclick="adjustRepeats(-1)">−</button>
+                            <div class="duration-val" id="repsVal">8</div>
+                            <button class="counter-btn" onclick="adjustRepeats(1)">+</button>
+                        </div>
+                        <input type="text" id="intervalPaceInput" class="pace-input" placeholder="4:15"
+                               inputmode="numeric" maxlength="5"
+                               oninput="formatPaceInput(this)" onblur="validatePaceInput(this)">
+                        <div class="hint">Tempo roboczych odcinków (opcjonalne)</div>
+                        <div class="section-label" style="margin-top:14px;">Czas trwania</div>
+                        <div style="display:flex;align-items:center;gap:12px;margin:6px 0 4px;">
+                            <button class="counter-btn" onclick="adjustDuration(-5)">−5</button>
+                            <span class="duration-display-val" style="font-family:'Outfit',sans-serif;font-weight:800;font-size:36px;color:var(--primary);min-width:64px;text-align:center;line-height:1;">45</span>
+                            <span style="font-size:16px;font-weight:600;color:var(--text-muted);">min</span>
+                            <button class="counter-btn" onclick="adjustDuration(5)">+5</button>
+                        </div>
+                    </div>
+                    <!-- Tempo -->
+                    <div class="post0-section" id="post0-tempo">
+                        <div class="step-title">Odcinek roboczy</div>
+                        <div class="step-desc">Plan: <span id="tempoWorkPlanned">—</span> km w tempie</div>
+                        <div class="counter-row" style="margin-top:24px;">
+                            <button class="counter-btn" onclick="adjustWorkKm(-0.5)">−</button>
+                            <div class="duration-val" id="workKmVal">6.0 km</div>
+                            <button class="counter-btn" onclick="adjustWorkKm(0.5)">+</button>
+                        </div>
+                        <input type="text" id="workPaceInput" class="pace-input" placeholder="4:45"
+                               inputmode="numeric" maxlength="5"
+                               oninput="formatPaceInput(this)" onblur="validatePaceInput(this)">
+                        <div class="hint">Tempo odcinka roboczego (opcjonalne)</div>
+                        <div class="section-label" style="margin-top:14px;">Czas trwania</div>
+                        <div style="display:flex;align-items:center;gap:12px;margin:6px 0 4px;">
+                            <button class="counter-btn" onclick="adjustDuration(-5)">−5</button>
+                            <span class="duration-display-val" style="font-family:'Outfit',sans-serif;font-weight:800;font-size:36px;color:var(--primary);min-width:64px;text-align:center;line-height:1;">45</span>
+                            <span style="font-size:16px;font-weight:600;color:var(--text-muted);">min</span>
+                            <button class="counter-btn" onclick="adjustDuration(5)">+5</button>
+                        </div>
+                    </div>
+                    <!-- Walkrun -->
+                    <div class="post0-section" id="post0-walkrun">
+                        <div class="step-title">Ile serii?</div>
+                        <div class="step-desc">Plan zakładał <span id="seriesPlanned">—</span> serii bieg-marsz.</div>
+                        <div class="counter-row">
+                            <button class="counter-btn" onclick="adjustSeries(-1)">−</button>
+                            <div class="duration-val" id="seriesVal">6</div>
+                            <button class="counter-btn" onclick="adjustSeries(1)">+</button>
+                        </div>
+                        <div class="hint">Seria = odcinek biegu + odpoczynek marszu</div>
+                        <div class="section-label" style="margin-top:14px;">Czas trwania</div>
+                        <div style="display:flex;align-items:center;gap:12px;margin:6px 0 4px;">
+                            <button class="counter-btn" onclick="adjustDuration(-5)">−5</button>
+                            <span class="duration-display-val" style="font-family:'Outfit',sans-serif;font-weight:800;font-size:36px;color:var(--primary);min-width:64px;text-align:center;line-height:1;">45</span>
+                            <span style="font-size:16px;font-weight:600;color:var(--text-muted);">min</span>
+                            <button class="counter-btn" onclick="adjustDuration(5)">+5</button>
+                        </div>
                     </div>
                     <div class="nav-area"><button class="btn-next visible" onclick="goNext()">Dalej →</button></div>
                 </div>
 
-                <!-- P2: RPE -->
+                <!-- P1: RPE -->
                 <div class="step" id="step-post-1">
                     <div class="step-title">Jak ciężko?</div>
                     <div class="step-desc">1 = spacer, 10 = absolutne maksimum.</div>
@@ -9533,60 +9699,7 @@
                     <div class="nav-area"><button class="btn-next" id="next-post-1" onclick="goNext()">Dalej →</button></div>
                 </div>
 
-                <!-- P2a: Interwały — liczba powtórzeń -->
-                <div class="step" id="step-post-interval-reps">
-                    <div class="step-title">Ile powtórzeń?</div>
-                    <div class="step-desc" id="repsDesc">Plan zakładał <span id="repsPlanned">—</span> powtórzeń</div>
-                    <div class="counter-row">
-                        <button class="counter-btn" onclick="adjustRepeats(-1)">−</button>
-                        <div class="duration-val" id="repsVal">8</div>
-                        <button class="counter-btn" onclick="adjustRepeats(1)">+</button>
-                    </div>
-                    <div class="hint">Jeśli zrobiłeś wszystkie — zostaw bez zmian</div>
-                    <div class="nav-area"><button class="btn-next visible" onclick="goNext()">Dalej →</button></div>
-                </div>
-
-                <!-- P2b: Interwały — tempo roboczych odcinków -->
-                <div class="step" id="step-post-interval-pace">
-                    <div class="step-title">Tempo interwałów</div>
-                    <div class="step-desc">Średnie tempo roboczych odcinków (bez rozgrzewki)</div>
-                    <input type="text" id="intervalPaceInput" class="pace-input" placeholder="4:15"
-                           inputmode="numeric" maxlength="5"
-                           oninput="formatPaceInput(this)" onblur="validatePaceInput(this)">
-                    <div class="hint">Format MM:SS — np. 4:15 na km. Zostaw puste jeśli nie pamiętasz.</div>
-                    <div class="nav-area"><button class="btn-next visible" onclick="goNext()">Dalej →</button></div>
-                </div>
-
-                <!-- P2c: Tempo run — odcinek roboczy -->
-                <div class="step" id="step-post-tempo-work">
-                    <div class="step-title">Odcinek roboczy</div>
-                    <div class="step-desc" id="tempoWorkDesc">Ile km udało się w tempie? Plan: <span id="tempoWorkPlanned">—</span> km</div>
-                    <div class="counter-row">
-                        <button class="counter-btn" onclick="adjustWorkKm(-0.5)">−</button>
-                        <div class="duration-val" id="workKmVal">6.0 km</div>
-                        <button class="counter-btn" onclick="adjustWorkKm(0.5)">+</button>
-                    </div>
-                    <input type="text" id="workPaceInput" class="pace-input" placeholder="4:45"
-                           inputmode="numeric" maxlength="5"
-                           oninput="formatPaceInput(this)" onblur="validatePaceInput(this)">
-                    <div class="hint">Tempo odcinka (bez rozgrzewki). Zostaw puste jeśli nie pamiętasz.</div>
-                    <div class="nav-area"><button class="btn-next visible" onclick="goNext()">Dalej →</button></div>
-                </div>
-
-                <!-- P2d: Walkrun — serie -->
-                <div class="step" id="step-post-walkrun-series">
-                    <div class="step-title">Ile serii?</div>
-                    <div class="step-desc" id="seriesDesc">Plan zakładał <span id="seriesPlanned">—</span> serii</div>
-                    <div class="counter-row">
-                        <button class="counter-btn" onclick="adjustSeries(-1)">−</button>
-                        <div class="duration-val" id="seriesVal">6</div>
-                        <button class="counter-btn" onclick="adjustSeries(1)">+</button>
-                    </div>
-                    <div class="hint">Seria = odcinek biegu + odpoczynek marszu</div>
-                    <div class="nav-area"><button class="btn-next visible" onclick="goNext()">Dalej →</button></div>
-                </div>
-
-                <!-- P3: Realizacja -->
+                <!-- P2: Realizacja -->
                 <div class="step" id="step-post-2">
                     <div class="step-title">Jak poszło?</div>
                     <div class="step-desc">Porównaj z tym co planowałeś.</div>
@@ -9607,7 +9720,7 @@
                     <div class="nav-area"><button class="btn-next" id="next-post-2" onclick="goNext()">Dalej →</button></div>
                 </div>
 
-                <!-- P3b: Co pominięto (tylko gdy "mniej niż w planie") -->
+                <!-- P2b: Co pominięto (tylko gdy "mniej niż w planie") -->
                 <div class="step" id="step-post-2b">
                     <div class="step-title">Co zostało pominięte?</div>
                     <div class="step-desc">Zaznacz wszystko co pasuje — zostaw puste jeśli nie wiesz.</div>
@@ -9621,19 +9734,27 @@
                     <div class="nav-area"><button class="btn-next visible" id="next-post-2b" onclick="goNext()">Dalej →</button></div>
                 </div>
 
-                <!-- P4: Strava -->
+                <!-- P3: Odczucia (nowy) -->
                 <div class="step" id="step-post-3">
-                    <div class="step-title">Ułatw sobie życie</div>
-                    <div class="step-desc">Połącz raz — zero pytań po każdym treningu.</div>
-                    <div class="strava-content">
-                        <div class="strava-logo">S</div>
-                        <div class="strava-name">Połącz Stravę</div>
-                        <div class="strava-sub">Synchronizuj treningi automatycznie i odbierz pełną analizę AI po każdym biegu.</div>
-                        <button class="strava-btn" onclick="connectStrava()">Połącz Stravę →</button>
+                    <div class="step-title">Jak oceniasz ten bieg?</div>
+                    <div class="step-desc">Zaznacz co pasuje — możesz wybrać kilka.</div>
+                    <div class="feeling-grid">
+                        <button class="feeling-chip" data-feeling="swietne" onclick="toggleFeeling(this)">Świetne odczucia</button>
+                        <button class="feeling-chip" data-feeling="lekko" onclick="toggleFeeling(this)">Lekko i swobodnie</button>
+                        <button class="feeling-chip" data-feeling="ok" onclick="toggleFeeling(this)">Zgodnie z oczekiwaniami</button>
+                        <button class="feeling-chip" data-feeling="ciezko-dalem-rade" onclick="toggleFeeling(this)">Ciężko, ale dałem radę</button>
+                        <button class="feeling-chip" data-feeling="slabe-nogi" onclick="toggleFeeling(this)">Słabe nogi</button>
+                        <button class="feeling-chip" data-feeling="brakowalo-tchu" onclick="toggleFeeling(this)">Brakowało tchu</button>
                     </div>
-                    <div class="skip-link" onclick="skipStrava()">Pomiń na teraz</div>
-                    <div class="nav-area"><button class="btn-next done-btn visible" onclick="finish()">Gotowe ✓</button></div>
+                    <div id="post3-pace-wrap" style="display:none;">
+                        <div class="section-label">Średnie tempo (opcjonalnie)</div>
+                        <input type="text" id="avgPaceInput" class="pace-input" placeholder="5:30"
+                               inputmode="numeric" maxlength="5"
+                               oninput="formatPaceInput(this)" onblur="validatePaceInput(this)">
+                    </div>
+                    <div class="nav-area"><button class="btn-next done-btn visible" onclick="finish(event)">Gotowe ✓</button></div>
                 </div>
+
 
             </div><!-- /steps-outer -->
 
