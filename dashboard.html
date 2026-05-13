@@ -2992,6 +2992,8 @@
         #checkin-overlay .morning-fu-btn { width:100%; padding:16px 20px; background:#FFFFFF; border:1.5px solid #EBEBEB; border-radius:18px; font-size:15px; font-weight:600; color:var(--primary); font-family:'Inter',sans-serif; cursor:pointer; text-align:left; transition:all 0.22s cubic-bezier(0.34,1.56,0.64,1); }
         #checkin-overlay .morning-fu-btn:hover { transform:translateY(-1px); border-color:#DCDCDC; box-shadow:0 4px 12px rgba(0,0,0,0.04); }
         #checkin-overlay .morning-fu-btn:active { transform:scale(0.98); }
+        #checkin-overlay .morning-fu-btn.fu-multi-btn, #checkin-overlay .morning-fu-btn.fu-single-btn { display:flex; align-items:center; }
+        #checkin-overlay .morning-fu-btn.fu-multi-btn.selected, #checkin-overlay .morning-fu-btn.fu-single-btn.selected { background:#F5F3F0; border-color:var(--primary); }
         #checkin-overlay .morning-fu-btn.selected { background:#F5F3F0; border-color:var(--primary); box-shadow:0 6px 18px rgba(26,26,26,0.06); }
         #checkin-overlay .soreness-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:16px 0; }
         #checkin-overlay .soreness-chip { padding:14px 10px; background:#FFFFFF; border:1.5px solid #EBEBEB; border-radius:14px; font-size:13px; font-weight:600; color:var(--primary); font-family:'Inter',sans-serif; cursor:pointer; text-align:center; transition:all 0.18s ease; }
@@ -8698,6 +8700,9 @@
         let workoutType = 'easy';
         let workoutData = { dystans_km:10, struktura:true, powtorzenia:8, serie:6, odcinek_km:6 };
         let inFollowUp       = false;
+        let followUpSubStep  = 0;
+        let followUpCause    = null;
+        let _gotoCoachAfterCheckin = false;
         let followUpSelections = new Set();
         let fuSingleObstacle = null;
         let fuCounterVal     = 1;
@@ -8747,6 +8752,7 @@
             rpeVal       = null;
             duration     = 45;
             followUpSelections = new Set();
+            followUpSubStep = 0; followUpCause = null; _gotoCoachAfterCheckin = false;
             fuSingleObstacle   = null;
             fuCounterVal = 1;
             segmentRepeats = 0; segmentSeries = 0; segmentWorkKm = 0;
@@ -8900,7 +8906,7 @@
 
         function setMode(mode) {
             if (mode === currentMode) return;
-            const oldId = inSorenessDetail ? 'step-soreness-detail' : inReadinessFollowup ? 'step-morning-followup' : inFollowUp ? 'step-post-2b' : `step-${currentMode}-${currentStep}`;
+            const oldId = inSorenessDetail ? 'step-soreness-detail' : inReadinessFollowup ? 'step-morning-followup' : inFollowUp ? (followUpSubStep === 0 ? 'step-post-2b' : followUpSubStep === 1 ? 'step-post-2c' : 'step-post-2d') : `step-${currentMode}-${currentStep}`;
             const oldStepEl = document.getElementById(oldId);
             if (oldStepEl) {
                 oldStepEl.style.animation = 'ciStepExit 180ms ease-in forwards';
@@ -8940,9 +8946,23 @@
                 return;
             }
             if (inFollowUp) {
-                inFollowUp = false;
+                if (followUpSubStep === 0) {
+                    followUpSubStep = 1;
+                    _buildFollowUp2c();
+                    animateStep('step-post-2b', 'step-post-2c');
+                    setTimeout(() => updateStepsHeight(), 420);
+                    return;
+                }
+                if (followUpSubStep === 1) {
+                    followUpSubStep = 2;
+                    animateStep('step-post-2c', 'step-post-2d');
+                    setTimeout(() => updateStepsHeight(), 420);
+                    return;
+                }
+                // followUpSubStep === 2: "Dam radę sam" path
+                inFollowUp = false; followUpSubStep = 0;
                 _showPost3PaceWrap();
-                animateStep('step-post-2b', 'step-post-3');
+                animateStep('step-post-2d', 'step-post-3');
                 currentStep = 3; updateProgress();
                 setTimeout(() => updateStepsHeight(), 420);
                 return;
@@ -8961,8 +8981,8 @@
             // Completion routing (post)
             if (currentMode === 'post' && currentStep === 2) {
                 if (selectedCompletion === 'less') {
-                    skippedParts = new Set();
-                    document.querySelectorAll('#checkin-overlay .skip-btn').forEach(b => b.classList.remove('selected'));
+                    skippedParts = new Set(); followUpSelections = new Set(); followUpCause = null; followUpSubStep = 0;
+                    _buildFollowUp2b();
                     inFollowUp = true;
                     animateStep('step-post-2', 'step-post-2b');
                     setTimeout(() => updateStepsHeight(), 420);
@@ -9113,7 +9133,7 @@
         function updateStepsHeight() {
             const outer = document.getElementById('stepsOuter');
             if (!outer) return;
-            const id = inSorenessDetail ? 'step-soreness-detail' : inReadinessFollowup ? 'step-morning-followup' : inFollowUp ? 'step-post-2b' : `step-${currentMode}-${currentStep}`;
+            const id = inSorenessDetail ? 'step-soreness-detail' : inReadinessFollowup ? 'step-morning-followup' : inFollowUp ? (followUpSubStep === 0 ? 'step-post-2b' : followUpSubStep === 1 ? 'step-post-2c' : 'step-post-2d') : `step-${currentMode}-${currentStep}`;
             const activeEl = document.getElementById(id);
             if (!activeEl) return;
             outer.style.minHeight = activeEl.scrollHeight + 'px';
@@ -9376,7 +9396,7 @@
                     }).catch(e => console.error('checkin save:', e));
                 }
             }
-            setTimeout(() => { closeCheckin(); loadTodayCard(); updatePostCheckinBanner(); }, 300);
+            setTimeout(() => { closeCheckin(); loadTodayCard(); updatePostCheckinBanner(); if (_gotoCoachAfterCheckin) setTimeout(() => switchView('coach'), 400); }, 300);
         }
 
         function skipStrava() {
@@ -9452,9 +9472,64 @@
             document.getElementById('next-soreness-detail')?.classList.add('visible');
         }
 
-        function buildFollowUp() {
-            // Kept for compatibility — actual skip step is static HTML in step-post-2b
+        const _FU_2B_OPTS = {
+            easy:    [{key:'mniej_km',label:'Mniejszy dystans niż plan',color:'#C4A35A'},{key:'wolniej',label:'Wolniejsze tempo niż zakładano',color:'#C07264'},{key:'bez_rozgrzewki',label:'Pominięta rozgrzewka',color:'#C07264'},{key:'bez_schladzania',label:'Pominięte schłodzenie',color:'#C4A35A'},{key:'przerwany',label:'Trening przerwany w połowie',color:'#C07264'}],
+            long:    [{key:'mniej_km',label:'Mniejszy dystans niż plan',color:'#C4A35A'},{key:'wolniej',label:'Wolniejsze tempo niż zakładano',color:'#C07264'},{key:'bez_rozgrzewki',label:'Pominięta rozgrzewka',color:'#C07264'},{key:'bez_schladzania',label:'Pominięte schłodzenie',color:'#C4A35A'},{key:'przerwany',label:'Trening przerwany w połowie',color:'#C07264'}],
+            interval:[{key:'mniej_powtorzen',label:'Mniej powtórzeń niż planowano',color:'#C07264'},{key:'krotsze_odcinki',label:'Krótsze odcinki powtórzeń',color:'#C4A35A'},{key:'dluzsze_przerwy',label:'Dłuższe przerwy między powtórzeniami',color:'#C4A35A'},{key:'slabsze_tempo',label:'Słabsze tempo interwałów niż cel',color:'#C07264'},{key:'bez_rozgrzewki',label:'Pominięta rozgrzewka',color:'#C07264'}],
+            tempo:   [{key:'skrocony_odcinek',label:'Krótszy odcinek tempo niż plan',color:'#C07264'},{key:'wolniejsze_tempo',label:'Wolniejsze tempo niż zakładano',color:'#C07264'},{key:'bez_rozgrzewki',label:'Pominięta rozgrzewka',color:'#C07264'},{key:'bez_schladzania',label:'Pominięte schłodzenie',color:'#C4A35A'},{key:'przerwany',label:'Odcinek tempo nieukończony',color:'#C07264'}],
+            walkrun: [{key:'mniej_serii',label:'Mniej serii niż planowano',color:'#C07264'},{key:'mniej_km',label:'Mniejszy dystans całkowity',color:'#C4A35A'},{key:'krotszy_bieg',label:'Krótsze odcinki biegu w seriach',color:'#C4A35A'},{key:'bez_rozgrzewki',label:'Pominięta rozgrzewka',color:'#C07264'}],
+        };
+        const _FU_2C_OPTS = [
+            {key:'zmeczenie',label:'Zmęczenie fizyczne',color:'#C07264'},
+            {key:'bol',label:'Ból / dyskomfort',color:'#C07264'},
+            {key:'brak_czasu',label:'Brak czasu',color:'#C4A35A'},
+            {key:'pogoda',label:'Pogoda / warunki zewnętrzne',color:'#C4A35A'},
+            {key:'motywacja',label:'Brak motywacji',color:'#6B8F71'},
+            {key:'inne',label:'Coś innego',color:'#6B8F71'},
+        ];
+
+        function _buildFollowUp2b() {
+            const el = document.getElementById('fu-2b-options');
+            if (!el) return;
+            const opts = _FU_2B_OPTS[workoutType] || _FU_2B_OPTS.easy;
+            el.innerHTML = opts.map(o =>
+                `<button class="morning-fu-btn fu-multi-btn" onclick="toggleFollowUp2b(this,'${o.key}')" data-key="${o.key}">` +
+                `<span class="fu-dot" style="background:${o.color};width:10px;height:10px;border-radius:50%;flex-shrink:0;display:inline-block;margin-right:12px;"></span>${o.label}</button>`
+            ).join('');
+            const btn = document.getElementById('next-post-2b');
+            if (btn) btn.classList.remove('visible');
+        }
+        function _buildFollowUp2c() {
+            const el = document.getElementById('fu-2c-options');
+            if (!el) return;
+            el.innerHTML = _FU_2C_OPTS.map(o =>
+                `<button class="morning-fu-btn fu-single-btn" onclick="selectFollowUpCause(this,'${o.key}')" data-key="${o.key}">` +
+                `<span class="fu-dot" style="background:${o.color};width:10px;height:10px;border-radius:50%;flex-shrink:0;display:inline-block;margin-right:12px;"></span>${o.label}</button>`
+            ).join('');
+            const btn = document.getElementById('next-post-2c');
+            if (btn) btn.classList.remove('visible');
+        }
+        function toggleFollowUp2b(card, key) {
+            if (followUpSelections.has(key)) { followUpSelections.delete(key); card.classList.remove('selected'); }
+            else { followUpSelections.add(key); card.classList.add('selected'); }
+            const btn = document.getElementById('next-post-2b');
+            if (btn) btn.classList.toggle('visible', followUpSelections.size > 0);
             setTimeout(() => updateStepsHeight(), 50);
+        }
+        function selectFollowUpCause(card, key) {
+            document.querySelectorAll('#step-post-2c .fu-single-btn').forEach(b => b.classList.remove('selected'));
+            card.classList.add('selected');
+            followUpCause = key;
+            showBtn('next-post-2c');
+        }
+        function goWithTrainer() {
+            _gotoCoachAfterCheckin = true;
+            inFollowUp = false; followUpSubStep = 0;
+            _sendCheckinData();
+        }
+
+        function buildFollowUp() {
+            // Kept for compatibility
         }
         function fuCard(color, label, mode, key) {
             const onclick = mode === 'obstacle' ? `selectFuObstacle(this)` : `toggleFollowUp(this,'${key}')`;
@@ -9546,6 +9621,12 @@
             }
             if (selectedCompletion === 'less' && skippedParts.size > 0) {
                 base += `, pominięto=[${[...skippedParts].join(',')}]`;
+            }
+            if (selectedCompletion === 'less' && followUpSelections.size > 0) {
+                base += `, co_poszlo_inaczej=[${[...followUpSelections].join(',')}]`;
+            }
+            if (selectedCompletion === 'less' && followUpCause) {
+                base += `, przyczyna=${followUpCause}`;
             }
             if (feelings.size > 0) base += `, odczucia=[${[...feelings].join(',')}]`;
             const avgPaceInputEl = document.getElementById('avgPaceInput');
@@ -9891,18 +9972,36 @@
                     <div class="nav-area"><button class="btn-next" id="next-post-2" onclick="goNext()">Dalej →</button></div>
                 </div>
 
-                <!-- P2b: Co pominięto (tylko gdy "mniej niż w planie") -->
+                <!-- P2b: Co poszło inaczej? (personalized, multi-select) -->
                 <div class="step" id="step-post-2b">
-                    <div class="step-title">Co zostało pominięte?</div>
-                    <div class="step-desc">Zaznacz wszystko co pasuje — zostaw puste jeśli nie wiesz.</div>
-                    <div class="skip-options">
-                        <button class="skip-btn" data-skip="warmup" onclick="toggleSkip(this, 'warmup')">Pominięta rozgrzewka</button>
-                        <button class="skip-btn" data-skip="cooldown" onclick="toggleSkip(this, 'cooldown')">Pominięte schłodzenie</button>
-                        <button class="skip-btn" data-skip="distance" onclick="toggleSkip(this, 'distance')">Mniejszy dystans niż planowany</button>
-                        <button class="skip-btn" data-skip="repeats" onclick="toggleSkip(this, 'repeats')">Mniej powtórzeń (interwały)</button>
-                        <button class="skip-btn" data-skip="intensity" onclick="toggleSkip(this, 'intensity')">Mniejsza intensywność / wolniejsze tempo</button>
+                    <div class="step-title">Co poszło inaczej?</div>
+                    <div class="step-desc">Zaznacz wszystko co pasuje.</div>
+                    <div class="morning-followup-opts" id="fu-2b-options"></div>
+                    <div class="nav-area"><button class="btn-next" id="next-post-2b" onclick="goNext()">Dalej →</button></div>
+                </div>
+
+                <!-- P2c: Co było przyczyną? (single-select) -->
+                <div class="step" id="step-post-2c">
+                    <div class="step-title">Co było przyczyną?</div>
+                    <div class="step-desc">Wybierz jedną główną przyczynę.</div>
+                    <div class="morning-followup-opts" id="fu-2c-options"></div>
+                    <div class="nav-area"><button class="btn-next" id="next-post-2c" onclick="goNext()">Dalej →</button></div>
+                </div>
+
+                <!-- P2d: Pogadaj z trenerem? -->
+                <div class="step" id="step-post-2d">
+                    <div class="step-title">Porozmawiać z trenerem?</div>
+                    <div class="step-desc">Trener może pomóc przeanalizować co się stało i dostosować kolejne treningi.</div>
+                    <div class="readiness-btns" style="margin-top:20px;">
+                        <button class="readiness-btn" onclick="goWithTrainer()" style="background:#1A1A1A;color:#fff;border-color:#1A1A1A;">
+                            <span class="rd-dot" style="background:#6B8F71;"></span>
+                            Tak, pogadam z trenerem →
+                        </button>
+                        <button class="readiness-btn" onclick="goNext()">
+                            <span class="rd-dot" style="background:#C4A35A;"></span>
+                            Dam radę sam
+                        </button>
                     </div>
-                    <div class="nav-area"><button class="btn-next visible" id="next-post-2b" onclick="goNext()">Dalej →</button></div>
                 </div>
 
                 <!-- P3: Odczucia (nowy) -->
