@@ -2954,6 +2954,7 @@
         #checkin-overlay .ci-pk-item.near2 { font-size:17px; opacity:.25; }
         #checkin-overlay .ci-pk-item.far { font-size:14px; opacity:.1; }
         #checkin-overlay .ci-pk-sep { font-family:'Outfit',sans-serif; font-weight:800; font-size:30px; color:var(--primary); opacity:.3; line-height:1; flex-shrink:0; align-self:center; margin-top:10px; }
+        #checkin-overlay .ci-pk-hint { text-align:center; font-size:13px; color:var(--text-muted); font-weight:500; margin:6px 0 2px; min-height:18px; }
         #checkin-overlay .completion-grid { display:flex; flex-direction:column; gap:12px; margin:16px 0 8px; }
         #checkin-overlay .completion-btn { display:flex; align-items:center; gap:14px; padding:16px 20px; background:#FFFFFF; border:1.5px solid #EBEBEB; border-radius:18px; cursor:pointer; transition:all 0.22s cubic-bezier(0.34,1.56,0.64,1); text-align:left; font-family:'Inter',sans-serif; width:100%; }
         #checkin-overlay .completion-btn:hover { transform:translateY(-1px); box-shadow:0 6px 16px rgba(0,0,0,0.05); }
@@ -7936,6 +7937,7 @@
 
             // Tempo
             const paceRaw = day.tempo_min_km || '';
+            window._todayPace = paceRaw;
             if (tilePace) tilePace.textContent = paceRaw ? paceRaw.split('/')[0].split('-')[0].trim() : '—';
 
             // Intensywność
@@ -8769,7 +8771,26 @@
             if (typ) workoutType = typ;
             if (km)  { workoutData.dystans_km = parseFloat(km); workoutData.odcinek_km = Math.round(parseFloat(km) * 0.6 * 10) / 10; }
             fuKmVal = workoutData.dystans_km / 2;
-            if (currentMode === 'post') showPost0Section();
+            if (currentMode === 'post') {
+                const _ep = _parsePaceMin(window._todayPace);
+                const _dk = workoutData.dystans_km || 10;
+                if (workoutType === 'easy' || workoutType === 'long') {
+                    const _e = Math.round((_ep || 6.5) * _dk);
+                    durH = Math.floor(_e/60); durM = _e%60; durS = 0; duration = durH*60+durM;
+                } else if (workoutType === 'walkrun') {
+                    const _e = Math.round(8.0 * _dk);
+                    durH = Math.floor(_e/60); durM = _e%60; durS = 0; duration = durH*60+durM;
+                } else if (workoutType === 'tempo') {
+                    const _sk = workoutData.odcinek_km || 6;
+                    const _e = Math.round((_ep || 5.0) * _sk);
+                    workSegH = Math.floor(_e/60); workSegM = _e%60; workSegS = 0;
+                } else if (workoutType === 'interval') {
+                    const _es = Math.round((_ep || 4.5) * 60 * 0.4);
+                    workSegH = 0; workSegM = Math.floor(_es/60); workSegS = Math.round((_es%60)/5)*5;
+                    if (workSegS >= 60) { workSegM++; workSegS = 0; }
+                }
+                showPost0Section();
+            }
 
             // Update workout preview card
             const TYPE_LABEL_CI = {easy:'Spokojny bieg',long:'Długi bieg',interval:'Interwały',tempo:'Tempo Run',walkrun:'Marsz-bieg',rest:'Odpoczynek'};
@@ -9137,6 +9158,8 @@
         }
 
         const CI_PK_H = 52, CI_PK_PAD = 3, CI_PK_CONT_H = 200;
+        function _parsePaceMin(s) { const m = String(s||'').match(/(\d+):(\d+)/); return m ? parseInt(m[1]) + parseInt(m[2])/60 : null; }
+        function _fmtMin(total) { const h = Math.floor(total/60), m = total%60; return h > 0 ? `${h}h ${m} min` : `${m} min`; }
 
         function _ciPkCol(values, initVal, key) {
             const selIdx = Math.max(0, values.indexOf(initVal));
@@ -9267,6 +9290,19 @@
                     initCiPickers(_pkEl);
                 }
             }
+            const _dk = workoutData.dystans_km || 10;
+            const _hints = {
+                'ci-pk-hint-dur': (workoutType === 'easy' || workoutType === 'long')
+                    ? `Plan: ${_dk} km · ok. ${_fmtMin(durH*60+durM)}`
+                    : '',
+                'ci-pk-hint-dur-walkrun':
+                    `Plan: ${workoutData.serie||'—'} serii · ${_dk} km · ok. ${_fmtMin(durH*60+durM)}`,
+                'ci-pk-hint-wseg-interval':
+                    `Plan: ${workoutData.powtorzenia||8}× powtórzeń · ok. ${workSegM}:${String(workSegS).padStart(2,'0')}/odcinek`,
+                'ci-pk-hint-wseg-tempo':
+                    `Plan: ${workoutData.odcinek_km||'—'} km odcinka · ok. ${_fmtMin(workSegH*60+workSegM)}`,
+            };
+            Object.entries(_hints).forEach(([id, txt]) => { const el = document.getElementById(id); if (el) el.textContent = txt; });
             setTimeout(() => updateStepsHeight(), 50);
         }
 
@@ -9766,6 +9802,7 @@
                     <!-- Easy / Long / Rest -->
                     <div class="post0-section active" id="post0-duration">
                         <div class="step-title">Ile trwał trening?</div>
+                        <div class="ci-pk-hint" id="ci-pk-hint-dur"></div>
                         <div id="ci-pk-dur-easy"></div>
                     </div>
                     <!-- Interval -->
@@ -9792,6 +9829,7 @@
                                oninput="formatPaceInput(this)" onblur="validatePaceInput(this)">
                         <div class="hint">Tempo roboczych odcinków (opcjonalne)</div>
                         <div class="section-label" style="margin-top:14px;">Czas odcinków roboczych</div>
+                        <div class="ci-pk-hint" id="ci-pk-hint-wseg-interval"></div>
                         <div id="ci-pk-wseg-interval"></div>
                     </div>
                     <!-- Tempo -->
@@ -9808,6 +9846,7 @@
                                oninput="formatPaceInput(this)" onblur="validatePaceInput(this)">
                         <div class="hint">Tempo odcinka roboczego (opcjonalne)</div>
                         <div class="section-label" style="margin-top:14px;">Czas odcinka tempo</div>
+                        <div class="ci-pk-hint" id="ci-pk-hint-wseg-tempo"></div>
                         <div id="ci-pk-wseg-tempo"></div>
                     </div>
                     <!-- Walkrun -->
@@ -9821,6 +9860,7 @@
                         </div>
                         <div class="hint">Seria = odcinek biegu + odpoczynek marszu</div>
                         <div class="section-label" style="margin-top:14px;">Całkowity czas</div>
+                        <div class="ci-pk-hint" id="ci-pk-hint-dur-walkrun"></div>
                         <div id="ci-pk-dur-walkrun"></div>
                     </div>
                     <div class="nav-area"><button class="btn-next visible" onclick="goNext()">Dalej →</button></div>
