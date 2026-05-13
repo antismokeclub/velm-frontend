@@ -8825,7 +8825,7 @@
 
             // Reset sleep/rpe/readiness selections
             document.querySelectorAll('#checkin-overlay .sleep-card').forEach(c => { c.classList.remove('selected'); c.style.borderColor=''; });
-            document.querySelectorAll('#checkin-overlay .rpe-circle').forEach(c => { c.classList.remove('selected'); c.style.background='transparent'; c.style.color=c.dataset.color||'var(--primary)'; });
+            const _rpeS = document.getElementById('rpeSlider'); if (_rpeS) { _rpeS.value = 5; updateRpeSlider(); }
             document.querySelectorAll('#checkin-overlay .readiness-btn').forEach(b => { b.classList.remove('selected'); b.style.borderColor=''; });
             document.querySelectorAll('#checkin-overlay .completion-card').forEach(c => { c.classList.remove('selected'); c.style.borderColor=''; });
             document.getElementById('next-morning-1')?.classList.remove('visible');
@@ -9395,27 +9395,19 @@
         function adjustWorkSegM(d) {}
         function adjustWorkSegS(d) {}
 
-        function buildRpeRow() {
-            const row = document.getElementById('rpeRow');
-            if (!row || row.children.length > 0) return;
-            const colors = {1:'#6B8F71',2:'#6B8F71',3:'#6B8F71',4:'#C4A35A',5:'#C4A35A',6:'#C4A35A',7:'#C4A35A',8:'#C4A35A',9:'#C4A35A',10:'#C07264'};
-            for (let i = 1; i <= 10; i++) {
-                const el = document.createElement('div');
-                el.className = 'rpe-circle'; el.textContent = i;
-                el.style.borderColor = colors[i]; el.dataset.val = i; el.dataset.color = colors[i];
-                el.onclick = () => selectRpe(i);
-                row.appendChild(el);
-            }
-        }
-        function selectRpe(val) {
+        function buildRpeRow() {}
+        function selectRpe(val) {}
+        function updateRpeSlider() {
+            const slider = document.getElementById('rpeSlider');
+            if (!slider) return;
+            const val = parseInt(slider.value);
             rpeVal = val;
-            document.querySelectorAll('#checkin-overlay .rpe-circle').forEach(c => {
-                const v = parseInt(c.dataset.val);
-                c.classList.toggle('selected', v === val);
-                c.style.background = v === val ? c.dataset.color : 'transparent';
-                c.style.color = v === val ? '#fff' : c.dataset.color;
-            });
-            const descs = {1:'Bardzo lekko — prawie spacer',2:'Bardzo lekko — prawie spacer',3:'Bardzo lekko — prawie spacer',4:'Komfortowo, mógłbyś rozmawiać',5:'Komfortowo, mógłbyś rozmawiać',6:'Komfortowo, mógłbyś rozmawiać',7:'Ciężko, trudno mówić zdaniami',8:'Ciężko, trudno mówić zdaniami',9:'Absolutne maksimum',10:'Absolutne maksimum'};
+            const valEl = document.getElementById('rpeSliderVal');
+            if (valEl) valEl.textContent = `${val}/10`;
+            const pct = (val - 1) / 9 * 100;
+            const c = val <= 3 ? '#6B8F71' : val <= 6 ? '#C4A35A' : '#C07264';
+            slider.style.background = `linear-gradient(to right, ${c} ${pct}%, #EBEBEB ${pct}%)`;
+            const descs = {1:'Bardzo lekko — prawie spacer',2:'Bardzo lekko',3:'Lekko',4:'Komfortowo, mógłbyś rozmawiać',5:'Umiarkowanie',6:'Umiarkowanie ciężko',7:'Ciężko, trudno mówić zdaniami',8:'Bardzo ciężko',9:'Prawie maksimum',10:'Absolutne maksimum'};
             const rpeDesc = document.getElementById('rpeDesc');
             if (rpeDesc) rpeDesc.textContent = descs[val] || '';
             showBtn('next-post-1');
@@ -9565,7 +9557,7 @@
         // Płynne pojawienie się — window.load jako fallback nawet gdy JS rzuci błąd wyżej
         window.addEventListener('load', () => {
             document.body.classList.add('loaded');
-            buildRpeRow(); // init RPE circles once DOM is ready
+            updateRpeSlider(); // init RPE slider
         });
         // Dodaj też natychmiast po init dla szybkich połączeń
         document.body.classList.add('loaded');
@@ -9868,15 +9860,13 @@
 
                 <!-- P1: RPE -->
                 <div class="step" id="step-post-1">
-                    <div class="step-title">Jak ciężko?</div>
-                    <div class="step-desc">1 = spacer, 10 = absolutne maksimum.</div>
-                    <div class="rpe-row" id="rpeRow"></div>
-                    <div class="rpe-labels">
-                        <span class="rpe-label-text">Lekko</span>
-                        <span class="rpe-label-text">Ciężko</span>
+                    <div class="step-title">Poziom wysiłku</div>
+                    <div class="slider-wrap">
+                        <input type="range" min="1" max="10" value="5" id="rpeSlider" oninput="updateRpeSlider()">
+                        <div class="slider-big-val" id="rpeSliderVal">5/10</div>
+                        <div class="slider-desc" id="rpeDesc"></div>
                     </div>
-                    <div class="rpe-desc" id="rpeDesc">Wybierz poziom wysiłku</div>
-                    <div class="nav-area"><button class="btn-next" id="next-post-1" onclick="goNext()">Dalej →</button></div>
+                    <div class="nav-area"><button class="btn-next visible" id="next-post-1" onclick="goNext()">Dalej →</button></div>
                 </div>
 
                 <!-- P2: Realizacja -->
