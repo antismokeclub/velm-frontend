@@ -2940,6 +2940,20 @@
         #checkin-overlay .duration-unit { font-size:18px; font-weight:600; color:var(--text-muted); }
         #checkin-overlay .counter-btn-small { width:40px; height:40px; border-radius:12px; border:1.5px solid #E5E5E5; background:#FFFFFF; font-size:13px; font-weight:700; color:#6B6B6B; font-family:'Inter',sans-serif; cursor:pointer; transition:all 0.15s ease; display:flex; align-items:center; justify-content:center; }
         #checkin-overlay .counter-btn-small:active { background:#F5F3F0; transform:scale(0.9); }
+        /* ── CI Drum Picker ── */
+        #checkin-overlay .ci-pk-row { display:flex; justify-content:center; align-items:flex-start; gap:6px; margin:14px 0 8px; }
+        #checkin-overlay .ci-pk-field { display:flex; flex-direction:column; align-items:center; gap:4px; }
+        #checkin-overlay .ci-pk-label { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.07em; color:var(--text-muted); line-height:1; }
+        #checkin-overlay .ci-pk-wrap { position:relative; width:72px; height:200px; border-radius:18px; overflow:hidden; background:#F7F6F4; }
+        #checkin-overlay .ci-pk-highlight { position:absolute; top:50%; transform:translateY(-50%); left:4px; right:4px; height:52px; background:rgba(26,26,26,.08); border-radius:10px; pointer-events:none; z-index:2; }
+        #checkin-overlay .ci-pk-col { height:100%; overflow-y:scroll; scroll-snap-type:y mandatory; -webkit-overflow-scrolling:touch; scrollbar-width:none; touch-action:pan-y; overscroll-behavior:contain; -webkit-mask-image:linear-gradient(to bottom,transparent 0%,black 25%,black 75%,transparent 100%); mask-image:linear-gradient(to bottom,transparent 0%,black 25%,black 75%,transparent 100%); }
+        #checkin-overlay .ci-pk-col::-webkit-scrollbar { display:none; }
+        #checkin-overlay .ci-pk-item { height:52px; display:flex; align-items:center; justify-content:center; font-family:'Outfit',sans-serif; font-weight:700; font-size:14px; color:var(--primary); scroll-snap-align:center; transition:font-size .1s,opacity .1s; opacity:.1; }
+        #checkin-overlay .ci-pk-item.sel { font-size:30px; font-weight:800; opacity:1; }
+        #checkin-overlay .ci-pk-item.near1 { font-size:22px; opacity:.5; }
+        #checkin-overlay .ci-pk-item.near2 { font-size:17px; opacity:.25; }
+        #checkin-overlay .ci-pk-item.far { font-size:14px; opacity:.1; }
+        #checkin-overlay .ci-pk-sep { font-family:'Outfit',sans-serif; font-weight:800; font-size:30px; color:var(--primary); opacity:.3; line-height:1; flex-shrink:0; align-self:center; margin-top:10px; }
         #checkin-overlay .completion-grid { display:flex; flex-direction:column; gap:12px; margin:16px 0 8px; }
         #checkin-overlay .completion-btn { display:flex; align-items:center; gap:14px; padding:16px 20px; background:#FFFFFF; border:1.5px solid #EBEBEB; border-radius:18px; cursor:pointer; transition:all 0.22s cubic-bezier(0.34,1.56,0.64,1); text-align:left; font-family:'Inter',sans-serif; width:100%; }
         #checkin-overlay .completion-btn:hover { transform:translateY(-1px); box-shadow:0 6px 16px rgba(0,0,0,0.05); }
@@ -8700,7 +8714,12 @@
         let sorenessDuration     = null;
         // Sleep + body recovery state
         let sleepHours       = null;
+        let sleepH = 7, sleepM = 0;
         let muscleRecovery   = null;
+        // Duration pickers (H:MM:SS) — shared across easy/long/interval/walkrun
+        let durH = 0, durM = 45, durS = 0;
+        // Work segment duration (tempo / interval)
+        let workSegH = 0, workSegM = 0, workSegS = 0;
         // Post-workout feelings + avg pace + interval distance
         let feelings           = new Set();
         let avgPaceVal         = '';
@@ -8731,7 +8750,9 @@
             selectedCompletion = null; skippedParts = new Set();
             readinessFollowup = null; inReadinessFollowup = false;
             inSorenessDetail = false; sorenessLocation = null; sorenessDuration = null;
-            sleepHours = null; muscleRecovery = null;
+            sleepH = 7; sleepM = 0; sleepHours = sleepH + sleepM / 60; muscleRecovery = null;
+            durH = 0; durM = 45; durS = 0;
+            workSegH = 0; workSegM = 0; workSegS = 0;
             feelings = new Set(); avgPaceVal = ''; intervalDistanceM = 400;
             const intervalPaceEl = document.getElementById('intervalPaceInput');
             const workPaceEl = document.getElementById('workPaceInput');
@@ -8739,6 +8760,8 @@
             if (workPaceEl) workPaceEl.value = '';
             const durationInput = document.getElementById('durationInput');
             if (durationInput) durationInput.value = 45;
+            const _sleepPkEl = document.getElementById('ci-pk-sleep');
+            if (_sleepPkEl) { _sleepPkEl.innerHTML = _buildCiSleepPicker(); initCiPickers(_sleepPkEl); }
             document.querySelectorAll('#checkin-overlay .duration-display-val').forEach(el => el.textContent = '45');
             document.querySelectorAll('#checkin-overlay .completion-btn').forEach(b => b.classList.remove('selected'));
             document.querySelectorAll('#checkin-overlay .skip-btn').forEach(b => b.classList.remove('selected'));
@@ -8975,7 +8998,7 @@
             const energy   = document.getElementById('energySlider')?.value ?? '?';
             const readinessEl = document.querySelector('#step-morning-4 .readiness-btn.selected');
             const readiness   = readinessEl?.textContent?.trim() ?? '?';
-            const hoursStr = sleepHours ? `${sleepHours}h` : '?';
+            const hoursStr = (sleepH > 0 || sleepM > 0) ? `${sleepH}h${sleepM > 0 ? ' ' + sleepM + 'min' : ''}` : '?';
             const recoveryStr = muscleRecovery || '?';
             const msg = `CHECK-IN PORANNY: sen=${sleep}/5, godziny_snu=${hoursStr}, energia=${energy}/10, regeneracja_miesni=${recoveryStr}, gotowosc=${readiness}`;
             fetch(`${API_BASE}/api/chat`, {
@@ -9016,7 +9039,7 @@
             const workoutPayload = {
                 date: new Date().toISOString().split('T')[0],
                 distance_km: workoutData.dystans_km,
-                duration_min: duration, rpe: rpeVal,
+                duration_min: durH * 60 + durM + durS / 60, rpe: rpeVal,
                 type: workoutType, completion, notes: msg,
                 source: 'manual',
                 skipped_parts: skippedParts.size > 0 ? [...skippedParts] : null
@@ -9029,6 +9052,10 @@
             if (workoutType === 'tempo') {
                 if (segmentWorkKm > 0) workoutPayload.working_distance_km = segmentWorkKm;
                 if (workPaceInput) workoutPayload.working_pace = workPaceInput;
+                if (workSegH + workSegM + workSegS > 0) workoutPayload.working_segment_duration_min = workSegH * 60 + workSegM + workSegS / 60;
+            }
+            if (workoutType === 'interval' && workSegH + workSegM + workSegS > 0) {
+                workoutPayload.working_segment_duration_min = workSegH * 60 + workSegM + workSegS / 60;
             }
             if (workoutType === 'walkrun') {
                 if (segmentSeries > 0) workoutPayload.completed_series = segmentSeries;
@@ -9109,12 +9136,93 @@
             showBtn('next-morning-3');
         }
 
-        function selectSleepHours(h) {
-            sleepHours = h;
-            document.querySelectorAll('#checkin-overlay .sleep-hours-pill').forEach(p => {
-                p.classList.toggle('selected', parseInt(p.dataset.hours) === h);
+        const CI_PK_H = 52, CI_PK_PAD = 3, CI_PK_CONT_H = 200;
+
+        function _ciPkCol(values, initVal, key) {
+            const selIdx = Math.max(0, values.indexOf(initVal));
+            const initScroll = (CI_PK_PAD + selIdx) * CI_PK_H - (CI_PK_CONT_H / 2 - CI_PK_H / 2);
+            const pad = `<div class="ci-pk-item" data-pad="1" style="height:${CI_PK_H}px"></div>`;
+            const padHtml = pad.repeat(CI_PK_PAD);
+            const needsPad = key === 'sleepM' || key === 'durM' || key === 'durS' || key === 'workSegM' || key === 'workSegS';
+            const itemsHtml = values.map((v, i) => {
+                const dist = Math.abs(i - selIdx);
+                const cls = dist === 0 ? 'sel' : dist === 1 ? 'near1' : dist === 2 ? 'near2' : 'far';
+                const lbl = needsPad ? String(v).padStart(2, '0') : String(v);
+                return `<div class="ci-pk-item ${cls}" data-val="${v}" style="height:${CI_PK_H}px">${lbl}</div>`;
+            }).join('');
+            return `<div class="ci-pk-col" data-key="${key}" data-init="${initScroll}" onscroll="onCiPkScroll(this)">${padHtml}${itemsHtml}${padHtml}</div>`;
+        }
+
+        function _buildCiSleepPicker() {
+            const hVals = Array.from({length:13}, (_, i) => i);
+            const mVals = [0, 10, 20, 30, 40, 50];
+            return `<div class="ci-pk-row">
+                <div class="ci-pk-field"><div class="ci-pk-label">h</div><div class="ci-pk-wrap"><div class="ci-pk-highlight"></div>${_ciPkCol(hVals, sleepH, 'sleepH')}</div></div>
+                <div class="ci-pk-sep">:</div>
+                <div class="ci-pk-field"><div class="ci-pk-label">min</div><div class="ci-pk-wrap"><div class="ci-pk-highlight"></div>${_ciPkCol(mVals, sleepM, 'sleepM')}</div></div>
+            </div>`;
+        }
+
+        function _buildCiDurPicker() {
+            const hVals = Array.from({length:24}, (_, i) => i);
+            const mVals = Array.from({length:60}, (_, i) => i);
+            const sVals = Array.from({length:12}, (_, i) => i * 5);
+            return `<div class="ci-pk-row">
+                <div class="ci-pk-field"><div class="ci-pk-label">h</div><div class="ci-pk-wrap"><div class="ci-pk-highlight"></div>${_ciPkCol(hVals, durH, 'durH')}</div></div>
+                <div class="ci-pk-sep">:</div>
+                <div class="ci-pk-field"><div class="ci-pk-label">min</div><div class="ci-pk-wrap"><div class="ci-pk-highlight"></div>${_ciPkCol(mVals, durM, 'durM')}</div></div>
+                <div class="ci-pk-sep">:</div>
+                <div class="ci-pk-field"><div class="ci-pk-label">sek</div><div class="ci-pk-wrap"><div class="ci-pk-highlight"></div>${_ciPkCol(sVals, Math.round(durS / 5) * 5, 'durS')}</div></div>
+            </div>`;
+        }
+
+        function _buildCiWsegPicker() {
+            const hVals = [0, 1, 2, 3];
+            const mVals = Array.from({length:60}, (_, i) => i);
+            const sVals = Array.from({length:12}, (_, i) => i * 5);
+            return `<div class="ci-pk-row">
+                <div class="ci-pk-field"><div class="ci-pk-label">h</div><div class="ci-pk-wrap"><div class="ci-pk-highlight"></div>${_ciPkCol(hVals, workSegH, 'workSegH')}</div></div>
+                <div class="ci-pk-sep">:</div>
+                <div class="ci-pk-field"><div class="ci-pk-label">min</div><div class="ci-pk-wrap"><div class="ci-pk-highlight"></div>${_ciPkCol(mVals, workSegM, 'workSegM')}</div></div>
+                <div class="ci-pk-sep">:</div>
+                <div class="ci-pk-field"><div class="ci-pk-label">sek</div><div class="ci-pk-wrap"><div class="ci-pk-highlight"></div>${_ciPkCol(sVals, Math.round(workSegS / 5) * 5, 'workSegS')}</div></div>
+            </div>`;
+        }
+
+        function initCiPickers(container) {
+            if (!container) return;
+            container.querySelectorAll('.ci-pk-col').forEach(col => {
+                col.scrollTop = parseInt(col.dataset.init || '0', 10);
             });
         }
+
+        function onCiPkScroll(el) {
+            const containerH = el.offsetHeight || CI_PK_CONT_H;
+            const offset = containerH / 2 - CI_PK_H / 2;
+            const totalIdx = Math.round((el.scrollTop + offset) / CI_PK_H);
+            el.querySelectorAll('.ci-pk-item').forEach((item, k) => {
+                if (item.dataset.pad) { item.className = 'ci-pk-item'; return; }
+                const dist = Math.abs(k - totalIdx);
+                item.className = 'ci-pk-item ' + (dist === 0 ? 'sel' : dist === 1 ? 'near1' : dist === 2 ? 'near2' : 'far');
+            });
+            const realIdx = totalIdx - CI_PK_PAD;
+            const valueItems = el.querySelectorAll('.ci-pk-item[data-val]');
+            if (realIdx < 0 || realIdx >= valueItems.length) return;
+            const val = parseFloat(valueItems[realIdx].dataset.val);
+            const key = el.dataset.key;
+            if (key === 'sleepH')        { sleepH = val; sleepHours = sleepH + sleepM / 60; }
+            else if (key === 'sleepM')   { sleepM = val; sleepHours = sleepH + sleepM / 60; }
+            else if (key === 'durH')     { durH = val; duration = durH * 60 + durM + durS / 60; }
+            else if (key === 'durM')     { durM = val; duration = durH * 60 + durM + durS / 60; }
+            else if (key === 'durS')     { durS = val; duration = durH * 60 + durM + durS / 60; }
+            else if (key === 'workSegH') workSegH = val;
+            else if (key === 'workSegM') workSegM = val;
+            else if (key === 'workSegS') workSegS = val;
+        }
+
+        function selectSleepHours(h) {}
+        function adjustSleepH(d) {}
+        function adjustSleepM(d) {}
 
         function showPost0Section() {
             ['duration', 'interval', 'tempo', 'walkrun'].forEach(id => {
@@ -9148,6 +9256,16 @@
                 const seriesPlanned = document.getElementById('seriesPlanned');
                 if (seriesEl) seriesEl.textContent = segmentSeries;
                 if (seriesPlanned) seriesPlanned.textContent = workoutData.serie || '—';
+            }
+            const _pkMap = { duration: 'ci-pk-dur-easy', interval: 'ci-pk-wseg-interval', tempo: 'ci-pk-wseg-tempo', walkrun: 'ci-pk-dur-walkrun' };
+            const _pkId = _pkMap[map[workoutType] || 'duration'];
+            if (_pkId) {
+                const _pkEl = document.getElementById(_pkId);
+                if (_pkEl) {
+                    const _isWseg = (workoutType === 'interval' || workoutType === 'tempo');
+                    _pkEl.innerHTML = _isWseg ? _buildCiWsegPicker() : _buildCiDurPicker();
+                    initCiPickers(_pkEl);
+                }
             }
             setTimeout(() => updateStepsHeight(), 50);
         }
@@ -9214,7 +9332,7 @@
                 localStorage.setItem('velm_checkin_post_done', today);
                 sendPostCheckinToAI(); // saves to /api/chat + /api/workout internally
                 if (userId) {
-                    const dur = parseInt(document.getElementById('durationInput')?.value, 10) || duration;
+                    const dur = durH * 60 + durM + durS / 60;
                     fetch(`${API_BASE}/api/checkin`, {
                         method:'POST', headers: authHeaders(),
                         body: JSON.stringify({ userId, type:'post', data:{ duration:dur, rpe:rpeVal, completion:selectedCompletion }})
@@ -9232,23 +9350,14 @@
             _sendCheckinData();
         }
 
-        function adjustDuration(delta) {
-            const input = document.getElementById('durationInput');
-            let v = parseInt(input?.value, 10) || duration;
-            v = Math.max(1, Math.min(600, v + delta));
-            if (input) input.value = v;
-            duration = v;
-            document.querySelectorAll('#checkin-overlay .duration-display-val').forEach(el => el.textContent = v);
-        }
-        function onDurationChange() {
-            const input = document.getElementById('durationInput');
-            let v = parseInt(input.value, 10);
-            if (isNaN(v) || v < 1) v = 1;
-            if (v > 600) v = 600;
-            input.value = v;
-            duration = v;
-            document.querySelectorAll('#checkin-overlay .duration-display-val').forEach(el => el.textContent = v);
-        }
+        function adjustDuration(delta) {}
+        function onDurationChange() {}
+        function adjustDurH(d) {}
+        function adjustDurM(d) {}
+        function adjustDurS(d) {}
+        function adjustWorkSegH(d) {}
+        function adjustWorkSegM(d) {}
+        function adjustWorkSegS(d) {}
 
         function buildRpeRow() {
             const row = document.getElementById('rpeRow');
@@ -9382,7 +9491,10 @@
         function buildAiMessage() {
             const completionLabel = selectedCompletion === 'less' ? 'mniej_niż_plan'
                 : selectedCompletion === 'more' ? 'więcej_niż_plan' : 'zgodnie_z_planem';
-            let base = `CHECK-IN POTRENINGOWY: typ=${workoutType}, plan=${workoutData.dystans_km}km, czas=${duration}min, RPE=${rpeVal??'?'}/10, realizacja=${completionLabel}`;
+            const _durStr = durH > 0
+                ? `${durH}:${String(durM).padStart(2,'0')}:${String(durS).padStart(2,'0')}`
+                : `${String(durM).padStart(2,'0')}:${String(durS).padStart(2,'0')}`;
+            let base = `CHECK-IN POTRENINGOWY: typ=${workoutType}, plan=${workoutData.dystans_km}km, czas=${_durStr}, RPE=${rpeVal??'?'}/10, realizacja=${completionLabel}`;
             // Per-segment data
             const intervalPaceVal = document.getElementById('intervalPaceInput')?.value?.trim();
             const workPaceVal = document.getElementById('workPaceInput')?.value?.trim();
@@ -9393,6 +9505,12 @@
             if (workoutType === 'tempo' && segmentWorkKm) {
                 base += `, odcinek=${segmentWorkKm.toFixed(1)}/${workoutData.odcinek_km||'?'}km`;
                 if (workPaceVal) base += `, tempo_odcinka=${workPaceVal}`;
+            }
+            if ((workoutType === 'tempo' || workoutType === 'interval') && (workSegH + workSegM + workSegS > 0)) {
+                const _wStr = workSegH > 0
+                    ? `${workSegH}:${String(workSegM).padStart(2,'0')}:${String(workSegS).padStart(2,'0')}`
+                    : `${String(workSegM).padStart(2,'0')}:${String(workSegS).padStart(2,'0')}`;
+                base += `, czas_odcinka=${_wStr}`;
             }
             if (workoutType === 'walkrun' && segmentSeries) {
                 base += `, serie=${segmentSeries}/${workoutData.serie||'?'}`;
@@ -9465,28 +9583,7 @@
                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l2.5 2.5"/></svg>
                         Zalecane dla biegaczy: <strong>7–9 godzin</strong>
                     </div>
-                    <div class="sleep-hours-row">
-                        <button class="sleep-hours-pill" data-hours="5" onclick="selectSleepHours(5)">
-                            <span class="shp-val">5h</span>
-                            <span class="shp-label">za mało</span>
-                        </button>
-                        <button class="sleep-hours-pill" data-hours="6" onclick="selectSleepHours(6)">
-                            <span class="shp-val">6h</span>
-                            <span class="shp-label">poniżej</span>
-                        </button>
-                        <button class="sleep-hours-pill optimal" data-hours="7" onclick="selectSleepHours(7)">
-                            <span class="shp-val">7h</span>
-                            <span class="shp-label">optymalne</span>
-                        </button>
-                        <button class="sleep-hours-pill optimal" data-hours="8" onclick="selectSleepHours(8)">
-                            <span class="shp-val">8h</span>
-                            <span class="shp-label">optymalne</span>
-                        </button>
-                        <button class="sleep-hours-pill" data-hours="9" onclick="selectSleepHours(9)">
-                            <span class="shp-val">9h+</span>
-                            <span class="shp-label">dużo snu</span>
-                        </button>
-                    </div>
+                    <div id="ci-pk-sleep"></div>
                     <div class="nav-area"><button class="btn-next visible" id="next-morning-0" onclick="goNext()">Dalej →</button></div>
                 </div>
 
@@ -9669,17 +9766,7 @@
                     <!-- Easy / Long / Rest -->
                     <div class="post0-section active" id="post0-duration">
                         <div class="step-title">Ile trwał trening?</div>
-                        <div class="step-desc">Wpisz dokładny czas lub użyj przycisków.</div>
-                        <div class="duration-row">
-                            <button class="counter-btn" onclick="adjustDuration(-5)">−5</button>
-                            <button class="counter-btn-small" onclick="adjustDuration(-1)">−1</button>
-                            <div class="duration-input-wrap">
-                                <input type="number" id="durationInput" class="duration-number" min="1" max="600" value="45" inputmode="numeric" oninput="onDurationChange()">
-                                <span class="duration-unit">min</span>
-                            </div>
-                            <button class="counter-btn-small" onclick="adjustDuration(1)">+1</button>
-                            <button class="counter-btn" onclick="adjustDuration(5)">+5</button>
-                        </div>
+                        <div id="ci-pk-dur-easy"></div>
                     </div>
                     <!-- Interval -->
                     <div class="post0-section" id="post0-interval">
@@ -9704,13 +9791,8 @@
                                inputmode="numeric" maxlength="5"
                                oninput="formatPaceInput(this)" onblur="validatePaceInput(this)">
                         <div class="hint">Tempo roboczych odcinków (opcjonalne)</div>
-                        <div class="section-label" style="margin-top:14px;">Czas trwania</div>
-                        <div style="display:flex;align-items:center;gap:12px;margin:6px 0 4px;">
-                            <button class="counter-btn" onclick="adjustDuration(-5)">−5</button>
-                            <span class="duration-display-val" style="font-family:'Outfit',sans-serif;font-weight:800;font-size:36px;color:var(--primary);min-width:64px;text-align:center;line-height:1;">45</span>
-                            <span style="font-size:16px;font-weight:600;color:var(--text-muted);">min</span>
-                            <button class="counter-btn" onclick="adjustDuration(5)">+5</button>
-                        </div>
+                        <div class="section-label" style="margin-top:14px;">Czas odcinków roboczych</div>
+                        <div id="ci-pk-wseg-interval"></div>
                     </div>
                     <!-- Tempo -->
                     <div class="post0-section" id="post0-tempo">
@@ -9725,13 +9807,8 @@
                                inputmode="numeric" maxlength="5"
                                oninput="formatPaceInput(this)" onblur="validatePaceInput(this)">
                         <div class="hint">Tempo odcinka roboczego (opcjonalne)</div>
-                        <div class="section-label" style="margin-top:14px;">Czas trwania</div>
-                        <div style="display:flex;align-items:center;gap:12px;margin:6px 0 4px;">
-                            <button class="counter-btn" onclick="adjustDuration(-5)">−5</button>
-                            <span class="duration-display-val" style="font-family:'Outfit',sans-serif;font-weight:800;font-size:36px;color:var(--primary);min-width:64px;text-align:center;line-height:1;">45</span>
-                            <span style="font-size:16px;font-weight:600;color:var(--text-muted);">min</span>
-                            <button class="counter-btn" onclick="adjustDuration(5)">+5</button>
-                        </div>
+                        <div class="section-label" style="margin-top:14px;">Czas odcinka tempo</div>
+                        <div id="ci-pk-wseg-tempo"></div>
                     </div>
                     <!-- Walkrun -->
                     <div class="post0-section" id="post0-walkrun">
@@ -9743,13 +9820,8 @@
                             <button class="counter-btn" onclick="adjustSeries(1)">+</button>
                         </div>
                         <div class="hint">Seria = odcinek biegu + odpoczynek marszu</div>
-                        <div class="section-label" style="margin-top:14px;">Czas trwania</div>
-                        <div style="display:flex;align-items:center;gap:12px;margin:6px 0 4px;">
-                            <button class="counter-btn" onclick="adjustDuration(-5)">−5</button>
-                            <span class="duration-display-val" style="font-family:'Outfit',sans-serif;font-weight:800;font-size:36px;color:var(--primary);min-width:64px;text-align:center;line-height:1;">45</span>
-                            <span style="font-size:16px;font-weight:600;color:var(--text-muted);">min</span>
-                            <button class="counter-btn" onclick="adjustDuration(5)">+5</button>
-                        </div>
+                        <div class="section-label" style="margin-top:14px;">Całkowity czas</div>
+                        <div id="ci-pk-dur-walkrun"></div>
                     </div>
                     <div class="nav-area"><button class="btn-next visible" onclick="goNext()">Dalej →</button></div>
                 </div>
