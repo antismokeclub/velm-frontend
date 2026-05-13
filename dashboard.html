@@ -2834,7 +2834,8 @@
         .ci-close-btn svg { pointer-events:none; }
 
         /* Inner scrollable content */
-        #ci-inner { padding:20px 24px 36px; flex:1; }
+        #ci-inner { padding:20px 24px 36px; flex:1; min-height:0; overflow-y:auto; -webkit-overflow-scrolling:touch; scrollbar-width:none; }
+        #ci-inner::-webkit-scrollbar { display:none; }
 
         /* MODE TOGGLE */
         #checkin-overlay .mode-toggle { display:flex; background:var(--border); border-radius:99px; padding:3px; position:relative; margin-bottom:28px; height:44px; }
