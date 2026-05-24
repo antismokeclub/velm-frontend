@@ -8863,6 +8863,8 @@
 
             // Reinit slider and duration
             initModeSlider();
+            const energyS = document.getElementById('energySlider');
+            if (energyS) energyS.addEventListener('input', updateSlider);
             updateSlider();
             updateProgress();
             updateStepsHeight();
@@ -9175,9 +9177,9 @@
             const sliderVal = document.getElementById('sliderVal');
             if (sliderVal) sliderVal.textContent = `${val}/10`;
             const pct = (val - 1) / 9 * 100;
-            const c = val <= 3 ? '#C07264' : val <= 5 ? '#C4A35A' : val <= 7 ? '#6B8F71' : '#6B8F71';
+            const c = val <= 3 ? '#C07264' : val <= 5 ? '#C4A35A' : val <= 7 ? '#6B8F71' : '#22c55e';
             slider.style.background = `linear-gradient(to right, ${c} ${pct}%, #EBEBEB ${pct}%)`;
-            const descs = {1:'Ledwo wstaję z łóżka',2:'Bardzo zmęczony, ciało ciężkie',3:'Wyraźnie zmęczony',4:'Trochę poniżej normy',5:'Przeciętnie — jako tako',6:'W porządku',7:'Dobrze, czuję się normalnie',8:'Pełen energii',9:'Bardzo dobrze, gotowy na wszystko',10:'Szczyt formy'};
+            const descs = {1:'Ledwo wstaję z łóżka',2:'Bardzo zmęczony, cia la ciężkie',3:'Wyraźnie zmęczony',4:'Trochę poniżej normy',5:'Przeciętnie — jako tako',6:'W porządku',7:'Dobrze, czuję się normalnie',8:'Pełen energii',9:'Bardzo dobrze, gotowy na wszystko',10:'Szczyt formy'};
             const sliderDesc = document.getElementById('sliderDesc');
             if (sliderDesc) sliderDesc.textContent = descs[val] || '';
         }
@@ -9777,7 +9779,7 @@
                     <div class="step-title">Poziom energii</div>
                     <div class="step-desc">Jak oceniasz swój poziom energii w tej chwili?</div>
                     <div class="slider-wrap">
-                        <input type="range" min="1" max="10" value="7" id="energySlider" oninput="updateSlider()">
+                        <input type="range" min="1" max="10" value="7" id="energySlider">
                         <div class="slider-big-val" id="sliderVal">7/10</div>
                         <div class="slider-desc" id="sliderDesc">Dobrze, czuję się normalnie</div>
                     </div>
