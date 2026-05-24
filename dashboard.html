@@ -9016,20 +9016,31 @@
             const toEl   = document.getElementById(toId);
             if (!fromEl || !toEl) {
                 console.warn('animateStep: missing element', { fromId, toId, hasFrom: !!fromEl, hasTo: !!toEl });
-                // Best-effort fallback: still flip active state if at least one end exists
-                if (fromEl) fromEl.classList.remove('active');
-                if (toEl) toEl.classList.add('active');
+                if (fromEl) {
+                    fromEl.classList.remove('active');
+                    fromEl.style.opacity = '0';
+                    fromEl.style.transform = 'translateX(-20px)';
+                }
+                if (toEl) {
+                    toEl.style.opacity = '';
+                    toEl.style.transform = '';
+                    toEl.classList.add('active');
+                }
                 return;
             }
             fromEl.style.animation = 'ciStepExit 180ms ease-in forwards';
             setTimeout(() => {
-                fromEl.classList.remove('active'); fromEl.style.animation = '';
-                fromEl.style.opacity = '0'; fromEl.style.transform = 'translateX(-20px)';
-                toEl.style.opacity   = '0'; toEl.style.transform   = 'translateX(20px)';
+                fromEl.classList.remove('active');
+                fromEl.style.animation = '';
+                fromEl.style.opacity = '0';
+                fromEl.style.transform = 'translateX(-20px)';
+
+                toEl.style.opacity = '';
+                toEl.style.transform = '';
                 toEl.classList.add('active');
                 toEl.style.animation = 'ciStepEnter 220ms ease-out forwards';
                 toEl.addEventListener('animationend', () => {
-                    toEl.style.animation = ''; toEl.style.opacity = ''; toEl.style.transform = '';
+                    toEl.style.animation = '';
                 }, { once: true });
             }, 180);
         }
