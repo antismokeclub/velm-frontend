@@ -9194,7 +9194,7 @@
                 const lbl = needsPad ? String(v).padStart(2, '0') : String(v);
                 return `<div class="ci-pk-item ${cls}" data-val="${v}" style="height:${CI_PK_H}px">${lbl}</div>`;
             }).join('');
-            return `<div class="ci-pk-col" data-key="${key}" data-init="${initScroll}" onscroll="onCiPkScroll(this)">${padHtml}${itemsHtml}${padHtml}</div>`;
+            return `<div class="ci-pk-col" data-key="${key}" data-init="${initScroll}">${padHtml}${itemsHtml}${padHtml}</div>`;
         }
 
         function _buildCiSleepPicker() {
@@ -9237,6 +9237,8 @@
             if (!container) return;
             container.querySelectorAll('.ci-pk-col').forEach(col => {
                 col.scrollTop = parseInt(col.dataset.init || '0', 10);
+                col.addEventListener('scroll', () => onCiPkScroll(col));
+                onCiPkScroll(col);
             });
         }
 
@@ -9251,8 +9253,9 @@
             });
             const realIdx = totalIdx - CI_PK_PAD;
             const valueItems = el.querySelectorAll('.ci-pk-item[data-val]');
-            if (realIdx < 0 || realIdx >= valueItems.length) return;
-            const val = parseFloat(valueItems[realIdx].dataset.val);
+            if (valueItems.length === 0) return;
+            const clampedIdx = Math.max(0, Math.min(valueItems.length - 1, realIdx));
+            const val = parseFloat(valueItems[clampedIdx].dataset.val);
             const key = el.dataset.key;
             if (key === 'sleepH')        { sleepH = val; sleepHours = sleepH + sleepM / 60; }
             else if (key === 'sleepM')   { sleepM = val; sleepHours = sleepH + sleepM / 60; }
