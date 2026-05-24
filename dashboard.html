@@ -8766,7 +8766,7 @@
             selectedCompletion = null; skippedParts = new Set();
             readinessFollowup = null; inReadinessFollowup = false;
             inSorenessDetail = false; sorenessLocation = null; sorenessDuration = null;
-            sleepH = 7; sleepM = 0; sleepHours = sleepH + sleepM / 60; muscleRecovery = null;
+            sleepH = 8; sleepM = 0; sleepHours = sleepH + sleepM / 60; muscleRecovery = null;
             durH = 0; durM = 45; durS = 0;
             workSegH = 0; workSegM = 0; workSegS = 0;
             feelings = new Set(); avgPaceVal = ''; intervalDistanceM = 400;
@@ -8777,7 +8777,7 @@
             const durationInput = document.getElementById('durationInput');
             if (durationInput) durationInput.value = 45;
             const _sleepPkEl = document.getElementById('ci-pk-sleep');
-            if (_sleepPkEl) { _sleepPkEl.innerHTML = _buildCiSleepPicker(); initCiPickers(_sleepPkEl); }
+            if (_sleepPkEl) { _sleepPkEl.innerHTML = _buildCiSleepPicker(); }
             document.querySelectorAll('#checkin-overlay .duration-display-val').forEach(el => el.textContent = '45');
             document.querySelectorAll('#checkin-overlay .completion-btn').forEach(b => b.classList.remove('selected'));
             document.querySelectorAll('#checkin-overlay .skip-btn').forEach(b => b.classList.remove('selected'));
@@ -8883,6 +8883,7 @@
                 });
             });
             document.body.style.overflow = 'hidden';
+            initCiPickers(document.getElementById('ci-pk-sleep'));
         }
 
         function closeCheckin() {
