@@ -2976,7 +2976,8 @@
 
         /* FEELING CHIPS */
         #checkin-overlay .feeling-grid { display:flex; flex-wrap:wrap; gap:10px; margin:16px 0 20px; }
-        #checkin-overlay .feeling-chip { padding:11px 16px; border-radius:99px; border:1.5px solid #EBEBEB; background:#FFFFFF; font-size:14px; font-weight:600; color:var(--primary); font-family:'Inter',sans-serif; cursor:pointer; transition:all 0.18s cubic-bezier(0.34,1.56,0.64,1); }
+        #checkin-overlay .feeling-grid { display:grid; grid-template-columns:repeat(3, 1fr); gap:10px; margin-bottom:20px; }
+        #checkin-overlay .feeling-chip { width:auto; padding:12px 8px; text-align:center; font-size:13px; font-weight:600; color:var(--primary); font-family:'Inter',sans-serif; cursor:pointer; transition:all 0.18s cubic-bezier(0.34,1.56,0.64,1); border:1.5px solid #EBEBEB; background:#FFFFFF; border-radius:99px; }
         #checkin-overlay .feeling-chip:active { transform:scale(0.93); }
         #checkin-overlay .feeling-chip.selected { background:var(--primary); border-color:var(--primary); color:#fff; }
         /* DISTANCE PILLS */
@@ -8864,7 +8865,11 @@
             // Reinit slider and duration
             initModeSlider();
             const energyS = document.getElementById('energySlider');
-            if (energyS) energyS.addEventListener('input', updateSlider);
+            if (energyS) {
+                energyS.removeEventListener('input', updateSlider);
+                energyS.addEventListener('input', updateSlider);
+                energyS.addEventListener('change', updateSlider);
+            }
             updateSlider();
             updateProgress();
             updateStepsHeight();
@@ -10033,12 +10038,11 @@
                     <div class="step-title">Jak oceniasz ten bieg?</div>
                     <div class="step-desc">Zaznacz co pasuje — możesz wybrać kilka.</div>
                     <div class="feeling-grid">
-                        <button class="feeling-chip" data-feeling="swietne" onclick="toggleFeeling(this)">Świetne odczucia</button>
-                        <button class="feeling-chip" data-feeling="lekko" onclick="toggleFeeling(this)">Lekko i swobodnie</button>
-                        <button class="feeling-chip" data-feeling="ok" onclick="toggleFeeling(this)">Zgodnie z oczekiwaniami</button>
-                        <button class="feeling-chip" data-feeling="ciezko-dalem-rade" onclick="toggleFeeling(this)">Ciężko, ale dałem radę</button>
+                        <button class="feeling-chip" data-feeling="swietne" onclick="toggleFeeling(this)">Świetnie</button>
+                        <button class="feeling-chip" data-feeling="lekko" onclick="toggleFeeling(this)">Lekko</button>
+                        <button class="feeling-chip" data-feeling="ok" onclick="toggleFeeling(this)">W normie</button>
+                        <button class="feeling-chip" data-feeling="ciezko-dalem-rade" onclick="toggleFeeling(this)">Ciężko, ale ok</button>
                         <button class="feeling-chip" data-feeling="slabe-nogi" onclick="toggleFeeling(this)">Słabe nogi</button>
-                        <button class="feeling-chip" data-feeling="brakowalo-tchu" onclick="toggleFeeling(this)">Brakowało tchu</button>
                     </div>
                     <div id="post3-pace-wrap" style="display:none;">
                         <div class="section-label">Średnie tempo (opcjonalnie)</div>
