@@ -9026,17 +9026,29 @@
                 }
                 return;
             }
+
+            // Force state reset to avoid "intermittent" failures from previous animations
             fromEl.style.animation = 'ciStepExit 180ms ease-in forwards';
+
             setTimeout(() => {
                 fromEl.classList.remove('active');
                 fromEl.style.opacity = '0';
                 fromEl.style.transform = 'translateX(-20px)';
                 fromEl.style.animation = '';
 
+                // Ensure toEl is fully reset before adding active class
+                toEl.style.opacity = '0';
+                toEl.style.transform = 'translateX(20px)';
+                toEl.style.animation = '';
+
+                // Force a reflow to ensure the browser registers the reset before the animation
+                void toEl.offsetWidth;
+
+                toEl.classList.add('active');
                 toEl.style.opacity = '';
                 toEl.style.transform = '';
-                toEl.classList.add('active');
                 toEl.style.animation = 'ciStepEnter 220ms ease-out forwards';
+
                 toEl.addEventListener('animationend', () => {
                     toEl.style.animation = '';
                 }, { once: true });
