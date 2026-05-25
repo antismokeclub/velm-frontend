@@ -2860,8 +2860,10 @@
         #checkin-overlay .step-desc { font-size:15px; color:var(--text-muted); margin-bottom:28px; line-height:1.55; font-family:var(--font); }
 
         /* SLEEP CARDS */
-        #checkin-overlay .sleep-cards { display:grid; grid-template-columns:repeat(2, 1fr); gap:10px; margin-bottom:8px; }
-        #checkin-overlay .sleep-card { height:auto; min-height:96px; display:flex; flex-direction:column; align-items:center; justify-content:center; border-radius:18px; border:1.5px solid var(--border); background:var(--surface); gap:9px; cursor:pointer; transition:all 0.22s cubic-bezier(0.34,1.56,0.64,1); box-shadow:0 2px 8px rgba(0,0,0,0.03); padding:12px 8px; }
+        #checkin-overlay .sleep-cards { display:grid; grid-template-columns:repeat(6, 1fr); gap:10px; margin-bottom:8px; }
+        #checkin-overlay .sleep-card { grid-column:span 2; height:auto; min-height:96px; display:flex; flex-direction:column; align-items:center; justify-content:center; border-radius:18px; border:1.5px solid var(--border); background:var(--surface); gap:9px; cursor:pointer; transition:all 0.22s cubic-bezier(0.34,1.56,0.64,1); box-shadow:0 2px 8px rgba(0,0,0,0.03); padding:12px 8px; }
+        #checkin-overlay .sleep-card:nth-child(4) { grid-column: 2 / span 2; }
+        #checkin-overlay .sleep-card:nth-child(5) { grid-column: 4 / span 2; }
         #checkin-overlay .sleep-card:active { transform:scale(0.94); }
         #checkin-overlay .sleep-card.selected { border-color:var(--primary); transform:scale(1.05); box-shadow:0 8px 24px rgba(17,17,17,0.1), 0 0 0 1px var(--primary); }
         #checkin-overlay .sleep-ico { width:42px; height:42px; border-radius:12px; background:#EDE8DC; display:flex; align-items:center; justify-content:center; color:var(--primary); transition:all 0.22s cubic-bezier(0.34,1.56,0.64,1); flex-shrink:0; }
@@ -9668,13 +9670,43 @@
         function showBtn(id) { const btn = document.getElementById(id); if (btn) btn.classList.add('visible'); }
         // ── END CHECKIN OVERLAY JS ───────────────────────────────
 
+        function makeSliderTouchFriendly(sliderId, updateFn) {
+            const slider = document.getElementById(sliderId);
+            if (!slider) return;
+            function handleTouch(e) {
+                if (e.touches.length === 0) return;
+                const rect = slider.getBoundingClientRect();
+                const touch = e.touches[0];
+                const clientX = touch.clientX;
+                let pct = (clientX - rect.left) / rect.width;
+                pct = Math.max(0, Math.min(1, pct));
+                const min = parseFloat(slider.min) || 1;
+                const max = parseFloat(slider.max) || 10;
+                const step = parseFloat(slider.step) || 1;
+                let rawVal = min + pct * (max - min);
+                let val = Math.round(rawVal / step) * step;
+                val = Math.max(min, Math.min(max, val));
+                if (parseInt(slider.value) !== val) {
+                    slider.value = val;
+                    updateFn();
+                }
+                if (e.cancelable) e.preventDefault();
+            }
+            slider.addEventListener('touchstart', handleTouch, { passive: false });
+            slider.addEventListener('touchmove', handleTouch, { passive: false });
+        }
+
         // Płynne pojawienie się — window.load jako fallback nawet gdy JS rzuci błąd wyżej
         window.addEventListener('load', () => {
             document.body.classList.add('loaded');
             updateRpeSlider(); // init RPE slider
+            makeSliderTouchFriendly('energySlider', updateSlider);
+            makeSliderTouchFriendly('rpeSlider', updateRpeSlider);
         });
         // Dodaj też natychmiast po init dla szybkich połączeń
         document.body.classList.add('loaded');
+        makeSliderTouchFriendly('energySlider', updateSlider);
+        makeSliderTouchFriendly('rpeSlider', updateRpeSlider);
     </script>
 
 <!-- ── CHECKIN OVERLAY ──────────────────────────────────────────── -->
