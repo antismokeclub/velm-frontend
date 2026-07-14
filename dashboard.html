@@ -7762,17 +7762,33 @@
             document.getElementById('narada-overlay')?.remove();
             const overlay = document.createElement('div');
             overlay.id = 'narada-overlay';
+            overlay.setAttribute('role', 'dialog');
+            overlay.setAttribute('aria-modal', 'true');
+            overlay.setAttribute('aria-label', 'Narada sztabu — generowanie planu');
+            overlay.tabIndex = -1;
             overlay.innerHTML =
                 '<div id="narada-label">Narada sztabu</div>' +
-                '<div id="narada-stage">' +
-                    '<div id="narada-monogram">A</div>' +
+                '<div id="narada-stage" aria-live="polite">' +
+                    '<div id="narada-monogram" aria-hidden="true">A</div>' +
                     '<div id="narada-agent-name">Analityk</div>' +
                     '<div id="narada-status"></div>' +
                 '</div>' +
-                '<div id="narada-dots">' +
+                '<div id="narada-dots" aria-hidden="true">' +
                     NARADA_PHASES.map((_, i) => '<div class="narada-dot' + (i === 0 ? ' current' : '') + '"></div>').join('') +
                 '</div>';
+
+            // Modalność: fokus na overlay, tło nieaktywne (inert), przywrócenie przy zamknięciu
+            const prevFocus = document.activeElement;
+            const inerted = [];
+            Array.from(document.body.children).forEach(el => {
+                if (el !== overlay && !el.inert) { el.inert = true; inerted.push(el); }
+            });
             document.body.appendChild(overlay);
+            overlay.focus({ preventScroll: true });
+            function releaseModal() {
+                inerted.forEach(el => { el.inert = false; });
+                if (prevFocus && typeof prevFocus.focus === 'function') prevFocus.focus({ preventScroll: true });
+            }
             requestAnimationFrame(() => requestAnimationFrame(() => overlay.classList.add('visible')));
 
             let phaseIdx = 0, lineIdx = 0;
@@ -7836,13 +7852,21 @@
             }
 
             return {
-                // Sukces: dokończ sekwencję, pokaż "Plan gotowy", wygaś overlay
+                // Sukces: dokończ sekwencję (bez pomijania faz), pokaż "Plan gotowy", wygaś overlay
                 async finish() {
                     teardown();
                     // Minimum 4s na ekranie, żeby szybka odpowiedź nie mignęła
                     const minMs = 4000;
                     const elapsed = Date.now() - startedAt;
                     if (elapsed < minMs) await new Promise(r => setTimeout(r, minMs - elapsed));
+                    // Szybka odpowiedź API nie może pominąć członków sztabu —
+                    // przewiń pozostałe fazy w skróconym tempie (1.4s każda)
+                    while (phaseIdx < NARADA_PHASES.length - 1) {
+                        phaseIdx++;
+                        lineIdx = 0;
+                        renderPhase(phaseIdx);
+                        await new Promise(r => setTimeout(r, 1400));
+                    }
                     document.querySelectorAll('.narada-dot').forEach(d => { d.classList.add('done'); d.classList.remove('current'); });
                     const nameEl = document.getElementById('narada-agent-name');
                     const monoEl = document.getElementById('narada-monogram');
@@ -7850,12 +7874,14 @@
                     if (nameEl) nameEl.textContent = 'Plan gotowy';
                     setStatus('Twój nowy tydzień treningowy czeka');
                     await new Promise(r => setTimeout(r, 1600));
+                    releaseModal();
                     overlay.classList.remove('visible');
                     setTimeout(() => overlay.remove(), 320);
                 },
                 // Błąd: zamknij od razu
                 abort() {
                     teardown();
+                    releaseModal();
                     overlay.classList.remove('visible');
                     setTimeout(() => overlay.remove(), 320);
                 }
