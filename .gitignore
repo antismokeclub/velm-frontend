@@ -36,9 +36,13 @@
 skills/
 skills-lock.json
 COWORK_BRIEFING.md
-5
-5}
-div
+
+# Local docs & run helpers (not part of the app)
+context rozmowy.txt
+velm_zadania_natywna_apka.docx
+run-velm-backend.cmd
+run-velm-frontend.cmd
+*.log
 
 # Backend (has its own repo)
 velm-backend/

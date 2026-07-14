@@ -7,15 +7,17 @@
 ### Structure
 
 ```
-aspireflow/
-  dashboard.html          — Frontend SPA (mobile-first PWA, ~6000 lines)
-  index.html              — Onboarding / registration
-  velm-backend/
-    server.js             — Express API server (port 3001)
+aspireflow/                — frontend repo (this one)
+  dashboard.html          — Frontend SPA (mobile-first PWA, ~10 000 lines, 5 views + check-in overlay)
+  index.html              — Onboarding / registration (~4 000 lines, multilingual pl/en/fr/es/de)
+  sw.js                   — Service worker (network-first HTML, cache-first assets)
+  manifest.json           — PWA manifest; capacitor.config.json — native wrapper
+  velm-backend/           — SEPARATE git repo (github.com/antismokeclub/velm-backend), gitignored here
+    server.js             — Express API server (port 3000) — all endpoints, middleware, cron
     db/queries.js         — All Supabase database queries
     agents/
-      headtrainer.js      — Main trainer: chat, weekly planning, daily reports
-      analityk.js         — Workout analysis, performance patterns
+      headtrainer.js      — Szef Sztabu: chat, weekly planning (narada), daily reports
+      analityk.js         — Workout analysis, auto-analysis after each workout
       fizjo.js            — Injury management, recovery
       psycholog.js        — Mental coaching, motivation
     agent-skills/         — Markdown knowledge injected into agent prompts
@@ -23,11 +25,17 @@ aspireflow/
 ```
 
 ### Stack
-- **Backend**: Node.js + Express (CommonJS)
+- **Backend**: Node.js + Express (CommonJS), hosted on Railway
 - **Database**: Supabase (PostgreSQL)
-- **AI**: Anthropic Claude API (Haiku for chat, Sonnet for planning)
-- **Frontend**: Vanilla HTML/CSS/JS single-file SPA
+- **AI**: Anthropic Claude API (Haiku for chat/auto-analysis, Sonnet for weekly planning)
+- **Auth**: JWT access+refresh with token versioning; bcrypt passwords
+- **Payments**: Stripe (checkout/portal/webhook — code complete, needs env config)
+- **Integrations**: Strava OAuth+webhook (done), Garmin .fit import (done), Whoop (not started)
+- **Frontend**: Vanilla HTML/CSS/JS single-file SPA, hosted on Vercel
 - **Design**: Mobile-first, premium — white cards, #1A1A1A buttons, 20px radius
+
+### Backend details
+See `velm-backend/CLAUDE.md` for endpoints, DB tables, agent architecture, env vars.
 
 ## Build & Test
 
