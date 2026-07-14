@@ -12,7 +12,15 @@
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('/sw.js')
+                    .then((reg) => { reg.update().catch(() => {}); })
                     .catch(err => console.warn('[velm] SW register failed:', err.message));
+            });
+
+            navigator.serviceWorker.addEventListener('controllerchange', () => {
+                if (!window.__velmSwReloaded) {
+                    window.__velmSwReloaded = true;
+                    window.location.reload();
+                }
             });
         }
     </script>
@@ -2852,22 +2860,23 @@
         #checkin-overlay .progress-line-fill { position:absolute; left:0; top:0; bottom:0; background:var(--primary); width:0%; transition:width 0.36s cubic-bezier(0.4,0,0.2,1); border-radius:2px; }
 
         /* STEPS */
-        #checkin-overlay .steps-outer { position:relative; min-height:300px; }
-        #checkin-overlay .step { position:absolute; top:0; left:0; right:0; opacity:0; transform:translateX(20px); pointer-events:none; transition:opacity 0.2s, transform 0.2s; }
-        #checkin-overlay .step.active { opacity:1; transform:translateX(0); pointer-events:auto; z-index:10; animation: ciStepIn 0.4s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+        #checkin-overlay .steps-outer { display: grid; grid-template-columns: 1fr; align-items: start; position: relative; min-height: 0; transition: height 0.28s cubic-bezier(0.22, 1, 0.36, 1), min-height 0.28s cubic-bezier(0.22, 1, 0.36, 1); }
+        #checkin-overlay .step { grid-area: 1 / 1; opacity:0; transform:translate3d(20px,0,0); pointer-events:none; transition:opacity 0.3s cubic-bezier(0.22, 1, 0.36, 1), transform 0.3s cubic-bezier(0.22, 1, 0.36, 1); width: 100%; box-sizing: border-box; will-change: opacity, transform; backface-visibility: hidden; }
+        #checkin-overlay .step.active { opacity:1; transform:translate3d(0,0,0); pointer-events:auto; z-index:10; }
+        #checkin-overlay .step.is-leaving { opacity:0; transform:translate3d(-16px,0,0); }
         @keyframes ciStepIn { from { opacity:0; transform:translateX(15px); } to { opacity:1; transform:translateX(0); } }
         #checkin-overlay .step-title { font-family:var(--font-d); font-weight:800; font-size:32px; color:var(--primary); line-height:1.1; margin-bottom:8px; letter-spacing:-0.025em; }
         #checkin-overlay .step-desc { font-size:15px; color:var(--text-muted); margin-bottom:28px; line-height:1.55; font-family:var(--font); }
 
         /* SLEEP CARDS */
-        #checkin-overlay .sleep-cards { display:grid; grid-template-columns:repeat(6, 1fr); gap:10px; margin-bottom:8px; }
+        #checkin-overlay .sleep-cards { display:grid; grid-template-columns:repeat(6, minmax(0, 1fr)); gap:10px; margin-bottom:8px; align-items:stretch; }
         #checkin-overlay .sleep-card { grid-column:span 2; height:auto; min-height:96px; display:flex; flex-direction:column; align-items:center; justify-content:center; border-radius:18px; border:1.5px solid var(--border); background:var(--surface); gap:9px; cursor:pointer; transition:all 0.22s cubic-bezier(0.34,1.56,0.64,1); box-shadow:0 2px 8px rgba(0,0,0,0.03); padding:12px 8px; }
         #checkin-overlay .sleep-card:nth-child(4) { grid-column: 2 / span 2; }
         #checkin-overlay .sleep-card:nth-child(5) { grid-column: 4 / span 2; }
         #checkin-overlay .sleep-card:active { transform:scale(0.94); }
         #checkin-overlay .sleep-card.selected { border-color:var(--primary); transform:scale(1.05); box-shadow:0 8px 24px rgba(17,17,17,0.1), 0 0 0 1px var(--primary); }
-        #checkin-overlay .sleep-ico { width:42px; height:42px; border-radius:12px; background:#EDE8DC; display:flex; align-items:center; justify-content:center; color:var(--primary); transition:all 0.22s cubic-bezier(0.34,1.56,0.64,1); flex-shrink:0; }
-        #checkin-overlay .sleep-card.selected .sleep-ico { background:var(--primary); color:#fff; }
+        #checkin-overlay .sleep-ico { width:42px; height:42px; border-radius:12px; background:#EDE8DC; display:flex; align-items:center; justify-content:center; color:var(--primary); transition:all 0.3s cubic-bezier(0.34,1.56,0.64,1); flex-shrink:0; }
+        #checkin-overlay .sleep-card.selected .sleep-ico { background:var(--primary); color:#fff; box-shadow: 0 0 16px rgba(17,17,17,0.25); transform: scale(1.1); }
         #checkin-overlay .sleep-card .label { font-size:11px; font-weight:700; text-align:center; color:var(--primary); line-height:1; letter-spacing:0.01em; font-family:var(--font); }
         /* SLEEP HOURS PILLS — big card style for step-morning-0 */
         #checkin-overlay .sleep-hours-row { display:flex; gap:8px; margin:4px 0 8px; }
@@ -2907,6 +2916,8 @@
         #checkin-overlay .readiness-btn { width:100%; min-height:64px; border-radius:20px; font-size:15px; font-weight:600; font-family:'Inter',sans-serif; cursor:pointer; transition:all 0.22s cubic-bezier(0.34,1.56,0.64,1); border:2px solid transparent; background:#FFFFFF; color:var(--primary); display:flex; align-items:center; gap:14px; padding:0 20px; text-align:left; box-shadow:0 0 0 1px #EBEBEB, 0 2px 8px rgba(0,0,0,0.03); }
         #checkin-overlay .readiness-btn:hover { transform:translateY(-1px); box-shadow:0 0 0 1px #DCDCDC, 0 6px 16px rgba(0,0,0,0.05); }
         #checkin-overlay .readiness-btn:active { transform:scale(0.98); }
+        #checkin-overlay .readiness-btn .rd-ico { width:20px; height:20px; flex-shrink:0; display:block; transition: all 0.3s ease; }
+        #checkin-overlay .readiness-btn.selected .rd-ico { transform: scale(1.15); filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1)); }
         #checkin-overlay .readiness-btn .rd-dot { width:12px; height:12px; border-radius:50%; flex-shrink:0; display:block; }
         #checkin-overlay .readiness-btn.selected { background:#F5F3F0; box-shadow:0 8px 24px rgba(26,26,26,0.08), 0 0 0 1.5px var(--primary); }
         #checkin-overlay .readiness-btn .rd-arrow { margin-left:auto; flex-shrink:0; color:var(--text-light); transition:color 0.18s,transform 0.18s; }
@@ -3106,13 +3117,21 @@
         <div class="login-tagline">Twój AI trener biegowy</div>
         <div class="login-card">
             <h2>Zaloguj się</h2>
-            <p>Wpisz email, którym rejestrowałeś konto</p>
+            <p>Wpisz email i hasło, których używałeś przy rejestracji</p>
             <input
                 class="login-input"
                 id="login-email"
                 type="email"
                 placeholder="twoj@email.com"
                 autocomplete="email"
+                onkeydown="if(event.key==='Enter')document.getElementById('login-password')?.focus()"
+            />
+            <input
+                class="login-input"
+                id="login-password"
+                type="password"
+                placeholder="Hasło"
+                autocomplete="current-password"
                 onkeydown="if(event.key==='Enter')doLogin()"
             />
             <button class="login-btn" id="login-btn" onclick="doLogin()">Zaloguj się</button>
@@ -7400,24 +7419,36 @@
             btn.style.color = '#8A8A8A';
             btn.style.cursor = 'wait';
             try {
-                const res = await fetch(`${API_BASE}/api/weekly-update`, {
+                await apiFetch('/api/weekly-update', {
                     method: 'POST',
-                    headers: authHeaders(),
-                    body: JSON.stringify({ userId: userId })
+                    body: { userId: userId }
                 });
-                if (res.ok) {
-                    btn.innerHTML = 'Plan wygenerowany!';
-                    btn.style.color = '#6B8F71';
-                    btn.style.borderColor = '#6B8F71';
-                    setTimeout(() => { btn.innerHTML = 'Wygeneruj nowy plan'; btn.style.color = '#1A1A1A'; btn.style.borderColor = '#EBEBEB'; btn.disabled = false; btn.style.cursor = 'pointer'; }, 3000);
-                    loadSettings();
-                } else {
-                    throw new Error('fail');
-                }
+                btn.innerHTML = 'Plan wygenerowany!';
+                btn.style.color = '#6B8F71';
+                btn.style.borderColor = '#6B8F71';
+                loadSettings();
+                loadCalendar();
+                loadTodayCard();
+                loadPlanChanges();
+                setTimeout(() => {
+                    btn.innerHTML = 'Wygeneruj nowy plan';
+                    btn.style.color = '#1A1A1A';
+                    btn.style.borderColor = '#EBEBEB';
+                    btn.disabled = false;
+                    btn.style.cursor = 'pointer';
+                }, 3000);
             } catch(e) {
+                const msg = e?.message || 'Błąd generowania planu';
                 btn.innerHTML = 'Błąd — spróbuj ponownie';
                 btn.style.color = '#C07264';
-                setTimeout(() => { btn.innerHTML = 'Wygeneruj nowy plan'; btn.style.color = '#1A1A1A'; btn.style.borderColor = '#EBEBEB'; btn.disabled = false; btn.style.cursor = 'pointer'; }, 3000);
+                showVelmToast(msg, true);
+                setTimeout(() => {
+                    btn.innerHTML = 'Wygeneruj nowy plan';
+                    btn.style.color = '#1A1A1A';
+                    btn.style.borderColor = '#EBEBEB';
+                    btn.disabled = false;
+                    btn.style.cursor = 'pointer';
+                }, 3000);
             }
         }
 
@@ -8171,21 +8202,55 @@
 
         // Init
         // --- Login logic ---
-        const API_BASE = (!window.location.hostname || window.location.hostname === 'localhost' || window.location.hostname.startsWith('192.168'))
+        function isLocalHostLike(hostname) {
+            if (!hostname) return true;
+            if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '::1') return true;
+            if (/^192\.168\.\d{1,3}\.\d{1,3}$/.test(hostname)) return true;
+            if (/^10\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(hostname)) return true;
+            return /^172\.(1[6-9]|2\d|3[0-1])\.\d{1,3}\.\d{1,3}$/.test(hostname);
+        }
+
+        const API_BASE = isLocalHostLike(window.location.hostname)
             ? 'http://' + (window.location.hostname || 'localhost') + ':3000'
             : 'https://velm-backend-production.up.railway.app';
         window.API_BASE = API_BASE;
 
+        async function hardReloadApp() {
+            try {
+                if ('serviceWorker' in navigator) {
+                    const regs = await navigator.serviceWorker.getRegistrations();
+                    await Promise.all(regs.map((reg) => reg.unregister()));
+                }
+                if ('caches' in window) {
+                    const keys = await caches.keys();
+                    await Promise.all(keys.map((key) => caches.delete(key)));
+                }
+            } catch (e) {
+                console.warn('[velm] hard reload cleanup failed:', e);
+            }
+
+            const url = new URL(window.location.href);
+            url.searchParams.set('_r', Date.now().toString());
+            window.location.replace(url.toString());
+        }
+
         async function doLogin() {
             const emailEl = document.getElementById('login-email');
+            const pwdEl   = document.getElementById('login-password');
             const errEl   = document.getElementById('login-error');
             const btn     = document.getElementById('login-btn');
             const email   = emailEl.value.trim();
+            const password = pwdEl.value;
             errEl.textContent = '';
 
             if (!email || !email.includes('@')) {
                 errEl.textContent = 'Wpisz prawidłowy adres email';
                 emailEl.focus();
+                return;
+            }
+            if (!password) {
+                errEl.textContent = 'Wpisz hasło';
+                pwdEl.focus();
                 return;
             }
 
@@ -8196,7 +8261,7 @@
                 const res  = await fetch(`${API_BASE}/api/login`, {
                     method:  'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body:    JSON.stringify({ email })
+                    body:    JSON.stringify({ email, password })
                 });
                 const data = await res.json();
 
@@ -8215,10 +8280,13 @@
                 if (data.accessToken || data.token) localStorage.setItem('velm_token', data.accessToken || data.token);
                 if (data.refreshToken) localStorage.setItem('velm_refresh_token', data.refreshToken);
                 if (data.name) localStorage.setItem('velm_user_name', data.name);
-                window.location.reload();
+                await hardReloadApp();
                 return;
             } catch (e) {
-                errEl.textContent = 'Błąd połączenia z serwerem';
+                const msg = e?.name === 'AbortError'
+                    ? 'Serwer nie odpowiada — sprawdź czy backend działa'
+                    : `Błąd połączenia: ${e?.message || 'nie udało się połączyć z API'}`;
+                errEl.textContent = msg;
                 btn.disabled = false;
                 btn.textContent = 'Zaloguj się';
             }
@@ -8742,6 +8810,8 @@
         let feelings           = new Set();
         let avgPaceVal         = '';
         let intervalDistanceM  = 400;
+        let _checkinStepsLockedHeight = 0;
+        let _checkinHeightRaf = 0;
 
         function openCheckinSmart() {
             const today = todayStr();
@@ -8818,16 +8888,22 @@
             const m2desc = document.getElementById('step-morning-4-desc');
             if (m2desc) m2desc.textContent = `Twój trener czeka. Dziś masz: ${TYPE_LABEL_CI[workoutType] || workoutType} · ${workoutData.dystans_km} km.`;
 
+            _checkinStepsLockedHeight = 0;
             // Reset all steps to inactive
             document.querySelectorAll('#checkin-overlay .step').forEach(s => {
                 s.classList.remove('active');
+                s.classList.remove('is-leaving');
                 s.style.opacity = '0';
                 s.style.transform = 'translateX(24px)';
                 s.style.animation = '';
             });
             // Activate first step
             const firstStep = document.getElementById(`step-${currentMode}-0`);
-            if (firstStep) { firstStep.classList.add('active'); firstStep.style.opacity=''; firstStep.style.transform=''; }
+            if (firstStep) {
+                firstStep.classList.add('active');
+                firstStep.style.opacity='';
+                firstStep.style.transform='';
+            }
 
             // Reset all next buttons in overlay
             document.querySelectorAll('#checkin-overlay .btn-next:not(.done-btn)').forEach(b => b.classList.remove('visible'));
@@ -8868,18 +8944,26 @@
             initModeSlider();
             updateSlider();
             updateProgress();
-            updateStepsHeight();
-            updateProgress();
-            updateStepsHeight();
 
-            // Show overlay with animations — bottom-sheet slide-up
+            // Show overlay (invisible) first so we can measure scrollHeight correctly
             const ov   = document.getElementById('checkin-overlay');
             const card = document.getElementById('ci-card');
             ov.style.display = 'flex';
-            ov.style.animation = 'ciOverlayIn 300ms ease forwards';
-            card.style.transform = 'translateX(-50%) translateY(72px)';
             card.style.opacity = '0';
             card.style.transition = 'none';
+            card.style.transform = 'translateX(-50%) translateY(72px)';
+            document.body.style.overflow = 'hidden';
+
+            // Init dynamic pickers
+            initCiPickers(document.getElementById('ci-pk-sleep'));
+
+            requestAnimationFrame(() => {
+                lockStepsHeight();
+                updateStepsHeight();
+            });
+
+            // Animate card in
+            ov.style.animation = 'ciOverlayIn 300ms ease forwards';
             requestAnimationFrame(() => {
                 requestAnimationFrame(() => {
                     card.style.transition = 'transform 400ms cubic-bezier(0.34,1.56,0.64,1), opacity 220ms ease';
@@ -8887,8 +8971,6 @@
                     card.style.opacity    = '1';
                 });
             });
-            document.body.style.overflow = 'hidden';
-            initCiPickers(document.getElementById('ci-pk-sleep'));
         }
 
         function closeCheckin() {
@@ -8937,7 +9019,7 @@
                 newStepEl.style.animation = 'ciStepEnter 220ms ease-out forwards';
                 newStepEl.classList.add('active');
                 newStepEl.addEventListener('animationend', () => { newStepEl.style.animation = ''; }, { once: true });
-                updateProgress(); updateStepsHeight();
+                updateProgress();
             }, 180);
         }
 
@@ -8952,7 +9034,6 @@
                 if (readinessFollowup === 'soreness') {
                     inSorenessDetail = true;
                     animateStep('step-morning-followup', 'step-soreness-detail');
-                    setTimeout(() => updateStepsHeight(), 420);
                 } else {
                     _sendCheckinData();
                 }
@@ -8963,13 +9044,11 @@
                     followUpSubStep = 1;
                     _buildFollowUp2c();
                     animateStep('step-post-2b', 'step-post-2c');
-                    setTimeout(() => updateStepsHeight(), 420);
                     return;
                 }
                 if (followUpSubStep === 1) {
                     followUpSubStep = 2;
                     animateStep('step-post-2c', 'step-post-2d');
-                    setTimeout(() => updateStepsHeight(), 420);
                     return;
                 }
                 // followUpSubStep === 2: "Dam radę sam" path
@@ -8977,7 +9056,6 @@
                 _showPost3PaceWrap();
                 animateStep('step-post-2d', 'step-post-3');
                 currentStep = 3; updateProgress();
-                setTimeout(() => updateStepsHeight(), 420);
                 return;
             }
             // Morning: after readiness step (step 4), handle followup or send
@@ -8985,7 +9063,6 @@
                 if (isFightingReadiness()) {
                     inReadinessFollowup = true;
                     animateStep('step-morning-4', 'step-morning-followup');
-                    setTimeout(() => updateStepsHeight(), 420);
                 } else {
                     _sendCheckinData();
                 }
@@ -9023,38 +9100,22 @@
                 console.error('animateStep: CRITICAL FAIL', { fromId, toId });
                 if (toEl) {
                     toEl.classList.add('active');
-                    toEl.style.opacity = '1';
-                    toEl.style.transform = '';
                 }
                 return;
             }
 
-            // Force state reset to avoid "intermittent" failures from previous animations
-            fromEl.style.animation = 'ciStepExit 180ms ease-in forwards';
+            document.querySelectorAll('#checkin-overlay .step.is-leaving').forEach((step) => step.classList.remove('is-leaving'));
 
-            setTimeout(() => {
+            if (fromEl && fromEl !== toEl) {
+                fromEl.classList.add('is-leaving');
                 fromEl.classList.remove('active');
-                fromEl.style.opacity = '0';
-                fromEl.style.transform = 'translateX(-20px)';
-                fromEl.style.animation = '';
+            }
 
-                // Ensure toEl is fully reset before adding active class
-                toEl.style.opacity = '0';
-                toEl.style.transform = 'translateX(20px)';
-                toEl.style.animation = '';
-
-                // Force a reflow to ensure the browser registers the reset before the animation
-                void toEl.offsetWidth;
-
+            toEl.classList.remove('is-leaving');
+            requestAnimationFrame(() => {
                 toEl.classList.add('active');
-                toEl.style.opacity = '';
-                toEl.style.transform = '';
-                toEl.style.animation = 'ciStepEnter 220ms ease-out forwards';
-
-                toEl.addEventListener('animationend', () => {
-                    toEl.style.animation = '';
-                }, { once: true });
-            }, 180);
+                updateStepsHeight();
+            });
         }
 
         function finish(evt) {
@@ -9161,13 +9222,78 @@
             }
         }
 
+        function lockStepsHeight() {
+            const outer = document.getElementById('stepsOuter');
+            if (!outer) return 0;
+
+            const steps = [...outer.querySelectorAll('.step')];
+            if (!steps.length) return 0;
+
+            const prevOuterHeight = outer.style.height;
+            const prevOuterMinHeight = outer.style.minHeight;
+            const prevStepStyles = steps.map((step) => ({
+                position: step.style.position,
+                opacity: step.style.opacity,
+                transform: step.style.transform,
+                pointerEvents: step.style.pointerEvents,
+                visibility: step.style.visibility,
+                gridArea: step.style.gridArea,
+                display: step.style.display,
+            }));
+
+            outer.style.height = 'auto';
+            outer.style.minHeight = '0';
+
+            steps.forEach((step) => {
+                step.style.position = 'static';
+                step.style.gridArea = 'auto';
+                step.style.opacity = '0';
+                step.style.transform = 'none';
+                step.style.pointerEvents = 'none';
+                step.style.visibility = 'hidden';
+                step.style.display = 'block';
+            });
+
+            const maxHeight = Math.max(...steps.map((step) => Math.ceil(step.getBoundingClientRect().height || 0)), 0);
+
+            steps.forEach((step, idx) => {
+                const prev = prevStepStyles[idx];
+                step.style.position = prev.position;
+                step.style.opacity = prev.opacity;
+                step.style.transform = prev.transform;
+                step.style.pointerEvents = prev.pointerEvents;
+                step.style.visibility = prev.visibility;
+                step.style.gridArea = prev.gridArea;
+                step.style.display = prev.display;
+            });
+
+            if (maxHeight > 0) {
+                _checkinStepsLockedHeight = Math.max(_checkinStepsLockedHeight || 0, maxHeight);
+                outer.style.height = `${_checkinStepsLockedHeight}px`;
+                outer.style.minHeight = `${_checkinStepsLockedHeight}px`;
+            } else {
+                outer.style.height = prevOuterHeight;
+                outer.style.minHeight = prevOuterMinHeight;
+            }
+
+            return _checkinStepsLockedHeight || maxHeight;
+        }
+
         function updateStepsHeight() {
             const outer = document.getElementById('stepsOuter');
-            if (!outer) return;
-            const id = inSorenessDetail ? 'step-soreness-detail' : inReadinessFollowup ? 'step-morning-followup' : inFollowUp ? (followUpSubStep === 0 ? 'step-post-2b' : followUpSubStep === 1 ? 'step-post-2c' : 'step-post-2d') : `step-${currentMode}-${currentStep}`;
-            const activeEl = document.getElementById(id);
-            if (!activeEl) return;
-            outer.style.minHeight = activeEl.scrollHeight + 'px';
+            if (!outer) return 0;
+
+            const active = document.querySelector('#checkin-overlay .step.active');
+            const activeHeight = active ? Math.ceil(active.getBoundingClientRect().height || 0) : 0;
+            const targetHeight = Math.max(_checkinStepsLockedHeight || 0, activeHeight);
+
+            if (targetHeight > 0) {
+                _checkinStepsLockedHeight = targetHeight;
+                outer.style.height = `${targetHeight}px`;
+                outer.style.minHeight = `${targetHeight}px`;
+            }
+
+            return targetHeight;
         }
 
         const SLEEP_COLORS = ['#C07264', '#C4A35A', '#6B8F71', '#6B8F71', '#4A6B50'];
@@ -9832,22 +9958,22 @@
                     <div class="step-desc">Jak czujesz się fizycznie po ostatnim treningu?</div>
                     <div class="readiness-btns">
                         <button class="readiness-btn" data-recovery="full" data-color="#4A6B50" onclick="selectBodyRecovery(this)">
-                            <span class="rd-dot" style="background:#4A6B50;"></span>
+                            <svg class="rd-ico" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="#4A6B50" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg>
                             <span style="flex:1;">Pełna regeneracja — czuję się świetnie</span>
                             <svg class="rd-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
                         </button>
                         <button class="readiness-btn" data-recovery="mild" data-color="#6B8F71" onclick="selectBodyRecovery(this)">
-                            <span class="rd-dot" style="background:#6B8F71;"></span>
+                            <svg class="rd-ico" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="#6B8F71" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
                             <span style="flex:1;">Lekka sztywność, ale wszystko gra</span>
                             <svg class="rd-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
                         </button>
                         <button class="readiness-btn" data-recovery="moderate" data-color="#C4A35A" onclick="selectBodyRecovery(this)">
-                            <span class="rd-dot" style="background:#C4A35A;"></span>
+                            <svg class="rd-ico" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="#C4A35A" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="16" height="10" rx="2" ry="2"/><line x1="22" y1="11" x2="22" y2="13"/><line x1="6" y1="11" x2="6" y2="13"/></svg>
                             <span style="flex:1;">Wyraźne zmęczenie mięśni</span>
                             <svg class="rd-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
                         </button>
                         <button class="readiness-btn" data-recovery="heavy" data-color="#C07264" onclick="selectBodyRecovery(this)">
-                            <span class="rd-dot" style="background:#C07264;"></span>
+                            <svg class="rd-ico" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="#C07264" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
                             <span style="flex:1;">Duży ból mięśni / zakwasy</span>
                             <svg class="rd-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
                         </button>
@@ -9912,22 +10038,22 @@
                     <div class="section-label" style="margin-top:20px;">Twoja odpowiedź</div>
                     <div class="readiness-btns">
                         <button class="readiness-btn" data-color="#4A6B50" onclick="selectReadiness(this)">
-                            <span class="rd-dot" style="background:#4A6B50;"></span>
+                            <svg class="rd-ico" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="#4A6B50" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
                             <span style="flex:1;">Jestem wypoczęty i gotowy na pełny trening</span>
                             <svg class="rd-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
                         </button>
                         <button class="readiness-btn" data-color="#6B8F71" onclick="selectReadiness(this)">
-                            <span class="rd-dot" style="background:#6B8F71;"></span>
+                            <svg class="rd-ico" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="#6B8F71" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
                             <span style="flex:1;">Czuję się dobrze, dam radę</span>
                             <svg class="rd-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
                         </button>
                         <button class="readiness-btn" data-color="#C4A35A" onclick="selectReadiness(this)">
-                            <span class="rd-dot" style="background:#C4A35A;"></span>
+                            <svg class="rd-ico" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="#C4A35A" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
                             <span style="flex:1;">Jestem trochę zmęczony, ale trening zrobię</span>
                             <svg class="rd-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
                         </button>
                         <button class="readiness-btn" data-color="#C07264" onclick="selectReadiness(this)">
-                            <span class="rd-dot" style="background:#C07264;"></span>
+                            <svg class="rd-ico" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="#C07264" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="9" y1="9" x2="15" y2="15"/><line x1="15" y1="9" x2="9" y2="15"/></svg>
                             <span style="flex:1;">Dziś wolę odpuścić lub zrobię lżejszy trening</span>
                             <svg class="rd-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
                         </button>
@@ -10021,15 +10147,15 @@
                     <div class="step-desc">Porównaj z tym co planowałeś.</div>
                     <div class="completion-grid">
                         <button class="completion-btn" data-completion="less" onclick="selectCompletion(this, 'less')">
-                            <div class="completion-icon">−</div>
+                            <div class="completion-icon"><svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/><path d="M16 4h4v4"/><line x1="16" y1="4" x2="21" y2="9"/></svg></div>
                             <div><div class="completion-btn-label">Mniej niż w planie</div><div class="completion-btn-desc">np. mniejszy dystans lub pominięty element</div></div>
                         </button>
                         <button class="completion-btn" data-completion="exact" onclick="selectCompletion(this, 'exact')">
-                            <div class="completion-icon">✓</div>
+                            <div class="completion-icon" style="color:var(--primary);"><svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg></div>
                             <div><div class="completion-btn-label">Zgodnie z planem</div><div class="completion-btn-desc">wykonane jak zaplanowane</div></div>
                         </button>
                         <button class="completion-btn" data-completion="more" onclick="selectCompletion(this, 'more')">
-                            <div class="completion-icon">+</div>
+                            <div class="completion-icon"><svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/><path d="M4 16v4h4"/><line x1="4" y1="20" x2="9" y2="15"/></svg></div>
                             <div><div class="completion-btn-label">Więcej niż w planie</div><div class="completion-btn-desc">np. dorzuciłem km bo czułem się dobrze</div></div>
                         </button>
                     </div>
