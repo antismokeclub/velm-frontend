@@ -6993,6 +6993,10 @@
             if (!currentUserId) return;
             try {
                 const res = await fetch(API_BASE + '/api/subscription/' + currentUserId, { headers: authHeaders() });
+                if (!res.ok) {
+                    console.error('loadSubscriptionStatus: HTTP ' + res.status);
+                    return; // zachowaj poprzedni stan zamiast degradować do nie-premium
+                }
                 const data = await res.json();
                 currentUserPremium = data.isPremium ?? false;
                 currentTrialMessagesLeft = data.trialMessagesLeft ?? 0;
@@ -7028,7 +7032,7 @@
                     currentTrialMessagesLeft = data.trialMessagesLeft ?? 0;
                     currentSurveyCompleted = data.surveyCompleted ?? false;
                     const trialLine = currentTrialMessagesLeft > 0
-                        ? 'Plan z rejestracji · ' + currentTrialMessagesLeft + ' darmowych wiadomości'
+                        ? 'Plan z rejestracji · ' + currentTrialMessagesLeft + ' ' + _trialMsgWord(currentTrialMessagesLeft)
                         : 'Plan z rejestracji · darmowe wiadomości wykorzystane';
                     container.innerHTML = '<div style="margin-bottom:14px;">' +
                         '<div style="font-size:15px;font-weight:700;color:#1A1A1A;margin-bottom:4px;">Plan darmowy</div>' +
@@ -7054,23 +7058,31 @@
             }
         }
 
+        function _escHtml(s) {
+            return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+
+        function _trialMsgWord(n) {
+            return n === 1 ? 'darmowa wiadomość' : (n >= 2 && n <= 4 ? 'darmowe wiadomości' : 'darmowych wiadomości');
+        }
+
         function showPaywall(message, opts = {}) {
             const existing = document.getElementById('paywall-modal');
             if (existing) existing.remove();
 
-            const surveyAvailable = !!opts.surveyAvailable && !currentUserPremium;
+            const surveyAvailable = !!opts.surveyAvailable && !currentUserPremium && !currentSurveyCompleted;
 
             const modal = document.createElement('div');
             modal.id = 'paywall-modal';
             modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:flex-end;justify-content:center;padding:16px;';
             modal.innerHTML = '<div style="background:#FFFFFF;border-radius:20px;padding:24px 20px calc(24px + env(safe-area-inset-bottom));width:100%;max-width:480px;">' +
                 '<div style="font-family:Outfit,sans-serif;font-size:22px;font-weight:800;color:#1A1A1A;letter-spacing:-0.02em;margin-bottom:6px;">velm Premium</div>' +
-                '<div style="font-size:14px;color:#6B6B6B;line-height:1.45;margin-bottom:20px;">' + (message || 'Pełny sztab AI, narady tygodniowe i raporty — bez limitów.') + '</div>' +
+                '<div style="font-size:14px;color:#8A8A8A;line-height:1.45;margin-bottom:20px;">' + (message ? _escHtml(message) : 'Pełny sztab AI, narady tygodniowe i raporty — bez limitów.') + '</div>' +
                 '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">' +
                     '<button onclick="startCheckout(\'monthly\')" style="border:1px solid #EBEBEB;background:#FFFFFF;border-radius:12px;padding:16px 12px;cursor:pointer;text-align:left;min-height:44px;touch-action:manipulation;font-family:Inter,sans-serif;">' +
-                        '<div style="font-size:13px;color:#6B6B6B;font-weight:500;margin-bottom:4px;">Miesięcznie</div>' +
+                        '<div style="font-size:13px;color:#8A8A8A;font-weight:500;margin-bottom:4px;">Miesięcznie</div>' +
                         '<div style="font-family:Outfit,sans-serif;font-size:22px;font-weight:800;color:#1A1A1A;font-variant-numeric:tabular-nums;">29 zł</div>' +
-                        '<div style="font-size:13px;color:#6B6B6B;">/ miesiąc</div>' +
+                        '<div style="font-size:13px;color:#8A8A8A;">/ miesiąc</div>' +
                     '</button>' +
                     '<button onclick="startCheckout(\'yearly\')" style="border:1px solid #1A1A1A;background:#1A1A1A;border-radius:12px;padding:16px 12px;cursor:pointer;text-align:left;min-height:44px;touch-action:manipulation;font-family:Inter,sans-serif;">' +
                         '<div style="font-size:13px;color:rgba(255,255,255,0.7);font-weight:500;margin-bottom:4px;">Rocznie — taniej 43%</div>' +
@@ -7078,14 +7090,14 @@
                         '<div style="font-size:13px;color:rgba(255,255,255,0.7);">/ rok</div>' +
                     '</button>' +
                 '</div>' +
-                '<div style="font-size:13px;color:#6B6B6B;text-align:center;margin-bottom:16px;">7 dni za darmo · Anuluj kiedy chcesz</div>' +
+                '<div style="font-size:13px;color:#8A8A8A;text-align:center;margin-bottom:16px;">7 dni za darmo · Anuluj kiedy chcesz</div>' +
                 (surveyAvailable ?
                 '<div style="border:1px solid #EBEBEB;border-radius:12px;padding:16px;margin-bottom:12px;">' +
                     '<div style="font-size:14px;font-weight:600;color:#1A1A1A;margin-bottom:4px;">Jeszcze testujesz?</div>' +
-                    '<div style="font-size:13px;color:#6B6B6B;line-height:1.45;margin-bottom:12px;">Wypełnij ankietę (1 minuta) i odbierz 5 darmowych wiadomości do sztabu.</div>' +
+                    '<div style="font-size:13px;color:#8A8A8A;line-height:1.45;margin-bottom:12px;">Wypełnij ankietę (1 minuta) i odbierz 5 darmowych wiadomości do sztabu.</div>' +
                     '<button onclick="openTrialSurvey()" style="width:100%;padding:12px;min-height:44px;background:transparent;border:1px solid #1A1A1A;border-radius:12px;font-size:14px;font-weight:600;color:#1A1A1A;cursor:pointer;font-family:Inter,sans-serif;touch-action:manipulation;">Wypełnij ankietę</button>' +
                 '</div>' : '') +
-                '<button onclick="document.getElementById(\'paywall-modal\').remove()" style="width:100%;padding:12px;min-height:44px;background:transparent;border:none;font-size:14px;font-weight:500;font-family:Inter,sans-serif;cursor:pointer;color:#6B6B6B;touch-action:manipulation;">Może później</button>' +
+                '<button onclick="document.getElementById(\'paywall-modal\').remove()" style="width:100%;padding:12px;min-height:44px;background:transparent;border:none;font-size:14px;font-weight:500;font-family:Inter,sans-serif;cursor:pointer;color:#8A8A8A;touch-action:manipulation;">Może później</button>' +
                 '</div>';
             modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
             document.body.appendChild(modal);
@@ -7101,7 +7113,7 @@
             _surveyState.paysWhat = ''; _surveyState.willing = null;
 
             const chip = (group, value, label) =>
-                '<button data-svgroup="' + group + '" data-svval="' + value + '" onclick="svSelect(this)" ' +
+                '<button data-svgroup="' + group + '" data-svval="' + value + '" onclick="svSelect(this)" aria-pressed="false" ' +
                 'style="padding:10px 14px;min-height:44px;border:1px solid #D9D9D9;border-radius:12px;background:#FFFFFF;color:#1A1A1A;font-size:14px;font-weight:500;font-family:Inter,sans-serif;cursor:pointer;touch-action:manipulation;">' +
                 label + '</button>';
 
@@ -7115,7 +7127,7 @@
             modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:flex-end;justify-content:center;padding:16px;';
             modal.innerHTML = '<div style="background:#FFFFFF;border-radius:20px;padding:24px 20px calc(24px + env(safe-area-inset-bottom));width:100%;max-width:480px;max-height:85vh;overflow-y:auto;">' +
                 '<div style="font-family:Outfit,sans-serif;font-size:22px;font-weight:800;color:#1A1A1A;letter-spacing:-0.02em;margin-bottom:4px;">Szybka ankieta</div>' +
-                '<div style="font-size:13px;color:#6B6B6B;margin-bottom:20px;">1 minuta · odblokowuje 5 darmowych wiadomości</div>' +
+                '<div style="font-size:13px;color:#8A8A8A;margin-bottom:20px;">1 minuta · odblokowuje 5 darmowych wiadomości</div>' +
                 q('Skąd wiesz o velm?',
                     chip('source','instagram','Instagram') + chip('source','tiktok','TikTok') +
                     chip('source','google','Google') + chip('source','znajomi','Od znajomych') +
@@ -7129,12 +7141,12 @@
                     chip('willing','0','0 zł') + chip('willing','10-20','10–20 zł') +
                     chip('willing','20-40','20–40 zł') + chip('willing','40+','40+ zł')) +
                 '<div style="margin-bottom:20px;">' +
-                    '<div style="font-size:14px;font-weight:600;color:#1A1A1A;margin-bottom:8px;">Czego najbardziej brakuje ci w treningach? <span style="font-weight:400;color:#6B6B6B;">(opcjonalnie)</span></div>' +
+                    '<div style="font-size:14px;font-weight:600;color:#1A1A1A;margin-bottom:8px;">Czego najbardziej brakuje ci w treningach? <span style="font-weight:400;color:#8A8A8A;">(opcjonalnie)</span></div>' +
                     '<textarea id="sv-missing" maxlength="500" rows="2" placeholder="Napisz krótko…" ' +
                     'style="width:100%;padding:12px;border:1px solid #D9D9D9;border-radius:12px;font-size:14px;font-family:Inter,sans-serif;background:#FFFFFF;color:#1A1A1A;resize:none;box-sizing:border-box;"></textarea></div>' +
                 '<button id="sv-submit" onclick="submitTrialSurvey()" disabled ' +
                     'style="width:100%;padding:14px;min-height:48px;background:#1A1A1A;border:none;border-radius:12px;color:#FFFFFF;font-size:15px;font-weight:600;font-family:Inter,sans-serif;cursor:pointer;opacity:0.4;touch-action:manipulation;">Odbierz 5 wiadomości</button>' +
-                '<button onclick="document.getElementById(\'survey-modal\').remove()" style="width:100%;padding:12px;min-height:44px;background:transparent;border:none;font-size:14px;font-weight:500;font-family:Inter,sans-serif;cursor:pointer;color:#6B6B6B;margin-top:4px;touch-action:manipulation;">Wróć</button>' +
+                '<button onclick="document.getElementById(\'survey-modal\').remove()" style="width:100%;padding:12px;min-height:44px;background:transparent;border:none;font-size:14px;font-weight:500;font-family:Inter,sans-serif;cursor:pointer;color:#8A8A8A;margin-top:4px;touch-action:manipulation;">Wróć</button>' +
                 '</div>';
             modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
             document.body.appendChild(modal);
@@ -7146,6 +7158,7 @@
             _surveyState[group === 'pays' ? 'pays' : group] = val;
             document.querySelectorAll('#survey-modal [data-svgroup="' + group + '"]').forEach(b => {
                 const sel = b === btn;
+                b.setAttribute('aria-pressed', sel ? 'true' : 'false');
                 b.style.background = sel ? '#1A1A1A' : '#FFFFFF';
                 b.style.color = sel ? '#FFFFFF' : '#1A1A1A';
                 b.style.borderColor = sel ? '#1A1A1A' : '#D9D9D9';
@@ -7156,7 +7169,7 @@
             }
             const submit = document.getElementById('sv-submit');
             if (submit) {
-                const ready = !!(_surveyState.source && _surveyState.willing);
+                const ready = !!(_surveyState.source && _surveyState.pays && _surveyState.willing);
                 submit.disabled = !ready;
                 submit.style.opacity = ready ? '1' : '0.4';
             }
@@ -7208,8 +7221,7 @@
                 return;
             }
             const n = currentTrialMessagesLeft;
-            const word = n === 1 ? 'darmowa wiadomość' : (n >= 2 && n <= 4 ? 'darmowe wiadomości' : 'darmowych wiadomości');
-            el.textContent = (n === 1 ? 'Została' : 'Zostało') + ' ' + n + ' ' + word;
+            el.textContent = (n === 1 ? 'Została' : 'Zostało') + ' ' + n + ' ' + _trialMsgWord(n);
             el.style.display = 'block';
         }
 
