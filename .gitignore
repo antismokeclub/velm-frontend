@@ -42,3 +42,6 @@ div
 
 # Backend (has its own repo)
 velm-backend/
+
+# Local Claude Code permission settings (machine-specific, do not commit)
+.claude/settings.local.json
