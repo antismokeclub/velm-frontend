@@ -1,0 +1,44 @@
+# CodeRabbit configuration for velm (aspireflow)
+# https://docs.coderabbit.ai/reference/configuration
+
+language: "pl-PL"
+
+reviews:
+  profile: "chill"
+  high_level_summary: true
+  poem: false
+  collapse_walkthrough: false
+  auto_review:
+    enabled: true
+    drafts: false
+  path_filters:
+    - "!node_modules/**"
+    - "!**/*.min.js"
+    - "!ruflo/**"
+    - "!tmpenhancr/**"
+    - "!**/*.log"
+  path_instructions:
+    - path: "velm-backend/**/*.js"
+      instructions: >
+        Backend jest Node.js/Express (CommonJS) i łączy się z Supabase.
+        Zwracaj uwagę na: brak walidacji inputu na granicach API,
+        hardkodowane sekrety/klucze API, zmiany modelu Claude lub schematu
+        Supabase bez wyraźnego uzasadnienia, oraz błędy w agentach AI
+        (headtrainer, analityk, fizjo, psycholog).
+    - path: "dashboard.html"
+      instructions: >
+        To jest mobile-first PWA SPA (vanilla JS/HTML/CSS) z premium designem
+        (białe karty, #1A1A1A akcenty, 20px radius). Zwracaj uwagę na
+        regresje UX, dostępność (touch targets), i niespójności wizualne
+        z resztą interfejsu.
+    - path: "index.html"
+      instructions: >
+        Ekran onboardingu/rejestracji. Nie sugeruj skracania flow
+        onboardingowego bez wyraźnej prośby.
+
+chat:
+  auto_reply: true
+
+knowledge_base:
+  learnings:
+    scope: "auto"
