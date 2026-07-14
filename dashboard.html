@@ -3142,25 +3142,43 @@
         }
 
         /* ── SETTINGS CSS CLASSES ───────────────────────────────── */
-        .s-card { background:#fff; border-radius:20px; padding:20px; margin-bottom:16px; border:1px solid rgba(235,235,235,0.5); box-shadow:0 2px 16px rgba(0,0,0,0.04); }
+        .s-card { background:#fff; border-radius:20px; padding:20px; margin-bottom:12px; border:1px solid #EBEBEB; }
         .s-section-title { font-size:11px; font-weight:700; color:#8A8A8A; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:16px; }
         .s-label { font-size:11px; font-weight:700; color:#8A8A8A; text-transform:uppercase; letter-spacing:0.08em; display:block; margin-bottom:6px; }
-        .s-input { width:100%; padding:12px; border:1.5px solid #EBEBEB; border-radius:12px; font-size:15px; font-family:'Inter',sans-serif; color:#1A1A1A; background:#fff; outline:none; box-sizing:border-box; transition:border-color 0.2s; }
+        .s-input { width:100%; padding:12px; border:1px solid #D9D9D9; border-radius:12px; font-size:15px; font-family:'Inter',sans-serif; color:#1A1A1A; background:#fff; outline:none; box-sizing:border-box; transition:border-color 0.2s ease; min-height:44px; }
         .s-input:focus { border-color:#1A1A1A; }
         .s-field { margin-bottom:12px; }
         .s-row { display:flex; gap:10px; margin-bottom:12px; }
         .s-row > div { flex:1; }
-        .s-btn-primary { width:100%; height:48px; background:#1A1A1A; color:#fff; border:none; border-radius:14px; font-size:14px; font-weight:700; font-family:'Inter',sans-serif; cursor:pointer; transition:opacity 0.2s; }
-        .s-btn-primary:active { opacity:0.85; }
-        .s-btn-secondary { width:100%; height:48px; background:transparent; border:1.5px solid #EBEBEB; border-radius:14px; font-size:14px; font-weight:600; font-family:'Inter',sans-serif; color:#1A1A1A; cursor:pointer; transition:border-color 0.2s; }
-        .s-btn-secondary:hover { border-color:#1A1A1A; }
+        .s-btn-primary { width:100%; min-height:48px; background:#1A1A1A; color:#fff; border:none; border-radius:12px; font-size:14px; font-weight:700; font-family:'Inter',sans-serif; cursor:pointer; touch-action:manipulation; transition:transform 120ms cubic-bezier(0.23,1,0.32,1), opacity 0.2s ease; }
+        .s-btn-primary:active { transform:scale(0.97); opacity:0.9; }
+        .s-btn-secondary { width:100%; min-height:48px; background:transparent; border:1px solid #EBEBEB; border-radius:12px; font-size:14px; font-weight:600; font-family:'Inter',sans-serif; color:#1A1A1A; cursor:pointer; touch-action:manipulation; transition:transform 120ms cubic-bezier(0.23,1,0.32,1), border-color 0.2s ease; }
+        .s-btn-secondary:active { transform:scale(0.97); }
+        .s-btn-chip { padding:10px 16px; min-height:44px; border:1px solid #EBEBEB; border-radius:12px; background:transparent; font-size:13px; font-weight:600; font-family:'Inter',sans-serif; color:#1A1A1A; cursor:pointer; white-space:nowrap; touch-action:manipulation; transition:transform 120ms cubic-bezier(0.23,1,0.32,1), border-color 0.2s ease; }
+        .s-btn-chip:active { transform:scale(0.97); }
+        .s-btn-chip.filled { background:#1A1A1A; border-color:#1A1A1A; color:#fff; font-weight:700; }
+        .s-btn-danger { width:100%; min-height:48px; background:transparent; border:1px solid #C07264; border-radius:12px; font-size:14px; font-weight:600; font-family:'Inter',sans-serif; color:#C07264; cursor:pointer; touch-action:manipulation; transition:transform 120ms cubic-bezier(0.23,1,0.32,1), background 0.2s ease; }
+        .s-btn-danger:active { transform:scale(0.97); background:#F5EEEC; }
+        .s-btn-ghost { background:none; border:none; font-size:13px; color:#8A8A8A; font-family:'Inter',sans-serif; cursor:pointer; padding:12px 0; min-height:44px; width:100%; text-align:center; touch-action:manipulation; }
+        .s-conn-row { padding:12px 0; border-bottom:1px solid #F5F5F5; }
+        .s-conn-row:last-child { border-bottom:none; padding-bottom:0; }
+        .s-conn-head { display:flex; align-items:center; gap:12px; }
+        .s-conn-dot { width:10px; height:10px; border-radius:50%; background:#C4C4C4; flex-shrink:0; }
+        .s-conn-name { font-size:14px; font-weight:600; color:#1A1A1A; }
+        .s-conn-sub { font-size:12px; color:#8A8A8A; }
+        .s-link { color:#8A8A8A; text-decoration:none; border-bottom:1px solid #EBEBEB; }
+        @media (hover: hover) and (pointer: fine) {
+            .s-btn-secondary:hover, .s-btn-chip:hover { border-color:#1A1A1A; }
+            .s-btn-danger:hover { background:#F5EEEC; }
+            .s-link:hover { color:#1A1A1A; border-bottom-color:#1A1A1A; }
+        }
         .s-msg { display:none; text-align:center; font-size:13px; margin-top:10px; font-weight:600; }
         .s-divider { padding:12px 0; border-top:1px solid #F5F5F5; margin-top:14px; display:flex; justify-content:space-between; align-items:center; }
         .s-days-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:5px; margin-bottom:12px; }
-        .s-day-btn { height:36px; border:1.5px solid #EBEBEB; border-radius:10px; background:transparent; font-size:11px; font-weight:600; font-family:'Inter',sans-serif; color:#8A8A8A; cursor:pointer; transition:all 0.2s; padding:0; }
+        .s-day-btn { min-height:44px; border:1px solid #D9D9D9; border-radius:10px; background:transparent; font-size:11px; font-weight:600; font-family:'Inter',sans-serif; color:#8A8A8A; cursor:pointer; touch-action:manipulation; transition:background 0.2s ease, border-color 0.2s ease, color 0.2s ease; padding:0; }
         .s-day-btn.selected { background:#1A1A1A; border-color:#1A1A1A; color:#fff; }
         .s-lang-toggle { display:flex; gap:8px; margin-bottom:12px; }
-        .s-lang-btn { flex:1; height:40px; border:1.5px solid #EBEBEB; border-radius:12px; background:transparent; font-size:14px; font-weight:600; font-family:'Inter',sans-serif; color:#8A8A8A; cursor:pointer; transition:all 0.2s; }
+        .s-lang-btn { flex:1; min-height:44px; border:1px solid #D9D9D9; border-radius:12px; background:transparent; font-size:14px; font-weight:600; font-family:'Inter',sans-serif; color:#8A8A8A; cursor:pointer; touch-action:manipulation; transition:background 0.2s ease, border-color 0.2s ease, color 0.2s ease; }
         .s-lang-btn.selected { background:#1A1A1A; border-color:#1A1A1A; color:#fff; }
     </style>
 </head>
@@ -3678,8 +3696,8 @@
                         <span style="font-size:14px;color:#1A1A1A;">ID konta</span>
                         <div style="display:flex;align-items:center;gap:8px;">
                             <span id="settings-user-id" style="font-size:12px;color:#C4C4C4;font-family:'SF Mono','Courier New',monospace;">—</span>
-                            <button onclick="copyUserId()" style="background:none;border:1px solid rgba(235,235,235,0.5);border-radius:8px;padding:4px 8px;cursor:pointer;display:flex;align-items:center;justify-content:center;" title="Kopiuj ID">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8A8A8A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+                            <button onclick="copyUserId()" aria-label="Kopiuj ID konta" style="background:none;border:1px solid #EBEBEB;border-radius:10px;min-width:44px;min-height:44px;cursor:pointer;display:flex;align-items:center;justify-content:center;touch-action:manipulation;">
+                                <svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#8A8A8A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
                             </button>
                         </div>
                     </div>
@@ -3702,7 +3720,7 @@
                         <input type="number" id="settings-edit-weekly-km" min="10" max="200" class="s-input">
                     </div>
 
-                    <button onclick="saveGoalSettings()" class="s-btn-primary" style="height:52px;font-size:15px;">
+                    <button onclick="saveGoalSettings()" class="s-btn-primary" style="min-height:52px;font-size:15px;">
                         Zapisz i zaktualizuj plan &rarr;
                     </button>
                     <div id="settings-save-msg" class="s-msg" style="color:#6B8F71;">Zapisano — trwa generowanie nowego planu</div>
@@ -3712,7 +3730,7 @@
                 <div class="home-anim s-card" style="animation-delay:0.15s;">
                     <div class="s-section-title">Plan treningowy</div>
                     <div id="settings-plan-goal" style="font-size:14px;color:#1A1A1A;line-height:1.5;margin-bottom:16px;">Brak aktywnego planu</div>
-                    <button id="settings-generate-plan-btn" onclick="generateNewPlan()" class="s-btn-secondary" style="height:52px;font-size:15px;margin-bottom:10px;">
+                    <button id="settings-generate-plan-btn" onclick="generateNewPlan()" class="s-btn-secondary" style="min-height:52px;font-size:15px;margin-bottom:10px;">
                         Wygeneruj nowy plan
                     </button>
                     <button onclick="switchView('history')" class="s-btn-secondary">
@@ -3725,42 +3743,44 @@
                     <div class="s-section-title">Połączenia</div>
 
                     <!-- Strava -->
-                    <div style="padding:12px 0;border-bottom:1px solid #F5F5F5;">
-                        <div style="display:flex;align-items:center;gap:12px;">
-                            <div id="strava-dot" style="width:10px;height:10px;border-radius:50%;background:#C4C4C4;flex-shrink:0;"></div>
+                    <div class="s-conn-row">
+                        <div class="s-conn-head">
+                            <div id="strava-dot" class="s-conn-dot"></div>
                             <div style="flex:1;min-width:0;">
-                                <div style="font-size:14px;font-weight:600;color:#1A1A1A;">Strava</div>
-                                <div id="strava-status-text" style="font-size:12px;color:#8A8A8A;">Sprawdzam...</div>
+                                <div class="s-conn-name">Strava</div>
+                                <div id="strava-status-text" class="s-conn-sub">Sprawdzam…</div>
                             </div>
-                            <button id="strava-btn" onclick="stravaConnect()" style="padding:8px 16px;border:1.5px solid #EBEBEB;border-radius:10px;background:transparent;font-size:13px;font-weight:600;font-family:'Inter',sans-serif;color:#1A1A1A;cursor:pointer;white-space:nowrap;transition:border-color 0.2s;" onmouseenter="this.style.borderColor='#1A1A1A'" onmouseleave="this.style.borderColor='#EBEBEB'">Połącz</button>
+                            <button id="strava-btn" onclick="stravaConnect()" class="s-btn-chip">Połącz</button>
                         </div>
                         <div id="strava-connected-actions" style="display:none;margin-top:10px;">
-                            <button onclick="stravaImport()" style="width:100%;height:40px;background:transparent;border:1.5px solid #EBEBEB;border-radius:12px;font-size:13px;font-weight:600;font-family:'Inter',sans-serif;color:#1A1A1A;cursor:pointer;margin-bottom:8px;transition:border-color 0.2s;" onmouseenter="this.style.borderColor='#1A1A1A'" onmouseleave="this.style.borderColor='#EBEBEB'">Importuj treningi teraz</button>
+                            <button onclick="stravaImport()" class="s-btn-secondary" style="margin-bottom:8px;">Importuj treningi teraz</button>
                             <div id="strava-import-msg" style="font-size:12px;color:#6B8F71;text-align:center;display:none;margin-bottom:8px;font-weight:600;"></div>
-                            <button onclick="stravaDisconnect()" style="width:100%;height:36px;background:transparent;border:none;font-size:12px;color:#C07264;cursor:pointer;font-family:'Inter',sans-serif;">Rozłącz Stravę</button>
+                            <button onclick="stravaDisconnect()" class="s-btn-ghost" style="color:#C07264;">Rozłącz Stravę</button>
                         </div>
                     </div>
 
                     <!-- Garmin .fit import -->
-                    <div style="padding:12px 0;border-bottom:1px solid #F5F5F5;">
-                        <div style="display:flex;align-items:center;gap:12px;">
-                            <div style="width:10px;height:10px;border-radius:50%;background:#5A7A92;flex-shrink:0;"></div>
+                    <div class="s-conn-row">
+                        <div class="s-conn-head">
+                            <div class="s-conn-dot" style="background:#5A7A92;"></div>
                             <div style="flex:1;min-width:0;">
-                                <div style="font-size:14px;font-weight:600;color:#1A1A1A;">Garmin — import .fit</div>
-                                <div style="font-size:12px;color:#8A8A8A;">Garmin Connect → Aktywność → ⚙ → Eksportuj oryginał</div>
+                                <div class="s-conn-name">Garmin — import .fit</div>
+                                <div class="s-conn-sub">Garmin Connect → Aktywność → ⚙ → Eksportuj oryginał</div>
                             </div>
-                            <button onclick="document.getElementById('fit-file-input').click()" style="padding:8px 16px;background:#1A1A1A;border:none;border-radius:10px;color:#fff;font-size:12px;font-weight:700;font-family:'Inter',sans-serif;cursor:pointer;white-space:nowrap;">Wgraj .fit</button>
+                            <button onclick="document.getElementById('fit-file-input').click()" class="s-btn-chip filled">Wgraj .fit</button>
                         </div>
                         <input type="file" id="fit-file-input" accept=".fit" style="display:none" onchange="handleFitImport(event)">
                         <div id="fit-import-status" style="display:none;margin-top:8px;font-size:13px;padding:10px 14px;border-radius:10px;"></div>
                     </div>
 
                     <!-- Apple Health -->
-                    <div style="display:flex;align-items:center;gap:12px;padding:12px 0;opacity:0.45;">
-                        <div style="width:10px;height:10px;border-radius:50%;background:#C4C4C4;flex-shrink:0;"></div>
-                        <div style="flex:1;min-width:0;">
-                            <div style="font-size:14px;font-weight:600;color:#1A1A1A;">Apple Health</div>
-                            <div style="font-size:12px;color:#8A8A8A;">Niedostępne w PWA</div>
+                    <div class="s-conn-row" style="opacity:0.45;">
+                        <div class="s-conn-head">
+                            <div class="s-conn-dot"></div>
+                            <div style="flex:1;min-width:0;">
+                                <div class="s-conn-name">Apple Health</div>
+                                <div class="s-conn-sub">Dostępne w aplikacji na iOS — wkrótce</div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -3768,7 +3788,7 @@
                 <!-- SEKCJA 5 — SUBSKRYPCJA -->
                 <div class="home-anim s-card" style="animation-delay:0.22s;">
                     <div class="s-section-title">Subskrypcja</div>
-                    <div id="subscription-section" style="font-size:13px;color:#8A8A8A;">Ładowanie...</div>
+                    <div id="subscription-section" style="font-size:13px;color:#8A8A8A;">Ładowanie…</div>
                 </div>
 
                 <!-- SEKCJA 6 — ZMIANA HASŁA -->
@@ -3791,22 +3811,22 @@
                 <div class="home-anim s-card" style="margin-bottom:16px;animation-delay:0.27s;">
                     <div class="s-section-title">Twoje dane</div>
                     <p style="font-size:13px;color:#8A8A8A;line-height:1.5;margin:0 0 14px 0;">Pobierz wszystkie swoje dane (treningi, plany, czaty, ustawienia) jako plik JSON.</p>
-                    <button onclick="exportMyData()" id="export-data-btn" style="width:100%;height:44px;background:transparent;border:1.5px solid #EBEBEB;border-radius:12px;font-size:14px;font-weight:600;font-family:'Inter',sans-serif;color:#1A1A1A;cursor:pointer;transition:border-color 0.2s;" onmouseenter="this.style.borderColor='#1A1A1A'" onmouseleave="this.style.borderColor='#EBEBEB'">
+                    <button onclick="exportMyData()" id="export-data-btn" class="s-btn-secondary">
                         Pobierz moje dane
                     </button>
                     <div style="display:flex;gap:14px;margin-top:14px;font-size:12px;">
-                        <a href="/privacy.html" target="_blank" style="color:#8A8A8A;text-decoration:none;border-bottom:1px solid #EBEBEB;">Polityka prywatności</a>
-                        <a href="/terms.html" target="_blank" style="color:#8A8A8A;text-decoration:none;border-bottom:1px solid #EBEBEB;">Regulamin</a>
+                        <a href="/privacy.html" target="_blank" class="s-link">Polityka prywatności</a>
+                        <a href="/terms.html" target="_blank" class="s-link">Regulamin</a>
                     </div>
                 </div>
 
-                <!-- SEKCJA 7 — STREFA NIEBEZPIECZNA -->
-                <div class="home-anim s-card" style="margin-bottom:32px;border-left:3px solid #C07264;animation-delay:0.30s;">
-                    <div class="s-section-title">Strefa niebezpieczna</div>
-                    <button onclick="doLogout()" style="width:100%;height:48px;background:transparent;border:1.5px solid #C07264;border-radius:14px;font-size:14px;font-weight:600;font-family:'Inter',sans-serif;color:#C07264;cursor:pointer;margin-bottom:10px;transition:background 0.2s;" onmouseenter="this.style.background='#F5EEEC'" onmouseleave="this.style.background='transparent'">
+                <!-- SEKCJA 7 — KONTO -->
+                <div class="home-anim s-card" style="margin-bottom:32px;animation-delay:0.30s;">
+                    <div class="s-section-title">Konto</div>
+                    <button onclick="doLogout()" class="s-btn-danger" style="margin-bottom:8px;">
                         Wyloguj się
                     </button>
-                    <button onclick="deleteAccount()" style="background:none;border:none;font-size:13px;color:#8A8A8A;font-family:'Inter',sans-serif;cursor:pointer;padding:8px 0;width:100%;text-align:center;">
+                    <button onclick="deleteAccount()" class="s-btn-ghost">
                         Usuń konto
                     </button>
                 </div>
@@ -7638,7 +7658,7 @@
             if (!currentUserId) return;
             const container = document.getElementById('history-list');
             if (!container) return;
-            container.innerHTML = '<div style="text-align:center;padding:40px;color:#8A8A8A;">Ładowanie...</div>';
+            container.innerHTML = '<div style="text-align:center;padding:40px;color:#8A8A8A;">Ładowanie…</div>';
             try {
                 const res = await fetch(`${API_BASE}/api/workouts/${currentUserId}?days=90`, { headers: authHeaders() });
                 const data = await res.json();
@@ -8668,7 +8688,7 @@
         async function loadWeeklyReportView() {
             const container = document.getElementById('weekly-report-content');
             if (!container || !currentUserId) return;
-            container.innerHTML = '<div style="text-align:center;padding:60px 20px;color:#8A8A8A;">Ładowanie...</div>';
+            container.innerHTML = '<div style="text-align:center;padding:60px 20px;color:#8A8A8A;">Ładowanie…</div>';
             try {
                 const res = await fetch(`${API_BASE}/api/weekly-summary/${currentUserId}`, { headers: authHeaders() });
                 const data = await res.json();
@@ -9387,7 +9407,17 @@
             const previewTitle = document.getElementById('ci-preview-title');
             const previewSub   = document.getElementById('ci-preview-sub');
             if (previewTitle) previewTitle.textContent = TYPE_LABEL_CI[workoutType] || workoutType;
-            if (previewSub)   previewSub.textContent   = workoutData.dystans_km + ' km';
+            if (previewSub) {
+                // Pełny obraz planu: dystans · szacowany czas · tempo (jeśli plan je podaje)
+                const parts = [workoutData.dystans_km + ' km'];
+                const paceMin = (typeof _parsePaceMin === 'function') ? _parsePaceMin(window._todayPace) : null;
+                if (paceMin && workoutData.dystans_km) {
+                    const estMin = Math.round(paceMin * workoutData.dystans_km);
+                    if (typeof _fmtMin === 'function') parts.push('~' + _fmtMin(estMin));
+                }
+                if (window._todayPace) parts.push(String(window._todayPace).replace(/\s*min\/km\s*$/i, '') + '/km');
+                previewSub.textContent = parts.join(' · ');
+            }
             const m2desc = document.getElementById('step-morning-4-desc');
             if (m2desc) m2desc.textContent = `Twój trener czeka. Dziś masz: ${TYPE_LABEL_CI[workoutType] || workoutType} · ${workoutData.dystans_km} km.`;
 
