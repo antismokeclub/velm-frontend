@@ -6261,7 +6261,8 @@
         // ── LABORATORIUM — wskaźniki + widoczna analiza AI ───────
         function _labPace(sec) {
             if (sec == null) return '—';
-            const m = Math.floor(sec / 60), s = Math.round(sec % 60);
+            const total = Math.round(sec);
+            const m = Math.floor(total / 60), s = total % 60;
             return m + ':' + String(s).padStart(2, '0');
         }
 
@@ -6273,11 +6274,14 @@
                 '</div>';
         }
 
+        let _labLoadGen = 0;
         async function loadLab() {
             const el = document.getElementById('lab-content');
             if (!el || !currentUserId) return;
+            const gen = ++_labLoadGen; // strażnik: starsze odpowiedzi nie nadpisują nowszych
             try {
                 const d = await apiFetch('/api/lab/' + currentUserId);
+                if (gen !== _labLoadGen) return;
 
                 // ── Karty wskaźników ──
                 const cards = [];
@@ -6357,6 +6361,7 @@
                     '<div class="status-dots"><span></span><span></span><span></span></div>' +
                     '<div style="font-size:13px;color:#8A8A8A;">Analityk przygotowuje przegląd…</div></div>';
                 setTimeout(() => {
+                    if (gen !== _labLoadGen) return;
                     list.innerHTML = analyses.map(a => {
                         const dt = new Date(a.date + 'T00:00:00').toLocaleDateString('pl-PL', { day: 'numeric', month: 'long' });
                         return '<div class="lab-ai-item" style="background:#fff;border:1px solid #EBEBEB;border-radius:20px;padding:16px;margin-bottom:10px;">' +
@@ -6374,7 +6379,11 @@
                     });
                 }, 1200);
             } catch (e) {
-                el.innerHTML = '';
+                if (gen !== _labLoadGen) return;
+                el.innerHTML = '<div style="background:#fff;border:1px solid #EBEBEB;border-radius:20px;padding:20px;text-align:center;">' +
+                    '<div style="font-size:14px;font-weight:600;color:#1A1A1A;margin-bottom:4px;">Nie udało się wczytać danych</div>' +
+                    '<div style="font-size:13px;color:#8A8A8A;margin-bottom:12px;">Sprawdź połączenie i spróbuj ponownie.</div>' +
+                    '<button onclick="loadLab()" style="padding:10px 20px;min-height:44px;background:transparent;border:1px solid #1A1A1A;border-radius:12px;font-size:14px;font-weight:600;color:#1A1A1A;cursor:pointer;font-family:Inter,sans-serif;touch-action:manipulation;">Spróbuj ponownie</button></div>';
                 console.error('loadLab błąd:', e.message);
             }
         }
