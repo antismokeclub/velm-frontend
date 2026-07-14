@@ -2226,6 +2226,7 @@
             background: transparent;
             border: none;
             padding: 10px 8px;
+            min-height: 44px;
             font-family: 'Inter', sans-serif;
             font-size: 13px;
             font-weight: 500;
@@ -3300,7 +3301,7 @@
 
                 <!-- POST CHECK-IN BUTTON -->
                 <div id="post-checkin-btn" style="display:none;margin-bottom:12px;">
-                    <button onclick="openCheckin('post')"
+                    <button onclick="openCheckin('post', window._todayTyp, window._todayKm)"
                         style="width:100%;padding:14px;background:white;border:1.5px solid #1A1A1A;border-radius:14px;font-size:14px;font-weight:600;color:#1A1A1A;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;font-family:'Inter',sans-serif;">
                         <span style="width:8px;height:8px;border-radius:50%;background:#6B8F71;display:inline-block;flex-shrink:0;"></span>
                         Uzupełnij dzisiejszy trening
