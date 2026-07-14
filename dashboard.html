@@ -2225,9 +2225,9 @@
             flex: 1;
             background: transparent;
             border: none;
-            padding: 10px 20px;
+            padding: 10px 8px;
             font-family: 'Inter', sans-serif;
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 500;
             color: #8A8A8A;
             cursor: pointer;
@@ -3306,14 +3306,6 @@
                         Uzupełnij dzisiejszy trening
                     </button>
                 </div>
-                <!-- TEST: MORNING CHECK-IN BUTTON -->
-                <div id="test-morning-checkin-btn" style="margin-bottom:12px;">
-                    <button onclick="openCheckin('morning')"
-                        style="width:100%;padding:12px;background:#f0f0f0;border:1px dashed #8A8A8A;border-radius:14px;font-size:12px;font-weight:600;color:#8A8A8A;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;font-family:'Inter',sans-serif;">
-                        TEST: Ponowny Check-in Poranny
-                    </button>
-                </div>
-
                 <!-- PLAN CHANGES -->
                 <div id="plan-changes-section" style="display:none;margin-bottom:16px;">
                     <div style="font-size:11px;font-weight:700;color:#8A8A8A;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px;">Zmiany w planie</div>
@@ -3482,6 +3474,7 @@
                 <div id="coach-agent-selector">
                     <div id="agent-pill-wrap">
                         <button onclick="selectAgent('szef_sztabu',this)" id="chip-szef_sztabu" class="agent-active">Trener</button>
+                        <button onclick="selectAgent('analityk',this)" id="chip-analityk">Analityk</button>
                         <button onclick="selectAgent('fizjo',this)" id="chip-fizjo">Fizjo</button>
                         <button onclick="selectAgent('psycholog',this)" id="chip-psycholog">Psycholog</button>
                         <div id="agent-slider"></div>
@@ -4154,14 +4147,15 @@
             } catch(e) {}
         }
 
-        const AGENT_LABELS = { szef_sztabu: 'Trener', fizjo: 'Fizjo', psycholog: 'Psycholog' };
-        const AGENT_INITIALS = { szef_sztabu: 'T', fizjo: 'F', psycholog: 'P' };
+        const AGENT_LABELS = { szef_sztabu: 'Trener', analityk: 'Analityk', fizjo: 'Fizjo', psycholog: 'Psycholog' };
+        const AGENT_INITIALS = { szef_sztabu: 'T', analityk: 'A', fizjo: 'F', psycholog: 'P' };
         const AGENT_DESCS = {
             szef_sztabu: 'Twój główny trener — planuje treningi, analizuje postępy i koordynuje całą pracę sztabu.',
+            analityk:    'Analityk danych — czyta twoje tempo, tętno i obciążenie, wyłapuje trendy i wzorce w treningach.',
             fizjo:       'Specjalista od biomechaniki i regeneracji — ocenia ryzyko kontuzji i dobiera zalecenia.',
             psycholog:   'Coach mentalny — motywacja, nawyki i wsparcie w trudnych momentach treningowych.',
         };
-        const AGENT_NAMES = { szef_sztabu: 'Trener', fizjo: 'Fizjo', psycholog: 'Psycholog' };
+        const AGENT_NAMES = { szef_sztabu: 'Trener', analityk: 'Analityk', fizjo: 'Fizjo', psycholog: 'Psycholog' };
 
         const AGENT_SUGGESTIONS = {
             szef_sztabu: [
@@ -4175,6 +4169,18 @@
                 'Jak poprawić mój czas na 5 km?',
                 'Co zrobić gdy brakuje motywacji do biegu?',
                 'Czy moje tętno spoczynkowe jest w normie?',
+            ],
+            analityk: [
+                'Jak zmieniało się moje tempo w ostatnich tygodniach?',
+                'Czy mój ostatni trening był lepszy od poprzednich?',
+                'Jakie mam trendy w tętnie na łatwych biegach?',
+                'Ile kilometrów zrobiłem w tym miesiącu?',
+                'Czy moje obciążenie treningowe rośnie za szybko?',
+                'W jakie dni biegam najlepiej?',
+                'Jak wygląda moja realizacja planu?',
+                'Które treningi sprawiają mi największą trudność?',
+                'Czy widać postęp w moich długich biegach?',
+                'Co mówią dane o mojej formie przed zawodami?',
             ],
             fizjo: [
                 'Czuję ból w kolanie — co robić?',
@@ -4213,7 +4219,7 @@
             const container = document.getElementById('coach-quick-suggestions');
             if (!container) return;
             const footer = container.querySelector('.coach-suggest-footer');
-            const footerLabel = { szef_sztabu: 'SZTAB AI', fizjo: 'FIZJOTERAPEUTA', psycholog: 'PSYCHOLOG' }[agent] || 'SZTAB AI';
+            const footerLabel = { szef_sztabu: 'SZTAB AI', analityk: 'ANALITYK', fizjo: 'FIZJOTERAPEUTA', psycholog: 'PSYCHOLOG' }[agent] || 'SZTAB AI';
             const picks = _pickSuggestions(agent);
             const btns = picks.map(q =>
                 `<button class="coach-suggest-card" onclick="sendQuickSuggestion(${JSON.stringify(q)})">${q}</button>`

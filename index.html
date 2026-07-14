@@ -4039,7 +4039,6 @@ async function handleLogin() {
   if (!pwd) { errEl.textContent = 'Wpisz hasło'; return; }
 
   btn.disabled = true; btn.textContent = 'Logowanie…';
-  console.log('[LOGIN] Próba logowania:', email, 'API:', API_BASE);
   try {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 8000);
@@ -4049,9 +4048,7 @@ async function handleLogin() {
       signal: controller.signal
     });
     clearTimeout(timeout);
-    console.log('[LOGIN] Response status:', res.status);
     const data = await res.json();
-    console.log('[LOGIN] Response data:', JSON.stringify(data));
     if (!res.ok || !data.success) {
       errEl.textContent = data.error || 'Nieprawidłowy email lub hasło';
       btn.disabled = false; btn.textContent = 'Zaloguj';
@@ -4061,7 +4058,6 @@ async function handleLogin() {
     if (data.accessToken || data.token) localStorage.setItem('velm_token', data.accessToken || data.token);
     if (data.refreshToken) localStorage.setItem('velm_refresh_token', data.refreshToken);
     if (data.name) localStorage.setItem('velm_user_name', data.name);
-    console.log('[LOGIN] OK, redirect to dashboard');
     const overlay = document.getElementById('auth-overlay');
     overlay.classList.add('out');
     setTimeout(() => { window.location.href = 'dashboard.html'; }, 380);
