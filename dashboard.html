@@ -2254,6 +2254,61 @@
             pointer-events: none;
         }
 
+        /* ── NARADA SZTABU — pełnoekranowa animacja generowania planu ── */
+        #narada-overlay {
+            position: fixed; inset: 0; z-index: 9998;
+            background: #F7F4F0;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            padding: 24px;
+            opacity: 0;
+            transition: opacity 300ms cubic-bezier(0.23, 1, 0.32, 1);
+        }
+        #narada-overlay.visible { opacity: 1; }
+        #narada-label {
+            position: absolute; top: calc(32px + env(safe-area-inset-top));
+            font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 700;
+            letter-spacing: 0.12em; text-transform: uppercase; color: #8A8A8A;
+        }
+        #narada-stage {
+            display: flex; flex-direction: column; align-items: center; text-align: center;
+            opacity: 1; transform: translate3d(0, 0, 0);
+            transition: opacity 280ms cubic-bezier(0.23, 1, 0.32, 1), transform 280ms cubic-bezier(0.23, 1, 0.32, 1);
+        }
+        #narada-stage.phase-out { opacity: 0; transform: translate3d(0, -8px, 0); }
+        #narada-stage.phase-in  { opacity: 0; transform: translate3d(0, 8px, 0); transition: none; }
+        #narada-monogram {
+            width: 72px; height: 72px; border-radius: 50%;
+            background: #FFFFFF; border: 1px solid #EBEBEB;
+            display: flex; align-items: center; justify-content: center;
+            font-family: 'Outfit', sans-serif; font-size: 30px; font-weight: 800; color: #1A1A1A;
+            margin-bottom: 16px;
+        }
+        #narada-agent-name {
+            font-family: 'Outfit', sans-serif; font-size: 22px; font-weight: 800;
+            color: #1A1A1A; letter-spacing: -0.02em; margin-bottom: 8px;
+        }
+        #narada-status {
+            font-family: 'Inter', sans-serif; font-size: 14px; color: #8A8A8A;
+            line-height: 1.45; min-height: 20px;
+            opacity: 1; transition: opacity 220ms ease;
+        }
+        #narada-status.swap { opacity: 0; }
+        #narada-dots {
+            position: absolute; bottom: calc(40px + env(safe-area-inset-bottom));
+            display: flex; gap: 10px;
+        }
+        .narada-dot {
+            width: 8px; height: 8px; border-radius: 50%;
+            background: #D9D9D9;
+            transition: background 250ms ease, transform 250ms cubic-bezier(0.23, 1, 0.32, 1);
+        }
+        .narada-dot.done { background: #1A1A1A; }
+        .narada-dot.current { background: #1A1A1A; transform: scale(1.35); }
+        @media (prefers-reduced-motion: reduce) {
+            #narada-stage, #narada-stage.phase-out, #narada-stage.phase-in { transform: none; }
+            .narada-dot.current { transform: none; }
+        }
+
         /* Conversations drawer */
         #conv-drawer-wrap { position: relative; padding: 0 20px; margin-bottom: 8px; flex-shrink: 0; z-index: 50; }
         #conv-drawer-toggle {
@@ -7081,12 +7136,12 @@
                 '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">' +
                     '<button onclick="startCheckout(\'monthly\')" style="border:1px solid #EBEBEB;background:#FFFFFF;border-radius:12px;padding:16px 12px;cursor:pointer;text-align:left;min-height:44px;touch-action:manipulation;font-family:Inter,sans-serif;">' +
                         '<div style="font-size:13px;color:#8A8A8A;font-weight:500;margin-bottom:4px;">Miesięcznie</div>' +
-                        '<div style="font-family:Outfit,sans-serif;font-size:22px;font-weight:800;color:#1A1A1A;font-variant-numeric:tabular-nums;">29 zł</div>' +
+                        '<div style="font-family:Outfit,sans-serif;font-size:22px;font-weight:800;color:#1A1A1A;font-variant-numeric:tabular-nums;">$29</div>' +
                         '<div style="font-size:13px;color:#8A8A8A;">/ miesiąc</div>' +
                     '</button>' +
                     '<button onclick="startCheckout(\'yearly\')" style="border:1px solid #1A1A1A;background:#1A1A1A;border-radius:12px;padding:16px 12px;cursor:pointer;text-align:left;min-height:44px;touch-action:manipulation;font-family:Inter,sans-serif;">' +
                         '<div style="font-size:13px;color:rgba(255,255,255,0.7);font-weight:500;margin-bottom:4px;">Rocznie — taniej 43%</div>' +
-                        '<div style="font-family:Outfit,sans-serif;font-size:22px;font-weight:800;color:#FFFFFF;font-variant-numeric:tabular-nums;">199 zł</div>' +
+                        '<div style="font-family:Outfit,sans-serif;font-size:22px;font-weight:800;color:#FFFFFF;font-variant-numeric:tabular-nums;">$199</div>' +
                         '<div style="font-size:13px;color:rgba(255,255,255,0.7);">/ rok</div>' +
                     '</button>' +
                 '</div>' +
@@ -7572,53 +7627,185 @@
             }
         }
 
+        // ── NARADA SZTABU — animowana sekwencja podczas generowania planu ──
+        const NARADA_PHASES = [
+            { initial: 'A', name: 'Analityk',    lines: ['Przeglądam twoje ostatnie treningi', 'Porównuję tempo i tętno', 'Liczę obciążenie tygodnia'] },
+            { initial: 'F', name: 'Fizjo',       lines: ['Sprawdzam sygnały z ciała', 'Oceniam ryzyko przeciążenia', 'Wyznaczam limity regeneracji'] },
+            { initial: 'P', name: 'Psycholog',   lines: ['Czytam twoje check-iny', 'Oceniam energię i nastawienie', 'Przekazuję uwagi do narady'] },
+            { initial: 'T', name: 'Szef Sztabu', lines: ['Zbieram raporty sztabu', 'Układam tydzień treningowy', 'Dopinam szczegóły planu'] }
+        ];
+
+        function showNaradaOverlay() {
+            document.getElementById('narada-overlay')?.remove();
+            const overlay = document.createElement('div');
+            overlay.id = 'narada-overlay';
+            overlay.setAttribute('role', 'dialog');
+            overlay.setAttribute('aria-modal', 'true');
+            overlay.setAttribute('aria-label', 'Narada sztabu — generowanie planu');
+            overlay.tabIndex = -1;
+            overlay.innerHTML =
+                '<div id="narada-label">Narada sztabu</div>' +
+                '<div id="narada-stage" aria-live="polite">' +
+                    '<div id="narada-monogram" aria-hidden="true">A</div>' +
+                    '<div id="narada-agent-name">Analityk</div>' +
+                    '<div id="narada-status"></div>' +
+                '</div>' +
+                '<div id="narada-dots" aria-hidden="true">' +
+                    NARADA_PHASES.map((_, i) => '<div class="narada-dot' + (i === 0 ? ' current' : '') + '"></div>').join('') +
+                '</div>';
+
+            // Modalność: fokus na overlay, tło nieaktywne (inert), przywrócenie przy zamknięciu
+            const prevFocus = document.activeElement;
+            const inerted = [];
+            Array.from(document.body.children).forEach(el => {
+                if (el !== overlay && !el.inert) { el.inert = true; inerted.push(el); }
+            });
+            document.body.appendChild(overlay);
+            overlay.focus({ preventScroll: true });
+            function releaseModal() {
+                inerted.forEach(el => { el.inert = false; });
+                if (prevFocus && typeof prevFocus.focus === 'function') prevFocus.focus({ preventScroll: true });
+            }
+            requestAnimationFrame(() => requestAnimationFrame(() => overlay.classList.add('visible')));
+
+            let phaseIdx = 0, lineIdx = 0;
+            let phaseTimer = null, lineTimer = null;
+            const startedAt = Date.now();
+
+            const stage = () => document.getElementById('narada-stage');
+            const statusEl = () => document.getElementById('narada-status');
+
+            function setStatus(text) {
+                const el = statusEl();
+                if (!el) return;
+                el.classList.add('swap');
+                setTimeout(() => { el.textContent = text; el.classList.remove('swap'); }, 220);
+            }
+
+            function renderPhase(idx) {
+                const s = stage();
+                if (!s) return;
+                const phase = NARADA_PHASES[idx];
+                s.classList.add('phase-out');
+                setTimeout(() => {
+                    document.getElementById('narada-monogram').textContent = phase.initial;
+                    document.getElementById('narada-agent-name').textContent = phase.name;
+                    const st = statusEl();
+                    if (st) { st.classList.remove('swap'); st.textContent = phase.lines[0]; }
+                    s.classList.remove('phase-out');
+                    s.classList.add('phase-in');
+                    requestAnimationFrame(() => requestAnimationFrame(() => {
+                        s.style.transition = '';
+                        s.classList.remove('phase-in');
+                    }));
+                }, 280);
+                document.querySelectorAll('.narada-dot').forEach((d, i) => {
+                    d.classList.toggle('done', i < idx);
+                    d.classList.toggle('current', i === idx);
+                });
+            }
+
+            function nextLine() {
+                const phase = NARADA_PHASES[phaseIdx];
+                lineIdx = (lineIdx + 1) % phase.lines.length;
+                setStatus(phase.lines[lineIdx]);
+            }
+
+            function nextPhase() {
+                if (phaseIdx >= NARADA_PHASES.length - 1) return; // Szef czeka na API
+                phaseIdx++;
+                lineIdx = 0;
+                renderPhase(phaseIdx);
+            }
+
+            const st0 = statusEl();
+            if (st0) st0.textContent = NARADA_PHASES[0].lines[0];
+            lineTimer = setInterval(nextLine, 2400);
+            phaseTimer = setInterval(nextPhase, 6500);
+
+            function teardown() {
+                clearInterval(lineTimer);
+                clearInterval(phaseTimer);
+            }
+
+            return {
+                // Sukces: dokończ sekwencję (bez pomijania faz), pokaż "Plan gotowy", wygaś overlay
+                async finish() {
+                    teardown();
+                    // Minimum 4s na ekranie, żeby szybka odpowiedź nie mignęła
+                    const minMs = 4000;
+                    const elapsed = Date.now() - startedAt;
+                    if (elapsed < minMs) await new Promise(r => setTimeout(r, minMs - elapsed));
+                    // Szybka odpowiedź API nie może pominąć członków sztabu —
+                    // przewiń pozostałe fazy w skróconym tempie (1.4s każda)
+                    while (phaseIdx < NARADA_PHASES.length - 1) {
+                        phaseIdx++;
+                        lineIdx = 0;
+                        renderPhase(phaseIdx);
+                        await new Promise(r => setTimeout(r, 1400));
+                    }
+                    document.querySelectorAll('.narada-dot').forEach(d => { d.classList.add('done'); d.classList.remove('current'); });
+                    const nameEl = document.getElementById('narada-agent-name');
+                    const monoEl = document.getElementById('narada-monogram');
+                    if (monoEl) monoEl.textContent = '✓';
+                    if (nameEl) nameEl.textContent = 'Plan gotowy';
+                    setStatus('Twój nowy tydzień treningowy czeka');
+                    await new Promise(r => setTimeout(r, 1600));
+                    releaseModal();
+                    overlay.classList.remove('visible');
+                    setTimeout(() => overlay.remove(), 320);
+                },
+                // Błąd: zamknij od razu
+                abort() {
+                    teardown();
+                    releaseModal();
+                    overlay.classList.remove('visible');
+                    setTimeout(() => overlay.remove(), 320);
+                }
+            };
+        }
+
         async function generateNewPlan() {
             const userId = localStorage.getItem('velm_user_id');
             if (!userId) return;
+
+            // Bez premium narada i tak wróci 402 — pokaż paywall bez wywołania API
+            if (!currentUserPremium) {
+                showPaywall('Nowa narada sztabu dostępna w Premium. Twój plan z rejestracji pozostaje aktywny.', { surveyAvailable: !currentSurveyCompleted });
+                return;
+            }
+
             const btn = document.getElementById('settings-generate-plan-btn');
-            if (!btn) return;
-            btn.disabled = true;
-            btn.innerHTML = 'Generowanie planu<span class="generating-dot"></span>';
-            btn.style.color = '#8A8A8A';
-            btn.style.cursor = 'wait';
+            if (btn) { btn.disabled = true; btn.style.cursor = 'wait'; }
+            const resetBtn = () => {
+                if (!btn) return;
+                btn.innerHTML = 'Wygeneruj nowy plan';
+                btn.style.color = '#1A1A1A';
+                btn.style.borderColor = '#EBEBEB';
+                btn.disabled = false;
+                btn.style.cursor = 'pointer';
+            };
+
+            const narada = showNaradaOverlay();
             try {
                 await apiFetch('/api/weekly-update', {
                     method: 'POST',
                     body: { userId: userId }
                 });
-                btn.innerHTML = 'Plan wygenerowany!';
-                btn.style.color = '#6B8F71';
-                btn.style.borderColor = '#6B8F71';
                 loadSettings();
                 loadCalendar();
                 loadTodayCard();
                 loadPlanChanges();
-                setTimeout(() => {
-                    btn.innerHTML = 'Wygeneruj nowy plan';
-                    btn.style.color = '#1A1A1A';
-                    btn.style.borderColor = '#EBEBEB';
-                    btn.disabled = false;
-                    btn.style.cursor = 'pointer';
-                }, 3000);
+                await narada.finish();
+                resetBtn();
             } catch(e) {
-                const resetBtn = () => {
-                    btn.innerHTML = 'Wygeneruj nowy plan';
-                    btn.style.color = '#1A1A1A';
-                    btn.style.borderColor = '#EBEBEB';
-                    btn.disabled = false;
-                    btn.style.cursor = 'pointer';
-                };
+                narada.abort();
+                resetBtn();
                 if (e.status === 402) {
-                    // Narada tylko dla premium — paywall zamiast komunikatu o błędzie
-                    resetBtn();
                     showPaywall(e.data?.message || 'Nowa narada sztabu dostępna w Premium.', { surveyAvailable: e.data?.surveyAvailable });
                     return;
                 }
-                const msg = e?.message || 'Błąd generowania planu';
-                btn.innerHTML = 'Błąd — spróbuj ponownie';
-                btn.style.color = '#C07264';
-                showVelmToast(msg, true);
-                setTimeout(resetBtn, 3000);
+                showVelmToast(e?.message || 'Błąd generowania planu', true);
             }
         }
 
