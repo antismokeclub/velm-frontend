@@ -6355,7 +6355,6 @@
                 }
                 renderCalendar();
                 updateCalToggle(calView);
-                maybeShowWeeklyNarada(calendarPlan);
             } catch (e) {
                 console.error('Calendar load error:', e);
                 calContent.innerHTML = `<div style="text-align:center;padding:48px 16px;font-size:14px;color:#8A8A8A;">Brak połączenia z serwerem</div>`;
@@ -8268,43 +8267,51 @@
             };
         }
 
-        // ── Teatr narady przy pierwszym wejściu w tygodniu z nowym planem ──
-        // Cron generuje plan w niedzielę 23:00; pierwsze otwarcie apki z
-        // nieobejrzanym tygodniem = niezamykalna narada (potem już nie).
-        function maybeShowWeeklyNarada(plan) {
-            try {
-                const weekKey = plan?.tydzien_od || plan?.dni?.[0]?.data;
-                if (!weekKey) return;
-                const KEY = 'velm_narada_seen_week';
-                const seen = localStorage.getItem(KEY);
-                if (seen === weekKey) return;
-                if (document.getElementById('narada-overlay')) {
-                    // Narada na żywo właśnie trwa — ten tydzień jest obejrzany
-                    localStorage.setItem(KEY, weekKey);
-                    return;
-                }
-                if (!seen) {
-                    // Pierwsze uruchomienie na tym urządzeniu (np. tuż po
-                    // onboardingu, gdzie narada już była) — nie pokazuj,
-                    // tylko zapamiętaj obecny tydzień
-                    localStorage.setItem(KEY, weekKey);
-                    return;
-                }
-                const THEATER_MS = 30000;
-                const narada = showNaradaOverlay({ estimateMs: THEATER_MS, weekKey });
-                setTimeout(() => { narada.finish(); }, THEATER_MS * 0.92);
-            } catch (e) { console.error('maybeShowWeeklyNarada:', e); }
-        }
-
-        // Sprawdzenie przy starcie aplikacji (nie tylko przy wejściu w kalendarz)
+        // ── Narada NA ŻĄDANIE przy pierwszym wejściu w nowym tygodniu ──
+        // Bez crona: to użytkownik (samym wejściem do apki) zwołuje naradę.
+        // Plan aktualny (tydzien_od >= poniedziałek) → nic. Plan stary →
+        // niezamykalna narada + PRAWDZIWE generowanie (/api/weekly-update).
+        // Darmowi (402) — cicho zostają przy starym planie, bez ponawiania
+        // w tym samym tygodniu. Kasa Sonneta pali się tylko dla wracających.
+        let _weeklyNaradaRunning = false;
         async function checkWeeklyNarada() {
             try {
-                if (!currentUserId) return;
+                if (!currentUserId || _weeklyNaradaRunning) return;
+                if (document.getElementById('narada-overlay')) return;
+
                 const res = await fetch(`${API_BASE}/api/plan/${currentUserId}`, { headers: authHeaders() });
                 if (!res.ok) return;
                 const data = await res.json();
-                maybeShowWeeklyNarada(data?.plan?.plan ?? data?.plan ?? null);
-            } catch (e) { /* brak planu / offline — pomiń */ }
+                const plan = data?.plan?.plan ?? data?.plan ?? null;
+                const weekKey = plan?.tydzien_od || plan?.dni?.[0]?.data;
+                if (!weekKey) return;   // brak planu w ogóle — nie ruszamy (onboarding to załatwia)
+
+                const mondayStr = toDateStr(getMonday(new Date()));
+                if (weekKey >= mondayStr) return;   // plan aktualny — nic do roboty
+
+                // Darmowy user dostał już 402 w tym tygodniu? Nie męczymy.
+                if (localStorage.getItem('velm_narada_402_week') === mondayStr) return;
+
+                _weeklyNaradaRunning = true;
+                const narada = showNaradaOverlay({ estimateMs: 60000 });
+                try {
+                    await apiFetch('/api/weekly-update', { method: 'POST', body: { userId: currentUserId } });
+                    loadCalendar();
+                    loadTodayCard();
+                    if (typeof loadPlanChanges === 'function') loadPlanChanges();
+                    await narada.finish();
+                } catch (e) {
+                    narada.abort();
+                    if (e.status === 402) {
+                        // Free tier: stary plan zostaje; nie ponawiaj w tym tygodniu
+                        localStorage.setItem('velm_narada_402_week', mondayStr);
+                    } else {
+                        showVelmToast('Nie udało się zwołać narady — spróbujemy przy następnym wejściu', true);
+                    }
+                } finally {
+                    _weeklyNaradaRunning = false;
+                }
+            } catch (e) { /* offline / brak planu — pomiń */ }
         }
 
         // Klik w "Wygeneruj nowy plan" → eleganckie okno potwierdzenia
