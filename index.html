@@ -1360,8 +1360,9 @@ const C={
     qedist:'What is your target distance?',
     dist5k:'5k',dist10k:'10k',disthalf:'Half Marathon',distmarathon:'Marathon',distultra:'50km Ultra',distother:'Other',
     qlongest:'What\'s the longest you\'ve run recently?',qrace:'Do you have a race planned?',
-    raceyes:'Yes, I have a race',raceno:'No race yet — I\'ll pick a date later',
-    qracedate:'When is the race?',qgoaldate:'When do you want to achieve this?',
+    raceyes:'Yes, I know my race date',raceno:'Not yet — I\'ll set my own target date',
+    qracedate:'When is the race?',qgoaldate:'When do you want to reach your goal?',
+    qgoaldatehint:'Pick a realistic date — you can always change it later in settings.',
     seldate:'Selected date',
     qwrc1:'How do you structure your intervals?',walk_time:'Walk time',run_time:'Run time',
     qwrc2:'How many times do you repeat the cycle?',qwrc2_sub:'Your cycle: {run} min run / {walk} min walk',
@@ -1437,9 +1438,10 @@ const C={
     qcb_mixvol:'Powiedz nam więcej o swoim tygodniu',
     qedist:'Docelowy dystans startowy',
     dist5k:'5 km',dist10k:'10 km',disthalf:'Półmaraton',distmarathon:'Maraton',distultra:'Ultramaraton',distother:'Niestandardowy',
-    qlongest:'Jaki był Twój najdłuższy bieg w ostatnim czasie?',qrace:'Czy masz już zaplanowane konkretne zawody?',
-    raceyes:'Tak, mam datę startu',raceno:'Nie mam zawodów, sam pobiję rekord',
-    qracedate:'Data zawodów',qgoaldate:'Kiedy chcesz osiągnąć formę?',
+    qlongest:'Jaki był Twój najdłuższy bieg w ostatnim czasie?',qrace:'Czy masz już zaplanowane zawody?',
+    raceyes:'Tak, znam datę startu',raceno:'Jeszcze nie — sam wyznaczę sobie termin',
+    qracedate:'Data zawodów',qgoaldate:'Kiedy chcesz osiągnąć swój cel?',
+    qgoaldatehint:'Wybierz realny termin — zawsze możesz go zmienić w ustawieniach.',
     seldate:'Wybrano',
     qwrc1:'Jak układasz swoje interwały marszobiegowe?',walk_time:'Marsz (min)',run_time:'Bieg (min)',
     qwrc2:'Ile razy powtarzasz ten cykl w treningu?',qwrc2_sub:'Pętla treningowa: {run} min biegu / {walk} min marszu',
@@ -2018,19 +2020,19 @@ function bld(id){
     case 'time_pb':        return bTimePb();
     case 'time_target':    return bTimeTarget();
     case 'time_race':      return bTimeRace();
-    case 'time_race_date': return bCalendar('time_race_target','tr_m','tr_y',S.data.time_has_race?c('qracedate'):c('qgoaldate'));
+    case 'time_race_date': return bCalendar('time_race_target','tr_m','tr_y',S.data.time_has_race?c('qracedate'):c('qgoaldate'),S.data.time_has_race?null:c('qgoaldatehint'));
     case 'time_mixed_week':return bMixedWeek('time_week_plan');
     case 'time_mixed_volume':return bMixedVolume(false, 'time');
     case 'distance_dist':      return bDistanceDist();
     case 'distance_pb':        return bDistancePb();
     case 'distance_race':      return bDistanceRace();
-    case 'distance_race_date': return bCalendar('distance_race_target','dr_m','dr_y',S.data.distance_has_race?c('qracedate'):c('qgoaldate'));
+    case 'distance_race_date': return bCalendar('distance_race_target','dr_m','dr_y',S.data.distance_has_race?c('qracedate'):c('qgoaldate'),S.data.distance_has_race?null:c('qgoaldatehint'));
     case 'distance_mixed_week':return bMixedWeek('distance_week_plan');
     case 'distance_mixed_volume':return bMixedVolume(false, 'distance');
     case 'endurance_target':return bEnduranceTarget();
     case 'dist_longest_run':return bLongestRun();
     case 'dist_race':      return bDistRace();
-    case 'dist_race_date': return bCalendar('dist_goal_date','dist_cal_month','dist_cal_year',S.data.dist_has_race?c('qracedate'):c('qgoaldate'));
+    case 'dist_race_date': return bCalendar('dist_goal_date','dist_cal_month','dist_cal_year',S.data.dist_has_race?c('qracedate'):c('qgoaldate'),S.data.dist_has_race?null:c('qgoaldatehint'));
 
     case 'walkrun_config':    return bWalkrunConfig();
     case 'walkrun_rpe':       return bWalkrunRpe();
@@ -3839,7 +3841,7 @@ function bTimeRace(){
 function pickTimeRace(v){S.data.time_has_race=v;setTimeout(next, 190);}
 
 // ── CALENDAR ──
-function bCalendar(dk,mk,yk,title){
+function bCalendar(dk,mk,yk,title,subtitle){
   const lang=S.data.language||'en';
   const months=c('months');const now=new Date();
   if(!S.data[mk])S.data[mk]=now.getMonth();
@@ -3855,7 +3857,8 @@ function bCalendar(dk,mk,yk,title){
     cells+=`<div class="cal-day${isSel?' sel':''}${isPast?' past':''}" data-iso="${iso}" onclick="${isPast?'':`pickDate('${dk}','${mk}','${yk}','${iso}', this)`}">${d}</div>`;
   }
   return`<h1 class="hl">${e(title)}</h1>
-<div class="cal" style="margin-top:40px;">
+${subtitle?`<p class="sh">${e(subtitle)}</p>`:''}
+<div class="cal" style="margin-top:${subtitle?'20px':'40px'};">
   <div class="cal-nav">
     <button class="cal-nav-btn" onclick="shiftCal('${mk}','${yk}',-1)">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
