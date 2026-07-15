@@ -3167,6 +3167,8 @@
         #checkin-overlay .ci-pk-col { height:100%; overflow-y:scroll; scroll-snap-type:y mandatory; -webkit-overflow-scrolling:touch; scrollbar-width:none; touch-action:pan-y; overscroll-behavior:contain; -webkit-mask-image:linear-gradient(to bottom,transparent 0%,black 25%,black 75%,transparent 100%); mask-image:linear-gradient(to bottom,transparent 0%,black 25%,black 75%,transparent 100%); }
         #checkin-overlay .ci-pk-col::-webkit-scrollbar { display:none; }
         #checkin-overlay .ci-pk-item { height:52px; display:flex; align-items:center; justify-content:center; font-family:'Outfit',sans-serif; font-weight:700; font-size:14px; color:var(--primary); scroll-snap-align:center; transition:font-size .1s,opacity .1s; opacity:.1; }
+        /* Paddingi NIE są punktami zaczepienia — nie da się zatrzymać na pustym poza zakresem */
+        #checkin-overlay .ci-pk-item[data-pad] { scroll-snap-align:none; pointer-events:none; }
         #checkin-overlay .ci-pk-item.sel { font-size:30px; font-weight:800; opacity:1; }
         #checkin-overlay .ci-pk-item.near1 { font-size:22px; opacity:.5; }
         #checkin-overlay .ci-pk-item.near2 { font-size:17px; opacity:.25; }
