@@ -1445,8 +1445,9 @@ async function done() {
     }
 
     // Network timeout — onboarding had no abort guard (login already has 8s)
+    // 90s: plan generation (szefNarada, Sonnet) regularly exceeds 30s
     const ac = new AbortController();
-    const timeoutId = setTimeout(() => ac.abort(), 30000);
+    const timeoutId = setTimeout(() => ac.abort(), 90000);
     try {
       const response = await fetch(`${API_BASE}/api/onboarding`, {
         method: 'POST',
@@ -1468,15 +1469,23 @@ async function done() {
         if (btn) { btn.disabled = false; btn.textContent = c('qgenerate'); }
         alert(data.error || 'Konto z tym emailem już istnieje. Zaloguj się, by kontynuować.');
       } else {
-        throw new Error(data.error || `HTTP ${response.status}`);
+        // Server responded with an error — surface its real message instead of a generic one
+        const serverErr = new Error(data.error || `Błąd serwera (${response.status})`);
+        serverErr.isServerError = true;
+        throw serverErr;
       }
     } catch (err) {
       clearTimeout(timeoutId);
       console.error('Onboarding error:', err);
       if (btn) { btn.disabled = false; btn.textContent = c('qgenerate'); }
-      const msg = err.name === 'AbortError'
-        ? 'Połączenie trwało zbyt długo. Sprawdź internet i spróbuj ponownie.'
-        : 'Błąd połączenia z serwerem. Spróbuj ponownie za chwilę.';
+      let msg;
+      if (err.name === 'AbortError') {
+        msg = 'Połączenie trwało zbyt długo. Sprawdź internet i spróbuj ponownie.';
+      } else if (err.isServerError) {
+        msg = err.message;
+      } else {
+        msg = 'Brak połączenia z serwerem (' + (err.message || 'nieznany błąd') + '). Sprawdź internet i spróbuj ponownie.';
+      }
       alert(msg);
     }
   };
