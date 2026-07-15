@@ -1,4 +1,4 @@
-# Wnioski o dostęp do API — Garmin i Whoop
+# Wnioski o dostęp do API — Garmin, Whoop, Coros (+ Apple/Samsung natywnie)
 
 Prosta instrukcja krok po kroku. Rejestracja i złożenie wniosku nic nie kosztują, ale uwaga: program Garmina jest przeznaczony do użytku biznesowego i dostęp do części metryk może wiązać się z opłatami licencyjnymi lub wymogami dotyczącymi liczby urządzeń — ostateczne warunki poznasz po kontakcie z Garminem. Wniosek wymaga Twojego konta i akceptacji przez firmę, dlatego składamy go teraz, a apka w międzyczasie działa na Stravie i imporcie .fit.
 
@@ -38,6 +38,35 @@ Co dostaniemy: recovery score, strain, sen, HRV.
 4. Whoop często daje klucze **od razu** (sandbox/limitowany dostęp), a o wyższy limit użytkowników wnioskuje się później — czyli może pójść szybciej niż Garmin.
 5. Dostaniesz Client ID + Client Secret → **nie wklejaj do kodu**, dodamy na Railway.
 
+## COROS (Open Platform)
+
+Co dostaniemy: treningi (bieg, tempo, tętno, przewyższenia) prosto z zegarków COROS.
+
+1. Wejdź na **https://open.coros.com/** (COROS Open Platform).
+2. Kliknij **Apply / Register** i wypełnij wniosek partnerski:
+   - **App name:** velm
+   - **Website:** https://velm-frontend.vercel.app
+   - **Redirect URI:** `https://velm-backend-production.up.railway.app/api/coros/callback`
+   - **Opis (po angielsku):** ten sam co dla Garmina powyżej.
+3. COROS rozpatruje wnioski mailowo — czasem dopytują o szczegóły produktu. Po akceptacji dostaniesz Client ID + Secret (OAuth, schemat jak Strava).
+4. Kluczy **nie wklejaj do kodu** — dodamy na Railway.
+
+## APPLE HEALTH i SAMSUNG HEALTH — tylko natywnie (osobny etap)
+
+Te dwie NIE mają web-API — żaden serwer nie może pobrać danych „z chmury".
+Dostęp jest możliwy wyłącznie z natywnej aplikacji zainstalowanej na telefonie:
+
+- **Apple Health (iOS):** HealthKit — czytamy sen/HRV/tętno/treningi bezpośrednio
+  na iPhonie. Wymaga zapakowania velm w Capacitora (mamy już `capacitor.config.json`),
+  pluginu HealthKit i publikacji w App Store.
+- **Samsung Health (Android):** najlepsza droga to **Health Connect** (systemowy
+  magazyn zdrowia Androida) — Samsung Health, Garmin i inni synchronizują do niego
+  dane, a my czytamy jednym pluginem Capacitora. Jedna integracja = Samsung + inni.
+
+Czyli: **jedna robota natywna (Capacitor + 2 pluginy) załatwia Apple i Samsunga naraz.**
+Wniosków składać nie trzeba — to czysto nasza praca inżynierska + konta developerskie
+Apple (99 USD/rok) i Google Play (25 USD jednorazowo), które i tak są potrzebne do sklepów.
+
 ## Po akceptacji (moja robota, nie Twoja)
 
 - Backend: OAuth flow `/api/garmin/*` i `/api/whoop/*` według wspólnego schematu OAuth znanego ze Stravy (server.js), z dostosowaniem do wymagań każdego dostawcy — w tym zapisywanie access + refresh tokenów w bazie i automatyczne odświeżanie ich przed wygaśnięciem.
@@ -48,5 +77,9 @@ Co dostaniemy: recovery score, strain, sen, HRV.
 
 - [ ] Wniosek Garmin złożony — data: ______
 - [ ] Wniosek Whoop złożony — data: ______
+- [ ] Wniosek Coros złożony — data: ______
 - [ ] Garmin zaakceptowany — klucze na Railway
 - [ ] Whoop zaakceptowany — klucze na Railway
+- [ ] Coros zaakceptowany — klucze na Railway
+- [ ] Konto Apple Developer (99 USD/rok) — potrzebne do App Store + HealthKit
+- [ ] Konto Google Play (25 USD) — potrzebne do sklepu + Health Connect
