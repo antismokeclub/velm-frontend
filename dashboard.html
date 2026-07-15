@@ -2393,6 +2393,70 @@
             .nrd-chip.active .nrd-badge, .nrd-tick::before, .nrd-day-row.scan .nrd-f:not(.on) { animation: none; }
         }
 
+        /* ── Modal "Zwołaj naradę" — potwierdzenie przed generowaniem ── */
+        #nrd-confirm-backdrop {
+            position: fixed; inset: 0; z-index: 9997;
+            background: rgba(26, 26, 26, 0.35);
+            -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+            display: flex; align-items: center; justify-content: center;
+            padding: 24px;
+            opacity: 0;
+            transition: opacity 250ms ease;
+        }
+        #nrd-confirm-backdrop.visible { opacity: 1; }
+        #nrd-confirm {
+            width: 100%; max-width: 340px;
+            background: #FFFFFF; border-radius: 24px;
+            box-shadow: 0 24px 60px rgba(0,0,0,0.22);
+            padding: 28px 24px 20px;
+            text-align: center;
+            transform: scale(0.95) translateY(10px);
+            transition: transform 320ms cubic-bezier(0.23, 1, 0.32, 1);
+        }
+        #nrd-confirm-backdrop.visible #nrd-confirm { transform: scale(1) translateY(0); }
+        .nrdc-avas { display: flex; justify-content: center; margin-bottom: 18px; }
+        .nrdc-avas .a {
+            width: 46px; height: 46px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-family: 'Outfit', sans-serif; font-size: 17px; font-weight: 800; color: #FFF;
+            border: 3px solid #FFFFFF;
+            margin: 0 -6px;
+            animation: nrdcBob 2.4s ease-in-out infinite;
+        }
+        .nrdc-avas .a:nth-child(2) { animation-delay: 0.2s; }
+        .nrdc-avas .a:nth-child(3) { animation-delay: 0.4s; }
+        .nrdc-avas .a:nth-child(4) { animation-delay: 0.6s; }
+        @keyframes nrdcBob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+        #nrd-confirm h3 {
+            font-family: 'Outfit', sans-serif; font-size: 20px; font-weight: 800;
+            color: #1A1A1A; margin: 0 0 8px; letter-spacing: -0.01em;
+        }
+        #nrd-confirm p {
+            font-size: 13.5px; color: #8A8A8A; line-height: 1.55; margin: 0 0 22px;
+        }
+        #nrd-confirm .nrdc-go {
+            width: 100%; min-height: 52px;
+            background: #1A1A1A; color: #FFF;
+            border: none; border-radius: 18px;
+            font-family: 'Inter', sans-serif; font-size: 15px; font-weight: 700;
+            cursor: pointer; touch-action: manipulation;
+            transition: transform 120ms cubic-bezier(0.23, 1, 0.32, 1);
+            margin-bottom: 6px;
+        }
+        #nrd-confirm .nrdc-go:active { transform: scale(0.97); }
+        #nrd-confirm .nrdc-cancel {
+            width: 100%; min-height: 44px;
+            background: transparent; color: #8A8A8A;
+            border: none; border-radius: 14px;
+            font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600;
+            cursor: pointer; touch-action: manipulation;
+        }
+        #nrd-confirm .nrdc-cancel:active { color: #1A1A1A; }
+        @media (prefers-reduced-motion: reduce) {
+            #nrd-confirm { transform: none; transition: opacity 250ms ease; }
+            .nrdc-avas .a { animation: none; }
+        }
+
         /* Conversations drawer */
         #conv-drawer-wrap { position: relative; padding: 0 20px; margin-bottom: 8px; flex-shrink: 0; z-index: 50; }
         #conv-drawer-toggle {
@@ -8243,7 +8307,8 @@
             } catch (e) { /* brak planu / offline — pomiń */ }
         }
 
-        async function generateNewPlan() {
+        // Klik w "Wygeneruj nowy plan" → eleganckie okno potwierdzenia
+        function generateNewPlan() {
             const userId = localStorage.getItem('velm_user_id');
             if (!userId) return;
 
@@ -8252,6 +8317,47 @@
                 showPaywall('Nowa narada sztabu dostępna w Premium. Twój plan z rejestracji pozostaje aktywny.', { surveyAvailable: !currentSurveyCompleted });
                 return;
             }
+            showNaradaConfirm();
+        }
+
+        function showNaradaConfirm() {
+            document.getElementById('nrd-confirm-backdrop')?.remove();
+            const bd = document.createElement('div');
+            bd.id = 'nrd-confirm-backdrop';
+            bd.setAttribute('role', 'dialog');
+            bd.setAttribute('aria-modal', 'true');
+            bd.setAttribute('aria-label', 'Zwołaj naradę sztabu');
+            bd.innerHTML =
+                '<div id="nrd-confirm">' +
+                    '<div class="nrdc-avas" aria-hidden="true">' +
+                        '<div class="a" style="background:#5B8DB8">A</div>' +
+                        '<div class="a" style="background:#6B8F71">F</div>' +
+                        '<div class="a" style="background:#C9924E">P</div>' +
+                        '<div class="a" style="background:#1A1A1A">T</div>' +
+                    '</div>' +
+                    '<h3>Zwołać naradę sztabu?</h3>' +
+                    '<p>Czterech trenerów przejrzy Twoje ostatnie treningi i&nbsp;ułoży nowy tydzień. Obecny plan zostanie zastąpiony. Potrwa to około minuty.</p>' +
+                    '<button class="nrdc-go">Zwołaj naradę</button>' +
+                    '<button class="nrdc-cancel">Nie teraz</button>' +
+                '</div>';
+            document.body.appendChild(bd);
+            requestAnimationFrame(() => requestAnimationFrame(() => bd.classList.add('visible')));
+
+            const close = () => {
+                bd.classList.remove('visible');
+                setTimeout(() => bd.remove(), 260);
+            };
+            bd.addEventListener('click', (e) => { if (e.target === bd) close(); });
+            bd.querySelector('.nrdc-cancel').addEventListener('click', close);
+            bd.querySelector('.nrdc-go').addEventListener('click', () => {
+                close();
+                startNaradaGeneration();
+            });
+        }
+
+        async function startNaradaGeneration() {
+            const userId = localStorage.getItem('velm_user_id');
+            if (!userId) return;
 
             const btn = document.getElementById('settings-generate-plan-btn');
             if (btn) { btn.disabled = true; btn.style.cursor = 'wait'; }
