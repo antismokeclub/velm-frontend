@@ -3045,8 +3045,9 @@
         .ci-close-btn:active { transform:scale(0.86); }
         .ci-close-btn svg { pointer-events:none; }
 
-        /* Inner scrollable content */
-        #ci-inner { padding:20px 24px 36px; flex:1; min-height:0; overflow-y:auto; -webkit-overflow-scrolling:touch; scrollbar-width:none; }
+        /* Inner scrollable content — tylko pionowo (kroki przesuwają się w bok
+           podczas animacji, więc oś X musi być zablokowana i tu, i na overlayu) */
+        #ci-inner { padding:20px 24px 36px; flex:1; min-height:0; overflow-y:auto; overflow-x:hidden; -webkit-overflow-scrolling:touch; scrollbar-width:none; touch-action:pan-y; overscroll-behavior:contain; }
         #ci-inner::-webkit-scrollbar { display:none; }
 
         /* MODE TOGGLE */
@@ -10604,6 +10605,9 @@
             document.querySelectorAll('#checkin-overlay .morning-fu-btn').forEach(b => b.classList.remove('selected'));
             btn.classList.add('selected');
             readinessFollowup = key;
+            // openCheckin zdejmuje 'visible' ze wszystkich .btn-next — przywróć przycisk
+            // Dalej dla tego kroku, inaczej nie da się dokończyć check-inu po wyborze powodu
+            document.querySelector('#step-morning-followup .btn-next')?.classList.add('visible');
         }
         function selectSorenessLocation(btn, key) {
             document.querySelectorAll('#checkin-overlay .soreness-chip').forEach(b => b.classList.remove('selected'));
