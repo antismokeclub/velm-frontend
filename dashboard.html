@@ -3107,6 +3107,19 @@
         #checkin-overlay .slider-big-val { font-family:var(--font-d); font-weight:800; font-size:64px; text-align:center; color:var(--primary); line-height:1; margin:24px 0 0; letter-spacing:-2px; }
         #checkin-overlay .slider-desc { text-align:center; font-size:14px; color:var(--text-muted); min-height:24px; margin-top:10px; transition:opacity 0.2s ease; line-height:1.5; font-family:var(--font); }
 
+        /* PLAN REFERENCE — do czego user porównuje (dystans/czas/tempo z planu) */
+        #checkin-overlay .ci-plan-ref { display:flex; align-items:center; gap:10px; background:var(--bg); border-radius:16px; padding:12px 16px; margin:0 0 22px; }
+        #checkin-overlay .ci-plan-ref .cpr-dot { width:9px; height:9px; border-radius:50%; background:#C4A35A; flex-shrink:0; box-shadow:0 0 0 4px rgba(196,163,90,0.16); }
+        #checkin-overlay .ci-plan-ref .cpr-body { flex:1; min-width:0; }
+        #checkin-overlay .ci-plan-ref .cpr-label { font-size:10px; font-weight:700; letter-spacing:0.09em; text-transform:uppercase; color:var(--text-muted); line-height:1; margin-bottom:3px; }
+        #checkin-overlay .ci-plan-ref .cpr-val { font-family:var(--font-d); font-size:14px; font-weight:700; color:var(--primary); line-height:1.25; }
+        #checkin-overlay .ci-plan-ref .cpr-val small { font-weight:600; color:var(--text-muted); }
+
+        /* RPE — wyśrodkowany blok + skala pod suwakiem, żeby wypełniał krok */
+        #checkin-overlay .rpe-block { display:flex; flex-direction:column; justify-content:center; padding:8px 0 4px; }
+        #checkin-overlay .rpe-scale { display:flex; justify-content:space-between; margin:14px 2px 0; }
+        #checkin-overlay .rpe-scale span { font-size:11px; font-weight:600; color:var(--text-muted); letter-spacing:0.02em; }
+
         /* SECTION LABEL */
         #checkin-overlay .section-label { font-size:11px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-muted); margin-bottom:12px; }
 
@@ -9885,6 +9898,24 @@
             const m2desc = document.getElementById('step-morning-4-desc');
             if (m2desc) m2desc.textContent = `Twój trener czeka. Dziś masz: ${TYPE_LABEL_CI[workoutType] || workoutType} · ${workoutData.dystans_km} km.`;
 
+            // Odniesienie do planu w krokach potreningowych (RPE + "Jak poszło?")
+            // — żeby user wiedział, do czego porównuje: typ · dystans · ~czas · tempo
+            (function fillPostPlanRef() {
+                const typeLabel = TYPE_LABEL_CI[workoutType] || workoutType;
+                const parts = [];
+                if (workoutData.dystans_km) parts.push(workoutData.dystans_km + ' km');
+                const paceMin = (typeof _parsePaceMin === 'function') ? _parsePaceMin(window._todayPace) : null;
+                if (paceMin && workoutData.dystans_km && typeof _fmtMin === 'function') {
+                    parts.push('~' + _fmtMin(Math.round(paceMin * workoutData.dystans_km)));
+                }
+                if (window._todayPace) parts.push(String(window._todayPace).replace(/\s*min\/km\s*$/i, '') + '/km');
+                const html = '<strong>' + typeLabel + '</strong>' + (parts.length ? '  <small>' + parts.join(' · ') + '</small>' : '');
+                const r1 = document.getElementById('post-plan-ref-1-val');
+                const r2 = document.getElementById('post-plan-ref-2-val');
+                if (r1) r1.innerHTML = html;
+                if (r2) r2.innerHTML = html;
+            })();
+
             _checkinStepsLockedHeight = 0;
             // Reset all steps to inactive
             document.querySelectorAll('#checkin-overlay .step').forEach(s => {
@@ -10644,12 +10675,15 @@
             document.getElementById('next-soreness-detail')?.classList.add('visible');
         }
 
+        // Opcje "Co poszło inaczej?" — dopasowane do typu treningu.
+        // Zwykły/długi bieg: skrócenie ma sens głównie jako krótszy dystans.
+        // Strukturalne (interwał/tempo/marszo-bieg): odcinki, tempo, serie — z porównaniem do planu.
         const _FU_2B_OPTS = {
-            easy:    [{key:'mniej_km',label:'Mniejszy dystans niż plan',color:'#C4A35A'},{key:'wolniej',label:'Wolniejsze tempo niż zakładano',color:'#C07264'},{key:'bez_rozgrzewki',label:'Pominięta rozgrzewka',color:'#C07264'},{key:'bez_schladzania',label:'Pominięte schłodzenie',color:'#C4A35A'},{key:'przerwany',label:'Trening przerwany w połowie',color:'#C07264'}],
-            long:    [{key:'mniej_km',label:'Mniejszy dystans niż plan',color:'#C4A35A'},{key:'wolniej',label:'Wolniejsze tempo niż zakładano',color:'#C07264'},{key:'bez_rozgrzewki',label:'Pominięta rozgrzewka',color:'#C07264'},{key:'bez_schladzania',label:'Pominięte schłodzenie',color:'#C4A35A'},{key:'przerwany',label:'Trening przerwany w połowie',color:'#C07264'}],
-            interval:[{key:'mniej_powtorzen',label:'Mniej powtórzeń niż planowano',color:'#C07264'},{key:'krotsze_odcinki',label:'Krótsze odcinki powtórzeń',color:'#C4A35A'},{key:'dluzsze_przerwy',label:'Dłuższe przerwy między powtórzeniami',color:'#C4A35A'},{key:'slabsze_tempo',label:'Słabsze tempo interwałów niż cel',color:'#C07264'},{key:'bez_rozgrzewki',label:'Pominięta rozgrzewka',color:'#C07264'}],
-            tempo:   [{key:'skrocony_odcinek',label:'Krótszy odcinek tempo niż plan',color:'#C07264'},{key:'wolniejsze_tempo',label:'Wolniejsze tempo niż zakładano',color:'#C07264'},{key:'bez_rozgrzewki',label:'Pominięta rozgrzewka',color:'#C07264'},{key:'bez_schladzania',label:'Pominięte schłodzenie',color:'#C4A35A'},{key:'przerwany',label:'Odcinek tempo nieukończony',color:'#C07264'}],
-            walkrun: [{key:'mniej_serii',label:'Mniej serii niż planowano',color:'#C07264'},{key:'mniej_km',label:'Mniejszy dystans całkowity',color:'#C4A35A'},{key:'krotszy_bieg',label:'Krótsze odcinki biegu w seriach',color:'#C4A35A'},{key:'bez_rozgrzewki',label:'Pominięta rozgrzewka',color:'#C07264'}],
+            easy:    [{key:'krotszy_dystans',label:'Krótszy dystans niż w planie',color:'#C4A35A'},{key:'przerwany',label:'Trening przerwany / niedokończony',color:'#C07264'},{key:'bez_rozgrzewki',label:'Pominięta rozgrzewka',color:'#C4A35A'}],
+            long:    [{key:'krotszy_dystans',label:'Krótszy dystans niż w planie',color:'#C4A35A'},{key:'przerwany',label:'Trening przerwany / niedokończony',color:'#C07264'},{key:'bez_rozgrzewki',label:'Pominięta rozgrzewka',color:'#C4A35A'}],
+            interval:[{key:'mniej_powtorzen',label:'Mniej powtórzeń niż w planie',color:'#C07264'},{key:'krotsze_odcinki',label:'Krótsze odcinki niż zakładano',color:'#C4A35A'},{key:'wolniejsze_tempo_szybkich',label:'Wolniejsze tempo szybkich odcinków',color:'#C07264'},{key:'dluzsze_przerwy',label:'Dłuższe przerwy między powtórzeniami',color:'#C4A35A'},{key:'przerwany',label:'Serie przerwane przed końcem',color:'#C07264'}],
+            tempo:   [{key:'krotszy_odcinek_tempo',label:'Krótszy odcinek tempo niż w planie',color:'#C07264'},{key:'wolniejsze_tempo',label:'Wolniejsze tempo niż zakładano',color:'#C07264'},{key:'przerwany',label:'Odcinek tempo nieukończony',color:'#C07264'},{key:'bez_rozgrzewki',label:'Pominięta rozgrzewka',color:'#C4A35A'}],
+            walkrun: [{key:'mniej_serii',label:'Mniej serii niż w planie',color:'#C07264'},{key:'krotszy_bieg',label:'Krótsze odcinki biegu',color:'#C4A35A'},{key:'wiecej_marszu',label:'Więcej marszu niż zakładano',color:'#C4A35A'},{key:'mniej_km',label:'Mniejszy dystans całkowity',color:'#C4A35A'}],
         };
         const _FU_2C_OPTS = [
             {key:'zmeczenie',label:'Zmęczenie fizyczne',color:'#C07264'},
@@ -11145,9 +11179,17 @@
                 <!-- P1: RPE -->
                 <div class="step" id="step-post-1">
                     <div class="step-title">Poziom wysiłku</div>
-                    <div class="slider-wrap">
-                        <input type="range" min="1" max="10" value="5" id="rpeSlider" oninput="updateRpeSlider()">
+                    <div class="step-desc">Jak ciężki był ten trening? Oceń swój wysiłek w skali 1–10.</div>
+                    <div class="ci-plan-ref" id="post-plan-ref-1">
+                        <div class="cpr-dot"></div>
+                        <div class="cpr-body"><div class="cpr-label">Dzisiejszy plan</div><div class="cpr-val" id="post-plan-ref-1-val">—</div></div>
+                    </div>
+                    <div class="rpe-block">
                         <div class="slider-big-val" id="rpeSliderVal">5/10</div>
+                        <div class="slider-wrap" style="margin-top:20px;">
+                            <input type="range" min="1" max="10" value="5" id="rpeSlider" oninput="updateRpeSlider()">
+                        </div>
+                        <div class="rpe-scale"><span>Lekko</span><span>Umiarkowanie</span><span>Maksymalnie</span></div>
                         <div class="slider-desc" id="rpeDesc"></div>
                     </div>
                     <div class="nav-area"><button class="btn-next visible" id="next-post-1" onclick="goNext()">Dalej →</button></div>
@@ -11156,19 +11198,23 @@
                 <!-- P2: Realizacja -->
                 <div class="step" id="step-post-2">
                     <div class="step-title">Jak poszło?</div>
-                    <div class="step-desc">Porównaj z tym co planowałeś.</div>
+                    <div class="step-desc">Porównaj z tym, co planowałeś.</div>
+                    <div class="ci-plan-ref" id="post-plan-ref-2">
+                        <div class="cpr-dot"></div>
+                        <div class="cpr-body"><div class="cpr-label">Zakładał plan</div><div class="cpr-val" id="post-plan-ref-2-val">—</div></div>
+                    </div>
                     <div class="completion-grid">
                         <button class="completion-btn" data-completion="less" onclick="selectCompletion(this, 'less')">
-                            <div class="completion-icon"><svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/><path d="M16 4h4v4"/><line x1="16" y1="4" x2="21" y2="9"/></svg></div>
-                            <div><div class="completion-btn-label">Mniej niż w planie</div><div class="completion-btn-desc">np. mniejszy dystans lub pominięty element</div></div>
+                            <div class="completion-icon"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="6 13 12 19 18 13"/></svg></div>
+                            <div><div class="completion-btn-label">Mniej niż w planie</div><div class="completion-btn-desc">krótszy dystans lub pominięty element</div></div>
                         </button>
                         <button class="completion-btn" data-completion="exact" onclick="selectCompletion(this, 'exact')">
-                            <div class="completion-icon" style="color:var(--primary);"><svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg></div>
+                            <div class="completion-icon" style="color:var(--primary);"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
                             <div><div class="completion-btn-label">Zgodnie z planem</div><div class="completion-btn-desc">wykonane jak zaplanowane</div></div>
                         </button>
                         <button class="completion-btn" data-completion="more" onclick="selectCompletion(this, 'more')">
-                            <div class="completion-icon"><svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/><path d="M4 16v4h4"/><line x1="4" y1="20" x2="9" y2="15"/></svg></div>
-                            <div><div class="completion-btn-label">Więcej niż w planie</div><div class="completion-btn-desc">np. dorzuciłem km bo czułem się dobrze</div></div>
+                            <div class="completion-icon"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="6 11 12 5 18 11"/></svg></div>
+                            <div><div class="completion-btn-label">Więcej niż w planie</div><div class="completion-btn-desc">dorzuciłem km, bo czułem się dobrze</div></div>
                         </button>
                     </div>
                     <div class="nav-area"><button class="btn-next" id="next-post-2" onclick="goNext()">Dalej →</button></div>
