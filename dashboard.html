@@ -9991,6 +9991,10 @@
             mslider.style.width = activeBtn.offsetWidth + 'px';
             setTimeout(() => {
                 const newStepEl = document.getElementById(`step-${mode}-0`);
+                // Wyczyść resztkowe inline style (opacity:0/transform) z resetu w openCheckin,
+                // inaczej po zakończeniu animacji krok wróci do niewidocznego stanu
+                newStepEl.style.opacity = '';
+                newStepEl.style.transform = '';
                 newStepEl.style.animation = 'ciStepEnter 220ms ease-out forwards';
                 newStepEl.classList.add('active');
                 newStepEl.addEventListener('animationend', () => { newStepEl.style.animation = ''; }, { once: true });
@@ -10074,6 +10078,10 @@
             if (!fromEl || !toEl) {
                 console.error('animateStep: CRITICAL FAIL', { fromId, toId });
                 if (toEl) {
+                    // openCheckin ustawia inline opacity:0/transform na krokach — trzeba je
+                    // wyczyścić, inaczej inline nadpisze CSS .active i krok zostanie niewidoczny
+                    toEl.style.opacity = '';
+                    toEl.style.transform = '';
                     toEl.classList.add('active');
                 }
                 return;
@@ -10088,6 +10096,10 @@
 
             toEl.classList.remove('is-leaving');
             requestAnimationFrame(() => {
+                // Wyczyść resztkowe inline style z resetu w openCheckin (opacity:0 / translateX(24px)),
+                // żeby CSS .step.active (opacity:1) mógł zadziałać — inline zawsze wygrywa nad arkuszem
+                toEl.style.opacity = '';
+                toEl.style.transform = '';
                 toEl.classList.add('active');
                 updateStepsHeight();
             });
