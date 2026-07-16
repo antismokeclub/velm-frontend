@@ -4140,6 +4140,20 @@
             return _refreshPromise;
         }
 
+        // Wygasła/nieważna sesja — wyczyść tokeny i pokaż ekran logowania,
+        // zamiast zostawiać apkę „martwą" (dane po cichu nie ładują się).
+        let _reauthShown = false;
+        function forceReauth(message) {
+            localStorage.removeItem('velm_token');
+            localStorage.removeItem('velm_refresh_token');
+            const overlay = document.getElementById('login-overlay');
+            if (overlay) overlay.classList.remove('hidden');
+            if (!_reauthShown && message && typeof showVelmToast === 'function') {
+                _reauthShown = true;
+                showVelmToast(message, true);
+            }
+        }
+
         // --- API Fetch Helper ---
         // Wraps fetch() with: authHeaders, .ok check, JSON parse with safe fallback,
         // 401 → auto-refresh + retry once, then force re-login.
@@ -4247,7 +4261,14 @@
         async function loadUserProfile() {
             if (!currentUserId) return;
             try {
-                const res = await fetch(`${API_BASE}/api/user/${currentUserId}`, { headers: authHeaders() });
+                let res = await fetch(`${API_BASE}/api/user/${currentUserId}`, { headers: authHeaders() });
+                // Wartownik sesji: 401 → spróbuj odświeżyć token i powtórz; jak dalej 401,
+                // sesja jest martwa → pokaż logowanie (inaczej cała apka po cichu nie działa)
+                if (res.status === 401) {
+                    const nt = await refreshAccessToken();
+                    if (nt) res = await fetch(`${API_BASE}/api/user/${currentUserId}`, { headers: authHeaders() });
+                }
+                if (res.status === 401) { forceReauth('Sesja wygasła — zaloguj się ponownie'); return; }
                 const data = await res.json();
                 const u = data?.user;
                 // dob_y przechowywane w onboarding_data, nie na poziomie wiersza
