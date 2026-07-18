@@ -10331,15 +10331,17 @@
 
             const active = document.querySelector('#checkin-overlay .step.active');
             const activeHeight = active ? Math.ceil(active.getBoundingClientRect().height || 0) : 0;
-            const targetHeight = Math.max(_checkinStepsLockedHeight || 0, activeHeight);
 
-            if (targetHeight > 0) {
-                _checkinStepsLockedHeight = targetHeight;
-                outer.style.height = `${targetHeight}px`;
-                outer.style.minHeight = `${targetHeight}px`;
+            if (activeHeight > 0) {
+                // Wysokość podąża za AKTYWNYM krokiem (transition na .steps-outer
+                // animuje zmianę). Bez ratchetu do najwyższego kroku — krótkie kroki
+                // nie mają pustki na dole i karta nie przewija się bez potrzeby.
+                _checkinStepsLockedHeight = activeHeight;
+                outer.style.height = `${activeHeight}px`;
+                outer.style.minHeight = `${activeHeight}px`;
             }
 
-            return targetHeight;
+            return activeHeight;
         }
 
         const SLEEP_COLORS = ['#C07264', '#C4A35A', '#6B8F71', '#6B8F71', '#4A6B50'];
@@ -10956,48 +10958,36 @@
                 <div class="step" id="step-morning-1">
                     <div class="step-title">Jak spałeś?</div>
                     <div class="step-desc">Jakość snu wpływa na intensywność treningu.</div>
+                    <!-- Ikony: surowe rysunkowe twarze (line-art), spójny monochrom —
+                         progres zmęczenia: opadające oczy+zzz → neutralnie → iskry energii -->
                     <div class="sleep-cards">
                         <div class="sleep-card" onclick="selectSleep(0)">
-                            <div class="sleep-ico" style="background:#F5E9E9;">
-                                <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
-                                    <path d="M22 15A10 10 0 1 1 9 2a8 8 0 0 0 13 13z" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
-                                </svg>
+                            <div class="sleep-ico">
+                                <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9.2"/><path d="M7.4 9.2 10 10"/><path d="M16.6 9.2 14 10"/><path d="M8 11.7q1.2 1 2.4 0"/><path d="M13.6 11.7q1.2 1 2.4 0"/><path d="M9 16.7q3-1.9 6 0"/><path d="M17.5 5.2h2l-2 2h2" stroke-width="1.2" opacity="0.6"/></svg>
                             </div>
                             <span class="label">Okropnie</span>
                         </div>
                         <div class="sleep-card" onclick="selectSleep(1)">
-                            <div class="sleep-ico" style="background:#F5EDE4;">
-                                <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
-                                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
-                                    <path d="M18 4.5l.38 1.12 1.12.38-1.12.38L18 7.5l-.38-1.12-1.12-.38 1.12-.38z" fill="currentColor"/>
-                                </svg>
+                            <div class="sleep-ico">
+                                <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9.2"/><path d="M8 11.8q1.2 0.8 2.4 0"/><path d="M13.6 11.8q1.2 0.8 2.4 0"/><path d="M9.4 16.2q2.6-1.3 5.2 0"/></svg>
                             </div>
                             <span class="label">Kiepsko</span>
                         </div>
                         <div class="sleep-card" onclick="selectSleep(2)">
-                            <div class="sleep-ico" style="background:#EDE8DC;">
-                                <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
-                                    <path d="M12 3a9 9 0 0 1 0 18V3" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
-                                </svg>
+                            <div class="sleep-ico">
+                                <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9.2"/><circle cx="9.2" cy="11.2" r="1" fill="currentColor" stroke="none"/><circle cx="14.8" cy="11.2" r="1" fill="currentColor" stroke="none"/><path d="M9.4 15.4q2.6 0.7 5.2 0"/></svg>
                             </div>
                             <span class="label">Nieźle</span>
                         </div>
                         <div class="sleep-card" onclick="selectSleep(3)">
-                            <div class="sleep-ico" style="background:#E8EFF0;">
-                                <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
-                                    <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.9"/>
-                                    <path d="M20 4.5l.38 1.12 1.12.38-1.12.38L20 7.5l-.38-1.12-1.12-.38 1.12-.38z" fill="currentColor"/>
-                                    <circle cx="22" cy="11" r="0.9" fill="currentColor"/>
-                                </svg>
+                            <div class="sleep-ico">
+                                <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9.2"/><path d="M8 11.6q1.2-1 2.4 0"/><path d="M13.6 11.6q1.2-1 2.4 0"/><path d="M9 15q3 2.3 6 0"/></svg>
                             </div>
                             <span class="label">Dobrze</span>
                         </div>
                         <div class="sleep-card" onclick="selectSleep(4)">
-                            <div class="sleep-ico" style="background:#FFF4D6;">
-                                <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
-                                    <circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="1.9"/>
-                                    <path d="M12 1.5v2M12 20.5v2M3.4 3.4l1.42 1.42M19.18 19.18l1.42 1.42M1.5 12h2M20.5 12h2M3.4 20.6l1.42-1.42M19.18 4.82l1.42-1.42" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/>
-                                </svg>
+                            <div class="sleep-ico">
+                                <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9.2"/><circle cx="9.2" cy="11" r="1.3"/><circle cx="14.8" cy="11" r="1.3"/><path d="M8.6 14.6q3.4 3.2 6.8 0"/><path d="M3.6 6v2.2M2.5 7.1h2.2" stroke-width="1.2"/><path d="M20 4.8v2M19 5.8h2" stroke-width="1.2"/></svg>
                             </div>
                             <span class="label">Świetnie</span>
                         </div>
