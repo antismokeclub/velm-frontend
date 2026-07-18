@@ -3073,16 +3073,14 @@
         #checkin-overlay .step-title { font-family:var(--font-d); font-weight:800; font-size:32px; color:var(--primary); line-height:1.1; margin-bottom:8px; letter-spacing:-0.025em; }
         #checkin-overlay .step-desc { font-size:15px; color:var(--text-muted); margin-bottom:28px; line-height:1.55; font-family:var(--font); }
 
-        /* SLEEP CARDS */
-        #checkin-overlay .sleep-cards { display:grid; grid-template-columns:repeat(6, minmax(0, 1fr)); gap:10px; margin-bottom:8px; align-items:stretch; }
-        #checkin-overlay .sleep-card { grid-column:span 2; height:auto; min-height:96px; display:flex; flex-direction:column; align-items:center; justify-content:center; border-radius:18px; border:1.5px solid var(--border); background:var(--surface); gap:9px; cursor:pointer; transition:all 0.22s cubic-bezier(0.34,1.56,0.64,1); box-shadow:0 2px 8px rgba(0,0,0,0.03); padding:12px 8px; }
-        #checkin-overlay .sleep-card:nth-child(4) { grid-column: 2 / span 2; }
-        #checkin-overlay .sleep-card:nth-child(5) { grid-column: 4 / span 2; }
+        /* SLEEP CARDS — jeden równy rząd 5 kart (bez wcięcia drugiego rzędu) */
+        #checkin-overlay .sleep-cards { display:grid; grid-template-columns:repeat(5, minmax(0, 1fr)); gap:8px; margin-bottom:8px; align-items:stretch; }
+        #checkin-overlay .sleep-card { height:auto; min-height:80px; display:flex; flex-direction:column; align-items:center; justify-content:center; border-radius:16px; border:1.5px solid var(--border); background:var(--surface); gap:8px; cursor:pointer; transition:all 0.22s cubic-bezier(0.34,1.56,0.64,1); box-shadow:0 2px 8px rgba(0,0,0,0.03); padding:12px 4px 10px; }
         #checkin-overlay .sleep-card:active { transform:scale(0.94); }
         #checkin-overlay .sleep-card.selected { border-color:var(--primary); transform:scale(1.05); box-shadow:0 8px 24px rgba(17,17,17,0.1), 0 0 0 1px var(--primary); }
-        #checkin-overlay .sleep-ico { width:42px; height:42px; border-radius:12px; background:#EDE8DC; display:flex; align-items:center; justify-content:center; color:var(--primary); transition:all 0.3s cubic-bezier(0.34,1.56,0.64,1); flex-shrink:0; }
-        #checkin-overlay .sleep-card.selected .sleep-ico { background:var(--primary); color:#fff; box-shadow: 0 0 16px rgba(17,17,17,0.25); transform: scale(1.1); }
-        #checkin-overlay .sleep-card .label { font-size:11px; font-weight:700; text-align:center; color:var(--primary); line-height:1; letter-spacing:0.01em; font-family:var(--font); }
+        #checkin-overlay .sleep-ico { width:100%; height:26px; display:flex; align-items:center; justify-content:center; color:var(--primary); transition:all 0.3s cubic-bezier(0.34,1.56,0.64,1); flex-shrink:0; }
+        #checkin-overlay .sleep-card.selected .sleep-ico { transform: scale(1.12); }
+        #checkin-overlay .sleep-card .label { font-size:10px; font-weight:700; text-align:center; color:var(--primary); line-height:1; letter-spacing:0.01em; font-family:var(--font); }
         /* SLEEP HOURS PILLS — big card style for step-morning-0 */
         #checkin-overlay .sleep-hours-row { display:flex; gap:8px; margin:4px 0 8px; }
         #checkin-overlay .sleep-hours-pill { flex:1; min-width:0; padding:14px 4px 10px; border-radius:18px; border:1.5px solid var(--border); background:var(--surface); cursor:pointer; transition:all 0.22s cubic-bezier(0.34,1.56,0.64,1); display:flex; flex-direction:column; align-items:center; gap:4px; font-family:var(--font); box-shadow:0 2px 6px rgba(0,0,0,0.03); }
@@ -10958,36 +10956,36 @@
                 <div class="step" id="step-morning-1">
                     <div class="step-title">Jak spałeś?</div>
                     <div class="step-desc">Jakość snu wpływa na intensywność treningu.</div>
-                    <!-- Ikony: surowe rysunkowe twarze (line-art), spójny monochrom —
-                         progres zmęczenia: opadające oczy+zzz → neutralnie → iskry energii -->
+                    <!-- Ikony: bateria naładowana snem (pusta → pełna) — surowy monochrom,
+                         metafora czytelna od razu: sen = ładowanie -->
                     <div class="sleep-cards">
                         <div class="sleep-card" onclick="selectSleep(0)">
                             <div class="sleep-ico">
-                                <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9.2"/><path d="M7.4 9.2 10 10"/><path d="M16.6 9.2 14 10"/><path d="M8 11.7q1.2 1 2.4 0"/><path d="M13.6 11.7q1.2 1 2.4 0"/><path d="M9 16.7q3-1.9 6 0"/><path d="M17.5 5.2h2l-2 2h2" stroke-width="1.2" opacity="0.6"/></svg>
+                                <svg width="34" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><rect x="2.5" y="8" width="17" height="8" rx="2.4"/><path d="M21.8 10.6v2.8" stroke-width="2.2"/></svg>
                             </div>
                             <span class="label">Okropnie</span>
                         </div>
                         <div class="sleep-card" onclick="selectSleep(1)">
                             <div class="sleep-ico">
-                                <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9.2"/><path d="M8 11.8q1.2 0.8 2.4 0"/><path d="M13.6 11.8q1.2 0.8 2.4 0"/><path d="M9.4 16.2q2.6-1.3 5.2 0"/></svg>
+                                <svg width="34" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><rect x="2.5" y="8" width="17" height="8" rx="2.4"/><path d="M21.8 10.6v2.8" stroke-width="2.2"/><rect x="4.6" y="9.9" width="2.8" height="4.2" rx="0.8" fill="currentColor" stroke="none"/></svg>
                             </div>
                             <span class="label">Kiepsko</span>
                         </div>
                         <div class="sleep-card" onclick="selectSleep(2)">
                             <div class="sleep-ico">
-                                <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9.2"/><circle cx="9.2" cy="11.2" r="1" fill="currentColor" stroke="none"/><circle cx="14.8" cy="11.2" r="1" fill="currentColor" stroke="none"/><path d="M9.4 15.4q2.6 0.7 5.2 0"/></svg>
+                                <svg width="34" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><rect x="2.5" y="8" width="17" height="8" rx="2.4"/><path d="M21.8 10.6v2.8" stroke-width="2.2"/><rect x="4.6" y="9.9" width="2.8" height="4.2" rx="0.8" fill="currentColor" stroke="none"/><rect x="8.0" y="9.9" width="2.8" height="4.2" rx="0.8" fill="currentColor" stroke="none"/></svg>
                             </div>
                             <span class="label">Nieźle</span>
                         </div>
                         <div class="sleep-card" onclick="selectSleep(3)">
                             <div class="sleep-ico">
-                                <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9.2"/><path d="M8 11.6q1.2-1 2.4 0"/><path d="M13.6 11.6q1.2-1 2.4 0"/><path d="M9 15q3 2.3 6 0"/></svg>
+                                <svg width="34" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><rect x="2.5" y="8" width="17" height="8" rx="2.4"/><path d="M21.8 10.6v2.8" stroke-width="2.2"/><rect x="4.6" y="9.9" width="2.8" height="4.2" rx="0.8" fill="currentColor" stroke="none"/><rect x="8.0" y="9.9" width="2.8" height="4.2" rx="0.8" fill="currentColor" stroke="none"/><rect x="11.4" y="9.9" width="2.8" height="4.2" rx="0.8" fill="currentColor" stroke="none"/></svg>
                             </div>
                             <span class="label">Dobrze</span>
                         </div>
                         <div class="sleep-card" onclick="selectSleep(4)">
                             <div class="sleep-ico">
-                                <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9.2"/><circle cx="9.2" cy="11" r="1.3"/><circle cx="14.8" cy="11" r="1.3"/><path d="M8.6 14.6q3.4 3.2 6.8 0"/><path d="M3.6 6v2.2M2.5 7.1h2.2" stroke-width="1.2"/><path d="M20 4.8v2M19 5.8h2" stroke-width="1.2"/></svg>
+                                <svg width="34" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><rect x="2.5" y="8" width="17" height="8" rx="2.4"/><path d="M21.8 10.6v2.8" stroke-width="2.2"/><rect x="4.6" y="9.9" width="2.8" height="4.2" rx="0.8" fill="currentColor" stroke="none"/><rect x="8.0" y="9.9" width="2.8" height="4.2" rx="0.8" fill="currentColor" stroke="none"/><rect x="11.4" y="9.9" width="2.8" height="4.2" rx="0.8" fill="currentColor" stroke="none"/><rect x="14.8" y="9.9" width="2.8" height="4.2" rx="0.8" fill="currentColor" stroke="none"/></svg>
                             </div>
                             <span class="label">Świetnie</span>
                         </div>
