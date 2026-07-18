@@ -9855,6 +9855,7 @@
             document.querySelectorAll('#checkin-overlay .completion-btn').forEach(b => b.classList.remove('selected'));
             document.querySelectorAll('#checkin-overlay .skip-btn').forEach(b => b.classList.remove('selected'));
             document.querySelectorAll('#checkin-overlay .morning-fu-btn').forEach(b => b.classList.remove('selected'));
+            document.getElementById('fuKmWrap')?.classList.remove('visible');
             if (typ) workoutType = typ;
             if (km)  { workoutData.dystans_km = parseFloat(km); workoutData.odcinek_km = Math.round(parseFloat(km) * 0.6 * 10) / 10; }
             fuKmVal = workoutData.dystans_km / 2;
@@ -9910,10 +9911,10 @@
                 }
                 if (window._todayPace) parts.push(String(window._todayPace).replace(/\s*min\/km\s*$/i, '') + '/km');
                 const html = '<strong>' + typeLabel + '</strong>' + (parts.length ? '  <small>' + parts.join(' · ') + '</small>' : '');
-                const r1 = document.getElementById('post-plan-ref-1-val');
-                const r2 = document.getElementById('post-plan-ref-2-val');
-                if (r1) r1.innerHTML = html;
-                if (r2) r2.innerHTML = html;
+                ['post-plan-ref-0-val', 'post-plan-ref-1-val', 'post-plan-ref-2-val'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.innerHTML = html;
+                });
             })();
 
             _checkinStepsLockedHeight = 0;
@@ -10210,9 +10211,14 @@
             const completion = selectedCompletion || 'exact';
             const intervalPaceInput = document.getElementById('intervalPaceInput')?.value?.trim();
             const workPaceInput = document.getElementById('workPaceInput')?.value?.trim();
+            // Faktyczny dystans: przy "krótszy dystans" (easy/long) zapisujemy to,
+            // co user PRZEBIEGŁ (licznik), a nie plan — statystyki mają widzieć prawdę
+            const actualKm = ((workoutType === 'easy' || workoutType === 'long') && followUpSelections.has('krotszy_dystans') && fuKmVal > 0)
+                ? fuKmVal
+                : workoutData.dystans_km;
             const workoutPayload = {
                 date: new Date().toISOString().split('T')[0],
-                distance_km: workoutData.dystans_km,
+                distance_km: actualKm,
                 duration_min: durH * 60 + durM + durS / 60, rpe: rpeVal,
                 type: workoutType, completion, notes: msg,
                 source: 'manual',
@@ -10679,8 +10685,8 @@
         // Zwykły/długi bieg: skrócenie ma sens głównie jako krótszy dystans.
         // Strukturalne (interwał/tempo/marszo-bieg): odcinki, tempo, serie — z porównaniem do planu.
         const _FU_2B_OPTS = {
-            easy:    [{key:'krotszy_dystans',label:'Krótszy dystans niż w planie',color:'#C4A35A'},{key:'przerwany',label:'Trening przerwany / niedokończony',color:'#C07264'},{key:'bez_rozgrzewki',label:'Pominięta rozgrzewka',color:'#C4A35A'}],
-            long:    [{key:'krotszy_dystans',label:'Krótszy dystans niż w planie',color:'#C4A35A'},{key:'przerwany',label:'Trening przerwany / niedokończony',color:'#C07264'},{key:'bez_rozgrzewki',label:'Pominięta rozgrzewka',color:'#C4A35A'}],
+            easy:    [{key:'krotszy_dystans',label:'Krótszy dystans niż w planie',color:'#C4A35A'},{key:'przerwany',label:'Trening przerwany / niedokończony',color:'#C07264'}],
+            long:    [{key:'krotszy_dystans',label:'Krótszy dystans niż w planie',color:'#C4A35A'},{key:'przerwany',label:'Trening przerwany / niedokończony',color:'#C07264'}],
             interval:[{key:'mniej_powtorzen',label:'Mniej powtórzeń niż w planie',color:'#C07264'},{key:'krotsze_odcinki',label:'Krótsze odcinki niż zakładano',color:'#C4A35A'},{key:'wolniejsze_tempo_szybkich',label:'Wolniejsze tempo szybkich odcinków',color:'#C07264'},{key:'dluzsze_przerwy',label:'Dłuższe przerwy między powtórzeniami',color:'#C4A35A'},{key:'przerwany',label:'Serie przerwane przed końcem',color:'#C07264'}],
             tempo:   [{key:'krotszy_odcinek_tempo',label:'Krótszy odcinek tempo niż w planie',color:'#C07264'},{key:'wolniejsze_tempo',label:'Wolniejsze tempo niż zakładano',color:'#C07264'},{key:'przerwany',label:'Odcinek tempo nieukończony',color:'#C07264'},{key:'bez_rozgrzewki',label:'Pominięta rozgrzewka',color:'#C4A35A'}],
             walkrun: [{key:'mniej_serii',label:'Mniej serii niż w planie',color:'#C07264'},{key:'krotszy_bieg',label:'Krótsze odcinki biegu',color:'#C4A35A'},{key:'wiecej_marszu',label:'Więcej marszu niż zakładano',color:'#C4A35A'},{key:'mniej_km',label:'Mniejszy dystans całkowity',color:'#C4A35A'}],
@@ -10718,6 +10724,19 @@
         function toggleFollowUp2b(card, key) {
             if (followUpSelections.has(key)) { followUpSelections.delete(key); card.classList.remove('selected'); }
             else { followUpSelections.add(key); card.classList.add('selected'); }
+            // Easy/long + "krótszy dystans" → licznik faktycznych km (musimy wiedzieć O ILE mniej)
+            const kmWrap = document.getElementById('fuKmWrap');
+            if (kmWrap) {
+                const needsKm = (workoutType === 'easy' || workoutType === 'long') && followUpSelections.has('krotszy_dystans');
+                if (needsKm && !kmWrap.classList.contains('visible')) {
+                    // Sensowny start: plan minus 1 km (min 0.5)
+                    fuKmVal = Math.max(0.5, Math.round(((workoutData.dystans_km || 5) - 1) * 2) / 2);
+                    const el = document.getElementById('fuKmVal');
+                    if (el) el.textContent = fuKmVal.toFixed(1) + ' km';
+                }
+                kmWrap.classList.toggle('visible', needsKm);
+                if (needsKm) setTimeout(() => updateStepsHeight(), 320);
+            }
             const btn = document.getElementById('next-post-2b');
             if (btn) btn.classList.toggle('visible', followUpSelections.size > 0);
             setTimeout(() => updateStepsHeight(), 50);
@@ -10751,12 +10770,8 @@
         function toggleFollowUp(card, key) {
             if (followUpSelections.has(key)) { followUpSelections.delete(key); card.classList.remove('selected'); card.style.borderColor = ''; }
             else { followUpSelections.add(key); card.classList.add('selected'); card.style.borderColor = card.querySelector('.fu-dot').style.background; }
-            const counterWrap = document.getElementById('fuCounterWrap');
-            if (counterWrap) {
-                const needsCounter = (workoutType==='interval' && followUpSelections.has('mniej_powtorzen')) || (workoutType==='tempo' && followUpSelections.has('skrocony_odcinek')) || (workoutType==='walkrun' && followUpSelections.has('mniej_serii'));
-                counterWrap.classList.toggle('visible', needsCounter);
-                if (needsCounter) setTimeout(() => updateStepsHeight(), 320);
-            }
+            // (Faktyczne wartości dla typów strukturalnych zbiera krok P0:
+            //  completed_repeats / completed_series / working_distance_km)
             if (followUpSelections.size > 0) showBtn('next-post-2b');
             else { const btn = document.getElementById('next-post-2b'); if (btn) btn.classList.remove('visible'); }
         }
@@ -10824,6 +10839,10 @@
             }
             if (workoutType === 'walkrun' && segmentSeries) {
                 base += `, serie=${segmentSeries}/${workoutData.serie||'?'}`;
+            }
+            // Easy/long skrócony: faktyczne km vs plan — AI ma wiedzieć O ILE mniej
+            if ((workoutType === 'easy' || workoutType === 'long') && followUpSelections.has('krotszy_dystans') && fuKmVal > 0) {
+                base += `, wykonano_km=${fuKmVal.toFixed(1)}/${workoutData.dystans_km}`;
             }
             if (selectedCompletion === 'less' && skippedParts.size > 0) {
                 base += `, pominięto=[${[...skippedParts].join(',')}]`;
@@ -11109,6 +11128,10 @@
 
                 <!-- P0: Trening — zależy od typu -->
                 <div class="step" id="step-post-0">
+                    <div class="ci-plan-ref" id="post-plan-ref-0">
+                        <div class="cpr-dot"></div>
+                        <div class="cpr-body"><div class="cpr-label">Dzisiejszy plan</div><div class="cpr-val" id="post-plan-ref-0-val">—</div></div>
+                    </div>
                     <!-- Easy / Long / Rest -->
                     <div class="post0-section active" id="post0-duration">
                         <div class="step-title">Ile trwał trening?</div>
@@ -11225,6 +11248,15 @@
                     <div class="step-title">Co poszło inaczej?</div>
                     <div class="step-desc">Zaznacz wszystko co pasuje.</div>
                     <div class="morning-followup-opts" id="fu-2b-options"></div>
+                    <!-- Faktyczny dystans przy "krótszy dystans" (easy/long) — musimy wiedzieć O ILE -->
+                    <div class="fu-counter-wrap" id="fuKmWrap">
+                        <div class="section-label" style="margin-top:14px;">Ile km faktycznie przebiegłeś?</div>
+                        <div class="fu-counter">
+                            <button class="counter-btn" onclick="adjustFuKm(-0.5)">−</button>
+                            <div class="fu-counter-val" id="fuKmVal">—</div>
+                            <button class="counter-btn" onclick="adjustFuKm(0.5)">+</button>
+                        </div>
+                    </div>
                     <div class="nav-area"><button class="btn-next" id="next-post-2b" onclick="goNext()">Dalej →</button></div>
                 </div>
 
