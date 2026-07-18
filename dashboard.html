@@ -9985,7 +9985,9 @@
             ov.style.display = 'flex';
             card.style.opacity = '0';
             card.style.transition = 'none';
-            card.style.transform = 'translateX(-50%) translateY(72px)';
+            // UWAGA: bez translateX(-50%)! Kartę centruje flexbox overlaya —
+            // ten transform przesuwał ją w bok, gdy animacja CSS go nie maskowała
+            card.style.transform = 'translateY(72px)';
             document.body.style.overflow = 'hidden';
 
             // Init dynamic pickers
@@ -10001,7 +10003,7 @@
             requestAnimationFrame(() => {
                 requestAnimationFrame(() => {
                     card.style.transition = 'transform 400ms cubic-bezier(0.34,1.56,0.64,1), opacity 220ms ease';
-                    card.style.transform  = 'translateX(-50%) translateY(0)';
+                    card.style.transform  = 'translateY(0)';
                     card.style.opacity    = '1';
                 });
             });
@@ -10011,7 +10013,7 @@
             const ov   = document.getElementById('checkin-overlay');
             const card = document.getElementById('ci-card');
             card.style.transition = 'transform 280ms cubic-bezier(0.4,0,1,1), opacity 200ms ease-in';
-            card.style.transform  = 'translateX(-50%) translateY(80px)';
+            card.style.transform  = 'translateY(80px)';
             card.style.opacity    = '0';
             ov.style.animation = 'ciOverlayOut 300ms ease forwards';
             setTimeout(() => {
