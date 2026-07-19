@@ -3067,7 +3067,10 @@
         /* STEPS */
         #checkin-overlay .steps-outer { display: grid; grid-template-columns: 1fr; align-items: start; position: relative; min-height: 0; transition: height 0.28s cubic-bezier(0.22, 1, 0.36, 1), min-height 0.28s cubic-bezier(0.22, 1, 0.36, 1); }
         #checkin-overlay .step { grid-area: 1 / 1; opacity:0; transform:translate3d(20px,0,0); pointer-events:none; transition:opacity 0.3s cubic-bezier(0.22, 1, 0.36, 1), transform 0.3s cubic-bezier(0.22, 1, 0.36, 1); width: 100%; box-sizing: border-box; will-change: opacity, transform; backface-visibility: hidden; }
-        #checkin-overlay .step.active { opacity:1; transform:translate3d(0,0,0); pointer-events:auto; z-index:10; }
+        /* !important = bezpiecznik: bije KAŻDY resztkowy inline styl z resetu
+           (opacity:0 / translateX(24px)), niezależnie od ścieżki aktywacji —
+           aktywny krok NIGDY nie może być przezroczysty ani zsunięty w prawo */
+        #checkin-overlay .step.active { opacity:1 !important; transform:none !important; pointer-events:auto; z-index:10; }
         #checkin-overlay .step.is-leaving { opacity:0; transform:translate3d(-16px,0,0); }
         @keyframes ciStepIn { from { opacity:0; transform:translateX(15px); } to { opacity:1; transform:translateX(0); } }
         #checkin-overlay .step-title { font-family:var(--font-d); font-weight:800; font-size:32px; color:var(--primary); line-height:1.1; margin-bottom:8px; letter-spacing:-0.025em; }
