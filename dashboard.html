@@ -9238,7 +9238,7 @@
 
         // Stempel buildu — dowód na urządzeniu, że działa świeży kod (trzymać
         // w zgodzie z CACHE_VERSION w sw.js; bump przy każdym deployu frontendu)
-        const VELM_BUILD = 'v8';
+        const VELM_BUILD = 'v9';
         console.log('velm build', VELM_BUILD, navigator.userAgent);
 
         async function hardReloadApp() {
@@ -9870,10 +9870,6 @@
             durH = 0; durM = 45; durS = 0;
             workSegH = 0; workSegM = 0; workSegS = 0;
             feelings = new Set(); avgPaceVal = ''; intervalDistanceM = 400;
-            const intervalPaceEl = document.getElementById('intervalPaceInput');
-            const workPaceEl = document.getElementById('workPaceInput');
-            if (intervalPaceEl) intervalPaceEl.value = '';
-            if (workPaceEl) workPaceEl.value = '';
             const durationInput = document.getElementById('durationInput');
             if (durationInput) durationInput.value = 45;
             const _sleepPkEl = document.getElementById('ci-pk-sleep');
@@ -10559,22 +10555,15 @@
             const map = { easy: 'duration', long: 'duration', rest: 'duration', interval: 'interval', tempo: 'tempo', walkrun: 'walkrun' };
             const sectionEl = document.getElementById('post0-' + (map[workoutType] || 'duration'));
             if (sectionEl) sectionEl.classList.add('active');
+            // Wartości segmentów idą z planu (kontrolki ręcznej korekty usunięte —
+            // odchylenia łapie gałąź "mniej niż plan" w kroku "Jak poszło?")
             if (workoutType === 'interval') {
                 segmentRepeats = workoutData.powtorzenia || 8;
-                const repsEl = document.getElementById('repsVal');
-                if (repsEl) repsEl.textContent = segmentRepeats;
-                document.querySelectorAll('#checkin-overlay .distance-pill').forEach(p => {
-                    p.classList.toggle('selected', p.dataset.dist === '400');
-                });
                 intervalDistanceM = 400;
             } else if (workoutType === 'tempo') {
                 segmentWorkKm = workoutData.odcinek_km || 6;
-                const workKmEl = document.getElementById('workKmVal');
-                if (workKmEl) workKmEl.textContent = segmentWorkKm.toFixed(1) + ' km';
             } else if (workoutType === 'walkrun') {
                 segmentSeries = workoutData.serie || 6;
-                const seriesEl = document.getElementById('seriesVal');
-                if (seriesEl) seriesEl.textContent = segmentSeries;
             }
             const _pkMap = { duration: 'ci-pk-dur-easy', interval: 'ci-pk-wseg-interval', tempo: 'ci-pk-wseg-tempo', walkrun: 'ci-pk-dur-walkrun' };
             const _pkId = _pkMap[map[workoutType] || 'duration'];
@@ -10586,9 +10575,9 @@
                     initCiPickers(_pkEl);
                 }
             }
-            // Karta "Plan na dziś" pod pickerem — 2-3 statystyki zamiast tekstowej podpowiedzi
+            // Karta "Plan na dziś" pod pickerem — zamiast tempa PRZEWIDYWANY CZAS,
+            // czyli dokładnie ta wartość, na której startuje karuzela
             const _dk = workoutData.dystans_km || 0;
-            const _paceTxt = window._todayPace ? String(window._todayPace).replace(/\s*min\/km\s*$/i, '').trim() : '';
             const _cardEl = document.getElementById('ci-plan-card-0');
             const _rowEl  = document.getElementById('ci-plan-card-0-row');
             if (_cardEl && _rowEl) {
@@ -10598,19 +10587,17 @@
                 if (workoutType === 'interval') {
                     items.push(_it(workoutData.powtorzenia || 8, '×', 'powtórzenia'));
                     items.push(_it('400', 'm', 'odcinek'));
-                    if (workSegM || workSegS) items.push(_it(`~${workSegM}:${String(workSegS).padStart(2, '0')}`, '', 'czas odcinka'));
+                    if (workSegM || workSegS) items.push(_it(`~${workSegM}:${String(workSegS).padStart(2, '0')}`, '', 'przew. czas'));
                 } else if (workoutType === 'tempo') {
                     if (workoutData.odcinek_km) items.push(_it(workoutData.odcinek_km, 'km', 'odcinek'));
-                    if (workSegH * 60 + workSegM) items.push(_it('~' + _fmtMin(workSegH * 60 + workSegM), '', 'czas'));
-                    if (_paceTxt) items.push(_it(_paceTxt, '/km', 'tempo'));
+                    if (workSegH * 60 + workSegM) items.push(_it('~' + _fmtMin(workSegH * 60 + workSegM), '', 'przew. czas'));
                 } else if (workoutType === 'walkrun') {
                     if (workoutData.serie) items.push(_it(workoutData.serie, '×', 'serie'));
                     if (_dk) items.push(_it(_dk, 'km', 'dystans'));
-                    if (durH * 60 + durM) items.push(_it('~' + _fmtMin(durH * 60 + durM), '', 'czas'));
+                    if (durH * 60 + durM) items.push(_it('~' + _fmtMin(durH * 60 + durM), '', 'przew. czas'));
                 } else {
                     if (_dk) items.push(_it(_dk, 'km', 'dystans'));
-                    if (durH * 60 + durM) items.push(_it('~' + _fmtMin(durH * 60 + durM), '', 'czas'));
-                    if (_paceTxt) items.push(_it(_paceTxt, '/km', 'tempo'));
+                    if (durH * 60 + durM) items.push(_it('~' + _fmtMin(durH * 60 + durM), '', 'przew. czas'));
                 }
                 _rowEl.innerHTML = items.join('');
                 _cardEl.style.display = items.length ? '' : 'none';
@@ -10622,14 +10609,6 @@
             const key = btn.dataset.feeling;
             if (feelings.has(key)) { feelings.delete(key); btn.classList.remove('selected'); }
             else { feelings.add(key); btn.classList.add('selected'); }
-        }
-
-        function selectIntervalDist(btn, m) {
-            intervalDistanceM = m;
-            document.querySelectorAll('#checkin-overlay .distance-pill').forEach(p => p.classList.remove('selected'));
-            btn.classList.add('selected');
-            const distDesc = document.getElementById('intervalDistDesc');
-            if (distDesc) distDesc.textContent = m >= 1000 ? '1km' : m + 'm';
         }
 
         function _showPost3PaceWrap() {
@@ -10871,21 +10850,6 @@
             fuCounterVal = Math.max(1, Math.min(max, fuCounterVal + delta));
             const el = document.getElementById('fuCounterVal');
             if (el) el.textContent = fuCounterVal;
-        }
-        function adjustRepeats(delta) {
-            segmentRepeats = Math.max(1, Math.min(99, segmentRepeats + delta));
-            const el = document.getElementById('repsVal');
-            if (el) el.textContent = segmentRepeats;
-        }
-        function adjustSeries(delta) {
-            segmentSeries = Math.max(1, Math.min(99, segmentSeries + delta));
-            const el = document.getElementById('seriesVal');
-            if (el) el.textContent = segmentSeries;
-        }
-        function adjustWorkKm(delta) {
-            segmentWorkKm = Math.max(0.5, Math.round((segmentWorkKm + delta) * 10) / 10);
-            const el = document.getElementById('workKmVal');
-            if (el) el.textContent = segmentWorkKm.toFixed(1) + ' km';
         }
         function formatPaceInput(el) {
             // Auto-format: insert ':' after 1-2 digits
@@ -11207,56 +11171,19 @@
                         <div class="step-title">Ile trwał trening?</div>
                         <div id="ci-pk-dur-easy"></div>
                     </div>
-                    <!-- Interval -->
+                    <!-- Interval — ten sam wzór co easy: pytanie + karuzela + karta planu -->
                     <div class="post0-section" id="post0-interval">
-                        <div class="step-title">Odcinki robocze</div>
-                        <div class="section-label" style="margin-top:4px;">Dystans odcinka</div>
-                        <div class="distance-pills-row">
-                            <button class="distance-pill" data-dist="100" onclick="selectIntervalDist(this,100)">100m</button>
-                            <button class="distance-pill" data-dist="200" onclick="selectIntervalDist(this,200)">200m</button>
-                            <button class="distance-pill selected" data-dist="400" onclick="selectIntervalDist(this,400)">400m</button>
-                            <button class="distance-pill" data-dist="600" onclick="selectIntervalDist(this,600)">600m</button>
-                            <button class="distance-pill" data-dist="800" onclick="selectIntervalDist(this,800)">800m</button>
-                            <button class="distance-pill" data-dist="1000" onclick="selectIntervalDist(this,1000)">1km</button>
-                        </div>
-                        <div class="section-label">Liczba powtórzeń</div>
-                        <div class="counter-row">
-                            <button class="counter-btn" onclick="adjustRepeats(-1)">−</button>
-                            <div class="duration-val" id="repsVal">8</div>
-                            <button class="counter-btn" onclick="adjustRepeats(1)">+</button>
-                        </div>
-                        <input type="text" id="intervalPaceInput" class="pace-input" placeholder="4:15"
-                               inputmode="numeric" maxlength="5"
-                               oninput="formatPaceInput(this)" onblur="validatePaceInput(this)">
-                        <div class="hint">Tempo roboczych odcinków (opcjonalne)</div>
-                        <div class="section-label" style="margin-top:14px;">Czas odcinków roboczych</div>
+                        <div class="step-title">Ile trwał odcinek roboczy?</div>
                         <div id="ci-pk-wseg-interval"></div>
                     </div>
                     <!-- Tempo -->
                     <div class="post0-section" id="post0-tempo">
-                        <div class="step-title">Odcinek roboczy</div>
-                        <div class="counter-row" style="margin-top:24px;">
-                            <button class="counter-btn" onclick="adjustWorkKm(-0.5)">−</button>
-                            <div class="duration-val" id="workKmVal">6.0 km</div>
-                            <button class="counter-btn" onclick="adjustWorkKm(0.5)">+</button>
-                        </div>
-                        <input type="text" id="workPaceInput" class="pace-input" placeholder="4:45"
-                               inputmode="numeric" maxlength="5"
-                               oninput="formatPaceInput(this)" onblur="validatePaceInput(this)">
-                        <div class="hint">Tempo odcinka roboczego (opcjonalne)</div>
-                        <div class="section-label" style="margin-top:14px;">Czas odcinka tempo</div>
+                        <div class="step-title">Ile trwał odcinek tempo?</div>
                         <div id="ci-pk-wseg-tempo"></div>
                     </div>
                     <!-- Walkrun -->
                     <div class="post0-section" id="post0-walkrun">
-                        <div class="step-title">Ile serii?</div>
-                        <div class="counter-row">
-                            <button class="counter-btn" onclick="adjustSeries(-1)">−</button>
-                            <div class="duration-val" id="seriesVal">6</div>
-                            <button class="counter-btn" onclick="adjustSeries(1)">+</button>
-                        </div>
-                        <div class="hint">Seria = odcinek biegu + odpoczynek marszu</div>
-                        <div class="section-label" style="margin-top:14px;">Całkowity czas</div>
+                        <div class="step-title">Ile trwał trening?</div>
                         <div id="ci-pk-dur-walkrun"></div>
                     </div>
                     <!-- Karta planu POD wyborem wartości — wypełniana w showPost0Section -->
