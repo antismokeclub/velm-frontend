@@ -3201,7 +3201,16 @@
         #checkin-overlay .ci-pk-item.near2 { font-size:17px; opacity:.25; }
         #checkin-overlay .ci-pk-item.far { font-size:14px; opacity:.1; }
         #checkin-overlay .ci-pk-sep { font-family:'Outfit',sans-serif; font-weight:800; font-size:30px; color:var(--primary); opacity:.3; line-height:1; flex-shrink:0; align-self:center; margin-top:10px; }
-        #checkin-overlay .ci-pk-hint { text-align:center; font-size:13px; color:var(--text-muted); font-weight:500; margin:6px 0 2px; min-height:18px; }
+        /* Karta "Plan na dziś" pod pickerem czasu — 2-3 statystyki z separatorem */
+        #checkin-overlay .ci-plan-card { margin:18px 0 4px; background:var(--bg); border:1px solid var(--border); border-radius:18px; padding:13px 14px 11px; }
+        #checkin-overlay .ci-plan-card .cpc-head { display:flex; align-items:center; justify-content:center; gap:7px; font-size:10px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-muted); margin-bottom:10px; }
+        #checkin-overlay .ci-plan-card .cpc-head::before { content:''; width:7px; height:7px; border-radius:50%; background:#C4A35A; box-shadow:0 0 0 3px rgba(196,163,90,0.18); flex-shrink:0; }
+        #checkin-overlay .ci-plan-card .cpc-row { display:flex; align-items:stretch; }
+        #checkin-overlay .ci-plan-card .cpc-item { flex:1; min-width:0; text-align:center; padding:0 6px; }
+        #checkin-overlay .ci-plan-card .cpc-item + .cpc-item { border-left:1px solid var(--border); }
+        #checkin-overlay .ci-plan-card .cpc-val { font-family:var(--font-d); font-size:18px; font-weight:800; color:var(--primary); line-height:1.15; white-space:nowrap; }
+        #checkin-overlay .ci-plan-card .cpc-val small { font-size:11px; font-weight:700; color:var(--text-muted); margin-left:2px; }
+        #checkin-overlay .ci-plan-card .cpc-lbl { font-size:9px; font-weight:700; letter-spacing:0.07em; text-transform:uppercase; color:var(--text-light); margin-top:3px; }
         #checkin-overlay .completion-grid { display:flex; flex-direction:column; gap:12px; margin:16px 0 8px; }
         #checkin-overlay .completion-btn { display:flex; align-items:center; gap:14px; padding:16px 20px; background:#FFFFFF; border:1.5px solid #EBEBEB; border-radius:18px; cursor:pointer; transition:all 0.22s cubic-bezier(0.34,1.56,0.64,1); text-align:left; font-family:'Inter',sans-serif; width:100%; }
         #checkin-overlay .completion-btn:hover { transform:translateY(-1px); box-shadow:0 6px 16px rgba(0,0,0,0.05); }
@@ -9229,7 +9238,7 @@
 
         // Stempel buildu — dowód na urządzeniu, że działa świeży kod (trzymać
         // w zgodzie z CACHE_VERSION w sw.js; bump przy każdym deployu frontendu)
-        const VELM_BUILD = 'v7';
+        const VELM_BUILD = 'v8';
         console.log('velm build', VELM_BUILD, navigator.userAgent);
 
         async function hardReloadApp() {
@@ -9874,6 +9883,10 @@
             document.querySelectorAll('#checkin-overlay .skip-btn').forEach(b => b.classList.remove('selected'));
             document.querySelectorAll('#checkin-overlay .morning-fu-btn').forEach(b => b.classList.remove('selected'));
             document.getElementById('fuKmWrap')?.classList.remove('visible');
+            // Fallback do dzisiejszego planu — poranny check-in otwiera się bez
+            // argumentów i pokazywał domyślne 10 km zamiast dystansu z planu
+            if (!typ && window._todayTyp) typ = window._todayTyp;
+            if (!km && window._todayKm) km = window._todayKm;
             if (typ) workoutType = typ;
             if (km)  { workoutData.dystans_km = parseFloat(km); workoutData.odcinek_km = Math.round(parseFloat(km) * 0.6 * 10) / 10; }
             fuKmVal = workoutData.dystans_km / 2;
@@ -9929,7 +9942,7 @@
                 }
                 if (window._todayPace) parts.push(String(window._todayPace).replace(/\s*min\/km\s*$/i, '') + '/km');
                 const html = '<strong>' + typeLabel + '</strong>' + (parts.length ? '  <small>' + parts.join(' · ') + '</small>' : '');
-                ['post-plan-ref-0-val', 'post-plan-ref-1-val', 'post-plan-ref-2-val'].forEach(id => {
+                ['post-plan-ref-1-val', 'post-plan-ref-2-val'].forEach(id => {
                     const el = document.getElementById(id);
                     if (el) el.innerHTML = html;
                 });
@@ -10549,27 +10562,19 @@
             if (workoutType === 'interval') {
                 segmentRepeats = workoutData.powtorzenia || 8;
                 const repsEl = document.getElementById('repsVal');
-                const repsPlanned = document.getElementById('repsPlanned');
                 if (repsEl) repsEl.textContent = segmentRepeats;
-                if (repsPlanned) repsPlanned.textContent = workoutData.powtorzenia || '—';
                 document.querySelectorAll('#checkin-overlay .distance-pill').forEach(p => {
                     p.classList.toggle('selected', p.dataset.dist === '400');
                 });
                 intervalDistanceM = 400;
-                const distDesc = document.getElementById('intervalDistDesc');
-                if (distDesc) distDesc.textContent = '400m';
             } else if (workoutType === 'tempo') {
                 segmentWorkKm = workoutData.odcinek_km || 6;
                 const workKmEl = document.getElementById('workKmVal');
-                const workPlanned = document.getElementById('tempoWorkPlanned');
                 if (workKmEl) workKmEl.textContent = segmentWorkKm.toFixed(1) + ' km';
-                if (workPlanned) workPlanned.textContent = workoutData.odcinek_km || '—';
             } else if (workoutType === 'walkrun') {
                 segmentSeries = workoutData.serie || 6;
                 const seriesEl = document.getElementById('seriesVal');
-                const seriesPlanned = document.getElementById('seriesPlanned');
                 if (seriesEl) seriesEl.textContent = segmentSeries;
-                if (seriesPlanned) seriesPlanned.textContent = workoutData.serie || '—';
             }
             const _pkMap = { duration: 'ci-pk-dur-easy', interval: 'ci-pk-wseg-interval', tempo: 'ci-pk-wseg-tempo', walkrun: 'ci-pk-dur-walkrun' };
             const _pkId = _pkMap[map[workoutType] || 'duration'];
@@ -10581,19 +10586,35 @@
                     initCiPickers(_pkEl);
                 }
             }
-            const _dk = workoutData.dystans_km || 10;
-            const _hints = {
-                'ci-pk-hint-dur': (workoutType === 'easy' || workoutType === 'long')
-                    ? `Plan: ${_dk} km · ok. ${_fmtMin(durH*60+durM)}`
-                    : '',
-                'ci-pk-hint-dur-walkrun':
-                    `Plan: ${workoutData.serie||'—'} serii · ${_dk} km · ok. ${_fmtMin(durH*60+durM)}`,
-                'ci-pk-hint-wseg-interval':
-                    `Plan: ${workoutData.powtorzenia||8}× powtórzeń · ok. ${workSegM}:${String(workSegS).padStart(2,'0')}/odcinek`,
-                'ci-pk-hint-wseg-tempo':
-                    `Plan: ${workoutData.odcinek_km||'—'} km odcinka · ok. ${_fmtMin(workSegH*60+workSegM)}`,
-            };
-            Object.entries(_hints).forEach(([id, txt]) => { const el = document.getElementById(id); if (el) el.textContent = txt; });
+            // Karta "Plan na dziś" pod pickerem — 2-3 statystyki zamiast tekstowej podpowiedzi
+            const _dk = workoutData.dystans_km || 0;
+            const _paceTxt = window._todayPace ? String(window._todayPace).replace(/\s*min\/km\s*$/i, '').trim() : '';
+            const _cardEl = document.getElementById('ci-plan-card-0');
+            const _rowEl  = document.getElementById('ci-plan-card-0-row');
+            if (_cardEl && _rowEl) {
+                const _it = (val, unit, lbl) =>
+                    `<div class="cpc-item"><div class="cpc-val">${val}${unit ? `<small>${unit}</small>` : ''}</div><div class="cpc-lbl">${lbl}</div></div>`;
+                const items = [];
+                if (workoutType === 'interval') {
+                    items.push(_it(workoutData.powtorzenia || 8, '×', 'powtórzenia'));
+                    items.push(_it('400', 'm', 'odcinek'));
+                    if (workSegM || workSegS) items.push(_it(`~${workSegM}:${String(workSegS).padStart(2, '0')}`, '', 'czas odcinka'));
+                } else if (workoutType === 'tempo') {
+                    if (workoutData.odcinek_km) items.push(_it(workoutData.odcinek_km, 'km', 'odcinek'));
+                    if (workSegH * 60 + workSegM) items.push(_it('~' + _fmtMin(workSegH * 60 + workSegM), '', 'czas'));
+                    if (_paceTxt) items.push(_it(_paceTxt, '/km', 'tempo'));
+                } else if (workoutType === 'walkrun') {
+                    if (workoutData.serie) items.push(_it(workoutData.serie, '×', 'serie'));
+                    if (_dk) items.push(_it(_dk, 'km', 'dystans'));
+                    if (durH * 60 + durM) items.push(_it('~' + _fmtMin(durH * 60 + durM), '', 'czas'));
+                } else {
+                    if (_dk) items.push(_it(_dk, 'km', 'dystans'));
+                    if (durH * 60 + durM) items.push(_it('~' + _fmtMin(durH * 60 + durM), '', 'czas'));
+                    if (_paceTxt) items.push(_it(_paceTxt, '/km', 'tempo'));
+                }
+                _rowEl.innerHTML = items.join('');
+                _cardEl.style.display = items.length ? '' : 'none';
+            }
             setTimeout(() => updateStepsHeight(), 50);
         }
 
@@ -11181,20 +11202,14 @@
 
                 <!-- P0: Trening — zależy od typu -->
                 <div class="step" id="step-post-0">
-                    <div class="ci-plan-ref" id="post-plan-ref-0">
-                        <div class="cpr-dot"></div>
-                        <div class="cpr-body"><div class="cpr-label">Dzisiejszy plan</div><div class="cpr-val" id="post-plan-ref-0-val">—</div></div>
-                    </div>
                     <!-- Easy / Long / Rest -->
                     <div class="post0-section active" id="post0-duration">
                         <div class="step-title">Ile trwał trening?</div>
-                        <div class="ci-pk-hint" id="ci-pk-hint-dur"></div>
                         <div id="ci-pk-dur-easy"></div>
                     </div>
                     <!-- Interval -->
                     <div class="post0-section" id="post0-interval">
                         <div class="step-title">Odcinki robocze</div>
-                        <div class="step-desc">Plan: <span id="repsPlanned">—</span> powtórzeń · <span id="intervalDistDesc">400m</span></div>
                         <div class="section-label" style="margin-top:4px;">Dystans odcinka</div>
                         <div class="distance-pills-row">
                             <button class="distance-pill" data-dist="100" onclick="selectIntervalDist(this,100)">100m</button>
@@ -11215,13 +11230,11 @@
                                oninput="formatPaceInput(this)" onblur="validatePaceInput(this)">
                         <div class="hint">Tempo roboczych odcinków (opcjonalne)</div>
                         <div class="section-label" style="margin-top:14px;">Czas odcinków roboczych</div>
-                        <div class="ci-pk-hint" id="ci-pk-hint-wseg-interval"></div>
                         <div id="ci-pk-wseg-interval"></div>
                     </div>
                     <!-- Tempo -->
                     <div class="post0-section" id="post0-tempo">
                         <div class="step-title">Odcinek roboczy</div>
-                        <div class="step-desc">Plan: <span id="tempoWorkPlanned">—</span> km w tempie</div>
                         <div class="counter-row" style="margin-top:24px;">
                             <button class="counter-btn" onclick="adjustWorkKm(-0.5)">−</button>
                             <div class="duration-val" id="workKmVal">6.0 km</div>
@@ -11232,13 +11245,11 @@
                                oninput="formatPaceInput(this)" onblur="validatePaceInput(this)">
                         <div class="hint">Tempo odcinka roboczego (opcjonalne)</div>
                         <div class="section-label" style="margin-top:14px;">Czas odcinka tempo</div>
-                        <div class="ci-pk-hint" id="ci-pk-hint-wseg-tempo"></div>
                         <div id="ci-pk-wseg-tempo"></div>
                     </div>
                     <!-- Walkrun -->
                     <div class="post0-section" id="post0-walkrun">
                         <div class="step-title">Ile serii?</div>
-                        <div class="step-desc">Plan zakładał <span id="seriesPlanned">—</span> serii bieg-marsz.</div>
                         <div class="counter-row">
                             <button class="counter-btn" onclick="adjustSeries(-1)">−</button>
                             <div class="duration-val" id="seriesVal">6</div>
@@ -11246,8 +11257,12 @@
                         </div>
                         <div class="hint">Seria = odcinek biegu + odpoczynek marszu</div>
                         <div class="section-label" style="margin-top:14px;">Całkowity czas</div>
-                        <div class="ci-pk-hint" id="ci-pk-hint-dur-walkrun"></div>
                         <div id="ci-pk-dur-walkrun"></div>
+                    </div>
+                    <!-- Karta planu POD wyborem wartości — wypełniana w showPost0Section -->
+                    <div class="ci-plan-card" id="ci-plan-card-0" style="display:none;">
+                        <div class="cpc-head">Plan na dziś</div>
+                        <div class="cpc-row" id="ci-plan-card-0-row"></div>
                     </div>
                     <div class="nav-area"><button class="btn-next visible" onclick="goNext()">Dalej →</button></div>
                 </div>
