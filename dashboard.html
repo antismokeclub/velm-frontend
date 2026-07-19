@@ -3121,12 +3121,6 @@
         #checkin-overlay .slider-desc { text-align:center; font-size:14px; color:var(--text-muted); min-height:24px; margin-top:10px; transition:opacity 0.2s ease; line-height:1.5; font-family:var(--font); }
 
         /* PLAN REFERENCE — do czego user porównuje (dystans/czas/tempo z planu) */
-        #checkin-overlay .ci-plan-ref { display:flex; align-items:center; gap:10px; background:var(--bg); border-radius:16px; padding:12px 16px; margin:0 0 22px; }
-        #checkin-overlay .ci-plan-ref .cpr-dot { width:9px; height:9px; border-radius:50%; background:#C4A35A; flex-shrink:0; box-shadow:0 0 0 4px rgba(196,163,90,0.16); }
-        #checkin-overlay .ci-plan-ref .cpr-body { flex:1; min-width:0; }
-        #checkin-overlay .ci-plan-ref .cpr-label { font-size:10px; font-weight:700; letter-spacing:0.09em; text-transform:uppercase; color:var(--text-muted); line-height:1; margin-bottom:3px; }
-        #checkin-overlay .ci-plan-ref .cpr-val { font-family:var(--font-d); font-size:14px; font-weight:700; color:var(--primary); line-height:1.25; }
-        #checkin-overlay .ci-plan-ref .cpr-val small { font-weight:600; color:var(--text-muted); }
 
         /* RPE — wyśrodkowany blok + skala pod suwakiem, żeby wypełniał krok */
         #checkin-overlay .rpe-block { display:flex; flex-direction:column; justify-content:center; padding:8px 0 4px; }
@@ -9238,7 +9232,7 @@
 
         // Stempel buildu — dowód na urządzeniu, że działa świeży kod (trzymać
         // w zgodzie z CACHE_VERSION w sw.js; bump przy każdym deployu frontendu)
-        const VELM_BUILD = 'v9';
+        const VELM_BUILD = 'v10';
         console.log('velm build', VELM_BUILD, navigator.userAgent);
 
         async function hardReloadApp() {
@@ -9926,24 +9920,6 @@
             const m2desc = document.getElementById('step-morning-4-desc');
             if (m2desc) m2desc.textContent = `Twój trener czeka. Dziś masz: ${TYPE_LABEL_CI[workoutType] || workoutType} · ${workoutData.dystans_km} km.`;
 
-            // Odniesienie do planu w krokach potreningowych (RPE + "Jak poszło?")
-            // — żeby user wiedział, do czego porównuje: typ · dystans · ~czas · tempo
-            (function fillPostPlanRef() {
-                const typeLabel = TYPE_LABEL_CI[workoutType] || workoutType;
-                const parts = [];
-                if (workoutData.dystans_km) parts.push(workoutData.dystans_km + ' km');
-                const paceMin = (typeof _parsePaceMin === 'function') ? _parsePaceMin(window._todayPace) : null;
-                if (paceMin && workoutData.dystans_km && typeof _fmtMin === 'function') {
-                    parts.push('~' + _fmtMin(Math.round(paceMin * workoutData.dystans_km)));
-                }
-                if (window._todayPace) parts.push(String(window._todayPace).replace(/\s*min\/km\s*$/i, '') + '/km');
-                const html = '<strong>' + typeLabel + '</strong>' + (parts.length ? '  <small>' + parts.join(' · ') + '</small>' : '');
-                ['post-plan-ref-1-val', 'post-plan-ref-2-val'].forEach(id => {
-                    const el = document.getElementById(id);
-                    if (el) el.innerHTML = html;
-                });
-            })();
-
             _checkinStepsLockedHeight = 0;
             // Reset all steps to inactive
             document.querySelectorAll('#checkin-overlay .step').forEach(s => {
@@ -10575,33 +10551,34 @@
                     initCiPickers(_pkEl);
                 }
             }
-            // Karta "Plan na dziś" pod pickerem — zamiast tempa PRZEWIDYWANY CZAS,
-            // czyli dokładnie ta wartość, na której startuje karuzela
+            // Karty "Plan na dziś" — jedna w KAŻDYM kroku post (pytanie → odpowiedź →
+            // przypomnienie planu). Zamiast tempa PRZEWIDYWANY CZAS — ta sama wartość,
+            // na której startuje karuzela. Treść zależna od typu treningu.
             const _dk = workoutData.dystans_km || 0;
-            const _cardEl = document.getElementById('ci-plan-card-0');
-            const _rowEl  = document.getElementById('ci-plan-card-0-row');
-            if (_cardEl && _rowEl) {
-                const _it = (val, unit, lbl) =>
-                    `<div class="cpc-item"><div class="cpc-val">${val}${unit ? `<small>${unit}</small>` : ''}</div><div class="cpc-lbl">${lbl}</div></div>`;
-                const items = [];
-                if (workoutType === 'interval') {
-                    items.push(_it(workoutData.powtorzenia || 8, '×', 'powtórzenia'));
-                    items.push(_it('400', 'm', 'odcinek'));
-                    if (workSegM || workSegS) items.push(_it(`~${workSegM}:${String(workSegS).padStart(2, '0')}`, '', 'przew. czas'));
-                } else if (workoutType === 'tempo') {
-                    if (workoutData.odcinek_km) items.push(_it(workoutData.odcinek_km, 'km', 'odcinek'));
-                    if (workSegH * 60 + workSegM) items.push(_it('~' + _fmtMin(workSegH * 60 + workSegM), '', 'przew. czas'));
-                } else if (workoutType === 'walkrun') {
-                    if (workoutData.serie) items.push(_it(workoutData.serie, '×', 'serie'));
-                    if (_dk) items.push(_it(_dk, 'km', 'dystans'));
-                    if (durH * 60 + durM) items.push(_it('~' + _fmtMin(durH * 60 + durM), '', 'przew. czas'));
-                } else {
-                    if (_dk) items.push(_it(_dk, 'km', 'dystans'));
-                    if (durH * 60 + durM) items.push(_it('~' + _fmtMin(durH * 60 + durM), '', 'przew. czas'));
-                }
-                _rowEl.innerHTML = items.join('');
-                _cardEl.style.display = items.length ? '' : 'none';
+            const _it = (val, unit, lbl) =>
+                `<div class="cpc-item"><div class="cpc-val">${val}${unit ? `<small>${unit}</small>` : ''}</div><div class="cpc-lbl">${lbl}</div></div>`;
+            const items = [];
+            if (workoutType === 'interval') {
+                items.push(_it(workoutData.powtorzenia || 8, '×', 'powtórzenia'));
+                items.push(_it('400', 'm', 'odcinek'));
+                if (workSegM || workSegS) items.push(_it(`~${workSegM}:${String(workSegS).padStart(2, '0')}`, '', 'przew. czas'));
+            } else if (workoutType === 'tempo') {
+                if (workoutData.odcinek_km) items.push(_it(workoutData.odcinek_km, 'km', 'odcinek'));
+                if (workSegH * 60 + workSegM) items.push(_it('~' + _fmtMin(workSegH * 60 + workSegM), '', 'przew. czas'));
+            } else if (workoutType === 'walkrun') {
+                if (workoutData.serie) items.push(_it(workoutData.serie, '×', 'serie'));
+                if (_dk) items.push(_it(_dk, 'km', 'dystans'));
+                if (durH * 60 + durM) items.push(_it('~' + _fmtMin(durH * 60 + durM), '', 'przew. czas'));
+            } else {
+                if (_dk) items.push(_it(_dk, 'km', 'dystans'));
+                if (durH * 60 + durM) items.push(_it('~' + _fmtMin(durH * 60 + durM), '', 'przew. czas'));
             }
+            const _itemsHtml = items.join('');
+            document.querySelectorAll('#checkin-overlay .ci-plan-card').forEach(cardEl => {
+                const rowEl = cardEl.querySelector('.cpc-row');
+                if (rowEl) rowEl.innerHTML = _itemsHtml;
+                cardEl.style.display = items.length ? '' : 'none';
+            });
             setTimeout(() => updateStepsHeight(), 50);
         }
 
@@ -11186,10 +11163,11 @@
                         <div class="step-title">Ile trwał trening?</div>
                         <div id="ci-pk-dur-walkrun"></div>
                     </div>
-                    <!-- Karta planu POD wyborem wartości — wypełniana w showPost0Section -->
-                    <div class="ci-plan-card" id="ci-plan-card-0" style="display:none;">
+                    <!-- Karta planu POD wyborem wartości — jedna na każdy krok post,
+                         wypełniane wszystkie naraz w showPost0Section -->
+                    <div class="ci-plan-card" style="display:none;">
                         <div class="cpc-head">Plan na dziś</div>
-                        <div class="cpc-row" id="ci-plan-card-0-row"></div>
+                        <div class="cpc-row"></div>
                     </div>
                     <div class="nav-area"><button class="btn-next visible" onclick="goNext()">Dalej →</button></div>
                 </div>
@@ -11198,10 +11176,6 @@
                 <div class="step" id="step-post-1">
                     <div class="step-title">Poziom wysiłku</div>
                     <div class="step-desc">Jak ciężki był ten trening? Oceń swój wysiłek w skali 1–10.</div>
-                    <div class="ci-plan-ref" id="post-plan-ref-1">
-                        <div class="cpr-dot"></div>
-                        <div class="cpr-body"><div class="cpr-label">Dzisiejszy plan</div><div class="cpr-val" id="post-plan-ref-1-val">—</div></div>
-                    </div>
                     <div class="rpe-block">
                         <div class="slider-big-val" id="rpeSliderVal">5/10</div>
                         <div class="slider-wrap" style="margin-top:20px;">
@@ -11210,6 +11184,10 @@
                         <div class="rpe-scale"><span>Lekko</span><span>Umiarkowanie</span><span>Maksymalnie</span></div>
                         <div class="slider-desc" id="rpeDesc"></div>
                     </div>
+                    <div class="ci-plan-card" style="display:none;">
+                        <div class="cpc-head">Plan na dziś</div>
+                        <div class="cpc-row"></div>
+                    </div>
                     <div class="nav-area"><button class="btn-next visible" id="next-post-1" onclick="goNext()">Dalej →</button></div>
                 </div>
 
@@ -11217,10 +11195,6 @@
                 <div class="step" id="step-post-2">
                     <div class="step-title">Jak poszło?</div>
                     <div class="step-desc">Porównaj z tym, co planowałeś.</div>
-                    <div class="ci-plan-ref" id="post-plan-ref-2">
-                        <div class="cpr-dot"></div>
-                        <div class="cpr-body"><div class="cpr-label">Zakładał plan</div><div class="cpr-val" id="post-plan-ref-2-val">—</div></div>
-                    </div>
                     <div class="completion-grid">
                         <button class="completion-btn" data-completion="less" onclick="selectCompletion(this, 'less')">
                             <div class="completion-icon"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="6 13 12 19 18 13"/></svg></div>
@@ -11234,6 +11208,10 @@
                             <div class="completion-icon"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="6 11 12 5 18 11"/></svg></div>
                             <div><div class="completion-btn-label">Więcej niż w planie</div><div class="completion-btn-desc">dorzuciłem km, bo czułem się dobrze</div></div>
                         </button>
+                    </div>
+                    <div class="ci-plan-card" style="display:none;">
+                        <div class="cpc-head">Plan na dziś</div>
+                        <div class="cpc-row"></div>
                     </div>
                     <div class="nav-area"><button class="btn-next" id="next-post-2" onclick="goNext()">Dalej →</button></div>
                 </div>
@@ -11252,6 +11230,10 @@
                             <button class="counter-btn" onclick="adjustFuKm(0.5)">+</button>
                         </div>
                     </div>
+                    <div class="ci-plan-card" style="display:none;">
+                        <div class="cpc-head">Plan na dziś</div>
+                        <div class="cpc-row"></div>
+                    </div>
                     <div class="nav-area"><button class="btn-next" id="next-post-2b" onclick="goNext()">Dalej →</button></div>
                 </div>
 
@@ -11260,6 +11242,10 @@
                     <div class="step-title">Co było przyczyną?</div>
                     <div class="step-desc">Wybierz jedną główną przyczynę.</div>
                     <div class="morning-followup-opts" id="fu-2c-options"></div>
+                    <div class="ci-plan-card" style="display:none;">
+                        <div class="cpc-head">Plan na dziś</div>
+                        <div class="cpc-row"></div>
+                    </div>
                     <div class="nav-area"><button class="btn-next" id="next-post-2c" onclick="goNext()">Dalej →</button></div>
                 </div>
 
@@ -11276,6 +11262,10 @@
                             <span class="rd-dot" style="background:#C4A35A;"></span>
                             Dam radę sam
                         </button>
+                    </div>
+                    <div class="ci-plan-card" style="display:none;">
+                        <div class="cpc-head">Plan na dziś</div>
+                        <div class="cpc-row"></div>
                     </div>
                 </div>
 
@@ -11295,6 +11285,10 @@
                         <input type="text" id="avgPaceInput" class="pace-input" placeholder="5:30"
                                inputmode="numeric" maxlength="5"
                                oninput="formatPaceInput(this)" onblur="validatePaceInput(this)">
+                    </div>
+                    <div class="ci-plan-card" style="display:none;">
+                        <div class="cpc-head">Plan na dziś</div>
+                        <div class="cpc-row"></div>
                     </div>
                     <div class="nav-area"><button class="btn-next done-btn visible" onclick="finish(event)">Gotowe ✓</button></div>
                 </div>
