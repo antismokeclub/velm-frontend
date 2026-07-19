@@ -9229,7 +9229,7 @@
 
         // Stempel buildu — dowód na urządzeniu, że działa świeży kod (trzymać
         // w zgodzie z CACHE_VERSION w sw.js; bump przy każdym deployu frontendu)
-        const VELM_BUILD = 'v6';
+        const VELM_BUILD = 'v7';
         console.log('velm build', VELM_BUILD, navigator.userAgent);
 
         async function hardReloadApp() {
@@ -10022,6 +10022,10 @@
                     dbg.textContent = VELM_BUILD + ' · clip:' + sup('overflow-x', 'clip') + ' · inset:' + sup('inset', '0') + ' · ' + navigator.userAgent;
                 }
             }
+            // Skasuj ewentualny wiszący timer z closeCheckin (race: zamknij->otwórz <300ms)
+            clearTimeout(_ciCloseTimer);
+            _ciCloseTimer = null;
+            ov.style.animation = '';
             // Wyczyść inline'y po animacji zamknięcia — wejście karty robi w całości
             // CSS-owe ciEntrance (restartuje się samo przy display:none→flex)
             card.style.opacity = '';
@@ -10037,11 +10041,24 @@
                 lockStepsHeight();
                 updateStepsHeight();
             });
+            // Domiar po zakończeniu animacji wejścia i po dociągnięciu fontów —
+            // na wolnych telefonach font podmienia się PO pierwszym pomiarze
+            // i krok robi się wyższy niż zablokowana wysokość
+            setTimeout(() => updateStepsHeight(), 500);
+            if (document.fonts && document.fonts.ready) {
+                document.fonts.ready.then(() => {
+                    const o = document.getElementById('checkin-overlay');
+                    if (o && o.style.display !== 'none') updateStepsHeight();
+                });
+            }
 
             // Fade-in overlaya (karta wjeżdża CSS-owym ciEntrance — jedyna animacja karty)
             ov.style.animation = 'ciOverlayIn 300ms ease forwards';
         }
 
+        // Timer chowania overlayu — openCheckin MUSI go kasować, inaczej szybkie
+        // zamknij->otwórz (<300ms) chowa świeżo otwarty check-in
+        let _ciCloseTimer = null;
         function closeCheckin() {
             const ov   = document.getElementById('checkin-overlay');
             const card = document.getElementById('ci-card');
@@ -10049,7 +10066,8 @@
             card.style.transform  = 'translateY(80px)';
             card.style.opacity    = '0';
             ov.style.animation = 'ciOverlayOut 300ms ease forwards';
-            setTimeout(() => {
+            clearTimeout(_ciCloseTimer);
+            _ciCloseTimer = setTimeout(() => {
                 ov.style.display = 'none';
                 ov.style.animation = '';
                 card.style.transform = '';
@@ -10340,7 +10358,10 @@
                 step.style.display = 'block';
             });
 
-            const maxHeight = Math.max(...steps.map((step) => Math.ceil(step.getBoundingClientRect().height || 0)), 0);
+            // offsetHeight, NIE getBoundingClientRect — rect kurczy się pod scale(0.96)
+            // animacji wejścia karty i wysokość wychodziła ~4% za mała (przycisk
+            // "Dalej" nachodził na stopkę "velm · sztab AI" na wysokich krokach)
+            const maxHeight = Math.max(...steps.map((step) => step.offsetHeight || 0), 0);
 
             steps.forEach((step, idx) => {
                 const prev = prevStepStyles[idx];
@@ -10369,8 +10390,9 @@
             const outer = document.getElementById('stepsOuter');
             if (!outer) return 0;
 
+            // offsetHeight — odporny na scale() animacji wejścia (patrz lockStepsHeight)
             const active = document.querySelector('#checkin-overlay .step.active');
-            const activeHeight = active ? Math.ceil(active.getBoundingClientRect().height || 0) : 0;
+            const activeHeight = active ? (active.offsetHeight || 0) : 0;
 
             if (activeHeight > 0) {
                 // Wysokość podąża za AKTYWNYM krokiem (transition na .steps-outer
