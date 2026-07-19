@@ -563,7 +563,7 @@
 
         /* --- Login overlay --- */
         #login-overlay {
-            position:fixed; inset:0; z-index:99999;
+            position:fixed; top:0;right:0;bottom:0;left:0; z-index:99999;
             background:#F5F3F0;
             display:flex; flex-direction:column; align-items:center; justify-content:center;
             padding:32px 24px;
@@ -738,7 +738,7 @@
 
         .track-texture {
             position: absolute;
-            inset: 0;
+            top: 0; right: 0; bottom: 0; left: 0;
             background-image:
                 linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
                 linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
@@ -748,7 +748,7 @@
 
         .lanes {
             position: absolute;
-            inset: 0;
+            top: 0; right: 0; bottom: 0; left: 0;
             display: flex;
             flex-direction: column;
             width: 500%;
@@ -775,7 +775,7 @@
         .lane-line::after {
             content: '';
             position: absolute;
-            inset: 0;
+            top: 0; right: 0; bottom: 0; left: 0;
             background: white;
             opacity: 0.6;
             box-shadow: 0 0 10px white;
@@ -2258,7 +2258,7 @@
            Dzień po dniu przez cały sztab: Analityk → Fizjo → Psycholog →
            Szef; segmenty dnia zakreślają się kolorem agenta. */
         #narada-overlay {
-            position: fixed; inset: 0; z-index: 9998;
+            position: fixed; top: 0; right: 0; bottom: 0; left: 0; z-index: 9998;
             background: var(--bg-color, #F5F3F0);
             display: flex; flex-direction: column;
             padding: calc(14px + env(safe-area-inset-top)) 0 calc(10px + env(safe-area-inset-bottom));
@@ -2356,7 +2356,7 @@
         .nrd-fields { flex: 1; display: flex; align-items: center; gap: 5px; }
         .nrd-f { flex: 1; height: 10px; border-radius: 5px; background: #F0EDE8; position: relative; overflow: hidden; transition: opacity 350ms ease; }
         .nrd-f::after {
-            content: ''; position: absolute; inset: 0; background: #1A1A1A; border-radius: 5px;
+            content: ''; position: absolute; top: 0; right: 0; bottom: 0; left: 0; background: #1A1A1A; border-radius: 5px;
             transform: scaleX(0); transform-origin: left center;
             transition: transform 550ms var(--nrd-ease);
         }
@@ -2365,7 +2365,7 @@
         .nrd-f:nth-child(3)::after { background: var(--c-psycholog); }
         .nrd-f:nth-child(4)::after { background: var(--c-szef); }
         .nrd-f.on::after { transform: scaleX(1); }
-        .nrd-f b { position: absolute; inset: 0; z-index: 1; display: flex; align-items: center; justify-content: center; font-size: 7px; font-weight: 800; color: #FFF; font-style: normal; opacity: 0; transition: opacity 350ms ease 200ms; }
+        .nrd-f b { position: absolute; top: 0; right: 0; bottom: 0; left: 0; z-index: 1; display: flex; align-items: center; justify-content: center; font-size: 7px; font-weight: 800; color: #FFF; font-style: normal; opacity: 0; transition: opacity 350ms ease 200ms; }
         .nrd-f.on b { opacity: 0.9; }
         .nrd-status { font-size: 9px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #6B8F71; opacity: 0; transform: translateX(6px); transition: opacity 350ms ease, transform 350ms var(--nrd-ease); white-space: nowrap; }
         .nrd-dcheck { width: 17px; height: 17px; border-radius: 50%; flex-shrink: 0; background: #6B8F71; color: #FFF; display: flex; align-items: center; justify-content: center; opacity: 0; transform: scale(0.5); transition: opacity 300ms ease, transform 350ms var(--nrd-ease); }
@@ -2395,7 +2395,7 @@
 
         /* ── Modal "Zwołaj naradę" — potwierdzenie przed generowaniem ── */
         #nrd-confirm-backdrop {
-            position: fixed; inset: 0; z-index: 9997;
+            position: fixed; top: 0; right: 0; bottom: 0; left: 0; z-index: 9997;
             background: rgba(26, 26, 26, 0.35);
             -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
             display: flex; align-items: center; justify-content: center;
@@ -2951,8 +2951,9 @@
 
         /* ── CHECKIN OVERLAY ─────────────────────────────────────── */
         /* ─── CHECK-IN OVERLAY ─────────────────────────────────── */
-        @keyframes ciStepEnter { from{opacity:0;transform:translateX(24px);} to{opacity:1;transform:none;} }
-        @keyframes ciStepExit  { from{opacity:1;transform:none;} to{opacity:0;transform:translateX(-20px);} }
+        /* Tylko oś Y — jak przejścia .step/.is-leaving (zero ruchu w bok) */
+        @keyframes ciStepEnter { from{opacity:0;transform:translateY(12px);} to{opacity:1;transform:none;} }
+        @keyframes ciStepExit  { from{opacity:1;transform:none;} to{opacity:0;transform:translateY(-8px);} }
         @keyframes ciFadeIn    { from{opacity:0;transform:translateY(6px);} to{opacity:1;transform:none;} }
         @keyframes ciOverlayIn  { from{background:rgba(0,0,0,0);backdrop-filter:blur(0px);-webkit-backdrop-filter:blur(0px);} to{background:rgba(0,0,0,0.48);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);} }
         @keyframes ciOverlayOut { from{background:rgba(0,0,0,0.48);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);} to{background:rgba(0,0,0,0);backdrop-filter:blur(0px);-webkit-backdrop-filter:blur(0px);} }
@@ -3001,7 +3002,7 @@
             --bg:#F8F5EE; --surface:#FDFBF7; --border:#D8D2C4; --primary:#111111;
             --text-muted:#5C6B85; --text-light:#8A97AD; --strava:#FC4C02;
             font-family:'DM Sans',sans-serif; color:#111111; -webkit-font-smoothing:antialiased;
-            position:fixed; inset:0; z-index:9500; display:flex; align-items:center; justify-content:center;
+            position:fixed; top:0;right:0;bottom:0;left:0; z-index:9500; display:flex; align-items:center; justify-content:center;
             background: rgba(248, 245, 238, 0.4);
             backdrop-filter: blur(16px) saturate(180%);
             -webkit-backdrop-filter: blur(16px) saturate(180%);
@@ -3016,12 +3017,13 @@
             overflow:hidden; max-height:85vh;
             scrollbar-width:none; -ms-overflow-style:none;
             display:flex; flex-direction:column;
-            animation: ciEntrance 0.4s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+            /* Jedyna animacja wejścia karty — bez `forwards`, żeby po animacji
+               NIE zostawał żaden trwały transform (stan końcowy = czysty styl) */
+            animation: ciEntrance 0.4s cubic-bezier(0.22, 1, 0.36, 1);
             will-change: transform, opacity;
         }
         @keyframes ciEntrance {
             from { opacity: 0; transform: scale(0.96) translateY(10px); }
-            to { opacity: 1; transform: scale(1) translateY(0); }
         }
         #ci-card::-webkit-scrollbar { display:none; }
 
@@ -3036,6 +3038,7 @@
             display:block; width:44px; height:5px;
             border-radius:4px; background:#E2DDD8; margin:0;
         }
+        #ci-build-stamp { font-size:9px; font-weight:600; color:#D8D2C4; letter-spacing:0.06em; user-select:none; }
         .ci-close-btn {
             width:32px; height:32px; border-radius:50%; background:#F5F3F0;
             border:none; cursor:pointer; display:flex; align-items:center; justify-content:center;
@@ -3045,9 +3048,10 @@
         .ci-close-btn:active { transform:scale(0.86); }
         .ci-close-btn svg { pointer-events:none; }
 
-        /* Inner scrollable content — tylko pionowo (kroki przesuwają się w bok
-           podczas animacji, więc oś X musi być zablokowana i tu, i na overlayu) */
-        #ci-inner { padding:20px 24px 36px; flex:1; min-height:0; overflow-y:auto; overflow-x:clip; -webkit-overflow-scrolling:touch; scrollbar-width:none; touch-action:pan-y; overscroll-behavior:contain; }
+        /* Inner scrollable content — tylko pionowo; oś X zablokowana.
+           hidden PRZED clip = fallback dla starszych silników (clip wymaga
+           Chromium 90+; bez fallbacku oś X robiła się przewijalna na telefonie) */
+        #ci-inner { padding:20px 24px 36px; flex:1; min-height:0; overflow-y:auto; overflow-x:hidden; overflow-x:clip; -webkit-overflow-scrolling:touch; scrollbar-width:none; touch-action:pan-y; overscroll-behavior:contain; }
         #ci-inner::-webkit-scrollbar { display:none; }
 
         /* MODE TOGGLE */
@@ -3065,14 +3069,19 @@
         #checkin-overlay .progress-line-fill { position:absolute; left:0; top:0; bottom:0; background:var(--primary); width:0%; transition:width 0.36s cubic-bezier(0.4,0,0.2,1); border-radius:2px; }
 
         /* STEPS */
-        #checkin-overlay .steps-outer { display: grid; grid-template-columns: 1fr; align-items: start; position: relative; min-height: 0; transition: height 0.28s cubic-bezier(0.22, 1, 0.36, 1), min-height 0.28s cubic-bezier(0.22, 1, 0.36, 1); }
-        #checkin-overlay .step { grid-area: 1 / 1; opacity:0; transform:translate3d(20px,0,0); pointer-events:none; transition:opacity 0.3s cubic-bezier(0.22, 1, 0.36, 1), transform 0.3s cubic-bezier(0.22, 1, 0.36, 1); width: 100%; box-sizing: border-box; will-change: opacity, transform; backface-visibility: hidden; }
+        /* minmax(0,1fr) zamiast 1fr — goły 1fr ma minimum "auto" (min-content),
+           więc najszersza treść kroku (296px) rozpychała tor gridu ponad kontener
+           (278px) i CAŁA zawartość kroków wystawała 18px w prawo — wyśrodkowane
+           elementy wyglądały na przesunięte. To było źródło buga "na telefonie krzywo". */
+        #checkin-overlay .steps-outer { display: grid; grid-template-columns: minmax(0, 1fr); align-items: start; position: relative; min-height: 0; transition: height 0.28s cubic-bezier(0.22, 1, 0.36, 1), min-height 0.28s cubic-bezier(0.22, 1, 0.36, 1); }
+        /* Kroki animują się TYLKO w pionie (translateY) — żaden silnik,
+           nawet stary, nie może niczego przesunąć w bok */
+        #checkin-overlay .step { grid-area: 1 / 1; min-width: 0; opacity:0; transform:translate3d(0,12px,0); pointer-events:none; transition:opacity 0.3s cubic-bezier(0.22, 1, 0.36, 1), transform 0.3s cubic-bezier(0.22, 1, 0.36, 1); width: 100%; box-sizing: border-box; will-change: opacity, transform; backface-visibility: hidden; }
         /* !important = bezpiecznik: bije KAŻDY resztkowy inline styl z resetu
-           (opacity:0 / translateX(24px)), niezależnie od ścieżki aktywacji —
-           aktywny krok NIGDY nie może być przezroczysty ani zsunięty w prawo */
+           (opacity:0 / translateY(12px)), niezależnie od ścieżki aktywacji —
+           aktywny krok NIGDY nie może być przezroczysty ani przesunięty */
         #checkin-overlay .step.active { opacity:1 !important; transform:none !important; pointer-events:auto; z-index:10; }
-        #checkin-overlay .step.is-leaving { opacity:0; transform:translate3d(-16px,0,0); }
-        @keyframes ciStepIn { from { opacity:0; transform:translateX(15px); } to { opacity:1; transform:translateX(0); } }
+        #checkin-overlay .step.is-leaving { opacity:0; transform:translate3d(0,-8px,0); }
         #checkin-overlay .step-title { font-family:var(--font-d); font-weight:800; font-size:32px; color:var(--primary); line-height:1.1; margin-bottom:8px; letter-spacing:-0.025em; }
         #checkin-overlay .step-desc { font-size:15px; color:var(--text-muted); margin-bottom:28px; line-height:1.55; font-family:var(--font); }
 
@@ -3105,7 +3114,7 @@
 
         /* ENERGY SLIDER */
         #checkin-overlay .slider-wrap { margin-bottom:20px; touch-action: none; }
-        #checkin-overlay input[type=range] { -webkit-appearance:none; width:100%; height:12px; border-radius:8px; background:var(--border); outline:none; cursor:pointer; touch-action: none; }
+        #checkin-overlay input[type=range] { -webkit-appearance:none; width:100%; height:12px; margin:0; border-radius:8px; background:var(--border); outline:none; cursor:pointer; touch-action: none; }
         #checkin-overlay input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; width:30px; height:30px; border-radius:50%; background:var(--primary); cursor:pointer; border:4px solid #fff; box-shadow:0 4px 12px rgba(17,17,17,0.2); transition:transform 0.12s cubic-bezier(0.34,1.56,0.64,1); }
         #checkin-overlay input[type=range]:active::-webkit-slider-thumb { transform:scale(1.2); }
         #checkin-overlay .slider-big-val { font-family:var(--font-d); font-weight:800; font-size:64px; text-align:center; color:var(--primary); line-height:1; margin:24px 0 0; letter-spacing:-2px; }
@@ -7470,7 +7479,7 @@
 
             const modal = document.createElement('div');
             modal.id = 'paywall-modal';
-            modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:flex-end;justify-content:center;padding:16px;';
+            modal.style.cssText = 'position:fixed;top:0;right:0;bottom:0;left:0;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:flex-end;justify-content:center;padding:16px;';
             modal.innerHTML = '<div style="background:#FFFFFF;border-radius:20px;padding:24px 20px calc(24px + env(safe-area-inset-bottom));width:100%;max-width:480px;">' +
                 '<div style="font-family:Outfit,sans-serif;font-size:22px;font-weight:800;color:#1A1A1A;letter-spacing:-0.02em;margin-bottom:6px;">velm Premium</div>' +
                 '<div style="font-size:14px;color:#8A8A8A;line-height:1.45;margin-bottom:20px;">' + (message ? _escHtml(message) : 'Pełny sztab AI, narady tygodniowe i raporty — bez limitów.') + '</div>' +
@@ -7520,7 +7529,7 @@
 
             const modal = document.createElement('div');
             modal.id = 'survey-modal';
-            modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:flex-end;justify-content:center;padding:16px;';
+            modal.style.cssText = 'position:fixed;top:0;right:0;bottom:0;left:0;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:flex-end;justify-content:center;padding:16px;';
             modal.innerHTML = '<div style="background:#FFFFFF;border-radius:20px;padding:24px 20px calc(24px + env(safe-area-inset-bottom));width:100%;max-width:480px;max-height:85vh;overflow-y:auto;">' +
                 '<div style="font-family:Outfit,sans-serif;font-size:22px;font-weight:800;color:#1A1A1A;letter-spacing:-0.02em;margin-bottom:4px;">Szybka ankieta</div>' +
                 '<div style="font-size:13px;color:#8A8A8A;margin-bottom:20px;">1 minuta · odblokowuje 5 darmowych wiadomości</div>' +
@@ -9218,6 +9227,11 @@
             : 'https://velm-backend-production.up.railway.app';
         window.API_BASE = API_BASE;
 
+        // Stempel buildu — dowód na urządzeniu, że działa świeży kod (trzymać
+        // w zgodzie z CACHE_VERSION w sw.js; bump przy każdym deployu frontendu)
+        const VELM_BUILD = 'v6';
+        console.log('velm build', VELM_BUILD, navigator.userAgent);
+
         async function hardReloadApp() {
             try {
                 if ('serviceWorker' in navigator) {
@@ -9312,7 +9326,7 @@
             if (existing) existing.remove();
             const modal = document.createElement('div');
             modal.id = 'pwd-reset-modal';
-            modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:99999;display:flex;align-items:center;justify-content:center;padding:24px;font-family:Inter,sans-serif;';
+            modal.style.cssText = 'position:fixed;top:0;right:0;bottom:0;left:0;background:rgba(0,0,0,0.55);z-index:99999;display:flex;align-items:center;justify-content:center;padding:24px;font-family:Inter,sans-serif;';
             modal.innerHTML = `
                 <div style="background:#fff;border-radius:20px;padding:32px 26px;max-width:380px;width:100%;box-shadow:0 8px 40px rgba(0,0,0,0.18);">
                   <h2 style="margin:0 0 8px 0;font-size:20px;font-weight:700;color:#1A1A1A;">Ustaw nowe hasło</h2>
@@ -9927,7 +9941,7 @@
                 s.classList.remove('active');
                 s.classList.remove('is-leaving');
                 s.style.opacity = '0';
-                s.style.transform = 'translateX(24px)';
+                s.style.transform = 'translateY(12px)';
                 s.style.animation = '';
             });
             // Activate first step
@@ -9940,7 +9954,6 @@
 
             // Reset all next buttons in overlay
             document.querySelectorAll('#checkin-overlay .btn-next:not(.done-btn)').forEach(b => b.classList.remove('visible'));
-            document.querySelectorAll('#checkin-overlay .btn-next.visible:not(.done-btn)').forEach(b => b.classList.add('visible'));
             // M0 sleep hours and M2 energy are always visible (no selection required / slider always has a value)
             const m0btn = document.querySelector('#step-morning-0 .btn-next');
             if (m0btn) m0btn.classList.add('visible');
@@ -9984,13 +9997,37 @@
             // Wyzeruj ewentualne zapamiętane poziome przesunięcie kontenera
             // (overflow-x:hidden nie resetuje scrollLeft — treść wyglądała na przesuniętą)
             const innerEl = document.getElementById('ci-inner');
-            if (innerEl) { innerEl.scrollLeft = 0; innerEl.scrollTop = 0; }
+            if (innerEl) {
+                innerEl.scrollLeft = 0; innerEl.scrollTop = 0;
+                // Pin osi X: gdyby silnik mimo wszystko przewinął kontener w bok
+                // (focus inputu, scroll-chaining z pickerów) — natychmiast wracamy na 0
+                if (!innerEl._xPinned) {
+                    innerEl._xPinned = true;
+                    innerEl.addEventListener('scroll', () => { if (innerEl.scrollLeft) innerEl.scrollLeft = 0; }, { passive: true });
+                }
+            }
+            // Stempel wersji + tryb debug (?debug=1 albo localStorage.velm_debug='1')
+            const stampEl = document.getElementById('ci-build-stamp');
+            if (stampEl) stampEl.textContent = VELM_BUILD;
+            if (location.search.indexOf('debug=1') !== -1 || localStorage.getItem('velm_debug') === '1') {
+                let dbg = document.getElementById('ci-debug-info');
+                if (!dbg && innerEl) {
+                    dbg = document.createElement('div');
+                    dbg.id = 'ci-debug-info';
+                    dbg.style.cssText = 'font-size:9px;line-height:1.4;color:#8A8A8A;word-break:break-all;margin:0 0 10px;';
+                    innerEl.insertBefore(dbg, innerEl.firstChild);
+                }
+                if (dbg) {
+                    const sup = (p, v) => (window.CSS && CSS.supports && CSS.supports(p, v)) ? 'TAK' : 'NIE';
+                    dbg.textContent = VELM_BUILD + ' · clip:' + sup('overflow-x', 'clip') + ' · inset:' + sup('inset', '0') + ' · ' + navigator.userAgent;
+                }
+            }
+            // Wyczyść inline'y po animacji zamknięcia — wejście karty robi w całości
+            // CSS-owe ciEntrance (restartuje się samo przy display:none→flex)
+            card.style.opacity = '';
+            card.style.transition = '';
+            card.style.transform = '';
             ov.style.display = 'flex';
-            card.style.opacity = '0';
-            card.style.transition = 'none';
-            // UWAGA: bez translateX(-50%)! Kartę centruje flexbox overlaya —
-            // ten transform przesuwał ją w bok, gdy animacja CSS go nie maskowała
-            card.style.transform = 'translateY(72px)';
             document.body.style.overflow = 'hidden';
 
             // Init dynamic pickers
@@ -10001,15 +10038,8 @@
                 updateStepsHeight();
             });
 
-            // Animate card in
+            // Fade-in overlaya (karta wjeżdża CSS-owym ciEntrance — jedyna animacja karty)
             ov.style.animation = 'ciOverlayIn 300ms ease forwards';
-            requestAnimationFrame(() => {
-                requestAnimationFrame(() => {
-                    card.style.transition = 'transform 400ms cubic-bezier(0.34,1.56,0.64,1), opacity 220ms ease';
-                    card.style.transform  = 'translateY(0)';
-                    card.style.opacity    = '1';
-                });
-            });
         }
 
         function closeCheckin() {
@@ -10160,7 +10190,7 @@
 
             toEl.classList.remove('is-leaving');
             requestAnimationFrame(() => {
-                // Wyczyść resztkowe inline style z resetu w openCheckin (opacity:0 / translateX(24px)),
+                // Wyczyść resztkowe inline style z resetu w openCheckin (opacity:0 / translateY(12px)),
                 // żeby CSS .step.active (opacity:1) mógł zadziałać — inline zawsze wygrywa nad arkuszem
                 toEl.style.opacity = '';
                 toEl.style.transform = '';
@@ -10919,6 +10949,7 @@
         <!-- STICKY HEADER: drag handle + close button -->
         <div class="ci-header-bar">
             <span id="ci-handle"></span>
+            <span id="ci-build-stamp" aria-hidden="true"></span>
             <button class="ci-close-btn" onclick="closeCheckin()" aria-label="Zamknij">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                     <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
