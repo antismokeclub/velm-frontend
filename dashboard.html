@@ -2999,9 +2999,12 @@
         }
 
         #checkin-overlay {
+            /* Jedna paleta dla całego check-inu: ciepłe szarości (zero niebieskich),
+               fonty jak w całej apce — Inter na tekst, Outfit na tytuły/liczby */
             --bg:#F8F5EE; --surface:#FDFBF7; --border:#D8D2C4; --primary:#111111;
-            --text-muted:#5C6B85; --text-light:#8A97AD; --strava:#FC4C02;
-            font-family:'DM Sans',sans-serif; color:#111111; -webkit-font-smoothing:antialiased;
+            --text-muted:#75716A; --text-light:#A8A399;
+            --font:'Inter',sans-serif; --font-d:'Outfit',sans-serif;
+            font-family:var(--font); color:#111111; -webkit-font-smoothing:antialiased;
             position:fixed; top:0;right:0;bottom:0;left:0; z-index:9500; display:flex; align-items:center; justify-content:center;
             background: rgba(248, 245, 238, 0.4);
             backdrop-filter: blur(16px) saturate(180%);
@@ -3031,20 +3034,20 @@
         .ci-header-bar {
             display:flex; align-items:center; justify-content:space-between;
             padding:16px 20px 0; flex-shrink:0;
-            position:sticky; top:0; background:#fff; z-index:10;
+            position:sticky; top:0; background:var(--surface); z-index:10;
             border-radius:24px 24px 0 0;
         }
         #ci-handle {
             display:block; width:44px; height:5px;
-            border-radius:4px; background:#E2DDD8; margin:0;
+            border-radius:4px; background:var(--border); margin:0;
         }
-        #ci-build-stamp { font-size:9px; font-weight:600; color:#D8D2C4; letter-spacing:0.06em; user-select:none; }
+        #ci-build-stamp { font-size:9px; font-weight:600; color:var(--border); letter-spacing:0.06em; user-select:none; }
         .ci-close-btn {
-            width:32px; height:32px; border-radius:50%; background:#F5F3F0;
-            border:none; cursor:pointer; display:flex; align-items:center; justify-content:center;
-            color:#8A8A8A; transition:background 0.15s,color 0.15s,transform 0.12s; flex-shrink:0;
+            width:32px; height:32px; border-radius:50%; background:var(--bg, #F5F3F0);
+            border:none; cursor:pointer; touch-action:manipulation; display:flex; align-items:center; justify-content:center;
+            color:var(--text-muted, #8A8A8A); transition:background 0.15s,color 0.15s,transform 0.12s; flex-shrink:0;
         }
-        .ci-close-btn:hover { background:#EBEBEB; color:#1A1A1A; }
+        .ci-close-btn:hover { background:var(--border, #EBEBEB); color:var(--primary, #1A1A1A); }
         .ci-close-btn:active { transform:scale(0.86); }
         .ci-close-btn svg { pointer-events:none; }
 
@@ -3062,7 +3065,7 @@
 
         /* PROGRESS BAR */
         #checkin-overlay .progress-bar { display:flex; align-items:center; margin-bottom:28px; gap:0; }
-        #checkin-overlay .progress-dot { width:8px; height:8px; border-radius:50%; border:1.5px solid var(--border); background:transparent; flex-shrink:0; transition:all 0.32s cubic-bezier(0.34,1.56,0.64,1); position:relative; z-index:1; }
+        #checkin-overlay .progress-dot { width:8px; height:8px; border-radius:50%; border:1.5px solid var(--border); background:transparent; flex-shrink:0; transition:width 0.32s cubic-bezier(0.34,1.56,0.64,1), height 0.32s cubic-bezier(0.34,1.56,0.64,1), border-color 0.32s ease, background-color 0.32s ease, box-shadow 0.32s ease; position:relative; z-index:1; }
         #checkin-overlay .progress-dot.done { border-color:var(--primary); background:var(--primary); }
         #checkin-overlay .progress-dot.active { width:10px; height:10px; border-color:var(--primary); background:var(--primary); box-shadow:0 0 0 5px rgba(17,17,17,0.06); }
         #checkin-overlay .progress-line { flex:1; height:2px; background:var(--border); position:relative; overflow:hidden; border-radius:2px; }
@@ -3088,26 +3091,14 @@
         /* SLEEP CARDS — 2 równe rzędy pełnej szerokości: 3 karty + 2 karty
            (siatka 6 kolumn: rząd 1 po span 2, rząd 2 po span 3 — zero wcięcia) */
         #checkin-overlay .sleep-cards { display:grid; grid-template-columns:repeat(6, minmax(0, 1fr)); gap:8px; margin-bottom:8px; align-items:stretch; }
-        #checkin-overlay .sleep-card { grid-column:span 2; height:auto; min-height:86px; display:flex; flex-direction:column; align-items:center; justify-content:center; border-radius:16px; border:1.5px solid var(--border); background:var(--surface); gap:8px; cursor:pointer; transition:all 0.22s cubic-bezier(0.34,1.56,0.64,1); box-shadow:0 2px 8px rgba(0,0,0,0.03); padding:12px 4px 10px; }
+        #checkin-overlay .sleep-card { grid-column:span 2; height:auto; min-height:86px; display:flex; flex-direction:column; align-items:center; justify-content:center; border-radius:16px; border:1.5px solid var(--border); background:var(--surface); gap:8px; cursor:pointer; touch-action:manipulation; transition:transform 0.22s cubic-bezier(0.34,1.56,0.64,1), border-color 0.22s ease, box-shadow 0.22s ease; box-shadow:0 2px 8px rgba(0,0,0,0.03); padding:12px 4px 10px; }
         #checkin-overlay .sleep-card:nth-child(4),
         #checkin-overlay .sleep-card:nth-child(5) { grid-column:span 3; }
         #checkin-overlay .sleep-card:active { transform:scale(0.94); }
         #checkin-overlay .sleep-card.selected { border-color:var(--primary); transform:scale(1.05); box-shadow:0 8px 24px rgba(17,17,17,0.1), 0 0 0 1px var(--primary); }
-        #checkin-overlay .sleep-ico { width:100%; height:26px; display:flex; align-items:center; justify-content:center; color:var(--primary); transition:all 0.3s cubic-bezier(0.34,1.56,0.64,1); flex-shrink:0; }
+        #checkin-overlay .sleep-ico { width:100%; height:26px; display:flex; align-items:center; justify-content:center; color:var(--primary); transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1); flex-shrink:0; }
         #checkin-overlay .sleep-card.selected .sleep-ico { transform: scale(1.12); }
         #checkin-overlay .sleep-card .label { font-size:10px; font-weight:700; text-align:center; color:var(--primary); line-height:1; letter-spacing:0.01em; font-family:var(--font); }
-        /* SLEEP HOURS PILLS — big card style for step-morning-0 */
-        #checkin-overlay .sleep-hours-row { display:flex; gap:8px; margin:4px 0 8px; }
-        #checkin-overlay .sleep-hours-pill { flex:1; min-width:0; padding:14px 4px 10px; border-radius:18px; border:1.5px solid var(--border); background:var(--surface); cursor:pointer; transition:all 0.22s cubic-bezier(0.34,1.56,0.64,1); display:flex; flex-direction:column; align-items:center; gap:4px; font-family:var(--font); box-shadow:0 2px 6px rgba(0,0,0,0.03); }
-        #checkin-overlay .sleep-hours-pill:active { transform:scale(0.93); }
-        #checkin-overlay .sleep-hours-pill.optimal { border-color:#6B8F71; }
-        #checkin-overlay .sleep-hours-pill.selected { background:var(--primary); border-color:var(--primary); transform:scale(1.04); box-shadow:0 6px 20px rgba(26,26,26,0.1); }
-        #checkin-overlay .sleep-hours-pill.optimal.selected { background:#4A6B50; border-color:#4A6B50; }
-        #checkin-overlay .shp-val { font-family:'Outfit',sans-serif; font-weight:800; font-size:20px; color:var(--primary); line-height:1.1; transition:color 0.18s; }
-        #checkin-overlay .shp-label { font-size:10px; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.04em; transition:color 0.18s; line-height:1; }
-        #checkin-overlay .sleep-hours-pill.optimal .shp-label { color:#6B8F71; }
-        #checkin-overlay .sleep-hours-pill.selected .shp-val,
-        #checkin-overlay .sleep-hours-pill.selected .shp-label { color:#fff; }
         /* Sleep recommendation banner */
         #checkin-overlay .sleep-rec-box { display:flex; align-items:center; gap:9px; padding:11px 16px; background:#EDF5EE; border-radius:14px; font-size:13px; color:#4A6B50; margin:4px 0 20px; line-height:1.5; }
         #checkin-overlay .sleep-rec-box strong { font-weight:700; color:#3A5B40; }
@@ -3117,10 +3108,8 @@
         #checkin-overlay input[type=range] { -webkit-appearance:none; width:100%; height:12px; margin:0; border-radius:8px; background:var(--border); outline:none; cursor:pointer; touch-action: none; }
         #checkin-overlay input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; width:30px; height:30px; border-radius:50%; background:var(--primary); cursor:pointer; border:4px solid #fff; box-shadow:0 4px 12px rgba(17,17,17,0.2); transition:transform 0.12s cubic-bezier(0.34,1.56,0.64,1); }
         #checkin-overlay input[type=range]:active::-webkit-slider-thumb { transform:scale(1.2); }
-        #checkin-overlay .slider-big-val { font-family:var(--font-d); font-weight:800; font-size:64px; text-align:center; color:var(--primary); line-height:1; margin:24px 0 0; letter-spacing:-2px; }
+        #checkin-overlay .slider-big-val { font-family:var(--font-d); font-weight:800; font-size:64px; text-align:center; color:var(--primary); line-height:1; margin:24px 0 0; letter-spacing:-2px; font-variant-numeric:tabular-nums; }
         #checkin-overlay .slider-desc { text-align:center; font-size:14px; color:var(--text-muted); min-height:24px; margin-top:10px; transition:opacity 0.2s ease; line-height:1.5; font-family:var(--font); }
-
-        /* PLAN REFERENCE — do czego user porównuje (dystans/czas/tempo z planu) */
 
         /* RPE — wyśrodkowany blok + skala pod suwakiem, żeby wypełniał krok */
         #checkin-overlay .rpe-block { display:flex; flex-direction:column; justify-content:center; padding:8px 0 4px; }
@@ -3138,63 +3127,42 @@
 
         /* READINESS BUTTONS */
         #checkin-overlay .readiness-btns { display:flex; flex-direction:column; gap:12px; }
-        #checkin-overlay .readiness-btn { width:100%; min-height:64px; border-radius:20px; font-size:15px; font-weight:600; font-family:'Inter',sans-serif; cursor:pointer; transition:all 0.22s cubic-bezier(0.34,1.56,0.64,1); border:2px solid transparent; background:#FFFFFF; color:var(--primary); display:flex; align-items:center; gap:14px; padding:0 20px; text-align:left; box-shadow:0 0 0 1px #EBEBEB, 0 2px 8px rgba(0,0,0,0.03); }
-        #checkin-overlay .readiness-btn:hover { transform:translateY(-1px); box-shadow:0 0 0 1px #DCDCDC, 0 6px 16px rgba(0,0,0,0.05); }
+        #checkin-overlay .readiness-btn { width:100%; min-height:64px; border-radius:20px; font-size:15px; font-weight:600; font-family:var(--font); cursor:pointer; touch-action:manipulation; transition:transform 0.22s cubic-bezier(0.34,1.56,0.64,1), background-color 0.22s ease, box-shadow 0.22s ease; border:2px solid transparent; background:#FFFFFF; color:var(--primary); display:flex; align-items:center; gap:14px; padding:0 20px; text-align:left; box-shadow:0 0 0 1px var(--border), 0 2px 8px rgba(0,0,0,0.03); }
+        #checkin-overlay .readiness-btn:hover { transform:translateY(-1px); box-shadow:0 0 0 1px var(--border), 0 6px 16px rgba(0,0,0,0.05); }
         #checkin-overlay .readiness-btn:active { transform:scale(0.98); }
-        #checkin-overlay .readiness-btn .rd-ico { width:20px; height:20px; flex-shrink:0; display:block; transition: all 0.3s ease; }
+        #checkin-overlay .readiness-btn .rd-ico { width:20px; height:20px; flex-shrink:0; display:block; transition:transform 0.3s ease, filter 0.3s ease; }
         #checkin-overlay .readiness-btn.selected .rd-ico { transform: scale(1.15); filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1)); }
         #checkin-overlay .readiness-btn .rd-dot { width:12px; height:12px; border-radius:50%; flex-shrink:0; display:block; }
-        #checkin-overlay .readiness-btn.selected { background:#F5F3F0; box-shadow:0 8px 24px rgba(26,26,26,0.08), 0 0 0 1.5px var(--primary); }
+        #checkin-overlay .readiness-btn.selected { background:var(--bg); box-shadow:0 8px 24px rgba(26,26,26,0.08), 0 0 0 1.5px var(--primary); }
         #checkin-overlay .readiness-btn .rd-arrow { margin-left:auto; flex-shrink:0; color:var(--text-light); transition:color 0.18s,transform 0.18s; }
         #checkin-overlay .readiness-btn.selected .rd-arrow { color:var(--primary); transform:translateX(3px); }
         /* Legacy unicode arrow fallback */
         #checkin-overlay .readiness-btn:not(:has(.rd-arrow))::after { content:'→'; margin-left:auto; font-size:18px; color:var(--text-light); transition:color 0.18s,transform 0.18s; }
         #checkin-overlay .readiness-btn:not(:has(.rd-arrow)).selected::after { color:var(--primary); transform:translateX(3px); }
 
-        /* STRAVA */
-        #checkin-overlay .strava-content { text-align:center; margin-bottom:16px; }
-        #checkin-overlay .strava-logo { width:64px; height:64px; border-radius:50%; background:linear-gradient(135deg, #FC4C02 0%, #E8430A 100%); display:flex; align-items:center; justify-content:center; margin:0 auto 16px; font-family:'Outfit',sans-serif; font-weight:800; font-size:30px; color:#fff; box-shadow:0 10px 28px rgba(252,76,2,0.28), 0 0 0 1px rgba(232,67,10,0.1); }
-        #checkin-overlay .strava-name { font-family:'Outfit',sans-serif; font-weight:700; font-size:22px; margin-bottom:4px; letter-spacing:-0.01em; }
-        #checkin-overlay .strava-sub { font-size:14px; color:var(--text-muted); max-width:280px; margin:8px auto 24px; line-height:1.6; }
-        #checkin-overlay .strava-btn { width:100%; height:56px; background:linear-gradient(180deg, #FC4C02 0%, #E8430A 100%); color:#fff; border:none; border-radius:18px; font-size:15px; font-weight:700; font-family:'Inter',sans-serif; cursor:pointer; transition:transform 0.08s,filter 0.18s,box-shadow 0.18s; box-shadow:0 8px 24px rgba(252,76,2,0.28); letter-spacing:0.01em; }
-        #checkin-overlay .strava-btn:hover { filter:brightness(1.05); box-shadow:0 12px 32px rgba(252,76,2,0.32); }
-        #checkin-overlay .strava-btn:active { transform:scale(0.98); filter:brightness(0.92); }
-        #checkin-overlay .skip-link { display:block; text-align:center; font-size:13px; color:var(--text-light); margin-top:16px; cursor:pointer; transition:color 0.15s; }
-        #checkin-overlay .skip-link:hover { color:var(--primary); }
-
-        /* DURATION COUNTER */
-        #checkin-overlay .duration-counter { display:flex; align-items:center; justify-content:center; gap:24px; margin:24px 0 12px; }
-        #checkin-overlay .counter-btn { width:60px; height:60px; border-radius:50%; background:#FFFFFF; border:none; font-size:28px; color:var(--primary); cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all 0.18s cubic-bezier(0.34,1.56,0.64,1); font-family:'Inter',sans-serif; line-height:1; box-shadow:0 4px 16px rgba(0,0,0,0.06), inset 0 0 0 1px #EBEBEB; }
-        #checkin-overlay .counter-btn:hover { transform:translateY(-1px); box-shadow:0 6px 20px rgba(0,0,0,0.08), inset 0 0 0 1px #DCDCDC; }
-        #checkin-overlay .counter-btn:active { transform:scale(0.88); background:#F5F3F0; box-shadow:0 1px 4px rgba(0,0,0,0.06); }
-        #checkin-overlay .duration-val { font-family:'Outfit',sans-serif; font-weight:800; font-size:54px; color:var(--primary); line-height:1; min-width:160px; text-align:center; letter-spacing:-2px; }
-        #checkin-overlay .pace-input { width:100%; padding:20px 20px; font-family:'Outfit',sans-serif; font-weight:700; font-size:32px; text-align:center; letter-spacing:-0.5px; color:var(--primary); background:#fff; border:1.5px solid var(--border); border-radius:18px; outline:none; margin:16px 0 8px; box-sizing:border-box; transition:border-color 0.18s,box-shadow 0.18s; }
+        /* COUNTER (używany w gałęzi "ile km faktycznie") */
+        #checkin-overlay .counter-btn { width:60px; height:60px; border-radius:50%; background:#FFFFFF; border:none; font-size:28px; color:var(--primary); cursor:pointer; touch-action:manipulation; display:flex; align-items:center; justify-content:center; transition:transform 0.18s cubic-bezier(0.34,1.56,0.64,1), background-color 0.18s ease, box-shadow 0.18s ease; font-family:var(--font); line-height:1; box-shadow:0 4px 16px rgba(0,0,0,0.06), inset 0 0 0 1px var(--border); }
+        #checkin-overlay .counter-btn:hover { transform:translateY(-1px); box-shadow:0 6px 20px rgba(0,0,0,0.08), inset 0 0 0 1px var(--border); }
+        #checkin-overlay .counter-btn:active { transform:scale(0.88); background:var(--bg); box-shadow:0 1px 4px rgba(0,0,0,0.06); }
+        #checkin-overlay .pace-input { width:100%; padding:20px 20px; font-family:var(--font-d); font-weight:700; font-size:32px; text-align:center; letter-spacing:-0.5px; color:var(--primary); background:#fff; border:1.5px solid var(--border); border-radius:18px; outline:none; margin:16px 0 8px; box-sizing:border-box; transition:border-color 0.18s,box-shadow 0.18s; font-variant-numeric:tabular-nums; }
         #checkin-overlay .pace-input:focus { border-color:var(--primary); box-shadow:0 0 0 4px rgba(26,26,26,0.06); }
         #checkin-overlay .hint { text-align:center; font-size:13px; color:var(--text-muted); margin-bottom:8px; line-height:1.5; }
-        #checkin-overlay .counter-row { display:flex; align-items:center; justify-content:center; gap:24px; margin:24px 0 12px; }
-        #checkin-overlay .duration-row { display:flex; align-items:center; justify-content:center; gap:10px; margin:24px 0 16px; flex-wrap:nowrap; }
-        #checkin-overlay .duration-input-wrap { display:flex; align-items:baseline; gap:6px; }
-        #checkin-overlay .duration-number { width:72px; text-align:center; font-family:'Outfit',sans-serif; font-weight:800; font-size:48px; color:var(--primary); border:none; background:transparent; outline:none; letter-spacing:-2px; -moz-appearance:textfield; }
-        #checkin-overlay .duration-number::-webkit-outer-spin-button, #checkin-overlay .duration-number::-webkit-inner-spin-button { -webkit-appearance:none; margin:0; }
-        #checkin-overlay .duration-unit { font-size:18px; font-weight:600; color:var(--text-muted); }
-        #checkin-overlay .counter-btn-small { width:40px; height:40px; border-radius:12px; border:1.5px solid #E5E5E5; background:#FFFFFF; font-size:13px; font-weight:700; color:#6B6B6B; font-family:'Inter',sans-serif; cursor:pointer; transition:all 0.15s ease; display:flex; align-items:center; justify-content:center; }
-        #checkin-overlay .counter-btn-small:active { background:#F5F3F0; transform:scale(0.9); }
         /* ── CI Drum Picker ── */
         #checkin-overlay .ci-pk-row { display:flex; justify-content:center; align-items:flex-start; gap:6px; margin:14px 0 8px; }
         #checkin-overlay .ci-pk-field { display:flex; flex-direction:column; align-items:center; gap:4px; }
         #checkin-overlay .ci-pk-label { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.07em; color:var(--text-muted); line-height:1; }
-        #checkin-overlay .ci-pk-wrap { position:relative; width:72px; height:200px; border-radius:18px; overflow:hidden; background:#F7F6F4; }
+        #checkin-overlay .ci-pk-wrap { position:relative; width:72px; height:200px; border-radius:18px; overflow:hidden; background:var(--bg); }
         #checkin-overlay .ci-pk-highlight { position:absolute; top:50%; transform:translateY(-50%); left:4px; right:4px; height:52px; background:rgba(26,26,26,.08); border-radius:10px; pointer-events:none; z-index:2; }
         #checkin-overlay .ci-pk-col { height:100%; overflow-y:scroll; scroll-snap-type:y mandatory; -webkit-overflow-scrolling:touch; scrollbar-width:none; touch-action:pan-y; overscroll-behavior:contain; -webkit-mask-image:linear-gradient(to bottom,transparent 0%,black 25%,black 75%,transparent 100%); mask-image:linear-gradient(to bottom,transparent 0%,black 25%,black 75%,transparent 100%); }
         #checkin-overlay .ci-pk-col::-webkit-scrollbar { display:none; }
-        #checkin-overlay .ci-pk-item { height:52px; display:flex; align-items:center; justify-content:center; font-family:'Outfit',sans-serif; font-weight:700; font-size:14px; color:var(--primary); scroll-snap-align:center; transition:font-size .1s,opacity .1s; opacity:.1; }
+        #checkin-overlay .ci-pk-item { height:52px; display:flex; align-items:center; justify-content:center; font-family:var(--font-d); font-weight:700; font-size:14px; color:var(--primary); scroll-snap-align:center; transition:font-size .1s,opacity .1s; opacity:.1; font-variant-numeric:tabular-nums; }
         /* Paddingi NIE są punktami zaczepienia — nie da się zatrzymać na pustym poza zakresem */
         #checkin-overlay .ci-pk-item[data-pad] { scroll-snap-align:none; pointer-events:none; }
         #checkin-overlay .ci-pk-item.sel { font-size:30px; font-weight:800; opacity:1; }
         #checkin-overlay .ci-pk-item.near1 { font-size:22px; opacity:.5; }
         #checkin-overlay .ci-pk-item.near2 { font-size:17px; opacity:.25; }
         #checkin-overlay .ci-pk-item.far { font-size:14px; opacity:.1; }
-        #checkin-overlay .ci-pk-sep { font-family:'Outfit',sans-serif; font-weight:800; font-size:30px; color:var(--primary); opacity:.3; line-height:1; flex-shrink:0; align-self:center; margin-top:10px; }
+        #checkin-overlay .ci-pk-sep { font-family:var(--font-d); font-weight:800; font-size:30px; color:var(--primary); opacity:.3; line-height:1; flex-shrink:0; align-self:center; margin-top:10px; }
         /* Karta "Plan na dziś" pod pickerem czasu — 2-3 statystyki z separatorem */
         #checkin-overlay .ci-plan-card { margin:18px 0 4px; background:var(--bg); border:1px solid var(--border); border-radius:18px; padding:13px 14px 11px; }
         #checkin-overlay .ci-plan-card .cpc-head { display:flex; align-items:center; justify-content:center; gap:7px; font-size:10px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-muted); margin-bottom:10px; }
@@ -3202,99 +3170,67 @@
         #checkin-overlay .ci-plan-card .cpc-row { display:flex; align-items:stretch; }
         #checkin-overlay .ci-plan-card .cpc-item { flex:1; min-width:0; text-align:center; padding:0 6px; }
         #checkin-overlay .ci-plan-card .cpc-item + .cpc-item { border-left:1px solid var(--border); }
-        #checkin-overlay .ci-plan-card .cpc-val { font-family:var(--font-d); font-size:18px; font-weight:800; color:var(--primary); line-height:1.15; white-space:nowrap; }
+        #checkin-overlay .ci-plan-card .cpc-val { font-family:var(--font-d); font-size:18px; font-weight:800; color:var(--primary); line-height:1.15; white-space:nowrap; font-variant-numeric:tabular-nums; }
         #checkin-overlay .ci-plan-card .cpc-val small { font-size:11px; font-weight:700; color:var(--text-muted); margin-left:2px; }
         #checkin-overlay .ci-plan-card .cpc-lbl { font-size:9px; font-weight:700; letter-spacing:0.07em; text-transform:uppercase; color:var(--text-light); margin-top:3px; }
         #checkin-overlay .completion-grid { display:flex; flex-direction:column; gap:12px; margin:16px 0 8px; }
-        #checkin-overlay .completion-btn { display:flex; align-items:center; gap:14px; padding:16px 20px; background:#FFFFFF; border:1.5px solid #EBEBEB; border-radius:18px; cursor:pointer; transition:all 0.22s cubic-bezier(0.34,1.56,0.64,1); text-align:left; font-family:'Inter',sans-serif; width:100%; }
+        #checkin-overlay .completion-btn { display:flex; align-items:center; gap:14px; padding:16px 20px; background:#FFFFFF; border:1.5px solid var(--border); border-radius:18px; cursor:pointer; touch-action:manipulation; transition:transform 0.22s cubic-bezier(0.34,1.56,0.64,1), border-color 0.22s ease, background-color 0.22s ease, box-shadow 0.22s ease; text-align:left; font-family:var(--font); width:100%; }
         #checkin-overlay .completion-btn:hover { transform:translateY(-1px); box-shadow:0 6px 16px rgba(0,0,0,0.05); }
         #checkin-overlay .completion-btn:active { transform:scale(0.98); }
         #checkin-overlay .completion-btn.selected { border-color:var(--primary); background:rgba(26,26,26,0.03); box-shadow:0 8px 20px rgba(26,26,26,0.06); }
-        #checkin-overlay .completion-icon { width:40px; height:40px; border-radius:50%; background:#F5F3F0; display:flex; align-items:center; justify-content:center; font-size:18px; font-weight:700; color:#6B6B6B; flex-shrink:0; transition:all 0.18s ease; }
-        #checkin-overlay .completion-btn[data-completion="exact"] .completion-icon { background:var(--accent-success-soft); color:var(--accent-success); }
-        #checkin-overlay .completion-btn[data-completion="more"] .completion-icon { background:var(--accent-heart-soft); color:var(--accent-heart); }
+        /* Akcenty tylko z ziemistej palety velm (zero SaaS-owej zieleni/czerwieni) */
+        #checkin-overlay .completion-icon { width:40px; height:40px; border-radius:50%; background:var(--bg); display:flex; align-items:center; justify-content:center; font-size:18px; font-weight:700; color:var(--text-muted); flex-shrink:0; transition:background-color 0.18s ease, color 0.18s ease; }
+        #checkin-overlay .completion-btn[data-completion="exact"] .completion-icon { background:rgba(107,143,113,0.14); color:#6B8F71; }
+        #checkin-overlay .completion-btn[data-completion="more"] .completion-icon { background:rgba(196,163,90,0.16); color:#C4A35A; }
         #checkin-overlay .completion-btn.selected .completion-icon { background:var(--primary); color:#FFFFFF; }
-        #checkin-overlay .completion-btn.selected[data-completion="exact"] .completion-icon { background:var(--accent-success); color:#FFFFFF; }
-        #checkin-overlay .completion-btn.selected[data-completion="more"] .completion-icon { background:var(--accent-heart); color:#FFFFFF; }
-        #checkin-overlay .completion-btn-label { font-size:15px; font-weight:600; color:#1A1A1A; margin-bottom:2px; }
-        #checkin-overlay .completion-btn-desc { font-size:12px; color:#8A8A8A; line-height:1.4; }
-        #checkin-overlay .skip-options { display:flex; flex-direction:column; gap:10px; margin:16px 0; }
-        #checkin-overlay .skip-btn { width:100%; padding:14px 20px; background:#FFFFFF; border:1.5px solid #EBEBEB; border-radius:14px; font-size:14px; font-weight:600; color:var(--primary); font-family:'Inter',sans-serif; cursor:pointer; text-align:left; transition:all 0.18s ease; }
-        #checkin-overlay .skip-btn:hover { border-color:#DCDCDC; }
-        #checkin-overlay .skip-btn:active { transform:scale(0.98); }
+        #checkin-overlay .completion-btn.selected[data-completion="exact"] .completion-icon { background:#6B8F71; color:#FFFFFF; }
+        #checkin-overlay .completion-btn.selected[data-completion="more"] .completion-icon { background:#C4A35A; color:#FFFFFF; }
+        #checkin-overlay .completion-btn-label { font-size:15px; font-weight:600; color:var(--primary); margin-bottom:2px; }
+        #checkin-overlay .completion-btn-desc { font-size:12px; color:var(--text-muted); line-height:1.4; }
 
         /* FEELING CHIPS */
-        #checkin-overlay .feeling-grid { display:flex; flex-wrap:wrap; gap:10px; margin:16px 0 20px; }
-        #checkin-overlay .feeling-grid { display:grid; grid-template-columns:repeat(3, 1fr); gap:10px; margin-bottom:20px; }
-        #checkin-overlay .feeling-chip { width:auto; padding:12px 8px; text-align:center; font-size:13px; font-weight:600; color:var(--primary); font-family:'Inter',sans-serif; cursor:pointer; transition:all 0.18s cubic-bezier(0.34,1.56,0.64,1); border:1.5px solid #EBEBEB; background:#FFFFFF; border-radius:99px; }
+        #checkin-overlay .feeling-grid { display:grid; grid-template-columns:repeat(3, 1fr); gap:10px; margin:16px 0 20px; }
+        #checkin-overlay .feeling-chip { width:auto; min-height:44px; padding:12px 8px; text-align:center; font-size:13px; font-weight:600; color:var(--primary); font-family:var(--font); cursor:pointer; touch-action:manipulation; transition:transform 0.18s cubic-bezier(0.34,1.56,0.64,1), background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease; border:1.5px solid var(--border); background:#FFFFFF; border-radius:99px; }
         #checkin-overlay .feeling-chip:active { transform:scale(0.93); }
         #checkin-overlay .feeling-chip.selected { background:var(--primary); border-color:var(--primary); color:#fff; }
-        /* DISTANCE PILLS */
-        #checkin-overlay .distance-pills-row { display:flex; gap:6px; flex-wrap:nowrap; margin:10px 0 12px; overflow-x:auto; -webkit-overflow-scrolling:touch; }
-        #checkin-overlay .distance-pill { flex:1; min-width:0; padding:10px 4px; border-radius:12px; border:1.5px solid var(--border); background:var(--surface); font-size:13px; font-weight:700; color:var(--primary); cursor:pointer; transition:all 0.18s cubic-bezier(0.34,1.56,0.64,1); font-family:var(--font); text-align:center; white-space:nowrap; }
-        #checkin-overlay .distance-pill:active { transform:scale(0.93); }
-        #checkin-overlay .distance-pill.selected { background:var(--primary); border-color:var(--primary); color:#fff; }
         /* POST0 TYPE SECTIONS */
         #checkin-overlay .post0-section { display:none; }
         #checkin-overlay .post0-section.active { display:block; }
-        #checkin-overlay .skip-btn.selected { background:#F5F3F0; border-color:var(--primary); }
         #checkin-overlay .morning-followup-opts { display:flex; flex-direction:column; gap:10px; margin:16px 0; }
-        #checkin-overlay .morning-fu-btn { width:100%; padding:16px 20px; background:#FFFFFF; border:1.5px solid #EBEBEB; border-radius:18px; font-size:15px; font-weight:600; color:var(--primary); font-family:'Inter',sans-serif; cursor:pointer; text-align:left; transition:all 0.22s cubic-bezier(0.34,1.56,0.64,1); }
-        #checkin-overlay .morning-fu-btn:hover { transform:translateY(-1px); border-color:#DCDCDC; box-shadow:0 4px 12px rgba(0,0,0,0.04); }
+        #checkin-overlay .morning-fu-btn { width:100%; padding:16px 20px; background:#FFFFFF; border:1.5px solid var(--border); border-radius:18px; font-size:15px; font-weight:600; color:var(--primary); font-family:var(--font); cursor:pointer; touch-action:manipulation; text-align:left; transition:transform 0.22s cubic-bezier(0.34,1.56,0.64,1), background-color 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease; }
+        #checkin-overlay .morning-fu-btn:hover { transform:translateY(-1px); box-shadow:0 4px 12px rgba(0,0,0,0.04); }
         #checkin-overlay .morning-fu-btn:active { transform:scale(0.98); }
         #checkin-overlay .morning-fu-btn.fu-multi-btn, #checkin-overlay .morning-fu-btn.fu-single-btn { display:flex; align-items:center; }
-        #checkin-overlay .morning-fu-btn.fu-multi-btn.selected, #checkin-overlay .morning-fu-btn.fu-single-btn.selected { background:#F5F3F0; border-color:var(--primary); }
-        #checkin-overlay .morning-fu-btn.selected { background:#F5F3F0; border-color:var(--primary); box-shadow:0 6px 18px rgba(26,26,26,0.06); }
+        #checkin-overlay .morning-fu-btn.selected { background:var(--bg); border-color:var(--primary); box-shadow:0 6px 18px rgba(26,26,26,0.06); }
         #checkin-overlay .soreness-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:16px 0; }
-        #checkin-overlay .soreness-chip { padding:14px 10px; background:#FFFFFF; border:1.5px solid #EBEBEB; border-radius:14px; font-size:13px; font-weight:600; color:var(--primary); font-family:'Inter',sans-serif; cursor:pointer; text-align:center; transition:all 0.18s ease; }
-        #checkin-overlay .soreness-chip:hover { border-color:#DCDCDC; }
+        #checkin-overlay .soreness-chip { min-height:44px; padding:14px 10px; background:#FFFFFF; border:1.5px solid var(--border); border-radius:14px; font-size:13px; font-weight:600; color:var(--primary); font-family:var(--font); cursor:pointer; touch-action:manipulation; text-align:center; transition:transform 0.18s ease, background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease; }
         #checkin-overlay .soreness-chip:active { transform:scale(0.96); }
-        #checkin-overlay .soreness-chip.selected { background:var(--accent-heart-soft); border-color:var(--accent-heart); color:var(--accent-heart); font-weight:600; }
+        #checkin-overlay .soreness-chip.selected { background:rgba(192,114,100,0.12); border-color:#C07264; color:#C07264; }
         #checkin-overlay .soreness-duration-opts { display:flex; flex-direction:column; gap:10px; margin:16px 0; }
-        #checkin-overlay .soreness-dur-btn { width:100%; padding:14px 20px; background:#FFFFFF; border:1.5px solid #EBEBEB; border-radius:14px; font-size:14px; font-weight:600; color:var(--primary); font-family:'Inter',sans-serif; cursor:pointer; text-align:left; transition:all 0.18s ease; }
-        #checkin-overlay .soreness-dur-btn:hover { border-color:#DCDCDC; }
+        #checkin-overlay .soreness-dur-btn { width:100%; min-height:44px; padding:14px 20px; background:#FFFFFF; border:1.5px solid var(--border); border-radius:14px; font-size:14px; font-weight:600; color:var(--primary); font-family:var(--font); cursor:pointer; touch-action:manipulation; text-align:left; transition:transform 0.18s ease, background-color 0.18s ease, border-color 0.18s ease; }
         #checkin-overlay .soreness-dur-btn:active { transform:scale(0.97); }
-        #checkin-overlay .soreness-dur-btn.selected { background:#F5F3F0; border-color:var(--primary); }
-        #checkin-overlay .soreness-warning { background:#FFF8F0; border:1.5px solid #FFCB8E; border-radius:12px; padding:14px 16px; font-size:13px; color:#7A4B00; line-height:1.5; margin:16px 0 0; display:none; }
+        #checkin-overlay .soreness-dur-btn.selected { background:var(--bg); border-color:var(--primary); }
+        #checkin-overlay .soreness-warning { background:rgba(196,163,90,0.10); border:1.5px solid rgba(196,163,90,0.55); border-radius:12px; padding:14px 16px; font-size:13px; color:#7A6434; line-height:1.5; margin:16px 0 0; display:none; }
         #checkin-overlay .soreness-warning.visible { display:block; }
 
-        /* RPE */
-        #checkin-overlay .rpe-row { display:grid; grid-template-columns:repeat(5,1fr); gap:8px; margin:16px 0; }
-        #checkin-overlay .rpe-circle { width:100%; min-height:60px; border-radius:16px; border:2px solid; display:flex; align-items:center; justify-content:center; font-size:18px; font-weight:700; cursor:pointer; transition:all 0.18s cubic-bezier(0.34,1.56,0.64,1); background:transparent; font-family:'Outfit',sans-serif; letter-spacing:-0.02em; }
-        #checkin-overlay .rpe-circle:active { transform:scale(0.88); }
-        #checkin-overlay .rpe-circle.selected { color:#fff; transform:scale(1.08); box-shadow:0 8px 24px rgba(0,0,0,0.18); }
-        #checkin-overlay .rpe-labels { display:flex; justify-content:space-between; margin:-4px 0 16px; padding:0 2px; }
-        #checkin-overlay .rpe-label-text { font-size:11px; color:var(--text-muted); font-weight:600; letter-spacing:0.05em; }
-        #checkin-overlay .rpe-desc { text-align:center; font-size:14px; color:var(--text-muted); min-height:24px; transition:opacity 0.2s; line-height:1.5; }
-
-        /* COMPLETION CARDS */
-        #checkin-overlay .completion-cards { display:flex; flex-direction:column; gap:12px; margin-bottom:8px; }
-        #checkin-overlay .completion-card { min-height:72px; border-radius:20px; border:2px solid transparent; background:#FFFFFF; display:flex; flex-direction:row; align-items:center; gap:16px; padding:18px 20px; cursor:pointer; transition:all 0.22s cubic-bezier(0.34,1.56,0.64,1); box-shadow:0 0 0 1px #EBEBEB, 0 2px 8px rgba(0,0,0,0.03); }
-        #checkin-overlay .completion-card:hover { transform:translateY(-1px); box-shadow:0 0 0 1px #DCDCDC, 0 6px 16px rgba(0,0,0,0.05); }
-        #checkin-overlay .completion-card:active { transform:scale(0.98); }
-        #checkin-overlay .completion-card.selected { background:#F5F3F0; box-shadow:0 8px 24px rgba(26,26,26,0.08), 0 0 0 1.5px var(--primary); }
-        #checkin-overlay .completion-dot { width:12px; height:12px; border-radius:50%; flex-shrink:0; }
-        #checkin-overlay .completion-label { font-size:15px; font-weight:600; color:var(--primary); line-height:1.3; }
-
-        /* FOLLOW-UP */
-        #checkin-overlay .followup-question { font-size:15px; font-weight:700; color:var(--primary); margin:24px 0 12px; font-family:'Outfit',sans-serif; letter-spacing:-0.01em; }
+        /* FOLLOW-UP (karty budowane z JS w gałęzi "mniej niż plan") */
+        #checkin-overlay .followup-question { font-size:15px; font-weight:700; color:var(--primary); margin:24px 0 12px; font-family:var(--font-d); letter-spacing:-0.01em; }
         #checkin-overlay .followup-question:first-child { margin-top:0; }
         #checkin-overlay .followup-cards { display:flex; flex-direction:column; gap:10px; margin-bottom:4px; }
-        #checkin-overlay .followup-card { background:#FFFFFF; border:2px solid transparent; border-radius:18px; padding:16px 20px; display:flex; align-items:center; gap:14px; cursor:pointer; transition:all 0.22s cubic-bezier(0.34,1.56,0.64,1); box-shadow:0 0 0 1px #EBEBEB, 0 1px 4px rgba(0,0,0,0.03); }
-        #checkin-overlay .followup-card:hover { transform:translateY(-1px); box-shadow:0 0 0 1px #DCDCDC, 0 4px 12px rgba(0,0,0,0.05); }
+        #checkin-overlay .followup-card { background:#FFFFFF; border:2px solid transparent; border-radius:18px; padding:16px 20px; display:flex; align-items:center; gap:14px; cursor:pointer; touch-action:manipulation; transition:transform 0.22s cubic-bezier(0.34,1.56,0.64,1), background-color 0.22s ease, box-shadow 0.22s ease; box-shadow:0 0 0 1px var(--border), 0 1px 4px rgba(0,0,0,0.03); }
+        #checkin-overlay .followup-card:hover { transform:translateY(-1px); box-shadow:0 0 0 1px var(--border), 0 4px 12px rgba(0,0,0,0.05); }
         #checkin-overlay .followup-card:active { transform:scale(0.98); }
-        #checkin-overlay .followup-card.selected { background:#F5F3F0; box-shadow:0 6px 18px rgba(26,26,26,0.07), 0 0 0 1.5px var(--primary); }
+        #checkin-overlay .followup-card.selected { background:var(--bg); box-shadow:0 6px 18px rgba(26,26,26,0.07), 0 0 0 1.5px var(--primary); }
         #checkin-overlay .fu-dot { width:12px; height:12px; border-radius:50%; display:block; flex-shrink:0; }
         #checkin-overlay .fu-label { font-size:15px; font-weight:500; color:var(--primary); }
-        #checkin-overlay .followup-hint { font-size:13px; color:var(--text-muted); text-align:center; margin:6px 0 0; line-height:1.5; }
         #checkin-overlay .fu-counter { display:flex; align-items:center; justify-content:center; gap:28px; margin:16px 0 4px; }
-        #checkin-overlay .fu-counter-val { font-family:'Outfit',sans-serif; font-size:40px; font-weight:800; min-width:120px; text-align:center; line-height:1; letter-spacing:-1px; }
+        #checkin-overlay .fu-counter-val { font-family:var(--font-d); font-size:40px; font-weight:800; min-width:120px; text-align:center; line-height:1; letter-spacing:-1px; font-variant-numeric:tabular-nums; }
         #checkin-overlay .fu-counter-wrap { overflow:hidden; transition:max-height 0.35s ease,opacity 0.25s ease; max-height:0; opacity:0; }
         #checkin-overlay .fu-counter-wrap.visible { max-height:180px; opacity:1; }
 
         /* NEXT BUTTON */
         #checkin-overlay .nav-area { margin-top:32px; }
-        #checkin-overlay .btn-next { width:100%; height:56px; background:#EBEBEB; color:#C4C4C4; border:none; border-radius:18px; font-size:16px; font-weight:700; font-family:'Inter',sans-serif; cursor:pointer; opacity:0; pointer-events:none; transition:opacity 0.22s ease,transform 0.1s ease,background 0.22s ease,color 0.22s ease,box-shadow 0.22s ease,filter 0.18s; letter-spacing:0.01em; }
+        #checkin-overlay .btn-next { width:100%; height:56px; background:var(--border); color:var(--text-light); border:none; border-radius:18px; font-size:16px; font-weight:700; font-family:var(--font); cursor:pointer; touch-action:manipulation; opacity:0; pointer-events:none; transition:opacity 0.22s ease,transform 0.1s ease,background 0.22s ease,color 0.22s ease,box-shadow 0.22s ease,filter 0.18s; letter-spacing:0.01em; }
         #checkin-overlay .btn-next.visible { opacity:1; pointer-events:auto; background:var(--primary); color:#fff; animation:ciFadeIn 0.22s ease forwards; box-shadow:0 10px 28px rgba(26,26,26,0.22); }
         #checkin-overlay .btn-next.visible:hover { filter:brightness(1.1); box-shadow:0 14px 36px rgba(26,26,26,0.28); }
         #checkin-overlay .btn-next.done-btn { background:#6B8F71; color:#fff; opacity:1; pointer-events:auto; box-shadow:0 10px 28px rgba(107,143,113,0.28); }
@@ -9232,7 +9168,7 @@
 
         // Stempel buildu — dowód na urządzeniu, że działa świeży kod (trzymać
         // w zgodzie z CACHE_VERSION w sw.js; bump przy każdym deployu frontendu)
-        const VELM_BUILD = 'v10';
+        const VELM_BUILD = 'v11';
         console.log('velm build', VELM_BUILD, navigator.userAgent);
 
         async function hardReloadApp() {
@@ -9864,13 +9800,9 @@
             durH = 0; durM = 45; durS = 0;
             workSegH = 0; workSegM = 0; workSegS = 0;
             feelings = new Set(); avgPaceVal = ''; intervalDistanceM = 400;
-            const durationInput = document.getElementById('durationInput');
-            if (durationInput) durationInput.value = 45;
             const _sleepPkEl = document.getElementById('ci-pk-sleep');
             if (_sleepPkEl) { _sleepPkEl.innerHTML = _buildCiSleepPicker(); }
-            document.querySelectorAll('#checkin-overlay .duration-display-val').forEach(el => el.textContent = '45');
             document.querySelectorAll('#checkin-overlay .completion-btn').forEach(b => b.classList.remove('selected'));
-            document.querySelectorAll('#checkin-overlay .skip-btn').forEach(b => b.classList.remove('selected'));
             document.querySelectorAll('#checkin-overlay .morning-fu-btn').forEach(b => b.classList.remove('selected'));
             document.getElementById('fuKmWrap')?.classList.remove('visible');
             // Fallback do dzisiejszego planu — poranny check-in otwiera się bez
@@ -9951,14 +9883,12 @@
             document.querySelectorAll('#checkin-overlay .sleep-card').forEach(c => { c.classList.remove('selected'); c.style.borderColor=''; });
             const _rpeS = document.getElementById('rpeSlider'); if (_rpeS) { _rpeS.value = 5; updateRpeSlider(); }
             document.querySelectorAll('#checkin-overlay .readiness-btn').forEach(b => { b.classList.remove('selected'); b.style.borderColor=''; });
-            document.querySelectorAll('#checkin-overlay .completion-card').forEach(c => { c.classList.remove('selected'); c.style.borderColor=''; });
             document.getElementById('next-morning-1')?.classList.remove('visible');
             document.getElementById('next-morning-3')?.classList.remove('visible');
             document.getElementById('next-morning-4')?.classList.remove('visible');
             document.getElementById('next-post-1')?.classList.remove('visible');
             document.getElementById('next-post-2')?.classList.remove('visible');
-            // Reset body recovery and sleep hours selections
-            document.querySelectorAll('#checkin-overlay .sleep-hours-pill').forEach(p => p.classList.remove('selected'));
+            // Reset body recovery selections
             document.querySelectorAll('#step-morning-3 .readiness-btn').forEach(b => { b.classList.remove('selected'); b.style.borderColor = ''; });
             // Reset feeling chips, distance pills, avg pace
             document.querySelectorAll('#checkin-overlay .feeling-chip').forEach(c => c.classList.remove('selected'));
@@ -10408,9 +10338,9 @@
             const sliderVal = document.getElementById('sliderVal');
             if (sliderVal) sliderVal.textContent = `${val}/10`;
             const pct = (val - 1) / 9 * 100;
-            const c = val <= 3 ? '#C07264' : val <= 5 ? '#C4A35A' : val <= 7 ? '#6B8F71' : '#22c55e';
-            slider.style.background = `linear-gradient(to right, ${c} ${pct}%, #EBEBEB ${pct}%)`;
-            const descs = {1:'Ledwo wstaję z łóżka',2:'Bardzo zmęczony, cia la ciężkie',3:'Wyraźnie zmęczony',4:'Trochę poniżej normy',5:'Przeciętnie — jako tako',6:'W porządku',7:'Dobrze, czuję się normalnie',8:'Pełen energii',9:'Bardzo dobrze, gotowy na wszystko',10:'Szczyt formy'};
+            const c = val <= 3 ? '#C07264' : val <= 5 ? '#C4A35A' : val <= 7 ? '#6B8F71' : '#4A6B50';
+            slider.style.background = `linear-gradient(to right, ${c} ${pct}%, #D8D2C4 ${pct}%)`;
+            const descs = {1:'Ledwo wstaję z łóżka',2:'Bardzo zmęczony, ciało ciężkie',3:'Wyraźnie zmęczony',4:'Trochę poniżej normy',5:'Przeciętnie — jako tako',6:'W porządku',7:'Dobrze, czuję się normalnie',8:'Pełen energii',9:'Bardzo dobrze, gotowy na wszystko',10:'Szczyt formy'};
             const sliderDesc = document.getElementById('sliderDesc');
             if (sliderDesc) sliderDesc.textContent = descs[val] || '';
         }
@@ -10659,12 +10589,6 @@
         function adjustDurH(d) {}
         function adjustDurM(d) {}
         function adjustDurS(d) {}
-        function adjustWorkSegH(d) {}
-        function adjustWorkSegM(d) {}
-        function adjustWorkSegS(d) {}
-
-        function buildRpeRow() {}
-        function selectRpe(val) {}
         function updateRpeSlider() {
             const slider = document.getElementById('rpeSlider');
             if (!slider) return;
@@ -10674,7 +10598,7 @@
             if (valEl) valEl.textContent = `${val}/10`;
             const pct = (val - 1) / 9 * 100;
             const c = val <= 3 ? '#6B8F71' : val <= 6 ? '#C4A35A' : '#C07264';
-            slider.style.background = `linear-gradient(to right, ${c} ${pct}%, #EBEBEB ${pct}%)`;
+            slider.style.background = `linear-gradient(to right, ${c} ${pct}%, #D8D2C4 ${pct}%)`;
             const descs = {1:'Bardzo lekko — prawie spacer',2:'Bardzo lekko',3:'Lekko',4:'Komfortowo, mógłbyś rozmawiać',5:'Umiarkowanie',6:'Umiarkowanie ciężko',7:'Ciężko, trudno mówić zdaniami',8:'Bardzo ciężko',9:'Prawie maksimum',10:'Absolutne maksimum'};
             const rpeDesc = document.getElementById('rpeDesc');
             if (rpeDesc) rpeDesc.textContent = descs[val] || '';
@@ -11099,7 +11023,7 @@
                     <div class="soreness-warning" id="soreness-week-warning">Ból trwający ponad tydzień warto skonsultować ze specjalistą — fizjoterapeutą lub ortopedą — zanim wrócimy do pełnych obciążeń.</div>
                     <div class="nav-area">
                         <button class="btn-next" id="next-soreness-detail" onclick="goNext()">Dalej →</button>
-                        <div style="text-align:center;margin-top:10px;"><span style="font-size:13px;color:#8A8A8A;cursor:pointer;text-decoration:underline;" onclick="goNext()">Pomiń</span></div>
+                        <div style="text-align:center;margin-top:6px;"><span style="display:inline-block;font-size:14px;color:var(--text-muted);cursor:pointer;text-decoration:underline;padding:12px 20px;" onclick="goNext()">Pomiń</span></div>
                     </div>
                 </div>
 
@@ -11201,7 +11125,7 @@
                             <div><div class="completion-btn-label">Mniej niż w planie</div><div class="completion-btn-desc">krótszy dystans lub pominięty element</div></div>
                         </button>
                         <button class="completion-btn" data-completion="exact" onclick="selectCompletion(this, 'exact')">
-                            <div class="completion-icon" style="color:var(--primary);"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+                            <div class="completion-icon"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
                             <div><div class="completion-btn-label">Zgodnie z planem</div><div class="completion-btn-desc">wykonane jak zaplanowane</div></div>
                         </button>
                         <button class="completion-btn" data-completion="more" onclick="selectCompletion(this, 'more')">
