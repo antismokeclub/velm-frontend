@@ -3209,7 +3209,13 @@
         #checkin-overlay .morning-fu-btn { width:100%; padding:16px 20px; background:#FFFFFF; border:1.5px solid var(--border); border-radius:18px; font-size:15px; font-weight:600; color:var(--primary); font-family:var(--font); cursor:pointer; touch-action:manipulation; text-align:left; transition:transform 0.22s cubic-bezier(0.34,1.56,0.64,1), background-color 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease; }
         #checkin-overlay .morning-fu-btn:hover { transform:translateY(-1px); box-shadow:0 4px 12px rgba(0,0,0,0.04); }
         #checkin-overlay .morning-fu-btn:active { transform:scale(0.98); }
-        #checkin-overlay .morning-fu-btn.fu-multi-btn, #checkin-overlay .morning-fu-btn.fu-single-btn { display:flex; align-items:center; }
+        #checkin-overlay .morning-fu-btn.fu-multi-btn { display:flex; align-items:center; }
+        /* Pole "Coś innego" — ten sam wzorzec reveal co licznik km (fu-counter-wrap) */
+        #checkin-overlay .fu-other-wrap { overflow:hidden; transition:max-height 0.35s ease, opacity 0.25s ease; max-height:0; opacity:0; }
+        #checkin-overlay .fu-other-wrap.visible { max-height:160px; opacity:1; margin-top:14px; }
+        #checkin-overlay .fu-other-input { width:100%; min-height:76px; padding:14px 16px; font-family:var(--font); font-size:14px; color:var(--primary); background:#fff; border:1.5px solid var(--border); border-radius:16px; outline:none; resize:none; box-sizing:border-box; line-height:1.5; transition:border-color 0.18s ease, box-shadow 0.18s ease; }
+        #checkin-overlay .fu-other-input:focus { border-color:var(--primary); box-shadow:0 0 0 4px rgba(26,26,26,0.06); }
+        #checkin-overlay .fu-other-input::placeholder { color:var(--text-light); }
         #checkin-overlay .morning-fu-btn.selected { background:var(--bg); border-color:var(--primary); box-shadow:0 6px 18px rgba(26,26,26,0.06); }
         #checkin-overlay .soreness-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:16px 0; }
         #checkin-overlay .soreness-chip { min-height:44px; padding:14px 10px; background:#FFFFFF; border:1.5px solid var(--border); border-radius:14px; font-size:13px; font-weight:600; color:var(--primary); font-family:var(--font); cursor:pointer; touch-action:manipulation; text-align:center; transition:transform 0.18s ease, background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease; }
@@ -9177,7 +9183,7 @@
 
         // Stempel buildu — dowód na urządzeniu, że działa świeży kod (trzymać
         // w zgodzie z CACHE_VERSION w sw.js; bump przy każdym deployu frontendu)
-        const VELM_BUILD = 'v14';
+        const VELM_BUILD = 'v15';
         console.log('velm build', VELM_BUILD, navigator.userAgent);
 
         async function hardReloadApp() {
@@ -9745,7 +9751,7 @@
         let workoutData = { dystans_km:10, struktura:true, powtorzenia:8, serie:6, odcinek_km:6 };
         let inFollowUp       = false;
         let followUpSubStep  = 0;
-        let followUpCause    = null;
+        let followUpCauses   = new Set();
         let _gotoCoachAfterCheckin = false;
         let followUpSelections = new Set();
         let fuSingleObstacle = null;
@@ -9798,7 +9804,7 @@
             rpeVal       = null;
             duration     = 45;
             followUpSelections = new Set();
-            followUpSubStep = 0; followUpCause = null; _gotoCoachAfterCheckin = false;
+            followUpSubStep = 0; followUpCauses = new Set(); _gotoCoachAfterCheckin = false;
             fuSingleObstacle   = null;
             fuCounterVal = 1;
             segmentRepeats = 0; segmentSeries = 0; segmentWorkKm = 0;
@@ -10018,6 +10024,7 @@
 
         function setMode(mode) {
             if (mode === currentMode) return;
+            document.getElementById('ci-inner')?.scrollTo({ top: 0, behavior: 'auto' });
             const oldId = inSorenessDetail ? 'step-soreness-detail' : inReadinessFollowup ? 'step-morning-followup' : inFollowUp ? (followUpSubStep === 0 ? 'step-post-2b' : followUpSubStep === 1 ? 'step-post-2c' : 'step-post-2d') : `step-${currentMode}-${currentStep}`;
             const oldStepEl = document.getElementById(oldId);
             if (oldStepEl) {
@@ -10092,7 +10099,7 @@
             // Completion routing (post)
             if (currentMode === 'post' && currentStep === 2) {
                 if (selectedCompletion === 'less') {
-                    skippedParts = new Set(); followUpSelections = new Set(); followUpCause = null; followUpSubStep = 0;
+                    skippedParts = new Set(); followUpSelections = new Set(); followUpCauses = new Set(); followUpSubStep = 0;
                     _buildFollowUp2b();
                     inFollowUp = true;
                     animateStep('step-post-2', 'step-post-2b');
@@ -10115,6 +10122,10 @@
         }
 
         function animateStep(fromId, toId) {
+            // Każdy kolejny krok startuje od góry — jeśli user doczytał poprzedni
+            // krok do końca (dłuższa lista opcji), następny nie otwiera się
+            // "wjechany" w środek treści
+            document.getElementById('ci-inner')?.scrollTo({ top: 0, behavior: 'auto' });
             const fromEl = document.getElementById(fromId);
             const toEl   = document.getElementById(toId);
             if (!fromEl || !toEl) {
@@ -10608,22 +10619,8 @@
         }
 
         // Skala RPE — 3 kotwice (Lekko/Umiarkowanie/Ciężko) to TE SAME progi co
-        // kolor suwaka (1-3 / 4-6 / 7-10). Opisy per-wartość celowo NIE powtarzają
-        // słów kotwic (dawniej wartość 5 pokazywała samo "Umiarkowanie" — dokładny
-        // duplikat etykiety nad nim), więc skala i opis niosą różną informację
-        // zamiast się dublować.
-        const RPE_DESCS = {
-            1: 'Bardzo lekki wysiłek — jak rozgrzewka',
-            2: 'Bardzo swobodnie, bez wysiłku',
-            3: 'Swobodny, komfortowy rytm',
-            4: 'Praca wyczuwalna, ale rozmowa swobodna',
-            5: 'Praca w pełni wyczuwalna, oddech przyspieszony',
-            6: 'Wymagająco — rozmowa krótkimi zdaniami',
-            7: 'Naprawdę wymagająco, trudno o rozmowę',
-            8: 'Blisko granicy, mocno w płucach',
-            9: 'Niemal pełna moc',
-            10: 'Absolutna granica wysiłku'
-        };
+        // kolor suwaka (1-3 / 4-6 / 7-10) i się z nim podświetlają. Bez osobnego
+        // opisowego podpisu pod suwakiem — liczba + kolor + kotwica to komplet.
         function _rpeZone(val) { return val <= 3 ? 'light' : val <= 6 ? 'moderate' : 'hard'; }
         function updateRpeSlider() {
             const slider = document.getElementById('rpeSlider');
@@ -10639,8 +10636,6 @@
             document.querySelectorAll('#checkin-overlay .rpe-scale span').forEach(s => {
                 s.classList.toggle('active-zone', s.dataset.zone === zone);
             });
-            const rpeDesc = document.getElementById('rpeDesc');
-            if (rpeDesc) rpeDesc.textContent = RPE_DESCS[val] || '';
             showBtn('next-post-1');
         }
 
@@ -10689,8 +10684,11 @@
         // Zwykły/długi bieg: skrócenie ma sens głównie jako krótszy dystans.
         // Strukturalne (interwał/tempo/marszo-bieg): odcinki, tempo, serie — z porównaniem do planu.
         const _FU_2B_OPTS = {
-            easy:    [{key:'krotszy_dystans',label:'Krótszy dystans niż w planie',color:'#C4A35A'},{key:'przerwany',label:'Trening przerwany / niedokończony',color:'#C07264'}],
-            long:    [{key:'krotszy_dystans',label:'Krótszy dystans niż w planie',color:'#C4A35A'},{key:'przerwany',label:'Trening przerwany / niedokończony',color:'#C07264'}],
+            // "Trening przerwany/niedokończony" usunięte — dla zwykłego/długiego biegu
+            // to dokładnie to samo zjawisko co "krótszy dystans" (przerwanie ZAWSZE
+            // skutkuje krótszym dystansem), więc było duplikatem tej samej opcji
+            easy:    [{key:'krotszy_dystans',label:'Krótszy dystans niż w planie',color:'#C4A35A'}],
+            long:    [{key:'krotszy_dystans',label:'Krótszy dystans niż w planie',color:'#C4A35A'}],
             interval:[{key:'mniej_powtorzen',label:'Mniej powtórzeń niż w planie',color:'#C07264'},{key:'krotsze_odcinki',label:'Krótsze odcinki niż zakładano',color:'#C4A35A'},{key:'wolniejsze_tempo_szybkich',label:'Wolniejsze tempo szybkich odcinków',color:'#C07264'},{key:'dluzsze_przerwy',label:'Dłuższe przerwy między powtórzeniami',color:'#C4A35A'},{key:'przerwany',label:'Serie przerwane przed końcem',color:'#C07264'}],
             tempo:   [{key:'krotszy_odcinek_tempo',label:'Krótszy odcinek tempo niż w planie',color:'#C07264'},{key:'wolniejsze_tempo',label:'Wolniejsze tempo niż zakładano',color:'#C07264'},{key:'przerwany',label:'Odcinek tempo nieukończony',color:'#C07264'},{key:'bez_rozgrzewki',label:'Pominięta rozgrzewka',color:'#C4A35A'}],
             walkrun: [{key:'mniej_serii',label:'Mniej serii niż w planie',color:'#C07264'},{key:'krotszy_bieg',label:'Krótsze odcinki biegu',color:'#C4A35A'},{key:'wiecej_marszu',label:'Więcej marszu niż zakładano',color:'#C4A35A'},{key:'mniej_km',label:'Mniejszy dystans całkowity',color:'#C4A35A'}],
@@ -10718,10 +10716,15 @@
         function _buildFollowUp2c() {
             const el = document.getElementById('fu-2c-options');
             if (!el) return;
+            followUpCauses = new Set();
             el.innerHTML = _FU_2C_OPTS.map(o =>
-                `<button class="morning-fu-btn fu-single-btn" onclick="selectFollowUpCause(this,'${o.key}')" data-key="${o.key}">` +
+                `<button class="morning-fu-btn fu-multi-btn" onclick="toggleFollowUpCause(this,'${o.key}')" data-key="${o.key}">` +
                 `<span class="fu-dot" style="background:${o.color};width:10px;height:10px;border-radius:50%;flex-shrink:0;display:inline-block;margin-right:12px;"></span>${o.label}</button>`
             ).join('');
+            // Reset pola "Coś innego" — świeże za każdym wejściem w ten krok
+            document.getElementById('fuCauseOtherWrap')?.classList.remove('visible');
+            const otherInput = document.getElementById('fuCauseOtherInput');
+            if (otherInput) otherInput.value = '';
             const btn = document.getElementById('next-post-2c');
             if (btn) btn.classList.remove('visible');
         }
@@ -10745,11 +10748,20 @@
             if (btn) btn.classList.toggle('visible', followUpSelections.size > 0);
             setTimeout(() => updateStepsHeight(), 50);
         }
-        function selectFollowUpCause(card, key) {
-            document.querySelectorAll('#step-post-2c .fu-single-btn').forEach(b => b.classList.remove('selected'));
-            card.classList.add('selected');
-            followUpCause = key;
-            showBtn('next-post-2c');
+        function toggleFollowUpCause(card, key) {
+            if (followUpCauses.has(key)) { followUpCauses.delete(key); card.classList.remove('selected'); }
+            else { followUpCauses.add(key); card.classList.add('selected'); }
+            // "Coś innego" → odsłoń pole na własny opis (opcjonalny — zaznaczenie samo w sobie wystarczy)
+            const otherWrap = document.getElementById('fuCauseOtherWrap');
+            if (otherWrap) {
+                const showOther = followUpCauses.has('inne');
+                otherWrap.classList.toggle('visible', showOther);
+                if (showOther) { setTimeout(() => document.getElementById('fuCauseOtherInput')?.focus(), 340); setTimeout(() => updateStepsHeight(), 320); }
+                else { const ta = document.getElementById('fuCauseOtherInput'); if (ta) ta.value = ''; }
+            }
+            const btn = document.getElementById('next-post-2c');
+            if (btn) btn.classList.toggle('visible', followUpCauses.size > 0);
+            setTimeout(() => updateStepsHeight(), 50);
         }
         function goWithTrainer() {
             _gotoCoachAfterCheckin = true;
@@ -10839,8 +10851,12 @@
             if (selectedCompletion === 'less' && followUpSelections.size > 0) {
                 base += `, co_poszlo_inaczej=[${[...followUpSelections].join(',')}]`;
             }
-            if (selectedCompletion === 'less' && followUpCause) {
-                base += `, przyczyna=${followUpCause}`;
+            if (selectedCompletion === 'less' && followUpCauses.size > 0) {
+                base += `, przyczyny=[${[...followUpCauses].join(',')}]`;
+            }
+            const _otherCauseText = document.getElementById('fuCauseOtherInput')?.value?.trim();
+            if (selectedCompletion === 'less' && _otherCauseText) {
+                base += `, przyczyna_inne="${_otherCauseText}"`;
             }
             if (feelings.size > 0) base += `, odczucia=[${[...feelings].join(',')}]`;
             const avgPaceInputEl = document.getElementById('avgPaceInput');
@@ -11145,7 +11161,6 @@
                             <input type="range" min="1" max="10" value="5" id="rpeSlider" oninput="updateRpeSlider()">
                         </div>
                         <div class="rpe-scale"><span data-zone="light">Lekko</span><span data-zone="moderate">Umiarkowanie</span><span data-zone="hard">Ciężko</span></div>
-                        <div class="slider-desc" id="rpeDesc"></div>
                     </div>
                     <div class="ci-plan-card" style="display:none;">
                         <div class="cpc-head">Plan na dziś</div>
@@ -11200,11 +11215,14 @@
                     <div class="nav-area"><button class="btn-next" id="next-post-2b" onclick="goNext()">Dalej →</button></div>
                 </div>
 
-                <!-- P2c: Co było przyczyną? (single-select) -->
+                <!-- P2c: Co było przyczyną? (multi-select + wolny tekst przy "Coś innego") -->
                 <div class="step" id="step-post-2c">
                     <div class="step-title">Co było przyczyną?</div>
-                    <div class="step-desc">Wybierz jedną główną przyczynę.</div>
+                    <div class="step-desc">Zaznacz wszystko co pasuje.</div>
                     <div class="morning-followup-opts" id="fu-2c-options"></div>
+                    <div class="fu-other-wrap" id="fuCauseOtherWrap">
+                        <textarea class="fu-other-input" id="fuCauseOtherInput" placeholder="Napisz, co się stało…" maxlength="200"></textarea>
+                    </div>
                     <div class="ci-plan-card" style="display:none;">
                         <div class="cpc-head">Plan na dziś</div>
                         <div class="cpc-row"></div>
