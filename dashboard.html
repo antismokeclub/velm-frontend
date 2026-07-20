@@ -678,7 +678,7 @@
             box-shadow: 0 2px 16px rgba(0,0,0,0.03);
         }
         .stats-chart-card .sc-header {
-            display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;
+            display:flex; align-items:center; justify-content:space-between; margin-bottom:4px;
         }
         .stats-chart-card .sc-title {
             font-size:11px; font-weight:700; letter-spacing:0.08em;
@@ -686,6 +686,9 @@
         }
         .stats-chart-card .sc-value {
             font-size:15px; font-weight:800; color:#111111;
+        }
+        .stats-chart-card .sc-desc {
+            font-size:12px; color:#8A8A8A; line-height:1.4; margin-bottom:16px;
         }
         .stats-legend {
             display:flex; flex-wrap:wrap; gap:12px; margin-top:14px;
@@ -6434,11 +6437,14 @@
             return m + ':' + String(s).padStart(2, '0');
         }
 
-        function _labCard(label, value, sub, subColor) {
+        function _labCard(label, value, sub, subColor, desc, unit) {
             return '<div class="lab-card" style="background:#fff;border:1px solid #EBEBEB;border-radius:20px;padding:18px 16px;">' +
                 '<div style="font-size:11px;font-weight:700;color:#8A8A8A;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;">' + label + '</div>' +
-                '<div style="font-family:Outfit,sans-serif;font-size:30px;font-weight:800;color:#1A1A1A;font-variant-numeric:tabular-nums;line-height:1;">' + value + '</div>' +
+                '<div style="font-family:Outfit,sans-serif;font-size:30px;font-weight:800;color:#1A1A1A;font-variant-numeric:tabular-nums;line-height:1;">' + value +
+                    (unit ? '<span style="font-size:13px;font-weight:700;color:#C8C2B8;margin-left:3px;">' + unit + '</span>' : '') +
+                '</div>' +
                 (sub ? '<div style="font-size:12px;font-weight:600;color:' + (subColor || '#8A8A8A') + ';margin-top:6px;">' + sub + '</div>' : '') +
+                (desc ? '<div style="font-size:11px;color:#A8A399;margin-top:5px;line-height:1.4;">' + desc + '</div>' : '') +
                 '</div>';
         }
 
@@ -6458,9 +6464,9 @@
                     const r = d.readiness.score;
                     const col = r >= 70 ? '#6B8F71' : (r >= 45 ? '#C4A35A' : '#C07264');
                     const lbl = r >= 70 ? 'Gotowy do treningu' : (r >= 45 ? 'Umiarkowana' : 'Odpocznij');
-                    cards.push(_labCard('Gotowość', r, lbl, col));
+                    cards.push(_labCard('Gotowość', r, lbl, col, 'Energia, sen i tętno z dzisiejszego rana', '/100'));
                 } else {
-                    cards.push(_labCard('Gotowość', '—', 'Zrób poranny check-in'));
+                    cards.push(_labCard('Gotowość', '—', 'Zrób poranny check-in', null, 'Energia, sen i tętno z dzisiejszego rana'));
                 }
 
                 if (d.sleep && d.sleep.score != null) {
@@ -6468,35 +6474,36 @@
                     const sub = t == null ? 'ostatnie 7 dni'
                         : (t > 0 ? '▲ +' + t + ' vs zeszły tydzień' : (t < 0 ? '▼ ' + t + ' vs zeszły tydzień' : '= jak zeszły tydzień'));
                     const col = t == null ? '#8A8A8A' : (t >= 0 ? '#6B8F71' : '#C07264');
-                    cards.push(_labCard('velm Sleep Score', d.sleep.score, sub, col));
+                    cards.push(_labCard('velm Sleep Score', d.sleep.score, sub, col, 'Jakość snu z porannych check-inów, 7 dni', '/100'));
                 } else {
-                    cards.push(_labCard('velm Sleep Score', '—', 'Za mało check-inów'));
+                    cards.push(_labCard('velm Sleep Score', '—', 'Za mało check-inów', null, 'Jakość snu z porannych check-inów, 7 dni'));
                 }
 
                 if (d.load) {
                     const statusPl = { low: 'Niskie — możesz więcej', optimal: 'Optymalne', elevated: 'Podwyższone', high: 'Ryzyko przeciążenia' }[d.load.status] || '';
                     const col = { low: '#8A8A8A', optimal: '#6B8F71', elevated: '#C4A35A', high: '#C07264' }[d.load.status] || '#8A8A8A';
-                    cards.push(_labCard('Obciążenie', d.load.acwr.toFixed(2), statusPl, col));
+                    cards.push(_labCard('Obciążenie', d.load.acwr.toFixed(2), statusPl, col, 'Ten tydzień vs Twoja średnia z miesiąca. 1,0 = normalne tempo'));
                 } else {
-                    cards.push(_labCard('Obciążenie', '—', 'Za mało treningów'));
+                    cards.push(_labCard('Obciążenie', '—', 'Za mało treningów', null, 'Ten tydzień vs Twoja średnia z miesiąca. 1,0 = normalne tempo'));
                 }
 
                 if (d.trends && d.trends.paceSec != null) {
                     const dl = d.trends.paceDeltaSec;
-                    const sub = dl == null ? 'śr. tempo easy/long'
+                    const sub = dl == null ? 'śr. tempo, biegi łatwe/długie'
                         : (dl < 0 ? '▲ szybciej o ' + Math.abs(dl) + 's' : (dl > 0 ? '▼ wolniej o ' + dl + 's' : '= stabilnie'));
                     const col = dl == null ? '#8A8A8A' : (dl <= 0 ? '#6B8F71' : '#C4A35A');
-                    cards.push(_labCard('Tempo', _labPace(d.trends.paceSec), sub, col));
+                    cards.push(_labCard('Tempo', _labPace(d.trends.paceSec), sub, col, 'Śr. tempo na łatwych i długich biegach, 14 dni', 'min/km'));
                 } else {
-                    cards.push(_labCard('Tempo', '—', 'Za mało biegów z tempem'));
+                    cards.push(_labCard('Tempo', '—', 'Za mało biegów z tempem', null, 'Śr. tempo na łatwych i długich biegach, 14 dni'));
                 }
 
                 // ── Sekcja Analiza AI ──
                 let aiHtml = '<div style="margin-top:20px;">' +
-                    '<div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:10px;">' +
+                    '<div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:2px;">' +
                         '<div style="font-family:Outfit,sans-serif;font-size:18px;font-weight:800;color:#1A1A1A;letter-spacing:-0.01em;">Analiza AI</div>' +
                         '<div style="font-size:10px;font-weight:700;color:#8A8A8A;text-transform:uppercase;letter-spacing:0.1em;">Analityk</div>' +
                     '</div>' +
+                    '<div style="font-size:12px;color:#8A8A8A;margin-bottom:10px;line-height:1.4;">Co Twój analityk zauważył po każdym treningu — plan vs to, co realnie zrobiłeś</div>' +
                     '<div id="lab-ai-list"></div></div>';
 
                 el.innerHTML =
@@ -6530,11 +6537,14 @@
                     '<div style="font-size:13px;color:#8A8A8A;">Analityk przygotowuje przegląd…</div></div>';
                 setTimeout(() => {
                     if (gen !== _labLoadGen) return;
-                    list.innerHTML = analyses.map(a => {
+                    list.innerHTML = analyses.map((a, i) => {
                         const dt = new Date(a.date + 'T00:00:00').toLocaleDateString('pl-PL', { day: 'numeric', month: 'long' });
+                        const cid = 'lab-ai-txt-' + i;
                         return '<div class="lab-ai-item" style="background:#fff;border:1px solid #EBEBEB;border-radius:20px;padding:16px;margin-bottom:10px;">' +
                             '<div style="font-size:11px;font-weight:700;color:#8A8A8A;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;">' + dt + '</div>' +
-                            '<div style="font-size:14px;color:#1A1A1A;line-height:1.55;">' + _escHtml(a.content) + '</div></div>';
+                            '<div id="' + cid + '" style="font-size:14px;color:#1A1A1A;line-height:1.6;overflow:hidden;display:-webkit-box;-webkit-line-clamp:4;line-clamp:4;-webkit-box-orient:vertical;">' + _escHtml(a.content) + '</div>' +
+                            '<button class="lab-ai-more" onclick="_toggleLabAiClamp(this)" data-target="' + cid + '" style="display:none;margin-top:8px;background:none;border:none;padding:0;min-height:24px;font-size:12px;font-weight:700;color:#1A1A1A;cursor:pointer;font-family:Inter,sans-serif;">Pokaż więcej</button>' +
+                            '</div>';
                     }).join('');
                     list.querySelectorAll('.lab-ai-item').forEach((item, i) => {
                         item.style.opacity = '0';
@@ -6545,6 +6555,14 @@
                             item.style.transform = 'translate3d(0,0,0)';
                         }));
                     });
+                    // Przycięty tekst (4 linie) dostaje "Pokaż więcej" TYLKO gdy realnie
+                    // się nie mieści — inaczej krótkie analizy miałyby martwy przycisk
+                    requestAnimationFrame(() => requestAnimationFrame(() => {
+                        list.querySelectorAll('.lab-ai-more').forEach(btn => {
+                            const txt = document.getElementById(btn.dataset.target);
+                            if (txt && txt.scrollHeight > txt.clientHeight + 2) btn.style.display = 'inline-block';
+                        });
+                    }));
                 }, 1200);
             } catch (e) {
                 if (gen !== _labLoadGen) return;
@@ -6553,6 +6571,21 @@
                     '<div style="font-size:13px;color:#8A8A8A;margin-bottom:12px;">Sprawdź połączenie i spróbuj ponownie.</div>' +
                     '<button onclick="loadLab()" style="padding:10px 20px;min-height:44px;background:transparent;border:1px solid #1A1A1A;border-radius:12px;font-size:14px;font-weight:600;color:#1A1A1A;cursor:pointer;font-family:Inter,sans-serif;touch-action:manipulation;">Spróbuj ponownie</button></div>';
                 console.error('loadLab błąd:', e.message);
+            }
+        }
+
+        function _toggleLabAiClamp(btn) {
+            const txt = document.getElementById(btn.dataset.target);
+            if (!txt) return;
+            const expanded = txt.dataset.expanded === '1';
+            if (expanded) {
+                txt.style.webkitLineClamp = '4';
+                txt.dataset.expanded = '0';
+                btn.textContent = 'Pokaż więcej';
+            } else {
+                txt.style.webkitLineClamp = 'unset';
+                txt.dataset.expanded = '1';
+                btn.textContent = 'Zwiń';
             }
         }
 
@@ -6889,6 +6922,7 @@
                             <span class="sc-title">Dystans</span>
                             <span class="sc-value" id="s-km-total">${totalKm.toFixed(1)} km</span>
                         </div>
+                        <div class="sc-desc">${statsRange === 'week' ? 'Ile km przebiegłeś każdego dnia tego tygodnia' : 'Suma km w każdym z ostatnich 4 tygodni'}</div>
                         ${distSVG}
                         ${legendHTML}
                         <div id="s-dist-tip" class="stats-tooltip"></div>
@@ -6897,6 +6931,7 @@
                             <span class="sc-title">Tempo</span>
                             ${avgSec ? `<span class="sc-value" style="color:#111;">śr. ${_p2t(avgSec)} <span style="font-size:12px;font-weight:400;color:#8A8A8A;">min/km</span></span>` : `<span style="font-size:12px;color:#8A8A8A;">—</span>`}
                         </div>
+                        <div class="sc-desc">Tempo z kolejnych treningów — wyżej na wykresie znaczy szybciej</div>
                         ${paceSVG}
                         <div id="s-pace-tip" class="stats-tooltip"></div>
                         `}
@@ -7048,6 +7083,7 @@
                         <span class="sc-title">Dystans</span>
                         <span class="sc-value" id="s-km-total">${totalKm.toFixed(1)} km</span>
                     </div>
+                    <div class="sc-desc">${statsRange === 'week' ? 'Ile km przebiegłeś każdego dnia tego tygodnia' : 'Suma km w każdym z ostatnich 4 tygodni'}</div>
                     ${distSVG}${legendHTML}
                     <div id="s-dist-tip" class="stats-tooltip"></div>`;
             } else {
@@ -7057,6 +7093,7 @@
                         <span class="sc-title">Tempo</span>
                         ${avgSec ? `<span class="sc-value" style="color:#111;">śr. ${_p2t(avgSec)} <span style="font-size:12px;font-weight:400;color:#8A8A8A;">min/km</span></span>` : `<span style="font-size:12px;color:#8A8A8A;">—</span>`}
                     </div>
+                    <div class="sc-desc">Tempo z kolejnych treningów — wyżej na wykresie znaczy szybciej</div>
                     ${paceSVG}
                     <div id="s-pace-tip" class="stats-tooltip"></div>`;
             }
@@ -9224,7 +9261,7 @@
 
         // Stempel buildu — dowód na urządzeniu, że działa świeży kod (trzymać
         // w zgodzie z CACHE_VERSION w sw.js; bump przy każdym deployu frontendu)
-        const VELM_BUILD = 'v24';
+        const VELM_BUILD = 'v25';
         console.log('velm build', VELM_BUILD, navigator.userAgent);
 
         async function hardReloadApp() {
