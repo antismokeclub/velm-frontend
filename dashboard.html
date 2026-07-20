@@ -9174,7 +9174,7 @@
 
         // Stempel buildu — dowód na urządzeniu, że działa świeży kod (trzymać
         // w zgodzie z CACHE_VERSION w sw.js; bump przy każdym deployu frontendu)
-        const VELM_BUILD = 'v17';
+        const VELM_BUILD = 'v18';
         console.log('velm build', VELM_BUILD, navigator.userAgent);
 
         async function hardReloadApp() {
@@ -9768,8 +9768,14 @@
         // Work segment duration (tempo / interval)
         let workSegH = 0, workSegM = 0, workSegS = 0;
         let intervalDistanceM  = 400;
-        // "Więcej niż w planie" — faktyczny łączny dystans (krok step-post-3)
-        let moreKmVal = 0;
+        // "Więcej niż w planie" (step-post-3) — km dla easy/long/tempo, liczba
+        // powtórzeń/serii dla interval/walkrun (jednostka zależy od typu)
+        let moreVal = 0;
+        // "Mniej niż w planie" (step-post-2b) — faktyczna liczba powtórzeń/serii,
+        // gdy user zaznaczy że zrobił ich mniej niż plan. _fuCountTarget mówi,
+        // do którego pola (segmentRepeats/segmentSeries) wpisać wartość
+        let fuCountVal = 0;
+        let _fuCountTarget = null;
         let _checkinStepsLockedHeight = 0;
         let _checkinHeightRaf = 0;
 
@@ -9800,7 +9806,8 @@
             sleepH = 8; sleepM = 0; sleepHours = sleepH + sleepM / 60; muscleRecovery = null;
             durH = 0; durM = 45; durS = 0;
             workSegH = 0; workSegM = 0; workSegS = 0;
-            intervalDistanceM = 400; moreKmVal = 0;
+            intervalDistanceM = 400; moreVal = 0;
+            fuCountVal = 0; _fuCountTarget = null;
             // Resetuj do domyślnych — nadpisywane niżej realną strukturą planu,
             // jeśli jest dostępna. Bez tego resetu wartości z POPRZEDNIEGO otwarcia
             // (np. realne 6 powtórzeń z wczorajszych interwałów) zostawałyby
@@ -10241,14 +10248,16 @@
             }).catch(() => {});
             const completion = selectedCompletion || 'exact';
             // Faktyczny dystans: "krótszy dystans" (easy/long) → licznik z kroku 2b;
-            // "więcej niż w planie" → licznik z kroku 3. W obu przypadkach statystyki
-            // i AI mają widzieć co user NAPRAWDĘ przebiegł, nie sam plan — tempo AI
-            // liczy samo z distance_km/duration_min, więc ręczne wpisywanie tempa
-            // (i tak niedostępne dla kogoś bez zegarka biegowego) jest zbędne.
+            // "więcej niż w planie" → licznik z kroku 3, ALE tylko dla easy/long, bo
+            // dla interval/tempo/walkrun moreVal niesie inną jednostkę (powtórzenia/
+            // serie/km odcinka — patrz completed_repeats/working_distance_km/
+            // completed_series niżej), nie łączny dystans. Tempo AI liczy samo z
+            // distance_km/duration_min, więc ręczne wpisywanie tempa (i tak
+            // niedostępne dla kogoś bez zegarka biegowego) jest zbędne.
             const actualKm = ((workoutType === 'easy' || workoutType === 'long') && followUpSelections.has('krotszy_dystans') && fuKmVal > 0)
                 ? fuKmVal
-                : (selectedCompletion === 'more' && moreKmVal > 0)
-                ? moreKmVal
+                : (selectedCompletion === 'more' && (workoutType === 'easy' || workoutType === 'long') && moreVal > 0)
+                ? moreVal
                 : workoutData.dystans_km;
             const workoutPayload = {
                 date: new Date().toISOString().split('T')[0],
@@ -10673,18 +10682,59 @@
             document.querySelectorAll('#checkin-overlay .completion-btn').forEach(b => b.classList.remove('selected'));
             btn.classList.add('selected');
             selectedCompletion = type;
-            if (type === 'more') {
-                // Sensowny start: plan plus 1 km — user doprecyzuje licznikiem
-                moreKmVal = Math.round(((workoutData.dystans_km || 5) + 1) * 2) / 2;
-                const el = document.getElementById('moreKmVal');
-                if (el) el.textContent = moreKmVal.toFixed(1) + ' km';
-            }
+            if (type === 'more') _initMoreStep();
             showBtn('next-post-2');
         }
-        function adjustMoreKm(delta) {
-            moreKmVal = Math.max(workoutData.dystans_km || 0.5, Math.round((moreKmVal + delta) * 10) / 10);
-            const el = document.getElementById('moreKmVal');
-            if (el) el.textContent = moreKmVal.toFixed(1) + ' km';
+        // "Więcej niż w planie" pyta o RÓŻNE rzeczy zależnie od typu — dla biegu
+        // łączny dystans (jedyna sensowna jednostka bez struktury), dla treningów
+        // strukturalnych to, co user faktycznie policzy sam w trakcie: ile
+        // powtórzeń/serii zrobił, albo ile km trwał odcinek tempo.
+        function _initMoreStep() {
+            const titleEl = document.getElementById('more-step-title');
+            const descEl  = document.getElementById('more-step-desc');
+            if (workoutType === 'interval') {
+                moreVal = (workoutData.powtorzenia || 6) + 1;
+                if (titleEl) titleEl.textContent = 'Ile powtórzeń zrobiłeś?';
+                if (descEl) descEl.textContent = 'Plan zakładał ' + (workoutData.powtorzenia || '—') + '.';
+            } else if (workoutType === 'walkrun') {
+                moreVal = (workoutData.serie || 6) + 1;
+                if (titleEl) titleEl.textContent = 'Ile serii zrobiłeś?';
+                if (descEl) descEl.textContent = 'Plan zakładał ' + (workoutData.serie || '—') + '.';
+            } else if (workoutType === 'tempo') {
+                moreVal = Math.round(((workoutData.odcinek_km || 5) + 0.5) * 2) / 2;
+                if (titleEl) titleEl.textContent = 'Ile trwał odcinek tempo?';
+                if (descEl) descEl.textContent = 'Podaj faktyczny dystans odcinka roboczego.';
+            } else {
+                moreVal = Math.round(((workoutData.dystans_km || 5) + 1) * 2) / 2;
+                if (titleEl) titleEl.textContent = 'Ile w sumie przebiegłeś?';
+                if (descEl) descEl.textContent = 'Sztab policzy z tego Twoje realne tempo.';
+            }
+            _renderMoreVal();
+            // Zatwierdź OD RAZU, nie dopiero przy pierwszym dotknięciu +/- — inaczej
+            // user widzący podpowiedź "7×" i klikający od razu "Gotowe" wysłałby
+            // starą wartość z planu (6), bo nic by nigdy nie zapisało pokazanej liczby
+            _commitMoreVal();
+        }
+        function _renderMoreVal() {
+            const el = document.getElementById('moreValDisplay');
+            if (!el) return;
+            const isCount = (workoutType === 'interval' || workoutType === 'walkrun');
+            el.textContent = isCount ? String(moreVal) + '×' : moreVal.toFixed(1) + ' km';
+        }
+        function _commitMoreVal() {
+            // Segmenty raportowane do AI/statystyk mają widzieć FAKTYCZNĄ liczbę,
+            // nie plan — to samo pole, które showPost0Section wypełnia planem
+            if (workoutType === 'interval') segmentRepeats = moreVal;
+            else if (workoutType === 'walkrun') segmentSeries = moreVal;
+            else if (workoutType === 'tempo') segmentWorkKm = moreVal;
+        }
+        function adjustMore(dir) {
+            const isCount = (workoutType === 'interval' || workoutType === 'walkrun');
+            const step = isCount ? 1 : 0.5;
+            const min  = isCount ? 1 : 0.5;
+            moreVal = Math.max(min, Math.round((moreVal + dir * step) * 10) / 10);
+            _renderMoreVal();
+            _commitMoreVal();
         }
         function isPartialCompletion() {
             return selectedCompletion === 'less';
@@ -10772,22 +10822,59 @@
         function toggleFollowUp2b(card, key) {
             if (followUpSelections.has(key)) { followUpSelections.delete(key); card.classList.remove('selected'); }
             else { followUpSelections.add(key); card.classList.add('selected'); }
-            // Easy/long + "krótszy dystans" → licznik faktycznych km (musimy wiedzieć O ILE mniej)
+            // Easy/long "krótszy dystans" LUB tempo "krótszy odcinek" → licznik km
+            // (musimy wiedzieć O ILE mniej — sam checkbox tego nie mówi)
             const kmWrap = document.getElementById('fuKmWrap');
             if (kmWrap) {
-                const needsKm = (workoutType === 'easy' || workoutType === 'long') && followUpSelections.has('krotszy_dystans');
+                const needsKmEasy  = (workoutType === 'easy' || workoutType === 'long') && followUpSelections.has('krotszy_dystans');
+                const needsKmTempo = workoutType === 'tempo' && followUpSelections.has('krotszy_odcinek_tempo');
+                const needsKm = needsKmEasy || needsKmTempo;
                 if (needsKm && !kmWrap.classList.contains('visible')) {
-                    // Sensowny start: plan minus 1 km (min 0.5)
-                    fuKmVal = Math.max(0.5, Math.round(((workoutData.dystans_km || 5) - 1) * 2) / 2);
+                    const base = needsKmTempo ? (workoutData.odcinek_km || 5) : (workoutData.dystans_km || 5);
+                    fuKmVal = Math.max(0.5, Math.round((base - 1) * 2) / 2);
+                    const lbl = document.getElementById('fuKmLabel');
+                    if (lbl) lbl.textContent = needsKmTempo ? 'Ile km trwał odcinek tempo?' : 'Ile km faktycznie przebiegłeś?';
                     const el = document.getElementById('fuKmVal');
                     if (el) el.textContent = fuKmVal.toFixed(1) + ' km';
+                    if (needsKmTempo) segmentWorkKm = fuKmVal;
                 }
                 kmWrap.classList.toggle('visible', needsKm);
                 if (needsKm) setTimeout(() => updateStepsHeight(), 320);
             }
+            // Interval "mniej powtórzeń" LUB walkrun "mniej serii" → licznik
+            // faktycznej liczby (ten sam wzorzec co licznik km wyżej)
+            const countWrap = document.getElementById('fuCountWrap');
+            if (countWrap) {
+                const needsRepeats = workoutType === 'interval' && followUpSelections.has('mniej_powtorzen');
+                const needsSeries  = workoutType === 'walkrun' && followUpSelections.has('mniej_serii');
+                const needsCount = needsRepeats || needsSeries;
+                if (needsCount && !countWrap.classList.contains('visible')) {
+                    _fuCountTarget = needsRepeats ? 'repeats' : 'series';
+                    const plan = needsRepeats ? (workoutData.powtorzenia || 6) : (workoutData.serie || 6);
+                    fuCountVal = Math.max(1, plan - 1);
+                    const lbl = document.getElementById('fuCountLabel');
+                    if (lbl) lbl.textContent = needsRepeats ? 'Ile powtórzeń faktycznie zrobiłeś?' : 'Ile serii faktycznie zrobiłeś?';
+                    const el = document.getElementById('fuCountVal');
+                    if (el) el.textContent = String(fuCountVal);
+                    if (needsRepeats) segmentRepeats = fuCountVal; else segmentSeries = fuCountVal;
+                } else if (!needsCount) {
+                    _fuCountTarget = null;
+                }
+                countWrap.classList.toggle('visible', needsCount);
+                if (needsCount) setTimeout(() => updateStepsHeight(), 320);
+            }
             const btn = document.getElementById('next-post-2b');
             if (btn) btn.classList.toggle('visible', followUpSelections.size > 0);
             setTimeout(() => updateStepsHeight(), 50);
+        }
+        function adjustFuCount(delta) {
+            if (!_fuCountTarget) return;
+            const plan = _fuCountTarget === 'repeats' ? (workoutData.powtorzenia || 6) : (workoutData.serie || 6);
+            fuCountVal = Math.max(1, Math.min(plan, fuCountVal + delta));
+            const el = document.getElementById('fuCountVal');
+            if (el) el.textContent = String(fuCountVal);
+            if (_fuCountTarget === 'repeats') segmentRepeats = fuCountVal;
+            else segmentSeries = fuCountVal;
         }
         function toggleFollowUpCause(card, key) {
             if (followUpCauses.has(key)) { followUpCauses.delete(key); card.classList.remove('selected'); }
@@ -10815,6 +10902,7 @@
             fuKmVal = Math.max(0.5, Math.min(max, fuKmVal + delta));
             const el = document.getElementById('fuKmVal');
             if (el) el.textContent = fuKmVal.toFixed(1) + ' km';
+            if (workoutType === 'tempo') segmentWorkKm = fuKmVal;
         }
         function buildAiMessage() {
             const completionLabel = selectedCompletion === 'less' ? 'mniej_niż_plan'
@@ -10857,9 +10945,11 @@
             if (selectedCompletion === 'less' && _otherCauseText) {
                 base += `, przyczyna_inne="${_otherCauseText}"`;
             }
-            // Więcej niż w planie — faktyczny łączny dystans z kroku step-post-3
-            if (selectedCompletion === 'more' && moreKmVal > 0) {
-                base += `, wykonano_km=${moreKmVal.toFixed(1)}/${workoutData.dystans_km}`;
+            // Więcej niż w planie, bieg bez struktury — faktyczny łączny dystans
+            // z step-post-3. Dla interval/tempo/walkrun "więcej" idzie już wyżej
+            // przez powtórzenia=/odcinek=/serie= (adjustMore aktualizuje segment*)
+            if (selectedCompletion === 'more' && (workoutType === 'easy' || workoutType === 'long') && moreVal > 0) {
+                base += `, wykonano_km=${moreVal.toFixed(1)}/${workoutData.dystans_km}`;
             }
             return base;
         }
@@ -11199,13 +11289,24 @@
                     <div class="step-title">Co poszło inaczej?</div>
                     <div class="step-desc">Zaznacz wszystko co pasuje.</div>
                     <div class="morning-followup-opts" id="fu-2b-options"></div>
-                    <!-- Faktyczny dystans przy "krótszy dystans" (easy/long) — musimy wiedzieć O ILE -->
+                    <!-- Faktyczny dystans: "krótszy dystans" (easy/long) lub "krótszy
+                         odcinek" (tempo) — musimy wiedzieć O ILE, sam checkbox nie mówi -->
                     <div class="fu-counter-wrap" id="fuKmWrap">
-                        <div class="section-label" style="margin-top:14px;">Ile km faktycznie przebiegłeś?</div>
+                        <div class="section-label" id="fuKmLabel" style="margin-top:14px;">Ile km faktycznie przebiegłeś?</div>
                         <div class="fu-counter">
                             <button class="counter-btn" onclick="adjustFuKm(-0.5)">−</button>
                             <div class="fu-counter-val" id="fuKmVal">—</div>
                             <button class="counter-btn" onclick="adjustFuKm(0.5)">+</button>
+                        </div>
+                    </div>
+                    <!-- Faktyczna liczba: "mniej powtórzeń" (interval) lub "mniej serii"
+                         (walkrun) — ten sam wzorzec co licznik km wyżej -->
+                    <div class="fu-counter-wrap" id="fuCountWrap">
+                        <div class="section-label" id="fuCountLabel" style="margin-top:14px;">Ile faktycznie zrobiłeś?</div>
+                        <div class="fu-counter">
+                            <button class="counter-btn" onclick="adjustFuCount(-1)">−</button>
+                            <div class="fu-counter-val" id="fuCountVal">—</div>
+                            <button class="counter-btn" onclick="adjustFuCount(1)">+</button>
                         </div>
                     </div>
                     <div class="ci-plan-card" style="display:none;">
@@ -11251,14 +11352,17 @@
                 </div>
 
                 <!-- P3: "Więcej niż w planie" — jedyna droga tutaj; "zgodnie z planem"
-                     kończy check-in od razu po P2, bez dodatkowego kroku -->
+                     kończy check-in od razu po P2, bez dodatkowego kroku. Treść zależy
+                     od typu — dla biegu łączny dystans, dla strukturalnych treningów
+                     to, co user faktycznie policzył: powtórzenia/serie/km odcinka
+                     (patrz _initMoreStep/adjustMore) -->
                 <div class="step" id="step-post-3">
-                    <div class="step-title">Ile w sumie przebiegłeś?</div>
-                    <div class="step-desc">Sztab policzy z tego Twoje realne tempo.</div>
+                    <div class="step-title" id="more-step-title">Ile w sumie przebiegłeś?</div>
+                    <div class="step-desc" id="more-step-desc">Sztab policzy z tego Twoje realne tempo.</div>
                     <div class="fu-counter">
-                        <button class="counter-btn" onclick="adjustMoreKm(-0.5)">−</button>
-                        <div class="fu-counter-val" id="moreKmVal">— km</div>
-                        <button class="counter-btn" onclick="adjustMoreKm(0.5)">+</button>
+                        <button class="counter-btn" onclick="adjustMore(-1)">−</button>
+                        <div class="fu-counter-val" id="moreValDisplay">—</div>
+                        <button class="counter-btn" onclick="adjustMore(1)">+</button>
                     </div>
                     <div class="ci-plan-card" style="display:none;">
                         <div class="cpc-head">Plan na dziś</div>
