@@ -9174,7 +9174,7 @@
 
         // Stempel buildu — dowód na urządzeniu, że działa świeży kod (trzymać
         // w zgodzie z CACHE_VERSION w sw.js; bump przy każdym deployu frontendu)
-        const VELM_BUILD = 'v18';
+        const VELM_BUILD = 'v19';
         console.log('velm build', VELM_BUILD, navigator.userAgent);
 
         async function hardReloadApp() {
@@ -9819,6 +9819,13 @@
             document.querySelectorAll('#checkin-overlay .completion-btn').forEach(b => b.classList.remove('selected'));
             document.querySelectorAll('#checkin-overlay .morning-fu-btn').forEach(b => b.classList.remove('selected'));
             document.getElementById('fuKmWrap')?.classList.remove('visible');
+            // BUG realny (nie artefakt testu): bez tego resetu, licznik odsłonięty
+            // w POPRZEDNIM check-inie (np. "mniej powtórzeń" przy interwałach)
+            // zostawał .visible, a toggleFollowUp2b sprawdza "!classList.contains
+            // ('visible')" przed przeliczeniem etykiety/wartości — więc kolejny,
+            // zupełnie inny trening (np. marsz-bieg) dziedziczył stary podpis
+            // "Ile powtórzeń..." zamiast "Ile serii...".
+            document.getElementById('fuCountWrap')?.classList.remove('visible');
             // Fallback do dzisiejszego planu — poranny check-in otwiera się bez
             // argumentów i pokazywał domyślne 10 km zamiast dystansu z planu
             if (!typ && window._todayTyp) typ = window._todayTyp;
