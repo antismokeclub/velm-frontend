@@ -6534,6 +6534,66 @@
             })(start);
         }
 
+        // Forma: zastępuje surowy tekst AI ("Analiza AI") jednym dużym, czytelnym
+        // werdyktem opartym o realny trend tempa (14 dni vs poprzednie 14) plus
+        // 4 kafelki kontekstu. Dokładniejsza logika (porównanie konkretnych
+        // interwałów tydzień do tygodnia z danych zegarka) czeka na rework
+        // trenerów — to jest celowo uproszczony szkic na danych, które już mamy.
+        function _labFormaTile(label, val, col, sub) {
+            return '<div style="background:#F8F5EE;border-radius:14px;padding:12px 8px;text-align:center;">' +
+                '<div style="font-size:9.5px;font-weight:700;color:#8A8A8A;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;">' + label + '</div>' +
+                '<div style="font-family:Outfit,sans-serif;font-size:16px;font-weight:800;color:' + col + ';font-variant-numeric:tabular-nums;">' + val + '</div>' +
+                (sub ? '<div style="font-size:9px;color:#B0A89E;margin-top:3px;line-height:1.3;">' + sub + '</div>' : '') +
+                '</div>';
+        }
+
+        function _labFormaCard(d) {
+            const t = d.trends || {};
+            const hasPace = t.paceSec != null && t.paceDeltaSec != null;
+
+            const header = '<div style="margin-top:20px;">' +
+                '<div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:2px;">' +
+                    '<div style="font-family:Outfit,sans-serif;font-size:18px;font-weight:800;color:#1A1A1A;letter-spacing:-0.01em;">Forma</div>' +
+                    '<div style="font-size:10px;font-weight:700;color:#8A8A8A;text-transform:uppercase;letter-spacing:0.1em;">Analityk</div>' +
+                '</div>' +
+                '<div style="font-size:12px;color:#8A8A8A;margin-bottom:10px;line-height:1.4;">Progres na podstawie tempa z ostatnich treningów</div>';
+
+            if (!hasPace) {
+                return header +
+                    '<div class="lab-card" style="background:#fff;border:1px solid #EBEBEB;border-radius:20px;padding:28px 20px;text-align:center;">' +
+                        '<div style="font-size:14px;font-weight:600;color:#1A1A1A;margin-bottom:4px;">Za mało danych na ocenę formy</div>' +
+                        '<div style="font-size:13px;color:#8A8A8A;line-height:1.5;">Wróć po kilku tygodniach regularnych treningów</div>' +
+                    '</div></div>';
+            }
+
+            const dl = t.paceDeltaSec;
+            let verdict, col, arrow, sub;
+            if (dl <= -3) { verdict = 'Progres';   col = '#6B8F71'; arrow = '↑'; sub = 'Tempo szybsze o ' + Math.abs(dl) + 's/km niż 2 tygodnie temu'; }
+            else if (dl >= 3) { verdict = 'Spadek'; col = '#C07264'; arrow = '↓'; sub = 'Tempo wolniejsze o ' + dl + 's/km niż 2 tygodnie temu'; }
+            else { verdict = 'Stabilnie'; col = '#C4A35A'; arrow = '→'; sub = 'Tempo podobne do sprzed 2 tygodni'; }
+
+            const hasHr = t.avgHr != null && t.hrDelta != null;
+            const loadStatusPl = { low: 'Niskie', optimal: 'Optymalne', elevated: 'Podwyższone', high: 'Wysokie' };
+            const loadCol = { low: '#8A8A8A', optimal: '#6B8F71', elevated: '#C4A35A', high: '#C07264' };
+            const sleepT = d.sleep && d.sleep.trend != null ? d.sleep.trend : null;
+
+            const tiles =
+                _labFormaTile('Tempo', (dl < 0 ? '▲' : dl > 0 ? '▼' : '=') + ' ' + Math.abs(dl) + 's', dl <= 0 ? '#6B8F71' : '#C07264', 'vs 2 tyg. temu') +
+                _labFormaTile('Tętno', hasHr ? (t.hrDelta < 0 ? '▼' : t.hrDelta > 0 ? '▲' : '=') + ' ' + Math.abs(t.hrDelta) : '—',
+                    hasHr ? (t.hrDelta <= 0 ? '#6B8F71' : '#C07264') : '#C8C2B8', hasHr ? 'przy tym wysiłku' : 'brak zegarka') +
+                _labFormaTile('Obciążenie', d.load ? (loadStatusPl[d.load.status] || '—') : '—', d.load ? (loadCol[d.load.status] || '#8A8A8A') : '#C8C2B8', 'ten tydzień') +
+                _labFormaTile('Sen', sleepT != null ? (sleepT > 0 ? '▲ +' + sleepT : sleepT < 0 ? '▼ ' + sleepT : '= 0') : '—',
+                    sleepT != null ? (sleepT >= 0 ? '#6B8F71' : '#C07264') : '#C8C2B8', 'vs zeszły tydzień');
+
+            return header +
+                '<div class="lab-card" style="background:#fff;border:1px solid #EBEBEB;border-radius:20px;padding:24px 20px 20px;text-align:center;">' +
+                    '<div style="font-size:52px;line-height:1;color:' + col + ';">' + arrow + '</div>' +
+                    '<div style="font-family:Outfit,sans-serif;font-size:26px;font-weight:800;color:#1A1A1A;margin-top:4px;">' + verdict + '</div>' +
+                    '<div style="font-size:13px;color:#8A8A8A;margin-top:4px;">' + sub + '</div>' +
+                    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:20px;">' + tiles + '</div>' +
+                '</div></div>';
+        }
+
         let _labLoadGen = 0;
         async function loadLab() {
             const el = document.getElementById('lab-content');
@@ -6568,17 +6628,11 @@
                 // ── Obciążenie: skala na pełną szerokość ──
                 const loadHtml = _labLoadGauge(d.load);
 
-                // ── Sekcja Analiza AI ──
-                let aiHtml = '<div style="margin-top:20px;">' +
-                    '<div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:2px;">' +
-                        '<div style="font-family:Outfit,sans-serif;font-size:18px;font-weight:800;color:#1A1A1A;letter-spacing:-0.01em;">Analiza AI</div>' +
-                        '<div style="font-size:10px;font-weight:700;color:#8A8A8A;text-transform:uppercase;letter-spacing:0.1em;">Analityk</div>' +
-                    '</div>' +
-                    '<div style="font-size:12px;color:#8A8A8A;margin-bottom:10px;line-height:1.4;">Co Twój analityk zauważył po każdym treningu — plan vs to, co realnie zrobiłeś</div>' +
-                    '<div id="lab-ai-list"></div></div>';
+                // ── Forma: duży werdykt progresu + 4 kafelki wspierające ──
+                const formaHtml = _labFormaCard(d);
 
                 el.innerHTML =
-                    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">' + ringCards.join('') + '</div>' + loadHtml + aiHtml;
+                    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">' + ringCards.join('') + '</div>' + loadHtml + formaHtml;
 
                 // Wypełnienie pierścieni i wjazd wskaźnika na skali — osobno od
                 // fade-in kart poniżej, żeby liczby/kreska ożywały PO tym jak karta
@@ -6600,51 +6654,6 @@
                         c.style.transform = 'translate3d(0,0,0)';
                     }));
                 });
-
-                // Analizy AI: najpierw "analityk pracuje", potem odsłonięcie
-                const list = document.getElementById('lab-ai-list');
-                if (!list) return;
-                const analyses = d.aiAnalyses || [];
-                if (!analyses.length) {
-                    list.innerHTML = '<div style="background:#fff;border:1px solid #EBEBEB;border-radius:20px;padding:20px;">' +
-                        '<div style="font-size:14px;font-weight:600;color:#1A1A1A;margin-bottom:4px;">Analityk czeka na dane</div>' +
-                        '<div style="font-size:13px;color:#8A8A8A;line-height:1.5;margin-bottom:12px;">W Premium analityk automatycznie analizuje każdy trening — wnioski zobaczysz tutaj.</div>' +
-                        (!currentUserPremium ? '<button onclick="showPaywall(\'Automatyczna analiza każdego treningu dostępna w Premium.\', { surveyAvailable: !currentSurveyCompleted })" style="width:100%;padding:12px;min-height:44px;background:#1A1A1A;border:none;border-radius:12px;color:#fff;font-size:14px;font-weight:600;cursor:pointer;font-family:Inter,sans-serif;touch-action:manipulation;">Odblokuj analizy</button>' : '') +
-                        '</div>';
-                    return;
-                }
-                list.innerHTML = '<div id="lab-ai-thinking" style="display:flex;align-items:center;gap:10px;padding:16px 4px;">' +
-                    '<div class="status-dots"><span></span><span></span><span></span></div>' +
-                    '<div style="font-size:13px;color:#8A8A8A;">Analityk przygotowuje przegląd…</div></div>';
-                setTimeout(() => {
-                    if (gen !== _labLoadGen) return;
-                    list.innerHTML = analyses.map((a, i) => {
-                        const dt = new Date(a.date + 'T00:00:00').toLocaleDateString('pl-PL', { day: 'numeric', month: 'long' });
-                        const cid = 'lab-ai-txt-' + i;
-                        return '<div class="lab-ai-item" style="background:#fff;border:1px solid #EBEBEB;border-radius:20px;padding:16px;margin-bottom:10px;">' +
-                            '<div style="font-size:11px;font-weight:700;color:#8A8A8A;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;">' + dt + '</div>' +
-                            '<div id="' + cid + '" style="font-size:14px;color:#1A1A1A;line-height:1.6;overflow:hidden;display:-webkit-box;-webkit-line-clamp:4;line-clamp:4;-webkit-box-orient:vertical;">' + _escHtml(a.content) + '</div>' +
-                            '<button class="lab-ai-more" onclick="_toggleLabAiClamp(this)" data-target="' + cid + '" style="display:none;margin-top:8px;background:none;border:none;padding:0;min-height:24px;font-size:12px;font-weight:700;color:#1A1A1A;cursor:pointer;font-family:Inter,sans-serif;">Pokaż więcej</button>' +
-                            '</div>';
-                    }).join('');
-                    list.querySelectorAll('.lab-ai-item').forEach((item, i) => {
-                        item.style.opacity = '0';
-                        item.style.transform = 'translate3d(0,8px,0)';
-                        item.style.transition = 'opacity 350ms cubic-bezier(0.23,1,0.32,1) ' + (i * 80) + 'ms, transform 350ms cubic-bezier(0.23,1,0.32,1) ' + (i * 80) + 'ms';
-                        requestAnimationFrame(() => requestAnimationFrame(() => {
-                            item.style.opacity = '1';
-                            item.style.transform = 'translate3d(0,0,0)';
-                        }));
-                    });
-                    // Przycięty tekst (4 linie) dostaje "Pokaż więcej" TYLKO gdy realnie
-                    // się nie mieści — inaczej krótkie analizy miałyby martwy przycisk
-                    requestAnimationFrame(() => requestAnimationFrame(() => {
-                        list.querySelectorAll('.lab-ai-more').forEach(btn => {
-                            const txt = document.getElementById(btn.dataset.target);
-                            if (txt && txt.scrollHeight > txt.clientHeight + 2) btn.style.display = 'inline-block';
-                        });
-                    }));
-                }, 1200);
             } catch (e) {
                 if (gen !== _labLoadGen) return;
                 el.innerHTML = '<div style="background:#fff;border:1px solid #EBEBEB;border-radius:20px;padding:20px;text-align:center;">' +
@@ -6652,21 +6661,6 @@
                     '<div style="font-size:13px;color:#8A8A8A;margin-bottom:12px;">Sprawdź połączenie i spróbuj ponownie.</div>' +
                     '<button onclick="loadLab()" style="padding:10px 20px;min-height:44px;background:transparent;border:1px solid #1A1A1A;border-radius:12px;font-size:14px;font-weight:600;color:#1A1A1A;cursor:pointer;font-family:Inter,sans-serif;touch-action:manipulation;">Spróbuj ponownie</button></div>';
                 console.error('loadLab błąd:', e.message);
-            }
-        }
-
-        function _toggleLabAiClamp(btn) {
-            const txt = document.getElementById(btn.dataset.target);
-            if (!txt) return;
-            const expanded = txt.dataset.expanded === '1';
-            if (expanded) {
-                txt.style.webkitLineClamp = '4';
-                txt.dataset.expanded = '0';
-                btn.textContent = 'Pokaż więcej';
-            } else {
-                txt.style.webkitLineClamp = 'unset';
-                txt.dataset.expanded = '1';
-                btn.textContent = 'Zwiń';
             }
         }
 
@@ -9342,7 +9336,7 @@
 
         // Stempel buildu — dowód na urządzeniu, że działa świeży kod (trzymać
         // w zgodzie z CACHE_VERSION w sw.js; bump przy każdym deployu frontendu)
-        const VELM_BUILD = 'v27';
+        const VELM_BUILD = 'v28';
         console.log('velm build', VELM_BUILD, navigator.userAgent);
 
         async function hardReloadApp() {
