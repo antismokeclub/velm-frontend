@@ -8323,11 +8323,16 @@
         }
 
         // Klik w "Wygeneruj nowy plan" → eleganckie okno potwierdzenia
-        function generateNewPlan() {
+        async function generateNewPlan() {
             const userId = localStorage.getItem('velm_user_id');
             if (!userId) return;
 
-            // Bez premium narada i tak wróci 402 — pokaż paywall bez wywołania API
+            // currentUserPremium to migawka z URUCHOMIENIA apki (loadSubscriptionStatus
+            // woła się raz, przy starcie) — jeśli status premium zmienił się W TRAKCIE
+            // tej samej sesji (świeży zakup, albo ręczna zmiana w bazie jak teraz przy
+            // teście), stary flag pokazywał zły ekran (paywall) mimo że konto JEST już
+            // premium. Odświeżamy na żywo tuż przed decyzją zamiast ufać migawce.
+            await loadSubscriptionStatus();
             if (!currentUserPremium) {
                 showPaywall('Nowa narada sztabu dostępna w Premium. Twój plan z rejestracji pozostaje aktywny.', { surveyAvailable: !currentSurveyCompleted });
                 return;
@@ -9214,7 +9219,7 @@
 
         // Stempel buildu — dowód na urządzeniu, że działa świeży kod (trzymać
         // w zgodzie z CACHE_VERSION w sw.js; bump przy każdym deployu frontendu)
-        const VELM_BUILD = 'v21';
+        const VELM_BUILD = 'v22';
         console.log('velm build', VELM_BUILD, navigator.userAgent);
 
         async function hardReloadApp() {
