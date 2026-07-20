@@ -9168,7 +9168,7 @@
 
         // Stempel buildu — dowód na urządzeniu, że działa świeży kod (trzymać
         // w zgodzie z CACHE_VERSION w sw.js; bump przy każdym deployu frontendu)
-        const VELM_BUILD = 'v11';
+        const VELM_BUILD = 'v12';
         console.log('velm build', VELM_BUILD, navigator.userAgent);
 
         async function hardReloadApp() {
@@ -9813,20 +9813,19 @@
             if (km)  { workoutData.dystans_km = parseFloat(km); workoutData.odcinek_km = Math.round(parseFloat(km) * 0.6 * 10) / 10; }
             fuKmVal = workoutData.dystans_km / 2;
             if (currentMode === 'post') {
-                const _ep = _parsePaceMin(window._todayPace);
+                // Wszystko liczone przez _ciEstTotalMin/_ciEstPaceMin — jedno źródło
+                // prawdy z fallbackowym tempem, żeby karuzela ZAWSZE startowała od
+                // sensownej wartości nawet gdy plan nie ma wpisanego realnego tempa
                 const _dk = workoutData.dystans_km || 10;
-                if (workoutType === 'easy' || workoutType === 'long') {
-                    const _e = Math.round((_ep || 6.5) * _dk);
-                    durH = Math.floor(_e/60); durM = _e%60; durS = 0; duration = durH*60+durM;
-                } else if (workoutType === 'walkrun') {
-                    const _e = Math.round(8.0 * _dk);
+                if (workoutType === 'easy' || workoutType === 'long' || workoutType === 'walkrun') {
+                    const _e = _ciEstTotalMin(workoutType, _dk);
                     durH = Math.floor(_e/60); durM = _e%60; durS = 0; duration = durH*60+durM;
                 } else if (workoutType === 'tempo') {
                     const _sk = workoutData.odcinek_km || 6;
-                    const _e = Math.round((_ep || 5.0) * _sk);
+                    const _e = _ciEstTotalMin('tempo', _sk);
                     workSegH = Math.floor(_e/60); workSegM = _e%60; workSegS = 0;
                 } else if (workoutType === 'interval') {
-                    const _es = Math.round((_ep || 4.5) * 60 * 0.4);
+                    const _es = Math.round(_ciEstPaceMin('interval') * 60 * 0.4);
                     workSegH = 0; workSegM = Math.floor(_es/60); workSegS = Math.round((_es%60)/5)*5;
                     if (workSegS >= 60) { workSegM++; workSegS = 0; }
                 }
@@ -9839,12 +9838,12 @@
             const previewSub   = document.getElementById('ci-preview-sub');
             if (previewTitle) previewTitle.textContent = TYPE_LABEL_CI[workoutType] || workoutType;
             if (previewSub) {
-                // Pełny obraz planu: dystans · szacowany czas · tempo (jeśli plan je podaje)
+                // Pełny obraz planu: dystans · szacowany czas (zawsze, dzięki fallbackowi
+                // w _ciEstTotalMin — nie znika, gdy plan nie ma wpisanego realnego tempa)
                 const parts = [workoutData.dystans_km + ' km'];
-                const paceMin = (typeof _parsePaceMin === 'function') ? _parsePaceMin(window._todayPace) : null;
-                if (paceMin && workoutData.dystans_km) {
-                    const estMin = Math.round(paceMin * workoutData.dystans_km);
-                    if (typeof _fmtMin === 'function') parts.push('~' + _fmtMin(estMin));
+                if (workoutData.dystans_km) {
+                    const estMin = _ciEstTotalMin(workoutType, workoutData.dystans_km);
+                    if (estMin > 0) parts.push('~' + _fmtMin(estMin));
                 }
                 if (window._todayPace) parts.push(String(window._todayPace).replace(/\s*min\/km\s*$/i, '') + '/km');
                 previewSub.textContent = parts.join(' · ');
@@ -10363,6 +10362,14 @@
         const CI_PK_H = 52, CI_PK_PAD = 3, CI_PK_CONT_H = 200;
         function _parsePaceMin(s) { const m = String(s||'').match(/(\d+):(\d+)/); return m ? parseInt(m[1]) + parseInt(m[2])/60 : null; }
         function _fmtMin(total) { const h = Math.floor(total/60), m = total%60; return h > 0 ? `${h}h ${m} min` : `${m} min`; }
+        // Domyślne tempo per typ treningu — gdy plan nie ma wpisanego konkretnego
+        // tempa (częste przy easy/long), i tak liczymy szacowany czas zamiast go
+        // pomijać. Bez tego karta planu i podgląd poranny potrafiły pokazać samo
+        // "6 km" bez czasu, kiedy window._todayPace było puste.
+        const CI_FALLBACK_PACE = { easy: 6.5, long: 6.5, walkrun: 8.0, tempo: 5.0, interval: 4.5 };
+        function _ciEstPaceMin(type) { return _parsePaceMin(window._todayPace) || CI_FALLBACK_PACE[type] || 6.5; }
+        // Zaokrąglone minuty total = tempo(min/km) x dystans(km); zawsze > 0 gdy km > 0
+        function _ciEstTotalMin(type, km) { return Math.round(_ciEstPaceMin(type) * (km || 0)); }
 
         function _ciPkCol(values, initVal, key) {
             const selIdx = Math.max(0, values.indexOf(initVal));
