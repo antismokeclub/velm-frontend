@@ -8299,6 +8299,10 @@
                 const narada = showNaradaOverlay({ estimateMs: 60000 });
                 try {
                     await apiFetch('/api/weekly-update', { method: 'POST', body: { userId: currentUserId } });
+                    // calendarPlan to wspólny cache — loadCalendar/loadTodayCard
+                    // bez wyczyszczenia go od razu wypadają na "if (calendarPlan)"
+                    // i renderują STARY plan sprzed narady, bez pytania serwera.
+                    calendarPlan = null;
                     loadCalendar();
                     loadTodayCard();
                     if (typeof loadPlanChanges === 'function') loadPlanChanges();
@@ -8396,6 +8400,7 @@
                     method: 'POST',
                     body: { userId: userId }
                 });
+                calendarPlan = null;
                 loadSettings();
                 loadCalendar();
                 loadTodayCard();
@@ -9219,7 +9224,7 @@
 
         // Stempel buildu — dowód na urządzeniu, że działa świeży kod (trzymać
         // w zgodzie z CACHE_VERSION w sw.js; bump przy każdym deployu frontendu)
-        const VELM_BUILD = 'v22';
+        const VELM_BUILD = 'v23';
         console.log('velm build', VELM_BUILD, navigator.userAgent);
 
         async function hardReloadApp() {
