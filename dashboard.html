@@ -9224,7 +9224,7 @@
 
         // Stempel buildu — dowód na urządzeniu, że działa świeży kod (trzymać
         // w zgodzie z CACHE_VERSION w sw.js; bump przy każdym deployu frontendu)
-        const VELM_BUILD = 'v23';
+        const VELM_BUILD = 'v24';
         console.log('velm build', VELM_BUILD, navigator.userAgent);
 
         async function hardReloadApp() {
@@ -9837,9 +9837,18 @@
             const morningDone = localStorage.getItem('velm_checkin_morning_done');
             if (morningDone !== today) {
                 openCheckin('morning');
-            } else {
-                openCheckin('post', window._todayTyp, window._todayKm);
+                return;
             }
+            // Bez tej bramki FAB zawsze otwierał PUSTY formularz wieczornego
+            // check-inu, nawet gdy user wypełnił go już dziś — dało się klikać
+            // w kółko i nadpisywać dane bez żadnego ostrzeżenia.
+            const postDone   = localStorage.getItem('velm_checkin_post_done');
+            const hasWorkout = window._todayTyp && window._todayTyp !== 'rest';
+            if (hasWorkout && postDone !== today) {
+                openCheckin('post', window._todayTyp, window._todayKm);
+                return;
+            }
+            showVelmToast('Dzisiejszy check-in już zrobiony ✓');
         }
 
         function openCheckin(mode, typ, km) {
