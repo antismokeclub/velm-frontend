@@ -6,7 +6,7 @@
 // - Static assets (icons, manifest): cache-first
 // - API calls: network-first z fallback do offline page
 
-const CACHE_VERSION = 'velm-v12';
+const CACHE_VERSION = 'velm-v13';
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const RUNTIME_CACHE = `${CACHE_VERSION}-runtime`;
 

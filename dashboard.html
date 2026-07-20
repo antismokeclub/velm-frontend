@@ -9168,7 +9168,7 @@
 
         // Stempel buildu — dowód na urządzeniu, że działa świeży kod (trzymać
         // w zgodzie z CACHE_VERSION w sw.js; bump przy każdym deployu frontendu)
-        const VELM_BUILD = 'v12';
+        const VELM_BUILD = 'v13';
         console.log('velm build', VELM_BUILD, navigator.userAgent);
 
         async function hardReloadApp() {
@@ -9829,7 +9829,11 @@
                     workSegH = 0; workSegM = Math.floor(_es/60); workSegS = Math.round((_es%60)/5)*5;
                     if (workSegS >= 60) { workSegM++; workSegS = 0; }
                 }
-                showPost0Section();
+                // UWAGA: showPost0Section() budowałoby karuzelę i ustawiało jej scrollTop
+                // TUTAJ — ale overlay ma jeszcze display:none (dopiero ustawiane niżej).
+                // scrollTop ustawiony na elemencie wewnątrz ukrytego przodka bywa
+                // zawodny (gubiony) w przeglądarkach mobilnych — dlatego wołamy to
+                // dopiero PO ov.style.display='flex', tak jak karuzelę snu.
             }
 
             // Update workout preview card
@@ -9948,8 +9952,11 @@
             ov.style.display = 'flex';
             document.body.style.overflow = 'hidden';
 
-            // Init dynamic pickers
+            // Init dynamic pickers — TERAZ overlay jest już display:flex, więc
+            // scrollTop ustawiony na kolumnach karuzeli faktycznie "łapie się"
+            // na każdej przeglądarce (patrz komentarz przy showPost0Section wyżej)
             initCiPickers(document.getElementById('ci-pk-sleep'));
+            if (currentMode === 'post') showPost0Section();
 
             requestAnimationFrame(() => {
                 lockStepsHeight();
