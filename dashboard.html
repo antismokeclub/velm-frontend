@@ -8279,9 +8279,12 @@
                 if (!currentUserId || _weeklyNaradaRunning) return;
                 if (document.getElementById('narada-overlay')) return;
 
-                const res = await fetch(`${API_BASE}/api/plan/${currentUserId}`, { headers: authHeaders() });
-                if (!res.ok) return;
-                const data = await res.json();
+                // apiFetch (nie goły fetch) — dostajemy darmowy retry po
+                // odświeżeniu tokenu. Goły fetch + "if (!res.ok) return" po
+                // cichu ubijał całe sprawdzenie stale-planu, gdy access token
+                // akurat wygasł przy starcie apki — bez tego user mógł nigdy
+                // nie dostać wymuszonej narady, bo nic tego nie ponawiało.
+                const data = await apiFetch(`/api/plan/${currentUserId}`);
                 const plan = data?.plan?.plan ?? data?.plan ?? null;
                 const weekKey = plan?.tydzien_od || plan?.dni?.[0]?.data;
                 if (!weekKey) return;   // brak planu w ogóle — nie ruszamy (onboarding to załatwia)
@@ -8311,7 +8314,12 @@
                 } finally {
                     _weeklyNaradaRunning = false;
                 }
-            } catch (e) { /* offline / brak planu — pomiń */ }
+            } catch (e) {
+                // Offline / sesja wygasła bez odzysku — nie przerywamy usera
+                // toastem, ale zostawiamy ślad w konsoli zamiast cichej czarnej
+                // dziury (poprzednio zero logu, nie dało się tego zdiagnozować)
+                console.warn('checkWeeklyNarada: pominięto —', e?.message || e);
+            }
         }
 
         // Klik w "Wygeneruj nowy plan" → eleganckie okno potwierdzenia
@@ -8918,7 +8926,23 @@
 
             const todayStr = new Date().toISOString().split('T')[0];
             let day = dni.find(d => d.data === todayStr);
-            if (!day) day = dni.find(d => d.typ !== 'rest') ?? dni[0];
+            if (!day) {
+                // Plan, którego tydzień już się skończył (dziś jest PO ostatnim
+                // dniu planu) — NIE zgadujemy losowego dnia z przeszłości jako
+                // "dzisiejszego" (to właśnie pokazywało np. "10 km" sprzed
+                // tygodnia). Mówimy wprost, że czekamy na naradę.
+                const lastDay = dni[dni.length - 1]?.data;
+                if (lastDay && todayStr > lastDay) {
+                    window._todayTyp = 'rest'; window._todayKm = 0; window._todayStruktura = null;
+                    if (nameEl)  nameEl.textContent = 'Plan wygasł — czeka na naradę';
+                    if (badgeEl) badgeEl.textContent = '🌙';
+                    updatePostCheckinBanner();
+                    return;
+                }
+                // Wciąż w obrębie tygodnia planu, ale bez dokładnego dopasowania
+                // (np. luka w danych) — fallback jak dotychczas
+                day = dni.find(d => d.typ !== 'rest') ?? dni[0];
+            }
 
             if (!day || day.typ === 'rest') {
                 window._todayTyp = 'rest';
@@ -9190,7 +9214,7 @@
 
         // Stempel buildu — dowód na urządzeniu, że działa świeży kod (trzymać
         // w zgodzie z CACHE_VERSION w sw.js; bump przy każdym deployu frontendu)
-        const VELM_BUILD = 'v20';
+        const VELM_BUILD = 'v21';
         console.log('velm build', VELM_BUILD, navigator.userAgent);
 
         async function hardReloadApp() {
