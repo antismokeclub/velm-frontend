@@ -8912,6 +8912,7 @@
             if (!day || day.typ === 'rest') {
                 window._todayTyp = 'rest';
                 window._todayKm  = 0;
+                window._todayStruktura = null;
                 if (nameEl)  nameEl.textContent = 'Dzień Odpoczynku';
                 if (badgeEl) badgeEl.textContent = '🌙';
                 updatePostCheckinBanner();
@@ -8920,6 +8921,11 @@
 
             window._todayTyp = day.typ;
             window._todayKm  = day.dystans_km || 0;
+            // Realna struktura treningu (powtórzenia/odcinek/tempo odcinka dla
+            // interval/tempo/walkrun) — ta sama, którą pokazuje widok kalendarza
+            // (buildDayHTML). Bez tego check-in pokazywał sztywne wartości domyślne
+            // (8 powtórzeń, 400m, 6km) zamiast tego, co NAPRAWDĘ jest w planie.
+            window._todayStruktura = day.struktura || null;
 
             const color = TYPE_COLORS[day.typ] || 'var(--primary-color)';
             if (mainCard) mainCard.style.borderLeftColor = color;
@@ -9168,7 +9174,7 @@
 
         // Stempel buildu — dowód na urządzeniu, że działa świeży kod (trzymać
         // w zgodzie z CACHE_VERSION w sw.js; bump przy każdym deployu frontendu)
-        const VELM_BUILD = 'v16';
+        const VELM_BUILD = 'v17';
         console.log('velm build', VELM_BUILD, navigator.userAgent);
 
         async function hardReloadApp() {
@@ -9795,6 +9801,12 @@
             durH = 0; durM = 45; durS = 0;
             workSegH = 0; workSegM = 0; workSegS = 0;
             intervalDistanceM = 400; moreKmVal = 0;
+            // Resetuj do domyślnych — nadpisywane niżej realną strukturą planu,
+            // jeśli jest dostępna. Bez tego resetu wartości z POPRZEDNIEGO otwarcia
+            // (np. realne 6 powtórzeń z wczorajszych interwałów) zostawałyby
+            // "przyklejone" do dzisiejszego, zupełnie innego treningu.
+            workoutData.powtorzenia = 8; workoutData.serie = 6;
+            workoutData.dystans_odcinka_m = null; workoutData.tempo_odcinka = null;
             const _sleepPkEl = document.getElementById('ci-pk-sleep');
             if (_sleepPkEl) { _sleepPkEl.innerHTML = _buildCiSleepPicker(); }
             document.querySelectorAll('#checkin-overlay .completion-btn').forEach(b => b.classList.remove('selected'));
@@ -9806,23 +9818,67 @@
             if (!km && window._todayKm) km = window._todayKm;
             if (typ) workoutType = typ;
             if (km)  { workoutData.dystans_km = parseFloat(km); workoutData.odcinek_km = Math.round(parseFloat(km) * 0.6 * 10) / 10; }
+            // Nadpisz domyślne/heurystyczne wartości REALNĄ strukturą z planu (Szef
+            // Sztabu zapisuje ją przy generowaniu — to samo źródło, którego już
+            // używa widok kalendarza w buildDayHTML). Bez tego karuzela i karta planu
+            // pokazywały fikcyjne 8 powtórzeń / 400 m / 6 km niezależnie od planu.
+            // "powtorzeenia" to literalna nazwa pola z backendu (headtrainer.js) —
+            // czytamy oba warianty pisowni na wszelki wypadek.
+            const _struct = window._todayStruktura || null;
+            if (_struct) {
+                if (workoutType === 'interval') {
+                    const rep = _struct.powtorzeenia || _struct.powtorzenia;
+                    if (rep) {
+                        if (rep.ile) workoutData.powtorzenia = rep.ile;
+                        if (rep.dystans_m) workoutData.dystans_odcinka_m = rep.dystans_m;
+                        if (rep.tempo) workoutData.tempo_odcinka = rep.tempo;
+                    }
+                } else if (workoutType === 'tempo') {
+                    const odc = _struct.odcinek;
+                    if (odc) {
+                        if (odc.dystans_km) workoutData.odcinek_km = odc.dystans_km;
+                        if (odc.tempo) workoutData.tempo_odcinka = odc.tempo;
+                    }
+                } else if (workoutType === 'walkrun') {
+                    const repCount = _struct.powtorzeenia ?? _struct.powtorzenia;
+                    if (typeof repCount === 'number' && repCount > 0) workoutData.serie = repCount;
+                }
+            }
             fuKmVal = workoutData.dystans_km / 2;
             if (currentMode === 'post') {
                 // Wszystko liczone przez _ciEstTotalMin/_ciEstPaceMin — jedno źródło
-                // prawdy z fallbackowym tempem, żeby karuzela ZAWSZE startowała od
-                // sensownej wartości nawet gdy plan nie ma wpisanego realnego tempa
+                // prawdy, które PRZEDE WSZYSTKIM sięga po realne tempo odcinka z planu
+                // (workoutData.tempo_odcinka), a dopiero potem po ogólne tempo dnia
+                // i na końcu po sensowny fallback — karuzela zawsze startuje od
+                // najdokładniejszej dostępnej wartości.
                 const _dk = workoutData.dystans_km || 10;
-                if (workoutType === 'easy' || workoutType === 'long' || workoutType === 'walkrun') {
+                if (workoutType === 'easy' || workoutType === 'long') {
                     const _e = _ciEstTotalMin(workoutType, _dk);
+                    durH = Math.floor(_e/60); durM = _e%60; durS = 0; duration = durH*60+durM;
+                } else if (workoutType === 'walkrun') {
+                    // Jeśli plan ma realny rozkład minut (rozgrzewka + serie biegu/marszu
+                    // + schłodzenie), liczymy z NIEGO — dokładniej niż generyczne 8 min/km
+                    const wr = _struct;
+                    const repCount = wr ? (wr.powtorzeenia ?? wr.powtorzenia) : null;
+                    let _e;
+                    if (wr && typeof repCount === 'number' && repCount > 0) {
+                        const _perRep = (wr.bieg_min || 0) + (wr.marsz_min || 0);
+                        _e = Math.round((wr.rozgrzewka_min || 0) + _perRep * repCount + (wr.schlodzenie_min || 0));
+                    } else {
+                        _e = _ciEstTotalMin('walkrun', _dk);
+                    }
                     durH = Math.floor(_e/60); durM = _e%60; durS = 0; duration = durH*60+durM;
                 } else if (workoutType === 'tempo') {
                     const _sk = workoutData.odcinek_km || 6;
                     const _e = _ciEstTotalMin('tempo', _sk);
                     workSegH = Math.floor(_e/60); workSegM = _e%60; workSegS = 0;
                 } else if (workoutType === 'interval') {
-                    const _es = Math.round(_ciEstPaceMin('interval') * 60 * 0.4);
-                    workSegH = 0; workSegM = Math.floor(_es/60); workSegS = Math.round((_es%60)/5)*5;
+                    // Dystans odcinka z planu (np. 1000m), nie sztywne 400m
+                    const _segKm = (workoutData.dystans_odcinka_m || 400) / 1000;
+                    const _es = Math.round(_ciEstPaceMin('interval') * 60 * _segKm);
+                    workSegH = Math.floor(_es/3600); workSegM = Math.floor((_es%3600)/60); workSegS = Math.round((_es%60)/5)*5;
                     if (workSegS >= 60) { workSegM++; workSegS = 0; }
+                    if (workSegM >= 60) { workSegH++; workSegM -= 60; }
                 }
                 // UWAGA: showPost0Section() budowałoby karuzelę i ustawiało jej scrollTop
                 // TUTAJ — ale overlay ma jeszcze display:none (dopiero ustawiane niżej).
@@ -10367,7 +10423,12 @@
         // pomijać. Bez tego karta planu i podgląd poranny potrafiły pokazać samo
         // "6 km" bez czasu, kiedy window._todayPace było puste.
         const CI_FALLBACK_PACE = { easy: 6.5, long: 6.5, walkrun: 8.0, tempo: 5.0, interval: 4.5 };
-        function _ciEstPaceMin(type) { return _parsePaceMin(window._todayPace) || CI_FALLBACK_PACE[type] || 6.5; }
+        // Kolejność: (1) realne tempo ODCINKA z planu (najdokładniejsze — dla
+        // interwałów/tempo bywa dużo szybsze niż ogólne tempo dnia, np. 3:40 vs 5:05),
+        // (2) ogólne tempo dnia z planu, (3) sensowny fallback per typ
+        function _ciEstPaceMin(type) {
+            return _parsePaceMin(workoutData.tempo_odcinka) || _parsePaceMin(window._todayPace) || CI_FALLBACK_PACE[type] || 6.5;
+        }
         // Zaokrąglone minuty total = tempo(min/km) x dystans(km); zawsze > 0 gdy km > 0
         function _ciEstTotalMin(type, km) { return Math.round(_ciEstPaceMin(type) * (km || 0)); }
 
@@ -10472,7 +10533,7 @@
             // odchylenia łapie gałąź "mniej niż plan" w kroku "Jak poszło?")
             if (workoutType === 'interval') {
                 segmentRepeats = workoutData.powtorzenia || 8;
-                intervalDistanceM = 400;
+                intervalDistanceM = workoutData.dystans_odcinka_m || 400;
             } else if (workoutType === 'tempo') {
                 segmentWorkKm = workoutData.odcinek_km || 6;
             } else if (workoutType === 'walkrun') {
@@ -10497,8 +10558,15 @@
             const items = [];
             if (workoutType === 'interval') {
                 items.push(_it(workoutData.powtorzenia || 8, '×', 'powtórzenia'));
-                items.push(_it('400', 'm', 'odcinek'));
-                if (workSegM || workSegS) items.push(_it(`~${workSegM}:${String(workSegS).padStart(2, '0')}`, '', 'przew. czas'));
+                items.push(_it(intervalDistanceM || 400, 'm', 'odcinek'));
+                if (workSegH || workSegM || workSegS) {
+                    // Godziny NIE mogą się pogubić — przy odcinkach >1h sam M:SS
+                    // pokazywałby np. "5:00" zamiast prawdziwych "1:05:00"
+                    const _wt = workSegH > 0
+                        ? `${workSegH}:${String(workSegM).padStart(2, '0')}:${String(workSegS).padStart(2, '0')}`
+                        : `${workSegM}:${String(workSegS).padStart(2, '0')}`;
+                    items.push(_it(`~${_wt}`, '', 'przew. czas'));
+                }
             } else if (workoutType === 'tempo') {
                 if (workoutData.odcinek_km) items.push(_it(workoutData.odcinek_km, 'km', 'odcinek'));
                 if (workSegH * 60 + workSegM) items.push(_it('~' + _fmtMin(workSegH * 60 + workSegM), '', 'przew. czas'));
