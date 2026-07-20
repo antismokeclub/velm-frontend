@@ -6333,7 +6333,16 @@
             try {
                 const res  = await fetch(`${API_BASE}/api/plan/${currentUserId}`, { headers: authHeaders() });
                 const data = await res.json();
-                calendarPlan = data?.plan?.plan ?? data?.plan ?? null;
+                // BUG: bez sprawdzenia res.ok, błąd auth (401 z poprawnym JSON-em
+                // { error: '...' }) parsował się bez wyjątku — calendarPlan dostawał
+                // ten obiekt błędu (bez .dni), renderCalendar() wychodził po cichu
+                // (if (!calendarPlan) return), a siatka zostawała pusta/w spinnerze
+                // BEZ ŻADNEGO komunikatu. Trening był wtedy widoczny na Dom (tam jest
+                // fallback na pierwszy dzień z planu), ale nie w Kalendarzu (brak
+                // fallbacku — i słusznie, komórka nie może pokazywać cudzego dnia).
+                if (!res.ok) throw new Error(data?.error || `HTTP ${res.status}`);
+                const _rawPlan = data?.plan?.plan ?? data?.plan ?? null;
+                calendarPlan = (_rawPlan && Array.isArray(_rawPlan.dni)) ? _rawPlan : null;
                 if (calendarPlan?.dni?.length) {
                     calWeekStart  = getMonday(new Date(calendarPlan.dni[0].data));
                     calSelectedDay = toDateStr(new Date());
@@ -6341,9 +6350,11 @@
                     const planStart = new Date(calendarPlan.dni[0].data);
                     calMonth = planStart.getMonth();
                     calYear  = planStart.getFullYear();
+                    renderCalendar();
+                    updateCalToggle(calView);
+                } else {
+                    calContent.innerHTML = `<div style="text-align:center;padding:48px 16px;font-size:14px;color:#8A8A8A;">Brak planu — wróć po naradzie</div>`;
                 }
-                renderCalendar();
-                updateCalToggle(calView);
             } catch (e) {
                 console.error('Calendar load error:', e);
                 calContent.innerHTML = `<div style="text-align:center;padding:48px 16px;font-size:14px;color:#8A8A8A;">Brak połączenia z serwerem</div>`;
@@ -8966,9 +8977,14 @@
                 if (!dni?.length) {
                     const res  = await fetch(`${API_BASE}/api/plan/${currentUserId}`, { headers: authHeaders() });
                     const data = await res.json();
-                    const plan = data?.plan?.plan ?? data?.plan ?? data;
+                    // Bez res.ok, błąd auth (401 z poprawnym JSON-em { error: '...' })
+                    // parsował się bez wyjątku i ten obiekt błędu (bez .dni) lądował
+                    // we WSPÓLNYM calendarPlan — Dom miał wtedy własny fallback więc
+                    // pokazywał coś (mylące "działa"), ale Kalendarz dziedziczył
+                    // "plan" bez dni i renderował pustą siatkę bez żadnego błędu.
+                    const plan = res.ok ? (data?.plan?.plan ?? data?.plan ?? null) : null;
                     dni = plan?.dni;
-                    if (plan && !calendarPlan) calendarPlan = plan;
+                    if (plan?.dni && !calendarPlan) calendarPlan = plan;
                 }
 
                 _fillTodayCard(dni);
@@ -9174,7 +9190,7 @@
 
         // Stempel buildu — dowód na urządzeniu, że działa świeży kod (trzymać
         // w zgodzie z CACHE_VERSION w sw.js; bump przy każdym deployu frontendu)
-        const VELM_BUILD = 'v19';
+        const VELM_BUILD = 'v20';
         console.log('velm build', VELM_BUILD, navigator.userAgent);
 
         async function hardReloadApp() {
@@ -9776,6 +9792,9 @@
         // do którego pola (segmentRepeats/segmentSeries) wpisać wartość
         let fuCountVal = 0;
         let _fuCountTarget = null;
+        // fuKmWrap obsługuje 2 tryby: 'km' (dystans) i 'm' (metry, odcinek
+        // interwałowy) — jeden widget, inny krok/format zależnie od _fuKmUnit
+        let _fuKmUnit = 'km';
         let _checkinStepsLockedHeight = 0;
         let _checkinHeightRaf = 0;
 
@@ -9807,7 +9826,7 @@
             durH = 0; durM = 45; durS = 0;
             workSegH = 0; workSegM = 0; workSegS = 0;
             intervalDistanceM = 400; moreVal = 0;
-            fuCountVal = 0; _fuCountTarget = null;
+            fuCountVal = 0; _fuCountTarget = null; _fuKmUnit = 'km';
             // Resetuj do domyślnych — nadpisywane niżej realną strukturą planu,
             // jeśli jest dostępna. Bez tego resetu wartości z POPRZEDNIEGO otwarcia
             // (np. realne 6 powtórzeń z wczorajszych interwałów) zostawałyby
@@ -10254,14 +10273,17 @@
                 body: JSON.stringify({ userId, message: msg, agent: 'analityk' })
             }).catch(() => {});
             const completion = selectedCompletion || 'exact';
-            // Faktyczny dystans: "krótszy dystans" (easy/long) → licznik z kroku 2b;
-            // "więcej niż w planie" → licznik z kroku 3, ALE tylko dla easy/long, bo
-            // dla interval/tempo/walkrun moreVal niesie inną jednostkę (powtórzenia/
-            // serie/km odcinka — patrz completed_repeats/working_distance_km/
-            // completed_series niżej), nie łączny dystans. Tempo AI liczy samo z
-            // distance_km/duration_min, więc ręczne wpisywanie tempa (i tak
-            // niedostępne dla kogoś bez zegarka biegowego) jest zbędne.
-            const actualKm = ((workoutType === 'easy' || workoutType === 'long') && followUpSelections.has('krotszy_dystans') && fuKmVal > 0)
+            // Faktyczny dystans: "krótszy dystans" (easy/long) lub "mniejszy dystans
+            // całkowity" (walkrun) → licznik z kroku 2b; "więcej niż w planie" →
+            // licznik z kroku 3, ALE tylko dla easy/long, bo dla interval/tempo/
+            // walkrun moreVal niesie inną jednostkę (powtórzenia/serie/km odcinka —
+            // patrz completed_repeats/working_distance_km/completed_series niżej),
+            // nie łączny dystans. Tempo AI liczy samo z distance_km/duration_min,
+            // więc ręczne wpisywanie tempa (i tak niedostępne dla kogoś bez
+            // zegarka biegowego) jest zbędne.
+            const needsKmLess = (((workoutType === 'easy' || workoutType === 'long') && followUpSelections.has('krotszy_dystans')) ||
+                                  (workoutType === 'walkrun' && followUpSelections.has('mniej_km'))) && fuKmVal > 0;
+            const actualKm = needsKmLess
                 ? fuKmVal
                 : (selectedCompletion === 'more' && (workoutType === 'easy' || workoutType === 'long') && moreVal > 0)
                 ? moreVal
@@ -10829,30 +10851,43 @@
         function toggleFollowUp2b(card, key) {
             if (followUpSelections.has(key)) { followUpSelections.delete(key); card.classList.remove('selected'); }
             else { followUpSelections.add(key); card.classList.add('selected'); }
-            // Easy/long "krótszy dystans" LUB tempo "krótszy odcinek" → licznik km
-            // (musimy wiedzieć O ILE mniej — sam checkbox tego nie mówi)
+            // Każda opcja opisująca "mniej/krócej" musi wiedzieć O ILE — sam
+            // checkbox tego nie mówi. "Przerwany"/"nieukończony" liczy się do
+            // tej samej wartości co jego "krótszy ___" odpowiednik, bo skutek
+            // (mniej zrobione) jest identyczny niezależnie od podanej przyczyny.
             const kmWrap = document.getElementById('fuKmWrap');
             if (kmWrap) {
-                const needsKmEasy  = (workoutType === 'easy' || workoutType === 'long') && followUpSelections.has('krotszy_dystans');
-                const needsKmTempo = workoutType === 'tempo' && followUpSelections.has('krotszy_odcinek_tempo');
-                const needsKm = needsKmEasy || needsKmTempo;
+                const needsKmEasy    = (workoutType === 'easy' || workoutType === 'long') && followUpSelections.has('krotszy_dystans');
+                const needsKmTempo   = workoutType === 'tempo' && (followUpSelections.has('krotszy_odcinek_tempo') || followUpSelections.has('przerwany'));
+                const needsKmWalkrun = workoutType === 'walkrun' && followUpSelections.has('mniej_km');
+                const needsMeters    = workoutType === 'interval' && followUpSelections.has('krotsze_odcinki');
+                const needsKm = needsKmEasy || needsKmTempo || needsKmWalkrun || needsMeters;
                 if (needsKm && !kmWrap.classList.contains('visible')) {
-                    const base = needsKmTempo ? (workoutData.odcinek_km || 5) : (workoutData.dystans_km || 5);
-                    fuKmVal = Math.max(0.5, Math.round((base - 1) * 2) / 2);
+                    _fuKmUnit = needsMeters ? 'm' : 'km';
                     const lbl = document.getElementById('fuKmLabel');
-                    if (lbl) lbl.textContent = needsKmTempo ? 'Ile km trwał odcinek tempo?' : 'Ile km faktycznie przebiegłeś?';
-                    const el = document.getElementById('fuKmVal');
-                    if (el) el.textContent = fuKmVal.toFixed(1) + ' km';
-                    if (needsKmTempo) segmentWorkKm = fuKmVal;
+                    const el  = document.getElementById('fuKmVal');
+                    if (needsMeters) {
+                        const planM = workoutData.dystans_odcinka_m || 400;
+                        fuKmVal = Math.max(50, Math.round((planM - 100) / 50) * 50);
+                        if (lbl) lbl.textContent = 'Ile metrów miał odcinek?';
+                        if (el) el.textContent = fuKmVal + ' m';
+                        intervalDistanceM = fuKmVal;
+                    } else {
+                        const base = needsKmTempo ? (workoutData.odcinek_km || 5) : (workoutData.dystans_km || 5);
+                        fuKmVal = Math.max(0.5, Math.round((base - 1) * 2) / 2);
+                        if (lbl) lbl.textContent = needsKmTempo ? 'Ile km trwał odcinek tempo?' : 'Ile km faktycznie przebiegłeś?';
+                        if (el) el.textContent = fuKmVal.toFixed(1) + ' km';
+                        if (needsKmTempo) segmentWorkKm = fuKmVal;
+                    }
                 }
                 kmWrap.classList.toggle('visible', needsKm);
                 if (needsKm) setTimeout(() => updateStepsHeight(), 320);
             }
-            // Interval "mniej powtórzeń" LUB walkrun "mniej serii" → licznik
-            // faktycznej liczby (ten sam wzorzec co licznik km wyżej)
+            // Interval "mniej powtórzeń"/"przerwane" LUB walkrun "mniej serii"
+            // → licznik faktycznej liczby (ten sam wzorzec co licznik km wyżej)
             const countWrap = document.getElementById('fuCountWrap');
             if (countWrap) {
-                const needsRepeats = workoutType === 'interval' && followUpSelections.has('mniej_powtorzen');
+                const needsRepeats = workoutType === 'interval' && (followUpSelections.has('mniej_powtorzen') || followUpSelections.has('przerwany'));
                 const needsSeries  = workoutType === 'walkrun' && followUpSelections.has('mniej_serii');
                 const needsCount = needsRepeats || needsSeries;
                 if (needsCount && !countWrap.classList.contains('visible')) {
@@ -10904,10 +10939,19 @@
             _sendCheckinData();
         }
 
-        function adjustFuKm(delta) {
-            const max = workoutType === 'tempo' ? workoutData.odcinek_km : workoutData.dystans_km;
-            fuKmVal = Math.max(0.5, Math.min(max, fuKmVal + delta));
+        // dir = kierunek (-1/+1), NIE stała delta — krok zależy od jednostki
+        // (50m dla odcinka interwałowego, 0.5km dla dystansu)
+        function adjustFuKm(dir) {
             const el = document.getElementById('fuKmVal');
+            if (_fuKmUnit === 'm') {
+                const maxM = workoutData.dystans_odcinka_m || 400;
+                fuKmVal = Math.max(50, Math.min(maxM, fuKmVal + dir * 50));
+                if (el) el.textContent = fuKmVal + ' m';
+                intervalDistanceM = fuKmVal;
+                return;
+            }
+            const max = workoutType === 'tempo' ? (workoutData.odcinek_km || 6) : workoutData.dystans_km;
+            fuKmVal = Math.max(0.5, Math.min(max, fuKmVal + dir * 0.5));
             if (el) el.textContent = fuKmVal.toFixed(1) + ' km';
             if (workoutType === 'tempo') segmentWorkKm = fuKmVal;
         }
@@ -10935,8 +10979,9 @@
             if (workoutType === 'walkrun' && segmentSeries) {
                 base += `, serie=${segmentSeries}/${workoutData.serie||'?'}`;
             }
-            // Easy/long skrócony: faktyczne km vs plan — AI ma wiedzieć O ILE mniej
-            if ((workoutType === 'easy' || workoutType === 'long') && followUpSelections.has('krotszy_dystans') && fuKmVal > 0) {
+            // Easy/long lub walkrun skrócony: faktyczne km vs plan — AI ma wiedzieć O ILE mniej
+            if ((((workoutType === 'easy' || workoutType === 'long') && followUpSelections.has('krotszy_dystans')) ||
+                 (workoutType === 'walkrun' && followUpSelections.has('mniej_km'))) && fuKmVal > 0) {
                 base += `, wykonano_km=${fuKmVal.toFixed(1)}/${workoutData.dystans_km}`;
             }
             if (selectedCompletion === 'less' && skippedParts.size > 0) {
@@ -11296,14 +11341,16 @@
                     <div class="step-title">Co poszło inaczej?</div>
                     <div class="step-desc">Zaznacz wszystko co pasuje.</div>
                     <div class="morning-followup-opts" id="fu-2b-options"></div>
-                    <!-- Faktyczny dystans: "krótszy dystans" (easy/long) lub "krótszy
-                         odcinek" (tempo) — musimy wiedzieć O ILE, sam checkbox nie mówi -->
+                    <!-- Dystans lub metry, zależnie od typu i zaznaczonej opcji:
+                         "krótszy dystans" (easy/long), "mniejszy dystans" (walkrun),
+                         "krótszy/nieukończony odcinek" (tempo) w km; "krótsze odcinki"
+                         (interval) w metrach — jednostkę przełącza _fuKmUnit -->
                     <div class="fu-counter-wrap" id="fuKmWrap">
                         <div class="section-label" id="fuKmLabel" style="margin-top:14px;">Ile km faktycznie przebiegłeś?</div>
                         <div class="fu-counter">
-                            <button class="counter-btn" onclick="adjustFuKm(-0.5)">−</button>
+                            <button class="counter-btn" onclick="adjustFuKm(-1)">−</button>
                             <div class="fu-counter-val" id="fuKmVal">—</div>
-                            <button class="counter-btn" onclick="adjustFuKm(0.5)">+</button>
+                            <button class="counter-btn" onclick="adjustFuKm(1)">+</button>
                         </div>
                     </div>
                     <!-- Faktyczna liczba: "mniej powtórzeń" (interval) lub "mniej serii"
