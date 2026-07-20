@@ -6430,21 +6430,60 @@
         }
 
         // ── LABORATORIUM — wskaźniki + widoczna analiza AI ───────
-        function _labPace(sec) {
-            if (sec == null) return '—';
-            const total = Math.round(sec);
-            const m = Math.floor(total / 60), s = total % 60;
-            return m + ':' + String(s).padStart(2, '0');
+        // Pierścień 0-100, ten sam wzorzec co karta "Sen" na Dom (SVG stroke-dasharray,
+        // transform="rotate(-90 cx cy)" jako atrybut SVG a NIE css transform — css
+        // transform-origin na inline SVG bywa różny między silnikami przeglądarek).
+        function _labRing(score, color) {
+            const r = 40, C = 2 * Math.PI * r;
+            const has = score != null;
+            const pct = has ? Math.max(0, Math.min(100, score)) : 0;
+            const offset = (C * (1 - pct / 100)).toFixed(2);
+            return '<div style="position:relative;width:96px;height:96px;margin:8px auto 0;">' +
+                '<svg width="96" height="96" viewBox="0 0 96 96" style="display:block;overflow:visible;">' +
+                    '<circle cx="48" cy="48" r="' + r + '" fill="none" stroke="#EDE8DF" stroke-width="8"/>' +
+                    (has ? '<circle cx="48" cy="48" r="' + r + '" fill="none" stroke="' + color + '" stroke-width="8" stroke-linecap="round" stroke-dasharray="' + C.toFixed(2) + '" stroke-dashoffset="' + offset + '" transform="rotate(-90 48 48)"/>' : '') +
+                '</svg>' +
+                '<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:Outfit,sans-serif;font-size:26px;font-weight:800;color:' + (has ? '#1A1A1A' : '#C8C2B8') + ';">' + (has ? Math.round(score) : '—') + '</div>' +
+                '</div>';
         }
 
-        function _labCard(label, value, sub, subColor, desc, unit) {
-            return '<div class="lab-card" style="background:#fff;border:1px solid #EBEBEB;border-radius:20px;padding:18px 16px;">' +
-                '<div style="font-size:11px;font-weight:700;color:#8A8A8A;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;">' + label + '</div>' +
-                '<div style="font-family:Outfit,sans-serif;font-size:30px;font-weight:800;color:#1A1A1A;font-variant-numeric:tabular-nums;line-height:1;">' + value +
-                    (unit ? '<span style="font-size:13px;font-weight:700;color:#C8C2B8;margin-left:3px;">' + unit + '</span>' : '') +
-                '</div>' +
+        function _labRingCard(label, score, sub, subColor) {
+            return '<div class="lab-card" style="background:#fff;border:1px solid #EBEBEB;border-radius:20px;padding:16px 14px 18px;text-align:center;">' +
+                '<div style="font-size:11px;font-weight:700;color:#8A8A8A;text-transform:uppercase;letter-spacing:0.08em;">' + label + '</div>' +
+                _labRing(score, subColor) +
                 (sub ? '<div style="font-size:12px;font-weight:600;color:' + (subColor || '#8A8A8A') + ';margin-top:6px;">' + sub + '</div>' : '') +
-                (desc ? '<div style="font-size:11px;color:#A8A399;margin-top:5px;line-height:1.4;">' + desc + '</div>' : '') +
+                '</div>';
+        }
+
+        // Obciążenie (ACWR) na pełną szerokość: pasek stref + trójkątny wskaźnik
+        // pozycji. Skala 0-2.0 — realny ACWR prawie zawsze mieści się w tym zakresie,
+        // progi 0.8/1.3/1.5 to te same wartości co status z backendu (server.js _labWorkoutLoad).
+        function _labLoadGauge(load) {
+            const STATUS_PL  = { low: 'Niskie — możesz więcej', optimal: 'Optymalne', elevated: 'Podwyższone', high: 'Ryzyko przeciążenia' };
+            const STATUS_COL = { low: '#8A8A8A', optimal: '#6B8F71', elevated: '#C4A35A', high: '#C07264' };
+            const MAX = 2.0;
+            const zones = [
+                { w: 0.8, color: '#D8D2C4' },  // 0.0–0.8 niskie
+                { w: 0.5, color: '#6B8F71' },  // 0.8–1.3 optymalne
+                { w: 0.2, color: '#C4A35A' },  // 1.3–1.5 podwyższone
+                { w: 0.5, color: '#C07264' },  // 1.5–2.0 wysokie
+            ];
+            const segs = zones.map(z => '<div style="flex:' + z.w + ';background:' + z.color + ';height:100%;"></div>').join('');
+            const has = load && load.acwr != null;
+            const pos = has ? Math.max(2, Math.min(98, (load.acwr / MAX) * 100)) : null;
+            return '<div class="lab-card" style="background:#fff;border:1px solid #EBEBEB;border-radius:20px;padding:18px 16px;margin-top:12px;">' +
+                '<div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:2px;">' +
+                    '<div style="font-size:11px;font-weight:700;color:#8A8A8A;text-transform:uppercase;letter-spacing:0.08em;">Obciążenie</div>' +
+                    '<div style="font-family:Outfit,sans-serif;font-size:20px;font-weight:800;color:#1A1A1A;font-variant-numeric:tabular-nums;">' + (has ? load.acwr.toFixed(2) : '—') + '</div>' +
+                '</div>' +
+                '<div style="font-size:12px;font-weight:600;color:' + (has ? STATUS_COL[load.status] || '#8A8A8A' : '#8A8A8A') + ';margin-bottom:16px;">' + (has ? (STATUS_PL[load.status] || '') : 'Za mało treningów') + '</div>' +
+                '<div style="position:relative;">' +
+                    (has ? '<div style="position:absolute;left:' + pos.toFixed(1) + '%;top:-7px;transform:translateX(-50%);width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-top:6px solid #1A1A1A;"></div>' : '') +
+                    '<div style="height:10px;border-radius:6px;overflow:hidden;display:flex;">' + segs + '</div>' +
+                '</div>' +
+                '<div style="display:flex;justify-content:space-between;margin-top:8px;font-size:9.5px;font-weight:700;color:#B0A89E;letter-spacing:0.03em;text-transform:uppercase;">' +
+                    '<span>Niskie</span><span>Optymalne</span><span>Wysokie</span>' +
+                '</div>' +
                 '</div>';
         }
 
@@ -6457,45 +6496,30 @@
                 const d = await apiFetch('/api/lab/' + currentUserId);
                 if (gen !== _labLoadGen) return;
 
-                // ── Karty wskaźników ──
-                const cards = [];
+                // ── Gotowość + Sleep Score: pierścienie 0-100 ──
+                const ringCards = [];
 
                 if (d.readiness) {
                     const r = d.readiness.score;
                     const col = r >= 70 ? '#6B8F71' : (r >= 45 ? '#C4A35A' : '#C07264');
                     const lbl = r >= 70 ? 'Gotowy do treningu' : (r >= 45 ? 'Umiarkowana' : 'Odpocznij');
-                    cards.push(_labCard('Gotowość', r, lbl, col, 'Energia, sen i tętno z dzisiejszego rana', '/100'));
+                    ringCards.push(_labRingCard('Gotowość', r, lbl, col));
                 } else {
-                    cards.push(_labCard('Gotowość', '—', 'Zrób poranny check-in', null, 'Energia, sen i tętno z dzisiejszego rana'));
+                    ringCards.push(_labRingCard('Gotowość', null, 'Zrób poranny check-in', null));
                 }
 
                 if (d.sleep && d.sleep.score != null) {
-                    const t = d.sleep.trend;
+                    const s = d.sleep.score, t = d.sleep.trend;
+                    const col = s >= 70 ? '#6B8F71' : (s >= 45 ? '#C4A35A' : '#C07264');
                     const sub = t == null ? 'ostatnie 7 dni'
                         : (t > 0 ? '▲ +' + t + ' vs zeszły tydzień' : (t < 0 ? '▼ ' + t + ' vs zeszły tydzień' : '= jak zeszły tydzień'));
-                    const col = t == null ? '#8A8A8A' : (t >= 0 ? '#6B8F71' : '#C07264');
-                    cards.push(_labCard('velm Sleep Score', d.sleep.score, sub, col, 'Jakość snu z porannych check-inów, 7 dni', '/100'));
+                    ringCards.push(_labRingCard('velm Sleep Score', s, sub, col));
                 } else {
-                    cards.push(_labCard('velm Sleep Score', '—', 'Za mało check-inów', null, 'Jakość snu z porannych check-inów, 7 dni'));
+                    ringCards.push(_labRingCard('velm Sleep Score', null, 'Za mało check-inów', null));
                 }
 
-                if (d.load) {
-                    const statusPl = { low: 'Niskie — możesz więcej', optimal: 'Optymalne', elevated: 'Podwyższone', high: 'Ryzyko przeciążenia' }[d.load.status] || '';
-                    const col = { low: '#8A8A8A', optimal: '#6B8F71', elevated: '#C4A35A', high: '#C07264' }[d.load.status] || '#8A8A8A';
-                    cards.push(_labCard('Obciążenie', d.load.acwr.toFixed(2), statusPl, col, 'Ten tydzień vs Twoja średnia z miesiąca. 1,0 = normalne tempo'));
-                } else {
-                    cards.push(_labCard('Obciążenie', '—', 'Za mało treningów', null, 'Ten tydzień vs Twoja średnia z miesiąca. 1,0 = normalne tempo'));
-                }
-
-                if (d.trends && d.trends.paceSec != null) {
-                    const dl = d.trends.paceDeltaSec;
-                    const sub = dl == null ? 'śr. tempo, biegi łatwe/długie'
-                        : (dl < 0 ? '▲ szybciej o ' + Math.abs(dl) + 's' : (dl > 0 ? '▼ wolniej o ' + dl + 's' : '= stabilnie'));
-                    const col = dl == null ? '#8A8A8A' : (dl <= 0 ? '#6B8F71' : '#C4A35A');
-                    cards.push(_labCard('Tempo', _labPace(d.trends.paceSec), sub, col, 'Śr. tempo na łatwych i długich biegach, 14 dni', 'min/km'));
-                } else {
-                    cards.push(_labCard('Tempo', '—', 'Za mało biegów z tempem', null, 'Śr. tempo na łatwych i długich biegach, 14 dni'));
-                }
+                // ── Obciążenie: skala na pełną szerokość ──
+                const loadHtml = _labLoadGauge(d.load);
 
                 // ── Sekcja Analiza AI ──
                 let aiHtml = '<div style="margin-top:20px;">' +
@@ -6507,7 +6531,7 @@
                     '<div id="lab-ai-list"></div></div>';
 
                 el.innerHTML =
-                    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">' + cards.join('') + '</div>' + aiHtml;
+                    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">' + ringCards.join('') + '</div>' + loadHtml + aiHtml;
 
                 // Wejście kart: fade + rise, stagger 50ms
                 el.querySelectorAll('.lab-card').forEach((c, i) => {
@@ -9261,7 +9285,7 @@
 
         // Stempel buildu — dowód na urządzeniu, że działa świeży kod (trzymać
         // w zgodzie z CACHE_VERSION w sw.js; bump przy każdym deployu frontendu)
-        const VELM_BUILD = 'v25';
+        const VELM_BUILD = 'v26';
         console.log('velm build', VELM_BUILD, navigator.userAgent);
 
         async function hardReloadApp() {
