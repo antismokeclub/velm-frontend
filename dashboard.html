@@ -3113,8 +3113,17 @@
 
         /* RPE — wyśrodkowany blok + skala pod suwakiem, żeby wypełniał krok */
         #checkin-overlay .rpe-block { display:flex; flex-direction:column; justify-content:center; padding:8px 0 4px; }
-        #checkin-overlay .rpe-scale { display:flex; justify-content:space-between; margin:14px 2px 0; }
-        #checkin-overlay .rpe-scale span { font-size:11px; font-weight:600; color:var(--text-muted); letter-spacing:0.02em; }
+        /* Kotwice skali RPE — wyrównane do środka gałki suwaka (promień 15px, patrz
+           input[type=range] thumb 30px), więc "Lekko"/"Ciężko" siedzą DOKŁADNIE
+           pod skrajnymi pozycjami gałki, a nie pod krawędzią toru */
+        #checkin-overlay .rpe-scale { display:flex; justify-content:space-between; margin:14px 15px 0; }
+        #checkin-overlay .rpe-scale span { font-size:11px; font-weight:600; color:var(--text-light); letter-spacing:0.02em; opacity:.55; transition:opacity 0.2s ease, color 0.2s ease, font-weight 0.2s ease; }
+        /* Aktywna strefa podświetla się tym samym kolorem co suwak i wypełnienie —
+           skala realnie "śledzi" gałkę zamiast być statyczną, oderwaną dekoracją */
+        #checkin-overlay .rpe-scale span.active-zone { opacity:1; font-weight:800; }
+        #checkin-overlay .rpe-scale span[data-zone="light"].active-zone { color:#6B8F71; }
+        #checkin-overlay .rpe-scale span[data-zone="moderate"].active-zone { color:#C4A35A; }
+        #checkin-overlay .rpe-scale span[data-zone="hard"].active-zone { color:#C07264; }
 
         /* SECTION LABEL */
         #checkin-overlay .section-label { font-size:11px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-muted); margin-bottom:12px; }
@@ -9168,7 +9177,7 @@
 
         // Stempel buildu — dowód na urządzeniu, że działa świeży kod (trzymać
         // w zgodzie z CACHE_VERSION w sw.js; bump przy każdym deployu frontendu)
-        const VELM_BUILD = 'v13';
+        const VELM_BUILD = 'v14';
         console.log('velm build', VELM_BUILD, navigator.userAgent);
 
         async function hardReloadApp() {
@@ -10598,11 +10607,24 @@
             _sendCheckinData();
         }
 
-        function adjustDuration(delta) {}
-        function onDurationChange() {}
-        function adjustDurH(d) {}
-        function adjustDurM(d) {}
-        function adjustDurS(d) {}
+        // Skala RPE — 3 kotwice (Lekko/Umiarkowanie/Ciężko) to TE SAME progi co
+        // kolor suwaka (1-3 / 4-6 / 7-10). Opisy per-wartość celowo NIE powtarzają
+        // słów kotwic (dawniej wartość 5 pokazywała samo "Umiarkowanie" — dokładny
+        // duplikat etykiety nad nim), więc skala i opis niosą różną informację
+        // zamiast się dublować.
+        const RPE_DESCS = {
+            1: 'Bardzo lekki wysiłek — jak rozgrzewka',
+            2: 'Bardzo swobodnie, bez wysiłku',
+            3: 'Swobodny, komfortowy rytm',
+            4: 'Praca wyczuwalna, ale rozmowa swobodna',
+            5: 'Praca w pełni wyczuwalna, oddech przyspieszony',
+            6: 'Wymagająco — rozmowa krótkimi zdaniami',
+            7: 'Naprawdę wymagająco, trudno o rozmowę',
+            8: 'Blisko granicy, mocno w płucach',
+            9: 'Niemal pełna moc',
+            10: 'Absolutna granica wysiłku'
+        };
+        function _rpeZone(val) { return val <= 3 ? 'light' : val <= 6 ? 'moderate' : 'hard'; }
         function updateRpeSlider() {
             const slider = document.getElementById('rpeSlider');
             if (!slider) return;
@@ -10611,11 +10633,14 @@
             const valEl = document.getElementById('rpeSliderVal');
             if (valEl) valEl.textContent = `${val}/10`;
             const pct = (val - 1) / 9 * 100;
-            const c = val <= 3 ? '#6B8F71' : val <= 6 ? '#C4A35A' : '#C07264';
+            const zone = _rpeZone(val);
+            const c = zone === 'light' ? '#6B8F71' : zone === 'moderate' ? '#C4A35A' : '#C07264';
             slider.style.background = `linear-gradient(to right, ${c} ${pct}%, #D8D2C4 ${pct}%)`;
-            const descs = {1:'Bardzo lekko — prawie spacer',2:'Bardzo lekko',3:'Lekko',4:'Komfortowo, mógłbyś rozmawiać',5:'Umiarkowanie',6:'Umiarkowanie ciężko',7:'Ciężko, trudno mówić zdaniami',8:'Bardzo ciężko',9:'Prawie maksimum',10:'Absolutne maksimum'};
+            document.querySelectorAll('#checkin-overlay .rpe-scale span').forEach(s => {
+                s.classList.toggle('active-zone', s.dataset.zone === zone);
+            });
             const rpeDesc = document.getElementById('rpeDesc');
-            if (rpeDesc) rpeDesc.textContent = descs[val] || '';
+            if (rpeDesc) rpeDesc.textContent = RPE_DESCS[val] || '';
             showBtn('next-post-1');
         }
 
@@ -11119,7 +11144,7 @@
                         <div class="slider-wrap" style="margin-top:20px;">
                             <input type="range" min="1" max="10" value="5" id="rpeSlider" oninput="updateRpeSlider()">
                         </div>
-                        <div class="rpe-scale"><span>Lekko</span><span>Umiarkowanie</span><span>Maksymalnie</span></div>
+                        <div class="rpe-scale"><span data-zone="light">Lekko</span><span data-zone="moderate">Umiarkowanie</span><span data-zone="hard">Ciężko</span></div>
                         <div class="slider-desc" id="rpeDesc"></div>
                     </div>
                     <div class="ci-plan-card" style="display:none;">
