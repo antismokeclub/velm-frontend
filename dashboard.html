@@ -6534,11 +6534,46 @@
             })(start);
         }
 
-        // Forma: zastępuje surowy tekst AI ("Analiza AI") jednym dużym, czytelnym
-        // werdyktem opartym o realny trend tempa (14 dni vs poprzednie 14) plus
-        // 4 kafelki kontekstu. Dokładniejsza logika (porównanie konkretnych
-        // interwałów tydzień do tygodnia z danych zegarka) czeka na rework
-        // trenerów — to jest celowo uproszczony szkic na danych, które już mamy.
+        // Forma: zastępuje surowy tekst AI ("Analiza AI") jedną policzoną wartością
+        // 0-100 (nie samym kierunkiem tempa) — ważona kompozycja kilku sygnałów,
+        // dokładnie jak Gotowość waży energię/sen/tętno. Wagi rozkładają się
+        // dynamicznie na to, co faktycznie mamy (bez zegarka Tętno wypada, reszta
+        // się przelicza) — ten sam wzorzec co backendowa formuła Gotowości.
+        // Dokładniejsza wersja (konkretne interwały tydzień do tygodnia z danych
+        // zegarka) czeka na rework trenerów — to jest v1 algorytmu na danych,
+        // które już mamy, do skalibrowania później.
+        function _labFormaScore(d) {
+            const t = d.trends || {};
+            const parts = [];
+            // Tempo: najważniejszy, bezpośredni sygnał fitness. ±20s/km od zera
+            // to pełen zakres skali — szybciej niż -20s = 100, wolniej niż +20s = 0.
+            if (t.paceDeltaSec != null) {
+                parts.push([clamp01(50 - t.paceDeltaSec * 2.5), 0.35]);
+            }
+            // Tętno przy tym samym wysiłku: niższe = lepsza forma. Tylko z zegarka.
+            if (t.hrDelta != null) {
+                parts.push([clamp01(50 - t.hrDelta * 5), 0.20]);
+            }
+            // Obciążenie: kara za oddalenie od optymalnego ACWR (~1.05) w OBIE
+            // strony — zarówno za mało, jak i za dużo obciążenia szkodzi formie.
+            if (d.load && d.load.acwr != null) {
+                parts.push([clamp01(100 - Math.abs(d.load.acwr - 1.05) * 100), 0.20]);
+            }
+            // Sen: trend regeneracji wspierający progres.
+            if (d.sleep && d.sleep.trend != null) {
+                parts.push([clamp01(50 + d.sleep.trend * 5), 0.15]);
+            }
+            // Gotowość: stan z dzisiejszego rana, mniejsza waga (to migawka, nie trend).
+            if (d.readiness && d.readiness.score != null) {
+                parts.push([d.readiness.score, 0.10]);
+            }
+            if (!parts.length) return null;
+            const wSum = parts.reduce((s, [, w]) => s + w, 0);
+            return Math.round(parts.reduce((s, [v, w]) => s + v * w, 0) / wSum);
+        }
+
+        function clamp01(v) { return Math.max(0, Math.min(100, v)); }
+
         function _labFormaTile(label, val, col, sub) {
             return '<div style="background:#F8F5EE;border-radius:14px;padding:12px 8px;text-align:center;">' +
                 '<div style="font-size:9.5px;font-weight:700;color:#8A8A8A;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;">' + label + '</div>' +
@@ -6556,7 +6591,7 @@
                     '<div style="font-family:Outfit,sans-serif;font-size:18px;font-weight:800;color:#1A1A1A;letter-spacing:-0.01em;">Forma</div>' +
                     '<div style="font-size:10px;font-weight:700;color:#8A8A8A;text-transform:uppercase;letter-spacing:0.1em;">Analityk</div>' +
                 '</div>' +
-                '<div style="font-size:12px;color:#8A8A8A;margin-bottom:10px;line-height:1.4;">Progres na podstawie tempa z ostatnich treningów</div>';
+                '<div style="font-size:12px;color:#8A8A8A;margin-bottom:10px;line-height:1.4;">Tempo, tętno, obciążenie i regeneracja razem</div>';
 
             if (!hasPace) {
                 return header +
@@ -6566,12 +6601,11 @@
                     '</div></div>';
             }
 
-            const dl = t.paceDeltaSec;
-            let verdict, col, arrow, sub;
-            if (dl <= -3) { verdict = 'Progres';   col = '#6B8F71'; arrow = '↑'; sub = 'Tempo szybsze o ' + Math.abs(dl) + 's/km niż 2 tygodnie temu'; }
-            else if (dl >= 3) { verdict = 'Spadek'; col = '#C07264'; arrow = '↓'; sub = 'Tempo wolniejsze o ' + dl + 's/km niż 2 tygodnie temu'; }
-            else { verdict = 'Stabilnie'; col = '#C4A35A'; arrow = '→'; sub = 'Tempo podobne do sprzed 2 tygodni'; }
+            const score = _labFormaScore(d);
+            const col = score >= 70 ? '#6B8F71' : (score >= 45 ? '#C4A35A' : '#C07264');
+            const verdict = score >= 70 ? 'Progres' : (score >= 45 ? 'Stabilnie' : 'Spadek');
 
+            const dl = t.paceDeltaSec;
             const hasHr = t.avgHr != null && t.hrDelta != null;
             const loadStatusPl = { low: 'Niskie', optimal: 'Optymalne', elevated: 'Podwyższone', high: 'Wysokie' };
             const loadCol = { low: '#8A8A8A', optimal: '#6B8F71', elevated: '#C4A35A', high: '#C07264' };
@@ -6587,9 +6621,8 @@
 
             return header +
                 '<div class="lab-card" style="background:#fff;border:1px solid #EBEBEB;border-radius:20px;padding:24px 20px 20px;text-align:center;">' +
-                    '<div style="font-size:52px;line-height:1;color:' + col + ';">' + arrow + '</div>' +
-                    '<div style="font-family:Outfit,sans-serif;font-size:26px;font-weight:800;color:#1A1A1A;margin-top:4px;">' + verdict + '</div>' +
-                    '<div style="font-size:13px;color:#8A8A8A;margin-top:4px;">' + sub + '</div>' +
+                    _labRing(score, col, 'lab-ring-forma') +
+                    '<div style="font-family:Outfit,sans-serif;font-size:22px;font-weight:800;color:' + col + ';margin-top:8px;">' + verdict + '</div>' +
                     '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:20px;">' + tiles + '</div>' +
                 '</div></div>';
         }
@@ -6642,6 +6675,8 @@
                     if (d.readiness) _labAnimateRing('lab-ring-readiness', d.readiness.score);
                     if (d.sleep && d.sleep.score != null) _labAnimateRing('lab-ring-sleep', d.sleep.score);
                     _labAnimateGauge(d.load);
+                    const formaScore = _labFormaScore(d);
+                    if (formaScore != null) _labAnimateRing('lab-ring-forma', formaScore);
                 }, 200);
 
                 // Wejście kart: fade + rise, stagger 50ms
@@ -9336,7 +9371,7 @@
 
         // Stempel buildu — dowód na urządzeniu, że działa świeży kod (trzymać
         // w zgodzie z CACHE_VERSION w sw.js; bump przy każdym deployu frontendu)
-        const VELM_BUILD = 'v28';
+        const VELM_BUILD = 'v29';
         console.log('velm build', VELM_BUILD, navigator.userAgent);
 
         async function hardReloadApp() {
