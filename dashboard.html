@@ -6606,11 +6606,21 @@
                 return `<line x1="${prevEnd[0].toFixed(1)}" y1="${prevEnd[1].toFixed(1)}" x2="${nextStart[0].toFixed(1)}" y2="${nextStart[1].toFixed(1)}" stroke="${color}" stroke-width="1.4" stroke-dasharray="1 4" stroke-linecap="round" opacity="0.4"/>`;
             }).join('');
 
-            // wypełnienie tylko pod najdłuższym ciągłym odcinkiem (zwykle jedynym przy dobrych danych)
-            const mainSeg = segments.reduce((a, b) => b.length > a.length ? b : a, []);
-            const areaPD = mainSeg.length >= 2
-                ? _crSmooth(mainSeg) +
-                  ` L${mainSeg[mainSeg.length - 1][0].toFixed(1)},${baseline.toFixed(1)} L${mainSeg[0][0].toFixed(1)},${baseline.toFixed(1)} Z`
+            // Cień (wypełnienie) NIE może kończyć się urwanym pionowym uskokiem tam,
+            // gdzie zaczyna się "główny" odcinek — to wygląda jak zepsuty render, nie
+            // świadomy wybór (w przeciwieństwie do samej linii, gdzie przerwa MA być
+            // widoczna). Cień idzie więc przez CAŁĄ szerokość — gładka krzywa w
+            // odcinkach z danymi, prosta kreska (jak gapConnectors) w przerwach —
+            // jeden ciągły kształt od pierwszego do ostatniego punktu.
+            const fullPD = segments.map((seg, i) => {
+                const d = _crSmooth(seg);
+                return i === 0 ? d : d.replace(/^M/, 'L');
+            }).join(' ');
+            const firstPt = segments[0][0];
+            const lastSeg = segments[segments.length - 1];
+            const lastPt = lastSeg[lastSeg.length - 1];
+            const areaPD = fullPD
+                ? fullPD + ` L${lastPt[0].toFixed(1)},${baseline.toFixed(1)} L${firstPt[0].toFixed(1)},${baseline.toFixed(1)} Z`
                 : '';
 
             // Pionowe kreski odniesienia od każdego ważnego punktu do linii bazowej —
@@ -9688,7 +9698,7 @@
 
         // Stempel buildu — dowód na urządzeniu, że działa świeży kod (trzymać
         // w zgodzie z CACHE_VERSION w sw.js; bump przy każdym deployu frontendu)
-        const VELM_BUILD = 'v33';
+        const VELM_BUILD = 'v34';
         console.log('velm build', VELM_BUILD, navigator.userAgent);
 
         async function hardReloadApp() {
