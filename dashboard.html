@@ -649,9 +649,6 @@
         @keyframes drawLine { from { stroke-dashoffset: 1400; } to { stroke-dashoffset: 0; } }
         @keyframes popDot   { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
         @keyframes fadeIn   { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes labDotPulse { 0% { transform: scale(1); opacity: 0.55; } 100% { transform: scale(2.1); opacity: 0; } }
-        .lab-dot-pulse { transform-box: fill-box; transform-origin: center; animation: labDotPulse 2.2s ease-out infinite; }
-        @media (prefers-reduced-motion: reduce) { .lab-dot-pulse { animation: none; opacity: 0; } }
         .chart-line-km   { stroke-dasharray: 1400; animation: drawLine 0.9s cubic-bezier(0.4,0,0.2,1) 0.46s both; }
         .chart-line-pace { stroke-dasharray: 1400; animation: drawLine 0.9s cubic-bezier(0.4,0,0.2,1) 0.60s both; }
         .chart-area-km   { animation: fadeIn 0.55s ease 1.0s both; }
@@ -6538,23 +6535,25 @@
             })(start);
         }
 
-        // Wykres trendu z lukami — tydzień bez wystarczających sygnałów = przerwa w
-        // linii, NIGDY zmyślona/interpolowana wartość (ta sama zasada co bramka ACWR
-        // dla obciążenia). Osobne ciągłe odcinki ("M...L...") w jednym <path>, żeby
-        // stroke-dashoffset line-draw animacja wciąż działała jedną transition (jak
-        // w _buildPaceSVG) — przeglądarka rysuje kolejne odcinki po kolei wzdłuż
-        // łącznej długości ścieżki, co naturalnie wygląda jak "od najstarszego do dziś".
+        // Wykres trendu — wzorowany 1:1 na karcie "Sen"/"Tętno Spoczynkowe"
+        // (renderSimpleChart, ~5124: prawdziwa oś Y z wartościami, pionowe kreski
+        // odniesienia do każdego punktu, kropki kolorowane statusem, aktywna kropka =
+        // kolorowe wypełnienie + biały środek) — user explicite wskazał te dwie karty
+        // jako wzór "jak ma wyglądać dobry wykres" w tej apce. Jedyna różnica: tu
+        // tydzień bez wystarczających sygnałów to przerwa w linii (Sen/Tętno mają
+        // zawsze komplet 7/7 dni), nigdy zmyślona/interpolowana wartość — ta sama
+        // zasada co bramka ACWR dla obciążenia.
         // invert=true: wyższa wartość wyżej na wykresie (Forma, 0-100 gdzie więcej=lepiej).
         // invert=false: wyższa wartość NIŻEJ (czas wyścigu, gdzie mniej=lepiej — ten sam
         // trik co w _buildPaceSVG, gdzie szybsze tempo/mniej sekund samo wypada wyżej).
         // opts.tipId: włącza tappable kropki (reużywa .stats-tooltip + showStatsTip()
-        // ze Statystyk — ten sam wzorzec, nie nowy system). opts.refLine: opcjonalna
-        // pozioma kreska odniesienia (cel usera z onboardingu) — rozciąga skalę tak,
-        // żeby zawsze się zmieściła, nawet gdy cel jest szybszy niż jakikolwiek punkt.
+        // ze Statystyk). opts.dotColorFor(value): opcjonalny kolor per punkt (status),
+        // domyślnie stały `color`. opts.refLine: opcjonalna pozioma kreska odniesienia
+        // (cel usera z onboardingu) — rozciąga skalę tak, żeby zawsze się zmieściła.
         function _labTrendSVG(points, opts) {
-            const { invert = true, color = '#1A1A1A', lineId, tipId, refLine } = opts || {};
-            const W = 320, H = 178;
-            const pL = 4, pR = 4, pT = 18, pB = 12;
+            const { invert = true, color = '#1A1A1A', lineId, tipId, refLine, dotColorFor, yFmt } = opts || {};
+            const W = 320, H = 172;
+            const pL = 30, pR = 10, pT = 16, pB = 16;
             const cW = W - pL - pR, cH = H - pT - pB;
             const n = points.length;
 
@@ -6568,12 +6567,20 @@
 
             const xAt = i => pL + (n <= 1 ? cW / 2 : (i / (n - 1)) * cW);
             const yAt = v => invert ? (pT + (1 - (v - yLo) / span) * cH) : (pT + ((v - yLo) / span) * cH);
+            const baseline = pT + cH;
+            const fmt = yFmt || (v => String(Math.round(v)));
 
-            // Dwie ciche linie rytmu — bez liczb, tylko żeby oko miało punkt odniesienia
-            // (pusty wykres bez ŻADNEJ siatki wygląda jak niedokończony szkic, nie dane).
-            const gridLines = [pT + cH / 3, pT + cH * 2 / 3]
-                .map(y => `<line x1="${pL}" y1="${y.toFixed(1)}" x2="${(pL + cW).toFixed(1)}" y2="${y.toFixed(1)}" stroke="#EEEBE3" stroke-width="0.8" stroke-dasharray="4 3"/>`)
-                .join('');
+            // Oś Y — jak w renderSimpleChart: 3 linie (dół/środek/góra) z prawdziwymi wartościami.
+            const gridFracs = [0, 0.5, 1];
+            const gridLines = gridFracs.map(f => {
+                const y = pT + f * cH;
+                return `<line x1="${pL}" y1="${y.toFixed(1)}" x2="${(pL + cW).toFixed(1)}" y2="${y.toFixed(1)}" stroke="#EDE8DC" stroke-width="0.8" stroke-dasharray="4 3"/>`;
+            }).join('');
+            const yLabels = gridFracs.map(f => {
+                const y = pT + f * cH;
+                const v = invert ? (yHi - f * span) : (yLo + f * span);
+                return `<text x="${(pL - 6).toFixed(1)}" y="${(y + 3).toFixed(1)}" text-anchor="end" font-size="8" fill="#8A8A8A" font-family="Inter,sans-serif">${fmt(v)}</text>`;
+            }).join('');
 
             let segments = [], cur = [];
             points.forEach((p, i) => {
@@ -6587,30 +6594,40 @@
 
             // wypełnienie tylko pod najdłuższym ciągłym odcinkiem (zwykle jedynym przy dobrych danych)
             const mainSeg = segments.reduce((a, b) => b.length > a.length ? b : a, []);
-            const baseline = pT + cH;
             const areaPD = mainSeg.length >= 2
                 ? mainSeg.map((pt, i) => `${i === 0 ? 'M' : 'L'}${pt[0].toFixed(1)},${pt[1].toFixed(1)}`).join(' ') +
                   ` L${mainSeg[mainSeg.length - 1][0].toFixed(1)},${baseline.toFixed(1)} L${mainSeg[0][0].toFixed(1)},${baseline.toFixed(1)} Z`
                 : '';
 
+            // Pionowe kreski odniesienia od każdego ważnego punktu do linii bazowej —
+            // dokładnie jak refLines w renderSimpleChart.
+            const refTicks = points.map((p, i) => {
+                if (p.y == null) return '';
+                const x = xAt(i).toFixed(1), y = yAt(p.y).toFixed(1);
+                return `<line x1="${x}" y1="${y}" x2="${x}" y2="${baseline.toFixed(1)}" stroke="#D8D2C4" stroke-width="0.7" stroke-dasharray="3 3"/>`;
+            }).join('');
+
             const refLineHtml = (refLine && refLine.value != null) ? (() => {
                 const ry = yAt(refLine.value).toFixed(1);
-                const lbl = refLine.label ? `<text x="${(pL + cW).toFixed(1)}" y="${(parseFloat(ry) - 6).toFixed(1)}" text-anchor="end" font-size="10" fill="#B08A3E" font-family="Inter,sans-serif" font-weight="700">${refLine.label}</text>` : '';
+                const lbl = refLine.label ? `<text x="${(pL + cW).toFixed(1)}" y="${(parseFloat(ry) - 6).toFixed(1)}" text-anchor="end" font-size="9.5" fill="#B08A3E" font-family="Inter,sans-serif" font-weight="700">${refLine.label}</text>` : '';
                 return `<line x1="${pL}" y1="${ry}" x2="${(pL + cW).toFixed(1)}" y2="${ry}" stroke="#C4A35A" stroke-width="1.3" stroke-dasharray="5 3"/>${lbl}`;
             })() : '';
 
+            // Kropki kolorowane statusem (jak getDotColor w renderSimpleChart); aktywna
+            // (ostatnia ważna) = kolorowe wypełnienie + mały biały środek, nie osobny pierścień.
             let lastValidIdx = -1;
             for (let i = points.length - 1; i >= 0; i--) if (points[i].y != null) { lastValidIdx = i; break; }
             const dots = points.map((p, i) => {
                 if (p.y == null) return '';
                 const isLast = i === lastValidIdx;
                 const x = xAt(i).toFixed(1), y = yAt(p.y).toFixed(1);
-                const r = isLast ? 5.5 : 3.5;
-                const pulse = isLast ? `<circle cx="${x}" cy="${y}" r="${r}" fill="none" stroke="${color}" stroke-width="1.5" class="lab-dot-pulse"/>` : '';
+                const dotCol = dotColorFor ? dotColorFor(p.y) : color;
+                const r = isLast ? 5 : 4;
+                const inner = isLast ? `<circle cx="${x}" cy="${y}" r="1.8" fill="#FFFFFF" style="pointer-events:none;"/>` : '';
                 const tapAttrs = (tipId && (p.label || p.sub))
                     ? ` onclick="showStatsTip('${tipId}',this,'${String(p.label || '').replace(/'/g, "\\'")}','${String(p.sub || '').replace(/'/g, "\\'")}','')" style="cursor:pointer;touch-action:manipulation;"`
                     : '';
-                return pulse + `<circle cx="${x}" cy="${y}" r="${r}" fill="${isLast ? color : '#fff'}" stroke="${color}" stroke-width="${isLast ? 0 : 1.7}"${tapAttrs}/>`;
+                return `<circle cx="${x}" cy="${y}" r="${r}" fill="${dotCol}" stroke="#FFFFFF" stroke-width="1.5"${tapAttrs}/>${inner}`;
             }).join('');
 
             const gradId = lineId + '-grad';
@@ -6619,13 +6636,14 @@
                 html: `<div style="position:relative;">
                     <svg id="${lineId}" viewBox="0 0 ${W} ${H}" width="100%" style="display:block;overflow:visible;">
                         <defs><linearGradient id="${gradId}" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0%" stop-color="${color}" stop-opacity="0.16"/>
+                            <stop offset="0%" stop-color="${color}" stop-opacity="0.2"/>
                             <stop offset="100%" stop-color="${color}" stop-opacity="0"/>
                         </linearGradient></defs>
-                        ${gridLines}
+                        ${gridLines}${yLabels}
                         ${areaPD ? `<path d="${areaPD}" fill="url(#${gradId})"/>` : ''}
+                        ${refTicks}
                         ${refLineHtml}
-                        ${linePD ? `<path id="${lineId}-line" d="${linePD}" fill="none" stroke="${color}" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>` : ''}
+                        ${linePD ? `<path id="${lineId}-line" d="${linePD}" fill="none" stroke="${color}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>` : ''}
                         ${dots}
                     </svg>
                     ${tipHtml}
@@ -6766,7 +6784,10 @@
             const validCount = points.filter(p => p.y != null).length;
             let bodyHtml;
             if (validCount >= 3) {
-                const chart = _labTrendSVG(points, { invert: true, color: col, lineId: 'lab-forma-line', tipId: 'lab-forma' });
+                const chart = _labTrendSVG(points, {
+                    invert: true, color: '#1A1A1A', lineId: 'lab-forma-line', tipId: 'lab-forma',
+                    dotColorFor: v => v >= 70 ? '#6B8F71' : (v >= 45 ? '#C4A35A' : '#C07264')
+                });
                 const firstValid = points.find(p => p.y != null);
                 const delta = (firstValid && firstValid.y !== score) ? score - firstValid.y : null;
                 const deltaPill = delta != null
@@ -6861,8 +6882,13 @@
                 '<div style="margin-top:10px;">' + _labPill('na podstawie: ' + _labBasedOnText(rp.current.basedOn), '#8A8A8A') + '</div>';
 
             if (validCount >= 3) {
-                const refLine = rp.goalTimeSec != null ? { value: rp.goalTimeSec, label: 'Cel ' + _labFmtRaceTime(rp.goalTimeSec) } : undefined;
-                const chart = _labTrendSVG(points, { invert: false, color: '#1A1A1A', lineId: 'lab-race-line', tipId: 'lab-race', refLine });
+                const goalSec = rp.goalTimeSec;
+                const refLine = goalSec != null ? { value: goalSec, label: 'Cel ' + _labFmtRaceTime(goalSec) } : undefined;
+                const chart = _labTrendSVG(points, {
+                    invert: false, color: '#1A1A1A', lineId: 'lab-race-line', tipId: 'lab-race', refLine,
+                    yFmt: _labFmtRaceTime,
+                    dotColorFor: goalSec != null ? (v => v <= goalSec ? '#6B8F71' : (v <= goalSec * 1.05 ? '#C4A35A' : '#C07264')) : undefined
+                });
                 if (chart) {
                     bodyHtml += '<div style="font-size:12px;color:#8A8A8A;margin:10px 0 2px;">ostatnie 9 tygodni · dotknij punkt po szczegóły</div>' +
                         chart.html +
@@ -9647,7 +9673,7 @@
 
         // Stempel buildu — dowód na urządzeniu, że działa świeży kod (trzymać
         // w zgodzie z CACHE_VERSION w sw.js; bump przy każdym deployu frontendu)
-        const VELM_BUILD = 'v31';
+        const VELM_BUILD = 'v32';
         console.log('velm build', VELM_BUILD, navigator.userAgent);
 
         async function hardReloadApp() {
