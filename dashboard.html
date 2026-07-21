@@ -649,6 +649,9 @@
         @keyframes drawLine { from { stroke-dashoffset: 1400; } to { stroke-dashoffset: 0; } }
         @keyframes popDot   { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
         @keyframes fadeIn   { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes labDotPulse { 0% { transform: scale(1); opacity: 0.55; } 100% { transform: scale(2.1); opacity: 0; } }
+        .lab-dot-pulse { transform-box: fill-box; transform-origin: center; animation: labDotPulse 2.2s ease-out infinite; }
+        @media (prefers-reduced-motion: reduce) { .lab-dot-pulse { animation: none; opacity: 0; } }
         .chart-line-km   { stroke-dasharray: 1400; animation: drawLine 0.9s cubic-bezier(0.4,0,0.2,1) 0.46s both; }
         .chart-line-pace { stroke-dasharray: 1400; animation: drawLine 0.9s cubic-bezier(0.4,0,0.2,1) 0.60s both; }
         .chart-area-km   { animation: fadeIn 0.55s ease 1.0s both; }
@@ -6544,22 +6547,33 @@
         // invert=true: wyższa wartość wyżej na wykresie (Forma, 0-100 gdzie więcej=lepiej).
         // invert=false: wyższa wartość NIŻEJ (czas wyścigu, gdzie mniej=lepiej — ten sam
         // trik co w _buildPaceSVG, gdzie szybsze tempo/mniej sekund samo wypada wyżej).
+        // opts.tipId: włącza tappable kropki (reużywa .stats-tooltip + showStatsTip()
+        // ze Statystyk — ten sam wzorzec, nie nowy system). opts.refLine: opcjonalna
+        // pozioma kreska odniesienia (cel usera z onboardingu) — rozciąga skalę tak,
+        // żeby zawsze się zmieściła, nawet gdy cel jest szybszy niż jakikolwiek punkt.
         function _labTrendSVG(points, opts) {
-            const { invert = true, color = '#1A1A1A', lineId } = opts || {};
-            const W = 320, H = 140;
-            const pL = 4, pR = 4, pT = 12, pB = 4;
+            const { invert = true, color = '#1A1A1A', lineId, tipId, refLine } = opts || {};
+            const W = 320, H = 178;
+            const pL = 4, pR = 4, pT = 18, pB = 12;
             const cW = W - pL - pR, cH = H - pT - pB;
             const n = points.length;
 
             const validVals = points.filter(p => p.y != null).map(p => p.y);
             if (validVals.length < 2) return null;
-            const minY = Math.min(...validVals), maxY = Math.max(...validVals);
+            let minY = Math.min(...validVals), maxY = Math.max(...validVals);
+            if (refLine && refLine.value != null) { minY = Math.min(minY, refLine.value); maxY = Math.max(maxY, refLine.value); }
             const pad = Math.max((maxY - minY) * 0.25, Math.abs(maxY) * 0.05, 1);
             const yLo = minY - pad, yHi = maxY + pad;
             const span = (yHi - yLo) || 1;
 
             const xAt = i => pL + (n <= 1 ? cW / 2 : (i / (n - 1)) * cW);
             const yAt = v => invert ? (pT + (1 - (v - yLo) / span) * cH) : (pT + ((v - yLo) / span) * cH);
+
+            // Dwie ciche linie rytmu — bez liczb, tylko żeby oko miało punkt odniesienia
+            // (pusty wykres bez ŻADNEJ siatki wygląda jak niedokończony szkic, nie dane).
+            const gridLines = [pT + cH / 3, pT + cH * 2 / 3]
+                .map(y => `<line x1="${pL}" y1="${y.toFixed(1)}" x2="${(pL + cW).toFixed(1)}" y2="${y.toFixed(1)}" stroke="#EEEBE3" stroke-width="0.8" stroke-dasharray="4 3"/>`)
+                .join('');
 
             let segments = [], cur = [];
             points.forEach((p, i) => {
@@ -6579,26 +6593,43 @@
                   ` L${mainSeg[mainSeg.length - 1][0].toFixed(1)},${baseline.toFixed(1)} L${mainSeg[0][0].toFixed(1)},${baseline.toFixed(1)} Z`
                 : '';
 
+            const refLineHtml = (refLine && refLine.value != null) ? (() => {
+                const ry = yAt(refLine.value).toFixed(1);
+                const lbl = refLine.label ? `<text x="${(pL + cW).toFixed(1)}" y="${(parseFloat(ry) - 6).toFixed(1)}" text-anchor="end" font-size="10" fill="#B08A3E" font-family="Inter,sans-serif" font-weight="700">${refLine.label}</text>` : '';
+                return `<line x1="${pL}" y1="${ry}" x2="${(pL + cW).toFixed(1)}" y2="${ry}" stroke="#C4A35A" stroke-width="1.3" stroke-dasharray="5 3"/>${lbl}`;
+            })() : '';
+
             let lastValidIdx = -1;
             for (let i = points.length - 1; i >= 0; i--) if (points[i].y != null) { lastValidIdx = i; break; }
             const dots = points.map((p, i) => {
                 if (p.y == null) return '';
                 const isLast = i === lastValidIdx;
                 const x = xAt(i).toFixed(1), y = yAt(p.y).toFixed(1);
-                return `<circle cx="${x}" cy="${y}" r="${isLast ? 4.5 : 3}" fill="${isLast ? color : '#fff'}" stroke="${color}" stroke-width="${isLast ? 0 : 1.6}"/>`;
+                const r = isLast ? 5.5 : 3.5;
+                const pulse = isLast ? `<circle cx="${x}" cy="${y}" r="${r}" fill="none" stroke="${color}" stroke-width="1.5" class="lab-dot-pulse"/>` : '';
+                const tapAttrs = (tipId && (p.label || p.sub))
+                    ? ` onclick="showStatsTip('${tipId}',this,'${String(p.label || '').replace(/'/g, "\\'")}','${String(p.sub || '').replace(/'/g, "\\'")}','')" style="cursor:pointer;touch-action:manipulation;"`
+                    : '';
+                return pulse + `<circle cx="${x}" cy="${y}" r="${r}" fill="${isLast ? color : '#fff'}" stroke="${color}" stroke-width="${isLast ? 0 : 1.7}"${tapAttrs}/>`;
             }).join('');
 
             const gradId = lineId + '-grad';
+            const tipHtml = tipId ? `<div id="s-${tipId}-tip" class="stats-tooltip"></div>` : '';
             return {
-                html: `<svg id="${lineId}" viewBox="0 0 ${W} ${H}" width="100%" style="display:block;overflow:visible;">
-                    <defs><linearGradient id="${gradId}" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stop-color="${color}" stop-opacity="0.14"/>
-                        <stop offset="100%" stop-color="${color}" stop-opacity="0"/>
-                    </linearGradient></defs>
-                    ${areaPD ? `<path d="${areaPD}" fill="url(#${gradId})"/>` : ''}
-                    ${linePD ? `<path id="${lineId}-line" d="${linePD}" fill="none" stroke="${color}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>` : ''}
-                    ${dots}
-                </svg>`
+                html: `<div style="position:relative;">
+                    <svg id="${lineId}" viewBox="0 0 ${W} ${H}" width="100%" style="display:block;overflow:visible;">
+                        <defs><linearGradient id="${gradId}" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stop-color="${color}" stop-opacity="0.16"/>
+                            <stop offset="100%" stop-color="${color}" stop-opacity="0"/>
+                        </linearGradient></defs>
+                        ${gridLines}
+                        ${areaPD ? `<path d="${areaPD}" fill="url(#${gradId})"/>` : ''}
+                        ${refLineHtml}
+                        ${linePD ? `<path id="${lineId}-line" d="${linePD}" fill="none" stroke="${color}" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>` : ''}
+                        ${dots}
+                    </svg>
+                    ${tipHtml}
+                </div>`
             };
         }
 
@@ -6675,6 +6706,13 @@
 
         function clamp01(v) { return Math.max(0, Math.min(100, v)); }
 
+        // Plakietka z przezroczystym tłem koloru tekstu (8-cyfrowy hex-alfa — wspierane
+        // od lat w Chrome/Safari mobile, cel PWA) — jedyne miejsce gdzie tło ma kolor,
+        // reszta karty zostaje monochromatyczna.
+        function _labPill(text, color) {
+            return '<span style="display:inline-flex;align-items:center;padding:5px 12px;border-radius:20px;background:' + color + '1F;color:' + color + ';font-size:13px;font-weight:700;line-height:1.2;">' + text + '</span>';
+        }
+
         function _labFormaTile(label, val, col, sub) {
             return '<div style="background:#F8F5EE;border-radius:14px;padding:12px 8px;text-align:center;">' +
                 '<div style="font-size:9.5px;font-weight:700;color:#8A8A8A;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;">' + label + '</div>' +
@@ -6728,28 +6766,28 @@
             const validCount = points.filter(p => p.y != null).length;
             let bodyHtml;
             if (validCount >= 3) {
-                const chart = _labTrendSVG(points, { invert: true, color: col, lineId: 'lab-forma-line' });
+                const chart = _labTrendSVG(points, { invert: true, color: col, lineId: 'lab-forma-line', tipId: 'lab-forma' });
                 const firstValid = points.find(p => p.y != null);
                 const delta = (firstValid && firstValid.y !== score) ? score - firstValid.y : null;
-                const deltaChip = delta != null
-                    ? '<span style="font-size:14px;font-weight:700;color:' + (delta >= 0 ? '#6B8F71' : '#C07264') + ';margin-left:8px;">' + (delta >= 0 ? '▲ +' : '▼ ') + Math.abs(delta) + '</span>'
+                const deltaPill = delta != null
+                    ? _labPill((delta >= 0 ? '▲ +' : '▼ ') + Math.abs(delta), delta >= 0 ? '#6B8F71' : '#C07264')
                     : '';
                 bodyHtml =
-                    '<div style="display:flex;align-items:baseline;justify-content:center;">' +
-                        '<span id="lab-forma-num" style="font-family:Outfit,sans-serif;font-size:34px;font-weight:800;color:' + col + ';font-variant-numeric:tabular-nums;">0</span>' +
-                        deltaChip +
+                    '<div style="display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;">' +
+                        '<span id="lab-forma-num" style="font-family:Outfit,sans-serif;font-size:38px;font-weight:800;color:' + col + ';font-variant-numeric:tabular-nums;line-height:1;">0</span>' +
+                        _labPill(verdict, col) + deltaPill +
                     '</div>' +
-                    '<div style="font-size:12px;font-weight:600;color:#8A8A8A;margin-bottom:10px;">' + verdict + ' · ostatnie tygodnie</div>' +
+                    '<div style="font-size:12px;color:#8A8A8A;margin:8px 0 4px;">ostatnie 9 tygodni · dotknij punkt po szczegóły</div>' +
                     (chart ? chart.html : '') +
-                    '<div style="display:flex;justify-content:space-between;font-size:10px;color:#B0A89E;margin-top:2px;"><span>8 tyg. temu</span><span>dziś</span></div>';
+                    '<div style="display:flex;justify-content:space-between;font-size:11px;color:#B0A89E;margin-top:4px;"><span>8 tyg. temu</span><span>dziś</span></div>';
             } else {
                 bodyHtml = _labRing(score, col, 'lab-ring-forma') +
-                    '<div style="font-family:Outfit,sans-serif;font-size:22px;font-weight:800;color:' + col + ';margin-top:8px;">' + verdict + '</div>' +
-                    '<div style="font-size:11px;color:#B0A89E;margin-top:8px;">Wykres pojawi się gdy zbierzemy więcej danych</div>';
+                    '<div style="margin-top:10px;">' + _labPill(verdict, col) + '</div>' +
+                    '<div style="font-size:11.5px;color:#B0A89E;margin-top:10px;">Wykres pojawi się gdy zbierzemy więcej danych</div>';
             }
 
             return header +
-                '<div class="lab-card" style="background:#fff;border:1px solid #EBEBEB;border-radius:20px;padding:24px 20px 20px;text-align:center;">' +
+                '<div class="lab-card" style="background:#fff;border:1px solid #EBEBEB;border-radius:20px;padding:24px 20px 20px;text-align:center;position:relative;">' +
                     bodyHtml +
                     '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:20px;">' + tiles + '</div>' +
                 '</div></div>';
@@ -6759,16 +6797,21 @@
         // tydzień przez _labFormaScore() — te same wagi co "dziś", jedno miejsce,
         // bez ryzyka że backend i frontend policzą Formę inaczej. Tydzień bez
         // wystarczających sygnałów → _labFormaScore zwraca null → przerwa w linii.
+        // label/sub zasilają tooltip po dotknięciu punktu (_labTrendSVG + showStatsTip).
         function _labFormaChartPoints(history, d) {
-            const pts = (history || []).map(h => ({
-                y: _labFormaScore({
+            const hist = history || [];
+            const pts = hist.map((h, i) => {
+                const y = _labFormaScore({
                     trends: { paceDeltaSec: h.paceDeltaSec, hrDelta: h.hrDelta },
                     load: h.acwr != null ? { acwr: h.acwr } : null,
                     sleep: h.sleepTrend != null ? { trend: h.sleepTrend } : null,
                     readiness: h.readiness != null ? { score: h.readiness } : null
-                })
-            }));
-            pts.push({ y: _labFormaScore(d) });
+                });
+                const weeksAgo = hist.length - i;
+                return { y, label: weeksAgo === 1 ? '1 tydz. temu' : weeksAgo + ' tyg. temu', sub: y != null ? y + ' pkt' : 'za mało danych' };
+            });
+            const today = _labFormaScore(d);
+            pts.push({ y: today, label: 'Dziś', sub: today != null ? today + ' pkt' : '' });
             return pts;
         }
 
@@ -6798,24 +6841,37 @@
                     '</div></div>';
             }
 
-            const points = (rp.history || []).map(h => ({ y: h.predictedSec }));
-            points.push({ y: rp.current.predictedSec });
+            const histArr = rp.history || [];
+            const points = histArr.map((h, i) => {
+                const weeksAgo = histArr.length - i;
+                return {
+                    y: h.predictedSec,
+                    label: weeksAgo === 1 ? '1 tydz. temu' : weeksAgo + ' tyg. temu',
+                    sub: h.predictedSec != null ? _labFmtRaceTime(h.predictedSec) + (h.basedOn ? ' · ' + h.basedOn.type : '') : 'za mało danych'
+                };
+            });
+            points.push({
+                y: rp.current.predictedSec, label: 'Dziś',
+                sub: _labFmtRaceTime(rp.current.predictedSec) + (rp.current.basedOn ? ' · ' + rp.current.basedOn.type : '')
+            });
             const validCount = points.filter(p => p.y != null).length;
 
             let bodyHtml =
-                '<div id="lab-race-num" style="font-family:Outfit,sans-serif;font-size:34px;font-weight:800;color:#1A1A1A;font-variant-numeric:tabular-nums;">' + _labFmtRaceTime(0) + '</div>' +
-                '<div style="font-size:11.5px;color:#8A8A8A;margin-top:2px;margin-bottom:10px;">na podstawie: ' + _labBasedOnText(rp.current.basedOn) + '</div>';
+                '<div id="lab-race-num" style="font-family:Outfit,sans-serif;font-size:38px;font-weight:800;color:#1A1A1A;font-variant-numeric:tabular-nums;line-height:1;">' + _labFmtRaceTime(0) + '</div>' +
+                '<div style="margin-top:10px;">' + _labPill('na podstawie: ' + _labBasedOnText(rp.current.basedOn), '#8A8A8A') + '</div>';
 
             if (validCount >= 3) {
-                const chart = _labTrendSVG(points, { invert: false, color: '#1A1A1A', lineId: 'lab-race-line' });
+                const refLine = rp.goalTimeSec != null ? { value: rp.goalTimeSec, label: 'Cel ' + _labFmtRaceTime(rp.goalTimeSec) } : undefined;
+                const chart = _labTrendSVG(points, { invert: false, color: '#1A1A1A', lineId: 'lab-race-line', tipId: 'lab-race', refLine });
                 if (chart) {
-                    bodyHtml += chart.html +
-                        '<div style="display:flex;justify-content:space-between;font-size:10px;color:#B0A89E;margin-top:2px;"><span>8 tyg. temu</span><span>dziś</span></div>';
+                    bodyHtml += '<div style="font-size:12px;color:#8A8A8A;margin:10px 0 2px;">ostatnie 9 tygodni · dotknij punkt po szczegóły</div>' +
+                        chart.html +
+                        '<div style="display:flex;justify-content:space-between;font-size:11px;color:#B0A89E;margin-top:4px;"><span>8 tyg. temu</span><span>dziś</span></div>';
                 }
             }
 
             return header +
-                '<div class="lab-card" style="background:#fff;border:1px solid #EBEBEB;border-radius:20px;padding:24px 20px 20px;text-align:center;">' +
+                '<div class="lab-card" style="background:#fff;border:1px solid #EBEBEB;border-radius:20px;padding:24px 20px 20px;text-align:center;position:relative;">' +
                     bodyHtml +
                 '</div></div>';
         }
@@ -9591,7 +9647,7 @@
 
         // Stempel buildu — dowód na urządzeniu, że działa świeży kod (trzymać
         // w zgodzie z CACHE_VERSION w sw.js; bump przy każdym deployu frontendu)
-        const VELM_BUILD = 'v30';
+        const VELM_BUILD = 'v31';
         console.log('velm build', VELM_BUILD, navigator.userAgent);
 
         async function hardReloadApp() {
