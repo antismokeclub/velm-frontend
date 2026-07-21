@@ -6590,12 +6590,26 @@
             if (cur.length) segments.push(cur);
             if (!segments.length) return null;
 
-            const linePD = segments.map(seg => seg.map((pt, i) => `${i === 0 ? 'M' : 'L'}${pt[0].toFixed(1)},${pt[1].toFixed(1)}`).join(' ')).join(' ');
+            // Krzywa (Catmull-Rom, ten sam _crSmooth co karty tygodniowe w Kalendarzu)
+            // zamiast łamanej — kilka punktów po prostej wygląda toporne, wygładzona
+            // linia czyta się jak dopracowany wykres, nie szkic.
+            const linePD = segments.map(seg => _crSmooth(seg)).join(' ');
+
+            // Przerwa (brak wystarczających danych w danym tygodniu) NIE jest ukrywana
+            // ani zmyślana — ale goły odstęp w linii czyta się jak zepsuty wykres, nie
+            // świadomy wybór. Łącznik: cienka, przerywana, wyraźnie odmienna od
+            // properowej krzywej kreska między ostatnim realnym punktem a następnym —
+            // sygnalizuje "tu nie wiemy", nie podaje żadnej wartości pośredniej.
+            const gapConnectors = segments.slice(1).map((seg, i) => {
+                const prevEnd = segments[i][segments[i].length - 1];
+                const nextStart = seg[0];
+                return `<line x1="${prevEnd[0].toFixed(1)}" y1="${prevEnd[1].toFixed(1)}" x2="${nextStart[0].toFixed(1)}" y2="${nextStart[1].toFixed(1)}" stroke="${color}" stroke-width="1.4" stroke-dasharray="1 4" stroke-linecap="round" opacity="0.4"/>`;
+            }).join('');
 
             // wypełnienie tylko pod najdłuższym ciągłym odcinkiem (zwykle jedynym przy dobrych danych)
             const mainSeg = segments.reduce((a, b) => b.length > a.length ? b : a, []);
             const areaPD = mainSeg.length >= 2
-                ? mainSeg.map((pt, i) => `${i === 0 ? 'M' : 'L'}${pt[0].toFixed(1)},${pt[1].toFixed(1)}`).join(' ') +
+                ? _crSmooth(mainSeg) +
                   ` L${mainSeg[mainSeg.length - 1][0].toFixed(1)},${baseline.toFixed(1)} L${mainSeg[0][0].toFixed(1)},${baseline.toFixed(1)} Z`
                 : '';
 
@@ -6643,6 +6657,7 @@
                         ${areaPD ? `<path d="${areaPD}" fill="url(#${gradId})"/>` : ''}
                         ${refTicks}
                         ${refLineHtml}
+                        ${gapConnectors}
                         ${linePD ? `<path id="${lineId}-line" d="${linePD}" fill="none" stroke="${color}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>` : ''}
                         ${dots}
                     </svg>
@@ -9673,7 +9688,7 @@
 
         // Stempel buildu — dowód na urządzeniu, że działa świeży kod (trzymać
         // w zgodzie z CACHE_VERSION w sw.js; bump przy każdym deployu frontendu)
-        const VELM_BUILD = 'v32';
+        const VELM_BUILD = 'v33';
         console.log('velm build', VELM_BUILD, navigator.userAgent);
 
         async function hardReloadApp() {
