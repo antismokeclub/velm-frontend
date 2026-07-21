@@ -4052,6 +4052,7 @@
     </div>
 
     <script>
+
         // --- Auth Check ---
         if (!localStorage.getItem('velm_token')) {
             // Clear user_id too to prevent redirect loop with index.html
@@ -6534,6 +6535,106 @@
             })(start);
         }
 
+        // Wykres trendu z lukami — tydzień bez wystarczających sygnałów = przerwa w
+        // linii, NIGDY zmyślona/interpolowana wartość (ta sama zasada co bramka ACWR
+        // dla obciążenia). Osobne ciągłe odcinki ("M...L...") w jednym <path>, żeby
+        // stroke-dashoffset line-draw animacja wciąż działała jedną transition (jak
+        // w _buildPaceSVG) — przeglądarka rysuje kolejne odcinki po kolei wzdłuż
+        // łącznej długości ścieżki, co naturalnie wygląda jak "od najstarszego do dziś".
+        // invert=true: wyższa wartość wyżej na wykresie (Forma, 0-100 gdzie więcej=lepiej).
+        // invert=false: wyższa wartość NIŻEJ (czas wyścigu, gdzie mniej=lepiej — ten sam
+        // trik co w _buildPaceSVG, gdzie szybsze tempo/mniej sekund samo wypada wyżej).
+        function _labTrendSVG(points, opts) {
+            const { invert = true, color = '#1A1A1A', lineId } = opts || {};
+            const W = 320, H = 140;
+            const pL = 4, pR = 4, pT = 12, pB = 4;
+            const cW = W - pL - pR, cH = H - pT - pB;
+            const n = points.length;
+
+            const validVals = points.filter(p => p.y != null).map(p => p.y);
+            if (validVals.length < 2) return null;
+            const minY = Math.min(...validVals), maxY = Math.max(...validVals);
+            const pad = Math.max((maxY - minY) * 0.25, Math.abs(maxY) * 0.05, 1);
+            const yLo = minY - pad, yHi = maxY + pad;
+            const span = (yHi - yLo) || 1;
+
+            const xAt = i => pL + (n <= 1 ? cW / 2 : (i / (n - 1)) * cW);
+            const yAt = v => invert ? (pT + (1 - (v - yLo) / span) * cH) : (pT + ((v - yLo) / span) * cH);
+
+            let segments = [], cur = [];
+            points.forEach((p, i) => {
+                if (p.y == null) { if (cur.length) segments.push(cur); cur = []; return; }
+                cur.push([xAt(i), yAt(p.y)]);
+            });
+            if (cur.length) segments.push(cur);
+            if (!segments.length) return null;
+
+            const linePD = segments.map(seg => seg.map((pt, i) => `${i === 0 ? 'M' : 'L'}${pt[0].toFixed(1)},${pt[1].toFixed(1)}`).join(' ')).join(' ');
+
+            // wypełnienie tylko pod najdłuższym ciągłym odcinkiem (zwykle jedynym przy dobrych danych)
+            const mainSeg = segments.reduce((a, b) => b.length > a.length ? b : a, []);
+            const baseline = pT + cH;
+            const areaPD = mainSeg.length >= 2
+                ? mainSeg.map((pt, i) => `${i === 0 ? 'M' : 'L'}${pt[0].toFixed(1)},${pt[1].toFixed(1)}`).join(' ') +
+                  ` L${mainSeg[mainSeg.length - 1][0].toFixed(1)},${baseline.toFixed(1)} L${mainSeg[0][0].toFixed(1)},${baseline.toFixed(1)} Z`
+                : '';
+
+            let lastValidIdx = -1;
+            for (let i = points.length - 1; i >= 0; i--) if (points[i].y != null) { lastValidIdx = i; break; }
+            const dots = points.map((p, i) => {
+                if (p.y == null) return '';
+                const isLast = i === lastValidIdx;
+                const x = xAt(i).toFixed(1), y = yAt(p.y).toFixed(1);
+                return `<circle cx="${x}" cy="${y}" r="${isLast ? 4.5 : 3}" fill="${isLast ? color : '#fff'}" stroke="${color}" stroke-width="${isLast ? 0 : 1.6}"/>`;
+            }).join('');
+
+            const gradId = lineId + '-grad';
+            return {
+                html: `<svg id="${lineId}" viewBox="0 0 ${W} ${H}" width="100%" style="display:block;overflow:visible;">
+                    <defs><linearGradient id="${gradId}" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stop-color="${color}" stop-opacity="0.14"/>
+                        <stop offset="100%" stop-color="${color}" stop-opacity="0"/>
+                    </linearGradient></defs>
+                    ${areaPD ? `<path d="${areaPD}" fill="url(#${gradId})"/>` : ''}
+                    ${linePD ? `<path id="${lineId}-line" d="${linePD}" fill="none" stroke="${color}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>` : ''}
+                    ${dots}
+                </svg>`
+            };
+        }
+
+        // Rysuje linię (stroke-dashoffset, jak pace-chart w Statystykach) + liczy w górę
+        // wartość liczbową obok. formatFn opcjonalny — domyślnie zaokrąglona liczba
+        // całkowita (Forma), dla czasu wyścigu przekazujemy formatter mm:ss.
+        function _labAnimateTrendChart(lineId, numId, targetNum, formatFn) {
+            const line = document.getElementById(lineId + '-line');
+            if (line && typeof line.getTotalLength === 'function') {
+                const len = line.getTotalLength();
+                if (len > 0) {
+                    line.style.strokeDasharray = len;
+                    line.style.strokeDashoffset = len;
+                    line.style.transition = 'stroke-dashoffset 900ms cubic-bezier(0.4,0,0.2,1)';
+                    requestAnimationFrame(() => requestAnimationFrame(() => { line.style.strokeDashoffset = '0'; }));
+                }
+            }
+            const num = numId && document.getElementById(numId);
+            if (num && targetNum != null) {
+                const fmt = formatFn || (v => String(Math.round(v)));
+                const duration = 900, start = performance.now(), ease = t => 1 - Math.pow(1 - t, 3);
+                (function tick(now) {
+                    const t = Math.min((now - start) / duration, 1);
+                    num.textContent = fmt(targetNum * ease(t));
+                    if (t < 1) requestAnimationFrame(tick);
+                })(start);
+            }
+        }
+
+        function _labFmtRaceTime(totalSec) {
+            if (totalSec == null || !isFinite(totalSec)) return '—';
+            const s = Math.max(0, Math.round(totalSec));
+            const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = s % 60;
+            return h > 0 ? h + ':' + String(m).padStart(2, '0') + ':' + String(sec).padStart(2, '0') : m + ':' + String(sec).padStart(2, '0');
+        }
+
         // Forma: zastępuje surowy tekst AI ("Analiza AI") jedną policzoną wartością
         // 0-100 (nie samym kierunkiem tempa) — ważona kompozycja kilku sygnałów,
         // dokładnie jak Gotowość waży energię/sen/tętno. Wagi rozkładają się
@@ -6619,12 +6720,111 @@
                 _labFormaTile('Sen', sleepT != null ? (sleepT > 0 ? '▲ +' + sleepT : sleepT < 0 ? '▼ ' + sleepT : '= 0') : '—',
                     sleepT != null ? (sleepT >= 0 ? '#6B8F71' : '#C07264') : '#C8C2B8', 'vs zeszły tydzień');
 
+            // User odrzucił pojedynczy pierścień — chce widzieć TREND w czasie ("czy
+            // idzie w górę"). Wymóg ≥3 ważnych punktów (spośród 8 tyg. historii + dziś)
+            // zanim w ogóle pokażemy wykres — inaczej fallback do pierścienia, żeby nie
+            // pokazywać pewnie wyglądającej linii z 1-2 prawdziwych punktów.
+            const points = _labFormaChartPoints(d.formaHistory, d);
+            const validCount = points.filter(p => p.y != null).length;
+            let bodyHtml;
+            if (validCount >= 3) {
+                const chart = _labTrendSVG(points, { invert: true, color: col, lineId: 'lab-forma-line' });
+                const firstValid = points.find(p => p.y != null);
+                const delta = (firstValid && firstValid.y !== score) ? score - firstValid.y : null;
+                const deltaChip = delta != null
+                    ? '<span style="font-size:14px;font-weight:700;color:' + (delta >= 0 ? '#6B8F71' : '#C07264') + ';margin-left:8px;">' + (delta >= 0 ? '▲ +' : '▼ ') + Math.abs(delta) + '</span>'
+                    : '';
+                bodyHtml =
+                    '<div style="display:flex;align-items:baseline;justify-content:center;">' +
+                        '<span id="lab-forma-num" style="font-family:Outfit,sans-serif;font-size:34px;font-weight:800;color:' + col + ';font-variant-numeric:tabular-nums;">0</span>' +
+                        deltaChip +
+                    '</div>' +
+                    '<div style="font-size:12px;font-weight:600;color:#8A8A8A;margin-bottom:10px;">' + verdict + ' · ostatnie tygodnie</div>' +
+                    (chart ? chart.html : '') +
+                    '<div style="display:flex;justify-content:space-between;font-size:10px;color:#B0A89E;margin-top:2px;"><span>8 tyg. temu</span><span>dziś</span></div>';
+            } else {
+                bodyHtml = _labRing(score, col, 'lab-ring-forma') +
+                    '<div style="font-family:Outfit,sans-serif;font-size:22px;font-weight:800;color:' + col + ';margin-top:8px;">' + verdict + '</div>' +
+                    '<div style="font-size:11px;color:#B0A89E;margin-top:8px;">Wykres pojawi się gdy zbierzemy więcej danych</div>';
+            }
+
             return header +
                 '<div class="lab-card" style="background:#fff;border:1px solid #EBEBEB;border-radius:20px;padding:24px 20px 20px;text-align:center;">' +
-                    _labRing(score, col, 'lab-ring-forma') +
-                    '<div style="font-family:Outfit,sans-serif;font-size:22px;font-weight:800;color:' + col + ';margin-top:8px;">' + verdict + '</div>' +
+                    bodyHtml +
                     '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:20px;">' + tiles + '</div>' +
                 '</div></div>';
+        }
+
+        // Surowe sygnały z backendu (formaHistory) → punkty wykresu, licząc KAŻDY
+        // tydzień przez _labFormaScore() — te same wagi co "dziś", jedno miejsce,
+        // bez ryzyka że backend i frontend policzą Formę inaczej. Tydzień bez
+        // wystarczających sygnałów → _labFormaScore zwraca null → przerwa w linii.
+        function _labFormaChartPoints(history, d) {
+            const pts = (history || []).map(h => ({
+                y: _labFormaScore({
+                    trends: { paceDeltaSec: h.paceDeltaSec, hrDelta: h.hrDelta },
+                    load: h.acwr != null ? { acwr: h.acwr } : null,
+                    sleep: h.sleepTrend != null ? { trend: h.sleepTrend } : null,
+                    readiness: h.readiness != null ? { score: h.readiness } : null
+                })
+            }));
+            pts.push({ y: _labFormaScore(d) });
+            return pts;
+        }
+
+        // Przewidywany czas wyścigu — druga nowa sekcja, pod Formą. Zakotwiczenie
+        // (anchor) to najlepszy niedawny wysiłek strukturalny (interwały/tempo z
+        // realnym tempem odcinka) albo, jako fallback niższej pewności, bieg z
+        // zegarka — formuła Riegela (backend, lib/racePrediction.js) ekstrapoluje z
+        // tego na dystans celu z onboardingu. Brak anchora = pusta sekcja/empty-state,
+        // NIGDY ekstrapolacja z samych easy runów (ta sama lekcja co ACWR=4.0).
+        // Podpis "na podstawie" jest nieopcjonalny — user explicite odrzucił czarną
+        // skrzynkę przy "Analizie AI" (runda 4); tu grounding jest jawny i krótki.
+        function _labRacePredictionCard(rp) {
+            if (!rp) return ''; // brak celu wyścigu z onboardingu — sekcja się nie pokazuje
+
+            const header = '<div style="margin-top:20px;">' +
+                '<div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:2px;">' +
+                    '<div style="font-family:Outfit,sans-serif;font-size:18px;font-weight:800;color:#1A1A1A;letter-spacing:-0.01em;">Przewidywany czas</div>' +
+                    '<div style="font-size:10px;font-weight:700;color:#8A8A8A;text-transform:uppercase;letter-spacing:0.1em;">' + (rp.goalLabel || '') + '</div>' +
+                '</div>' +
+                '<div style="font-size:12px;color:#8A8A8A;margin-bottom:10px;line-height:1.4;">Na podstawie ostatnich treningów z odcinkami</div>';
+
+            if (!rp.current) {
+                return header +
+                    '<div class="lab-card" style="background:#fff;border:1px solid #EBEBEB;border-radius:20px;padding:28px 20px;text-align:center;">' +
+                        '<div style="font-size:14px;font-weight:600;color:#1A1A1A;margin-bottom:4px;">Za mało danych na przewidywanie</div>' +
+                        '<div style="font-size:13px;color:#8A8A8A;line-height:1.5;">Zrób trening z odcinkami (interwały/tempo), żeby zobaczyć przewidywany czas</div>' +
+                    '</div></div>';
+            }
+
+            const points = (rp.history || []).map(h => ({ y: h.predictedSec }));
+            points.push({ y: rp.current.predictedSec });
+            const validCount = points.filter(p => p.y != null).length;
+
+            let bodyHtml =
+                '<div id="lab-race-num" style="font-family:Outfit,sans-serif;font-size:34px;font-weight:800;color:#1A1A1A;font-variant-numeric:tabular-nums;">' + _labFmtRaceTime(0) + '</div>' +
+                '<div style="font-size:11.5px;color:#8A8A8A;margin-top:2px;margin-bottom:10px;">na podstawie: ' + _labBasedOnText(rp.current.basedOn) + '</div>';
+
+            if (validCount >= 3) {
+                const chart = _labTrendSVG(points, { invert: false, color: '#1A1A1A', lineId: 'lab-race-line' });
+                if (chart) {
+                    bodyHtml += chart.html +
+                        '<div style="display:flex;justify-content:space-between;font-size:10px;color:#B0A89E;margin-top:2px;"><span>8 tyg. temu</span><span>dziś</span></div>';
+                }
+            }
+
+            return header +
+                '<div class="lab-card" style="background:#fff;border:1px solid #EBEBEB;border-radius:20px;padding:24px 20px 20px;text-align:center;">' +
+                    bodyHtml +
+                '</div></div>';
+        }
+
+        function _labBasedOnText(basedOn) {
+            if (!basedOn) return '';
+            const dateTxt = basedOn.date ? new Date(basedOn.date + 'T00:00:00').toLocaleDateString('pl-PL', { day: 'numeric', month: 'numeric' }) : '';
+            const confNote = basedOn.confidence === 'low' ? ' (zwykły bieg, nie test tempa)' : '';
+            return basedOn.type + ' ' + basedOn.distanceKm + 'km' + (dateTxt ? ', ' + dateTxt : '') + confNote;
         }
 
         let _labLoadGen = 0;
@@ -6661,11 +6861,14 @@
                 // ── Obciążenie: skala na pełną szerokość ──
                 const loadHtml = _labLoadGauge(d.load);
 
-                // ── Forma: duży werdykt progresu + 4 kafelki wspierające ──
+                // ── Forma: wykres trendu (fallback: pierścień) + 4 kafelki wspierające ──
                 const formaHtml = _labFormaCard(d);
 
+                // ── Przewidywany czas wyścigu: wykres trendu pod Formą ──
+                const raceHtml = _labRacePredictionCard(d.racePrediction);
+
                 el.innerHTML =
-                    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">' + ringCards.join('') + '</div>' + loadHtml + formaHtml;
+                    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">' + ringCards.join('') + '</div>' + loadHtml + formaHtml + raceHtml;
 
                 // Wypełnienie pierścieni i wjazd wskaźnika na skali — osobno od
                 // fade-in kart poniżej, żeby liczby/kreska ożywały PO tym jak karta
@@ -6675,8 +6878,25 @@
                     if (d.readiness) _labAnimateRing('lab-ring-readiness', d.readiness.score);
                     if (d.sleep && d.sleep.score != null) _labAnimateRing('lab-ring-sleep', d.sleep.score);
                     _labAnimateGauge(d.load);
+
+                    const formaPoints = _labFormaChartPoints(d.formaHistory, d);
                     const formaScore = _labFormaScore(d);
-                    if (formaScore != null) _labAnimateRing('lab-ring-forma', formaScore);
+                    if (formaPoints.filter(p => p.y != null).length >= 3) {
+                        _labAnimateTrendChart('lab-forma-line', 'lab-forma-num', formaScore);
+                    } else if (formaScore != null) {
+                        _labAnimateRing('lab-ring-forma', formaScore);
+                    }
+
+                    if (d.racePrediction && d.racePrediction.current) {
+                        const rpPoints = (d.racePrediction.history || []).map(h => ({ y: h.predictedSec }));
+                        rpPoints.push({ y: d.racePrediction.current.predictedSec });
+                        if (rpPoints.filter(p => p.y != null).length >= 3) {
+                            _labAnimateTrendChart('lab-race-line', 'lab-race-num', d.racePrediction.current.predictedSec, _labFmtRaceTime);
+                        } else {
+                            const numEl = document.getElementById('lab-race-num');
+                            if (numEl) numEl.textContent = _labFmtRaceTime(d.racePrediction.current.predictedSec);
+                        }
+                    }
                 }, 200);
 
                 // Wejście kart: fade + rise, stagger 50ms
@@ -9371,7 +9591,7 @@
 
         // Stempel buildu — dowód na urządzeniu, że działa świeży kod (trzymać
         // w zgodzie z CACHE_VERSION w sw.js; bump przy każdym deployu frontendu)
-        const VELM_BUILD = 'v29';
+        const VELM_BUILD = 'v30';
         console.log('velm build', VELM_BUILD, navigator.userAgent);
 
         async function hardReloadApp() {
@@ -10490,6 +10710,7 @@
                 if (segmentRepeats > 0) workoutPayload.completed_repeats = segmentRepeats;
                 if (workoutData.powtorzenia) workoutPayload.planned_repeats = workoutData.powtorzenia;
                 if (workSegH + workSegM + workSegS > 0) workoutPayload.working_segment_duration_min = workSegH * 60 + workSegM + workSegS / 60;
+                if (workoutData.odcinek_km > 0) workoutPayload.working_distance_km = workoutData.odcinek_km;
             }
             if (workoutType === 'tempo') {
                 if (segmentWorkKm > 0) workoutPayload.working_distance_km = segmentWorkKm;
