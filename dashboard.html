@@ -4046,6 +4046,7 @@
 
 
 
+
         // --- Auth Check ---
         if (!localStorage.getItem('velm_token')) {
             // Clear user_id too to prevent redirect loop with index.html
@@ -8754,6 +8755,39 @@
             apiFetch('/api/coaching/outreach-seen', { method: 'POST', body: { userId: currentUserId } }).catch(() => {});
         }
 
+        // CHECK-IN POWROTNY (dormant, 30 dni ciszy) — łagodne okno powrotu zamiast zwykłej
+        // narady. Pyta czy biegał, zapisuje kontekst, potem układa świeży plan.
+        function showReturnCheckin(dormant) {
+            if (document.getElementById('return-checkin-overlay')) return;
+            const days = dormant?.daysSince || 30;
+            const ov = document.createElement('div');
+            ov.id = 'return-checkin-overlay';
+            ov.style.cssText = 'position:fixed;inset:0;z-index:9999;background:#F7F4F0;display:flex;align-items:center;justify-content:center;padding:24px;';
+            ov.innerHTML = '<div style="max-width:360px;width:100%;text-align:center;">'
+                + '<div style="width:56px;height:56px;background:#1A1A1A;border-radius:18px;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:20px;font-weight:800;color:white;">S</div>'
+                + '<div style="font-family:\'Outfit\',sans-serif;font-weight:800;font-size:24px;color:#1A1A1A;margin-bottom:10px;">Dobrze Cię widzieć</div>'
+                + '<div style="font-size:15px;color:#6B6B6B;line-height:1.6;margin-bottom:28px;">Minęło trochę czasu (' + days + ' dni). Zanim ułożę nowy plan — biegałeś coś w tym czasie na własną rękę?</div>'
+                + '<button id="rc-yes" style="width:100%;padding:16px;background:#1A1A1A;border:none;border-radius:16px;font-size:15px;font-weight:700;font-family:\'Inter\',sans-serif;cursor:pointer;color:white;margin-bottom:12px;">Tak, trochę biegałem</button>'
+                + '<button id="rc-no" style="width:100%;padding:16px;background:white;border:1.5px solid #EBEBEB;border-radius:16px;font-size:15px;font-weight:700;font-family:\'Inter\',sans-serif;cursor:pointer;color:#1A1A1A;">Nie, wracam od zera</button>'
+                + '</div>';
+            document.body.appendChild(ov);
+            const finish = async (trained) => {
+                ov.remove();
+                try { await apiFetch('/api/coaching/return-checkin', { method: 'POST', body: { userId: currentUserId, trained } }); } catch(e) {}
+                const narada = showNaradaOverlay({ estimateMs: 60000 });
+                try {
+                    await apiFetch('/api/weekly-update', { method: 'POST', body: { userId: currentUserId } });
+                    calendarPlan = null; loadCalendar(); loadTodayCard();
+                    await narada.finish();
+                } catch(e) {
+                    narada.abort();
+                    if (e.status !== 402) showVelmToast('Nie udało się ułożyć planu — spróbujemy przy następnym wejściu', true);
+                }
+            };
+            document.getElementById('rc-yes').onclick = () => finish(true);
+            document.getElementById('rc-no').onclick = () => finish(false);
+        }
+
         let _weeklyNaradaRunning = false;
         async function checkWeeklyNarada() {
             try {
@@ -8766,6 +8800,8 @@
                 // akurat wygasł przy starcie apki — bez tego user mógł nigdy
                 // nie dostać wymuszonej narady, bo nic tego nie ponawiało.
                 const data = await apiFetch(`/api/plan/${currentUserId}`);
+                // Dormant (30 dni ciszy) ma pierwszeństwo — okno powrotne zamiast zwykłej narady.
+                if (data?.dormant?.needed) { showReturnCheckin(data.dormant); return; }
                 renderCoachOutreach(data?.outreach);   // zaczepka przy absencji (niezależna od narady)
                 const plan = data?.plan?.plan ?? data?.plan ?? null;
                 const weekKey = plan?.tydzien_od || plan?.dni?.[0]?.data;
@@ -9659,7 +9695,7 @@
 
         // Stempel buildu — dowód na urządzeniu, że działa świeży kod (trzymać
         // w zgodzie z CACHE_VERSION w sw.js; bump przy każdym deployu frontendu)
-        const VELM_BUILD = 'v38';
+        const VELM_BUILD = 'v39';
         console.log('velm build', VELM_BUILD, navigator.userAgent);
 
         async function hardReloadApp() {
