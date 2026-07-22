@@ -8741,12 +8741,12 @@
             };
         }
 
-        // ── Narada NA ŻĄDANIE przy pierwszym wejściu w nowym tygodniu ──
+        // ── Narada NA ŻĄDANIE przy pierwszym wejściu po wygaśnięciu planu ──
         // Bez crona: to użytkownik (samym wejściem do apki) zwołuje naradę.
-        // Plan aktualny (tydzien_od >= poniedziałek) → nic. Plan stary →
-        // niezamykalna narada + PRAWDZIWE generowanie (/api/weekly-update).
-        // Darmowi (402) — cicho zostają przy starym planie, bez ponawiania
-        // w tym samym tygodniu. Kasa Sonneta pali się tylko dla wracających.
+        // Rolling 7 dni: plan żyje 7 dni od tydzien_od. W oknie → nic. Po wygaśnięciu
+        // (dziś > start+6) → niezamykalna narada + PRAWDZIWE generowanie (/api/weekly-update).
+        // Darmowi (402) — cicho zostają przy starym planie, bez ponawiania dla tego
+        // wygasłego planu. Kasa Sonneta pali się tylko dla wracających.
         let _weeklyNaradaRunning = false;
         async function checkWeeklyNarada() {
             try {
@@ -8763,11 +8763,18 @@
                 const weekKey = plan?.tydzien_od || plan?.dni?.[0]?.data;
                 if (!weekKey) return;   // brak planu w ogóle — nie ruszamy (onboarding to załatwia)
 
-                const mondayStr = toDateStr(getMonday(new Date()));
-                if (weekKey >= mondayStr) return;   // plan aktualny — nic do roboty
+                // Rolling 7 dni: plan żyje 7 dni od tydzien_od. Aktualny, dopóki dziś
+                // nie przekroczy ostatniego dnia (start + 6). Koniec kalendarzowego
+                // pon-niedz — plan wygasa 8. dnia niezależnie od dnia tygodnia, i przy
+                // pierwszym wejściu do apki po wygaśnięciu wyskakuje niezamykalna narada.
+                const todayStr = toDateStr(new Date());
+                const planEnd = new Date(weekKey + 'T00:00:00');
+                planEnd.setDate(planEnd.getDate() + 6);
+                const planEndStr = toDateStr(planEnd);
+                if (todayStr <= planEndStr) return;   // plan w oknie 7 dni — nic do roboty
 
-                // Darmowy user dostał już 402 w tym tygodniu? Nie męczymy.
-                if (localStorage.getItem('velm_narada_402_week') === mondayStr) return;
+                // Darmowy user dostał już 402 dla TEGO wygasłego planu? Nie męczymy.
+                if (localStorage.getItem('velm_narada_402_week') === weekKey) return;
 
                 _weeklyNaradaRunning = true;
                 const narada = showNaradaOverlay({ estimateMs: 60000 });
@@ -8784,8 +8791,8 @@
                 } catch (e) {
                     narada.abort();
                     if (e.status === 402) {
-                        // Free tier: stary plan zostaje; nie ponawiaj w tym tygodniu
-                        localStorage.setItem('velm_narada_402_week', mondayStr);
+                        // Free tier: stary plan zostaje; nie ponawiaj dla tego wygasłego planu
+                        localStorage.setItem('velm_narada_402_week', weekKey);
                     } else {
                         showVelmToast('Nie udało się zwołać narady — spróbujemy przy następnym wejściu', true);
                     }
@@ -9698,7 +9705,7 @@
 
         // Stempel buildu — dowód na urządzeniu, że działa świeży kod (trzymać
         // w zgodzie z CACHE_VERSION w sw.js; bump przy każdym deployu frontendu)
-        const VELM_BUILD = 'v34';
+        const VELM_BUILD = 'v35';
         console.log('velm build', VELM_BUILD, navigator.userAgent);
 
         async function hardReloadApp() {
@@ -11563,6 +11570,7 @@
         document.body.classList.add('loaded');
         makeSliderTouchFriendly('energySlider', updateSlider);
         makeSliderTouchFriendly('rpeSlider', updateRpeSlider);
+
     </script>
 
 <!-- ── CHECKIN OVERLAY ──────────────────────────────────────────── -->
