@@ -3786,7 +3786,7 @@ function _confirmPwd() {
 }
 
 // ─── INIT ─────────────────────────────────────────────────────
-try{const sv=localStorage.getItem('velm_lang');if(sv&&C[sv])S.data.language=sv;}catch(x){}
+try{const sv=localStorage.getItem('velm_lang');if(sv&&C[sv]){S.data.language=sv;}else{const nav=(navigator.language||navigator.userLanguage||'en').slice(0,2).toLowerCase();if(C[nav])S.data.language=nav;}}catch(x){}
 // Motywy kolorystyczne usunięte — apka ma jeden bazowy wygląd (czerń).
 // Sprzątamy zapisany motyw ze starych sesji, żeby nic go nie wskrzesiło.
 try{localStorage.removeItem('velm_theme');}catch(x){}
