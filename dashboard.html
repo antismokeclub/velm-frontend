@@ -4043,6 +4043,7 @@
     <script>
 
 
+
         // --- Auth Check ---
         if (!localStorage.getItem('velm_token')) {
             // Clear user_id too to prevent redirect loop with index.html
@@ -8749,6 +8750,11 @@
                 const weekKey = plan?.tydzien_od || plan?.dni?.[0]?.data;
                 if (!weekKey) return;   // brak planu w ogóle — nie ruszamy (onboarding to załatwia)
 
+                // Maszyna stanów: user uprzedził o przerwie (wstrzymany) → nie zmuszamy narady
+                // dopóki data powrotu nie minie. Konwersacyjna pauza zamiast przycisku.
+                const _coaching = data?.coaching;
+                if (_coaching?.state === 'paused' && _coaching.hold_until && _coaching.hold_until > toDateStr(new Date())) return;
+
                 // Rolling 7 dni: plan żyje 7 dni od tydzien_od. Aktualny, dopóki dziś
                 // nie przekroczy ostatniego dnia (start + 6). Koniec kalendarzowego
                 // pon-niedz — plan wygasa 8. dnia niezależnie od dnia tygodnia, i przy
@@ -9632,7 +9638,7 @@
 
         // Stempel buildu — dowód na urządzeniu, że działa świeży kod (trzymać
         // w zgodzie z CACHE_VERSION w sw.js; bump przy każdym deployu frontendu)
-        const VELM_BUILD = 'v36';
+        const VELM_BUILD = 'v37';
         console.log('velm build', VELM_BUILD, navigator.userAgent);
 
         async function hardReloadApp() {
