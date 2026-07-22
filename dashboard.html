@@ -3444,7 +3444,8 @@
 
             <!-- VIEW: HOME (Landing) -->
             <div id="view-home" class="view active">
-                <!-- RAPORT TYGODNIOWY — pokazuje się gdy istnieje -->
+                <!-- ZACZEPKA TRENERA (absencja) — pokazuje się gdy backend zgłosi outreach -->
+                <div id="coach-outreach-card" style="display:none;margin-bottom:16px;"></div>
 
                 <!-- MAIN CARD: TODAY'S WORKOUT (dynamic) -->
                 <div class="home-section-title">Dzisiejszy trening</div>
@@ -4041,6 +4042,7 @@
     </div>
 
     <script>
+
 
 
 
@@ -8734,6 +8736,24 @@
         // (dziś > start+6) → niezamykalna narada + PRAWDZIWE generowanie (/api/weekly-update).
         // Darmowi (402) — cicho zostają przy starym planie, bez ponawiania dla tego
         // wygasłego planu. Kasa Sonneta pali się tylko dla wracających.
+        // Zaczepka przy absencji — Szef pisze po ludzku, gdy user zniknął (3 pominięte
+        // zaplanowane treningi, nie na uzgodnionej pauzie). Karta na Domu → otwiera czat.
+        function renderCoachOutreach(outreach) {
+            const card = document.getElementById('coach-outreach-card');
+            if (!card) return;
+            if (!outreach || !outreach.needed) { card.style.display = 'none'; return; }
+            card.style.display = 'block';
+            card.innerHTML = '<div style="background:#1A1A1A;border-radius:20px;padding:20px;">'
+                + '<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">'
+                + '<div style="width:36px;height:36px;background:white;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#1A1A1A;">S</div>'
+                + '<div style="font-size:14px;font-weight:700;color:white;">Szef Sztabu</div></div>'
+                + '<div style="font-size:15px;color:rgba(255,255,255,0.9);line-height:1.6;margin-bottom:16px;">' + sanitizeHTML(outreach.message) + '</div>'
+                + '<button onclick="switchView(\'coach\')" style="width:100%;padding:14px;background:white;border:none;border-radius:14px;font-size:14px;font-weight:700;font-family:\'Inter\',sans-serif;cursor:pointer;color:#1A1A1A;">Odpisz trenerowi →</button>'
+                + '</div>';
+            // Cooldown: zaznacz, że zaczepka pokazana — nie nagabuj co wejście.
+            apiFetch('/api/coaching/outreach-seen', { method: 'POST', body: { userId: currentUserId } }).catch(() => {});
+        }
+
         let _weeklyNaradaRunning = false;
         async function checkWeeklyNarada() {
             try {
@@ -8746,6 +8766,7 @@
                 // akurat wygasł przy starcie apki — bez tego user mógł nigdy
                 // nie dostać wymuszonej narady, bo nic tego nie ponawiało.
                 const data = await apiFetch(`/api/plan/${currentUserId}`);
+                renderCoachOutreach(data?.outreach);   // zaczepka przy absencji (niezależna od narady)
                 const plan = data?.plan?.plan ?? data?.plan ?? null;
                 const weekKey = plan?.tydzien_od || plan?.dni?.[0]?.data;
                 if (!weekKey) return;   // brak planu w ogóle — nie ruszamy (onboarding to załatwia)
@@ -9638,7 +9659,7 @@
 
         // Stempel buildu — dowód na urządzeniu, że działa świeży kod (trzymać
         // w zgodzie z CACHE_VERSION w sw.js; bump przy każdym deployu frontendu)
-        const VELM_BUILD = 'v37';
+        const VELM_BUILD = 'v38';
         console.log('velm build', VELM_BUILD, navigator.userAgent);
 
         async function hardReloadApp() {
