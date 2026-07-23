@@ -3263,6 +3263,18 @@
         /* ── SETTINGS CSS CLASSES ───────────────────────────────── */
         .s-card { background:#fff; border-radius:20px; padding:20px; margin-bottom:12px; border:1px solid #EBEBEB; }
         .s-section-title { font-size:11px; font-weight:700; color:#8A8A8A; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:16px; }
+        /* Menu ustawień → podekrany */
+        .s-menu-row { display:flex; align-items:center; gap:14px; width:100%; background:#fff; border:1px solid #EBEBEB; border-radius:16px; padding:15px 16px; margin-bottom:10px; cursor:pointer; text-align:left; min-height:44px; touch-action:manipulation; transition:transform 120ms cubic-bezier(0.23,1,0.32,1), border-color 0.2s ease; }
+        .s-menu-row:hover { border-color:#1A1A1A; }
+        .s-menu-row:active { transform:scale(0.985); }
+        .s-menu-icon { width:40px; height:40px; border-radius:12px; background:#F4F1EC; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+        .s-menu-label { flex:1; min-width:0; display:flex; flex-direction:column; }
+        .s-menu-title { font-family:'Outfit',sans-serif; font-weight:700; font-size:16px; color:#1A1A1A; }
+        .s-menu-sub { font-size:12px; color:#8A8A8A; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+        .s-back-header { display:flex; align-items:center; gap:12px; padding:8px 0 18px; }
+        .s-back-btn { background:none; border:1.5px solid #EBEBEB; width:40px; height:40px; border-radius:12px; display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0; touch-action:manipulation; transition:border-color 0.2s ease; }
+        .s-back-btn:hover { border-color:#1A1A1A; }
+        .s-pane-title { font-family:'Outfit',sans-serif; font-weight:800; font-size:24px; color:#1A1A1A; }
         .s-label { font-size:11px; font-weight:700; color:#8A8A8A; text-transform:uppercase; letter-spacing:0.08em; display:block; margin-bottom:6px; }
         .s-input { width:100%; padding:12px; border:1px solid #D9D9D9; border-radius:12px; font-size:15px; font-family:'Inter',sans-serif; color:#1A1A1A; background:#fff; outline:none; box-sizing:border-box; transition:border-color 0.2s ease; min-height:44px; }
         .s-input:focus { border-color:#1A1A1A; }
@@ -3749,6 +3761,39 @@
                     <div style="font-size:13px;color:#8A8A8A;" id="settings-version">v1.0.0 Beta</div>
                 </div>
 
+                <div id="settings-menu">
+                    <button class="s-menu-row" onclick="openSettingsPane('profil')">
+                        <span class="s-menu-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
+                        <span class="s-menu-label"><span class="s-menu-title">Profil</span><span class="s-menu-sub">Imię, waga, wzrost, dni, język, jednostki</span></span>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#C4C4C4" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+                    </button>
+                    <button class="s-menu-row" onclick="openSettingsPane('cel')">
+                        <span class="s-menu-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.4" fill="#1A1A1A"/></svg></span>
+                        <span class="s-menu-label"><span class="s-menu-title">Cel i plan</span><span class="s-menu-sub">Data zawodów, cel czasowy, plan treningowy</span></span>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#C4C4C4" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+                    </button>
+                    <button class="s-menu-row" onclick="openSettingsPane('polaczenia')">
+                        <span class="s-menu-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 007.07 0l2.83-2.83a5 5 0 10-7.07-7.07L11.5 4.5"/><path d="M14 11a5 5 0 00-7.07 0L4.1 13.83a5 5 0 107.07 7.07L12.5 19.5"/></svg></span>
+                        <span class="s-menu-label"><span class="s-menu-title">Połączenia</span><span class="s-menu-sub">Zegarek, Strava, Garmin</span></span>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#C4C4C4" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+                    </button>
+                    <button class="s-menu-row" onclick="openSettingsPane('subskrypcja')">
+                        <span class="s-menu-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="5" width="19" height="14" rx="2.5"/><path d="M2.5 10h19"/></svg></span>
+                        <span class="s-menu-label"><span class="s-menu-title">Subskrypcja</span><span class="s-menu-sub">Twój plan i płatności</span></span>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#C4C4C4" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+                    </button>
+                    <button class="s-menu-row" onclick="openSettingsPane('konto')">
+                        <span class="s-menu-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l7 3v6c0 4.5-3 8.5-7 10-4-1.5-7-5.5-7-10V5z"/></svg></span>
+                        <span class="s-menu-label"><span class="s-menu-title">Konto</span><span class="s-menu-sub">Email, hasło, dane, wyloguj</span></span>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#C4C4C4" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+                    </button>
+                </div>
+
+                <div class="s-pane" id="s-pane-profil" style="display:none;">
+                    <div class="s-back-header">
+                        <button class="s-back-btn" onclick="backToSettingsMenu()" aria-label="Wróć"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+                        <div class="s-pane-title">Profil</div>
+                    </div>
                 <!-- SEKCJA 1 — PROFIL -->
                 <div class="home-anim s-card" style="animation-delay:0.05s;">
                     <div class="s-section-title">Profil</div>
@@ -3830,6 +3875,13 @@
                     </div>
                 </div>
 
+                </div>
+
+                <div class="s-pane" id="s-pane-cel" style="display:none;">
+                    <div class="s-back-header">
+                        <button class="s-back-btn" onclick="backToSettingsMenu()" aria-label="Wróć"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+                        <div class="s-pane-title">Cel i plan</div>
+                    </div>
                 <!-- SEKCJA 2 — TWÓJ CEL -->
                 <div class="home-anim s-card" style="animation-delay:0.10s;">
                     <div class="s-section-title">Twój cel</div>
@@ -3865,6 +3917,13 @@
                     </button>
                 </div>
 
+                </div>
+
+                <div class="s-pane" id="s-pane-polaczenia" style="display:none;">
+                    <div class="s-back-header">
+                        <button class="s-back-btn" onclick="backToSettingsMenu()" aria-label="Wróć"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+                        <div class="s-pane-title">Połączenia</div>
+                    </div>
                 <!-- SEKCJA 4 — POŁĄCZENIA -->
                 <div class="home-anim s-card" style="animation-delay:0.20s;">
                     <div class="s-section-title">Połączenia</div>
@@ -3928,12 +3987,26 @@
                     </div>
                 </div>
 
+                </div>
+
+                <div class="s-pane" id="s-pane-subskrypcja" style="display:none;">
+                    <div class="s-back-header">
+                        <button class="s-back-btn" onclick="backToSettingsMenu()" aria-label="Wróć"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+                        <div class="s-pane-title">Subskrypcja</div>
+                    </div>
                 <!-- SEKCJA 5 — SUBSKRYPCJA -->
                 <div class="home-anim s-card" style="animation-delay:0.22s;">
                     <div class="s-section-title">Subskrypcja</div>
                     <div id="subscription-section" style="font-size:13px;color:#8A8A8A;">Ładowanie…</div>
                 </div>
 
+                </div>
+
+                <div class="s-pane" id="s-pane-konto" style="display:none;">
+                    <div class="s-back-header">
+                        <button class="s-back-btn" onclick="backToSettingsMenu()" aria-label="Wróć"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+                        <div class="s-pane-title">Konto</div>
+                    </div>
                 <!-- SEKCJA 5.5 — ZMIANA EMAILA -->
                 <div class="home-anim s-card" style="animation-delay:0.24s;">
                     <div class="s-section-title">Zmiana adresu email</div>
@@ -3987,6 +4060,7 @@
                     <button onclick="deleteAccount()" class="s-btn-ghost">
                         Usuń konto
                     </button>
+                </div>
                 </div>
             </div>
 
@@ -4081,6 +4155,7 @@
     </div>
 
     <script>
+
 
 
 
@@ -7725,9 +7800,26 @@
         }
 
         // --- Settings ---
+        // Menu ustawień → podekrany (jak Garmin/iOS): lista kategorii, klik → szczegóły.
+        function openSettingsPane(name) {
+            const menu = document.getElementById('settings-menu');
+            if (menu) menu.style.display = 'none';
+            document.querySelectorAll('#view-settings .s-pane').forEach(p => p.style.display = 'none');
+            const pane = document.getElementById('s-pane-' + name);
+            if (pane) pane.style.display = 'block';
+            try { window.scrollTo(0, 0); } catch(e) {}
+        }
+        function backToSettingsMenu() {
+            document.querySelectorAll('#view-settings .s-pane').forEach(p => p.style.display = 'none');
+            const menu = document.getElementById('settings-menu');
+            if (menu) menu.style.display = 'block';
+            try { window.scrollTo(0, 0); } catch(e) {}
+        }
+
         async function loadSettings() {
             const userId = localStorage.getItem('velm_user_id');
             if (!userId) return;
+            backToSettingsMenu();   // wejście w ustawienia zawsze pokazuje menu
             loadSubscriptionSection();
             try {
                 const [userRes, planRes] = await Promise.all([
@@ -9791,7 +9883,7 @@
 
         // Stempel buildu — dowód na urządzeniu, że działa świeży kod (trzymać
         // w zgodzie z CACHE_VERSION w sw.js; bump przy każdym deployu frontendu)
-        const VELM_BUILD = 'v41';
+        const VELM_BUILD = 'v42';
         console.log('velm build', VELM_BUILD, navigator.userAgent);
 
         async function hardReloadApp() {
