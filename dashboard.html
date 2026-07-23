@@ -3934,6 +3934,21 @@
                     <div id="subscription-section" style="font-size:13px;color:#8A8A8A;">Ładowanie…</div>
                 </div>
 
+                <!-- SEKCJA 5.5 — ZMIANA EMAILA -->
+                <div class="home-anim s-card" style="animation-delay:0.24s;">
+                    <div class="s-section-title">Zmiana adresu email</div>
+                    <div class="s-field">
+                        <label class="s-label">Nowy email</label>
+                        <input type="email" id="settings-new-email" placeholder="nowy@email.com" autocomplete="email" class="s-input">
+                    </div>
+                    <div class="s-field" style="margin-bottom:14px;">
+                        <label class="s-label">Potwierdź hasłem</label>
+                        <input type="password" id="settings-email-pwd" placeholder="Twoje hasło" autocomplete="current-password" class="s-input">
+                    </div>
+                    <button onclick="changeEmail()" class="s-btn-secondary">Zmień email</button>
+                    <div id="settings-email-msg" class="s-msg"></div>
+                </div>
+
                 <!-- SEKCJA 6 — ZMIANA HASŁA -->
                 <div class="home-anim s-card" style="animation-delay:0.25s;">
                     <div class="s-section-title">Zmiana hasła</div>
@@ -4066,6 +4081,7 @@
     </div>
 
     <script>
+
 
 
 
@@ -8308,6 +8324,29 @@
             }
         }
 
+        async function changeEmail() {
+            const newEmail = document.getElementById('settings-new-email')?.value?.trim();
+            const pwd = document.getElementById('settings-email-pwd')?.value;
+            if (!newEmail || !pwd) { showSettingsMsg('settings-email-msg', 'Wypełnij oba pola', true); return; }
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newEmail)) { showSettingsMsg('settings-email-msg', 'Nieprawidłowy email', true); return; }
+            try {
+                const res = await fetch(`${API_BASE}/api/user/${currentUserId}/change-email`, {
+                    method: 'POST', headers: authHeaders(),
+                    body: JSON.stringify({ currentPassword: pwd, newEmail })
+                });
+                const data = await res.json();
+                if (!data.success) throw new Error(data.error);
+                // Zmiana loginu unieważniła stare tokeny — zapisz świeże
+                if (data.accessToken || data.token) localStorage.setItem('velm_token', data.accessToken || data.token);
+                if (data.refreshToken) localStorage.setItem('velm_refresh_token', data.refreshToken);
+                ['settings-new-email','settings-email-pwd'].forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
+                showSettingsMsg('settings-email-msg', 'Email zmieniony');
+                loadSettings();
+            } catch(e) {
+                showSettingsMsg('settings-email-msg', e.message, true);
+            }
+        }
+
         function showSettingsMsg(elementId, msg, isError) {
             const el = document.getElementById(elementId);
             if (!el) return;
@@ -9752,7 +9791,7 @@
 
         // Stempel buildu — dowód na urządzeniu, że działa świeży kod (trzymać
         // w zgodzie z CACHE_VERSION w sw.js; bump przy każdym deployu frontendu)
-        const VELM_BUILD = 'v40';
+        const VELM_BUILD = 'v41';
         console.log('velm build', VELM_BUILD, navigator.userAgent);
 
         async function hardReloadApp() {
