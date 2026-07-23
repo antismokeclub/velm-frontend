@@ -3808,6 +3808,14 @@
                         </div>
                     </div>
 
+                    <div class="s-field">
+                        <label class="s-label">Jednostki</label>
+                        <div class="s-lang-toggle">
+                            <button class="s-lang-btn selected" id="s-unit-km" onclick="selectSettingsUnit('km')">Kilometry</button>
+                            <button class="s-lang-btn" id="s-unit-mi" onclick="selectSettingsUnit('mi')">Mile</button>
+                        </div>
+                    </div>
+
                     <button onclick="saveProfileSettings()" class="s-btn-primary">Zapisz profil</button>
                     <div id="settings-profile-msg" class="s-msg"></div>
 
@@ -3860,6 +3868,22 @@
                 <!-- SEKCJA 4 — POŁĄCZENIA -->
                 <div class="home-anim s-card" style="animation-delay:0.20s;">
                     <div class="s-section-title">Połączenia</div>
+
+                    <!-- Zegarek (Health Connect / HealthKit) — główne źródło -->
+                    <div class="s-conn-row">
+                        <div class="s-conn-head">
+                            <div id="watch-dot" class="s-conn-dot"></div>
+                            <div style="flex:1;min-width:0;">
+                                <div class="s-conn-name">Zegarek — Garmin, Coros, Samsung</div>
+                                <div id="watch-status-text" class="s-conn-sub">HRV, tętno spoczynkowe, sen i biegi — automatycznie</div>
+                            </div>
+                            <button id="watch-btn" onclick="connectWatch()" class="s-btn-chip filled">Połącz</button>
+                        </div>
+                        <div id="watch-connected-actions" style="display:none;margin-top:10px;">
+                            <button onclick="syncWatchNow()" class="s-btn-secondary" style="margin-bottom:8px;">Synchronizuj teraz</button>
+                            <button onclick="disconnectWatch()" class="s-btn-ghost" style="color:#C07264;">Rozłącz zegarek</button>
+                        </div>
+                    </div>
 
                     <!-- Strava -->
                     <div class="s-conn-row">
@@ -4042,6 +4066,7 @@
     </div>
 
     <script>
+
 
 
 
@@ -7727,6 +7752,9 @@
                 _settingsLang = onb.language ?? 'pl';
                 document.getElementById('s-lang-pl')?.classList.toggle('selected', _settingsLang === 'pl');
                 document.getElementById('s-lang-en')?.classList.toggle('selected', _settingsLang === 'en');
+                _settingsUnit = onb.unit ?? 'km';
+                document.getElementById('s-unit-km')?.classList.toggle('selected', _settingsUnit === 'km');
+                document.getElementById('s-unit-mi')?.classList.toggle('selected', _settingsUnit === 'mi');
 
                 // Twój cel — inputs
                 const editRaceDate = document.getElementById('settings-edit-race-date');
@@ -7775,6 +7803,7 @@
             if (dpw >= 1 && dpw <= 7) updates.daysPerWeek = dpw;
             if (_settingsSelectedDays.length > 0) updates.selectedDays = _settingsSelectedDays;
             if (_settingsLang) updates.language = _settingsLang;
+            if (_settingsUnit) updates.unit = _settingsUnit;
             if (Object.keys(updates).length === 0) return;
             try {
                 const res = await fetch(`${API_BASE}/api/user/${userId}`, {
@@ -7801,6 +7830,12 @@
             _settingsLang = lang;
             document.getElementById('s-lang-pl')?.classList.toggle('selected', lang === 'pl');
             document.getElementById('s-lang-en')?.classList.toggle('selected', lang === 'en');
+        }
+
+        function selectSettingsUnit(unit) {
+            _settingsUnit = unit;
+            document.getElementById('s-unit-km')?.classList.toggle('selected', unit === 'km');
+            document.getElementById('s-unit-mi')?.classList.toggle('selected', unit === 'mi');
         }
 
         // ── SUBSCRIPTION ─────────────────────────────────────────
@@ -8102,6 +8137,27 @@
                 const statusText = document.getElementById('strava-status-text');
                 if (statusText) statusText.textContent = 'Błąd połączenia';
             }
+        }
+
+        // ── ZEGAREK (Health Connect / HealthKit) ──
+        // W apce natywnej (Capacitor) most Health Connect czyta magazyn telefonu (Garmin/
+        // Coros/Samsung/Apple) i wysyła do POST /api/health/sync. W PWA (przeglądarka) nie
+        // ma dostępu do magazynu, więc kierujemy do apki mobilnej.
+        function _isNativeApp() {
+            return !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
+        }
+        function connectWatch() {
+            if (!_isNativeApp()) {
+                showVelmToast('Podłączenie zegarka działa w aplikacji mobilnej velm. Tam jednym kliknięciem połączysz Garmina, Coros albo Samsunga przez Health Connect — HRV, tętno, sen i biegi wpadają automatycznie.', false);
+                return;
+            }
+            // TODO(native build): most do Health Connect —
+            // window.HealthConnect.requestPermissions([...]) → odczyt → POST /api/health/sync
+            showVelmToast('Łączę z Health Connect…', false);
+        }
+        function syncWatchNow() { connectWatch(); }
+        function disconnectWatch() {
+            showVelmToast('Rozłączanie zegarka będzie dostępne w aplikacji mobilnej.', false);
         }
 
         async function stravaConnect() {
@@ -9211,6 +9267,7 @@
         let _chatHistoryLoaded = {};
         let _settingsSelectedDays = [];
         let _settingsLang = 'pl';
+        let _settingsUnit = 'km';
         async function loadChatHistory(agent) {
             if (!currentUserId) return;
             // Multi-conversation flow ładuje historię przez selectConversation/switchAgentConversation.
@@ -9695,7 +9752,7 @@
 
         // Stempel buildu — dowód na urządzeniu, że działa świeży kod (trzymać
         // w zgodzie z CACHE_VERSION w sw.js; bump przy każdym deployu frontendu)
-        const VELM_BUILD = 'v39';
+        const VELM_BUILD = 'v40';
         console.log('velm build', VELM_BUILD, navigator.userAgent);
 
         async function hardReloadApp() {
