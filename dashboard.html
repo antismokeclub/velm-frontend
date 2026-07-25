@@ -3796,7 +3796,7 @@
                     </button>
                     <button class="s-menu-row" onclick="openSettingsPane('cel')">
                         <span class="s-menu-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.4" fill="#1A1A1A"/></svg></span>
-                        <span class="s-menu-label"><span class="s-menu-title">Cel i plan</span><span class="s-menu-sub">Data zawodów, cel czasowy, plan treningowy</span></span>
+                        <span class="s-menu-label"><span class="s-menu-title">Cel</span><span class="s-menu-sub">Data zawodów, cel czasowy, kilometraż</span></span>
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#C4C4C4" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
                     </button>
                     <button class="s-menu-row" onclick="openSettingsPane('polaczenia')">
@@ -3823,7 +3823,6 @@
                     </div>
                 <!-- SEKCJA 1 — PROFIL -->
                 <div class="home-anim s-card" style="animation-delay:0.05s;">
-                    <div class="s-section-title">Profil</div>
                     <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px;">
                         <div id="settings-avatar" style="width:48px;height:48px;border-radius:50%;background:#1A1A1A;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
                             <span id="settings-initials" style="color:#fff;font-family:'Outfit',sans-serif;font-weight:700;font-size:18px;">?</span>
@@ -3907,42 +3906,30 @@
                 <div class="s-pane" id="s-pane-cel" style="display:none;">
                     <div class="s-back-header">
                         <button class="s-back-btn" onclick="backToSettingsMenu()" aria-label="Wróć"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
-                        <div class="s-pane-title">Cel i plan</div>
+                        <div class="s-pane-title">Twój cel</div>
                     </div>
-                <!-- SEKCJA 2 — TWÓJ CEL -->
-                <div class="home-anim s-card" style="animation-delay:0.10s;">
-                    <div class="s-section-title">Twój cel</div>
-
-                    <div class="s-field">
-                        <label class="s-label">Data zawodów</label>
-                        <input type="date" id="settings-edit-race-date" class="s-input">
+                    <p style="font-size:13px;color:#8A8A8A;line-height:1.5;margin:0 0 16px 2px;">Zmiana celu przebudowuje Twój plan od następnej narady sztabu.</p>
+                    <div class="home-anim s-card" style="animation-delay:0.05s;">
+                        <div class="s-field">
+                            <label class="s-label">Data zawodów</label>
+                            <input type="date" id="settings-edit-race-date" class="s-input">
+                        </div>
+                        <div class="s-field">
+                            <label class="s-label">Cel czasowy</label>
+                            <input type="text" id="settings-edit-time-goal" placeholder="np. 45:00 lub 1:45:00" class="s-input">
+                        </div>
+                        <div class="s-field" style="margin-bottom:20px;">
+                            <label class="s-label">Km tygodniowo</label>
+                            <input type="number" id="settings-edit-weekly-km" min="10" max="200" class="s-input">
+                        </div>
+                        <button onclick="saveGoalSettings()" class="s-btn-primary" style="min-height:52px;font-size:15px;">
+                            Zapisz i zaktualizuj plan &rarr;
+                        </button>
+                        <div id="settings-save-msg" class="s-msg" style="color:#6B8F71;">Zapisano — trwa generowanie nowego planu</div>
                     </div>
-                    <div class="s-field">
-                        <label class="s-label">Cel czasowy</label>
-                        <input type="text" id="settings-edit-time-goal" placeholder="np. 45:00 lub 1:45:00" class="s-input">
-                    </div>
-                    <div class="s-field" style="margin-bottom:20px;">
-                        <label class="s-label">Km tygodniowo</label>
-                        <input type="number" id="settings-edit-weekly-km" min="10" max="200" class="s-input">
-                    </div>
-
-                    <button onclick="saveGoalSettings()" class="s-btn-primary" style="min-height:52px;font-size:15px;">
-                        Zapisz i zaktualizuj plan &rarr;
+                    <button onclick="switchView('history')" class="s-btn-secondary" style="margin-top:2px;">
+                        Historia treningów &rarr;
                     </button>
-                    <div id="settings-save-msg" class="s-msg" style="color:#6B8F71;">Zapisano — trwa generowanie nowego planu</div>
-                </div>
-
-                <!-- SEKCJA 3 — PLAN TRENINGOWY -->
-                <div class="home-anim s-card" style="animation-delay:0.15s;">
-                    <div class="s-section-title">Plan treningowy</div>
-                    <div id="settings-plan-goal" style="font-size:14px;color:#1A1A1A;line-height:1.5;margin-bottom:16px;">Brak aktywnego planu</div>
-                    <button id="settings-generate-plan-btn" onclick="generateNewPlan()" class="s-btn-secondary" style="min-height:52px;font-size:15px;margin-bottom:10px;">
-                        Wygeneruj nowy plan
-                    </button>
-                    <button onclick="switchView('history')" class="s-btn-secondary">
-                        Historia treningów →
-                    </button>
-                </div>
 
                 </div>
 
@@ -3953,8 +3940,6 @@
                     </div>
                 <!-- SEKCJA 4 — POŁĄCZENIA -->
                 <div class="home-anim s-card" style="animation-delay:0.20s;">
-                    <div class="s-section-title">Połączenia</div>
-
                     <!-- Zegarek (Health Connect / HealthKit) — główne źródło -->
                     <div class="s-conn-row">
                         <div class="s-conn-head">
@@ -4023,7 +4008,6 @@
                     </div>
                 <!-- SEKCJA 5 — SUBSKRYPCJA -->
                 <div class="home-anim s-card" style="animation-delay:0.22s;">
-                    <div class="s-section-title">Subskrypcja</div>
                     <div id="subscription-section" style="font-size:13px;color:#8A8A8A;">Ładowanie…</div>
                 </div>
 
@@ -4182,6 +4166,7 @@
     </div>
 
     <script>
+
 
 
 
@@ -9912,7 +9897,7 @@
 
         // Stempel buildu — dowód na urządzeniu, że działa świeży kod (trzymać
         // w zgodzie z CACHE_VERSION w sw.js; bump przy każdym deployu frontendu)
-        const VELM_BUILD = 'v44';
+        const VELM_BUILD = 'v45';
         console.log('velm build', VELM_BUILD, navigator.userAgent);
 
         async function hardReloadApp() {
