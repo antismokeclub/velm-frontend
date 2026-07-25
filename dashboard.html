@@ -4177,6 +4177,7 @@
 
 
 
+
         // --- Auth Check ---
         if (!localStorage.getItem('velm_token')) {
             // Clear user_id too to prevent redirect loop with index.html
@@ -9704,8 +9705,7 @@
             // (8 powtórzeń, 400m, 6km) zamiast tego, co NAPRAWDĘ jest w planie.
             window._todayStruktura = day.struktura || null;
 
-            const color = TYPE_COLORS[day.typ] || 'var(--primary-color)';
-            if (mainCard) mainCard.style.borderLeftColor = color;
+            // (usunięto kolorowy lewy pasek kafelka — mylił; kafelek zostaje neutralny)
             if (nameEl)  nameEl.textContent = TYPE_LABEL[day.typ] ?? day.typ;
             if (badgeEl) badgeEl.innerHTML = TYPE_EMOJI[day.typ] ?? '⚫';
 
@@ -9897,7 +9897,7 @@
 
         // Stempel buildu — dowód na urządzeniu, że działa świeży kod (trzymać
         // w zgodzie z CACHE_VERSION w sw.js; bump przy każdym deployu frontendu)
-        const VELM_BUILD = 'v45';
+        const VELM_BUILD = 'v46';
         console.log('velm build', VELM_BUILD, navigator.userAgent);
 
         async function hardReloadApp() {
