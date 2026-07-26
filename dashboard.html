@@ -3333,7 +3333,7 @@
         .s-days-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:5px; margin-bottom:12px; }
         .s-day-btn { min-height:46px; border:1px solid #E7E1D9; border-radius:12px; background:#FAF8F4; font-size:11px; font-weight:700; font-family:'Inter',sans-serif; color:#8A8A8A; cursor:pointer; touch-action:manipulation; transition:transform 120ms cubic-bezier(0.23,1,0.32,1), background 0.2s ease, border-color 0.2s ease, color 0.2s ease; padding:0; }
         .s-day-btn:active { transform:scale(0.94); }
-        .s-day-btn.selected { background:#1A1A1A; border-color:#1A1A1A; color:#fff; box-shadow:0 3px 10px rgba(26,26,26,0.16); }
+        .s-day-btn.selected { background:#5F8368; border-color:#5F8368; color:#fff; box-shadow:0 3px 10px rgba(95,131,104,0.28); }
         .s-lang-toggle { display:flex; gap:8px; margin-bottom:12px; }
         .s-lang-btn { flex:1; min-height:46px; border:1px solid #E7E1D9; border-radius:13px; background:#FAF8F4; font-size:14px; font-weight:600; font-family:'Inter',sans-serif; color:#8A8A8A; cursor:pointer; touch-action:manipulation; transition:transform 120ms cubic-bezier(0.23,1,0.32,1), background 0.2s ease, border-color 0.2s ease, color 0.2s ease; }
         .s-lang-btn:active { transform:scale(0.98); }
@@ -3388,6 +3388,13 @@
         .sd-info b { color:#fff; }
         /* dark subscription hero */
         .sd-hero { background:#1A1A1A; color:#fff; border-radius:20px; padding:20px; margin-bottom:14px; }
+        /* account list rows */
+        .sd-acc-row { display:flex; align-items:center; gap:14px; width:100%; background:none; border:none; border-bottom:1px solid #F3EFE8; padding:14px 0; min-height:44px; cursor:pointer; touch-action:manipulation; transition:opacity 0.15s ease; }
+        .sd-acc-row:last-child { border-bottom:none; }
+        .sd-acc-row:active { opacity:0.55; }
+        .sd-acc-form { padding:2px 0 14px; }
+        .sd-acc-lbl { display:block; font-size:11px; font-weight:700; color:#A69C8E; text-transform:uppercase; letter-spacing:0.06em; }
+        .sd-acc-val { display:block; font-size:15px; font-weight:700; color:#1A1A1A; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
         /* confirm modal */
         .sd-modal-back { position:fixed; inset:0; background:rgba(20,18,16,0.55); display:none; align-items:center; justify-content:center; z-index:10000; padding:28px; }
         .sd-modal-back.show { display:flex; animation:sdFade 200ms ease both; }
@@ -3886,20 +3893,22 @@
                         <button class="s-back-btn" onclick="backToSettingsMenu()" aria-label="Wróć"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
                         <div class="s-pane-title">Profil</div>
                     </div>
-                <!-- SEKCJA 1 — PROFIL -->
-                <div class="home-anim s-card" style="animation-delay:0.05s;">
-                    <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px;">
-                        <div id="settings-avatar" style="width:48px;height:48px;border-radius:50%;background:#1A1A1A;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                            <span id="settings-initials" style="color:#fff;font-family:'Outfit',sans-serif;font-weight:700;font-size:18px;">?</span>
-                        </div>
-                        <div style="min-width:0;flex:1;">
-                            <div id="settings-name-display" style="font-family:'Outfit',sans-serif;font-weight:700;font-size:18px;color:#1A1A1A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">—</div>
-                            <div id="settings-email" style="font-size:13px;color:#8A8A8A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">—</div>
+                <!-- SEKCJA 1 — PROFIL (wg Figmy) -->
+                <div class="home-anim" style="animation-delay:0.04s;text-align:center;margin-bottom:18px;">
+                    <div style="width:92px;height:92px;border-radius:50%;margin:0 auto;padding:4px;background:#fff;border:2px solid #CFE0D2;box-sizing:border-box;">
+                        <div id="settings-avatar" style="width:100%;height:100%;border-radius:50%;background:#E9F0EA;display:flex;align-items:center;justify-content:center;">
+                            <span id="settings-initials" style="color:#4A6B52;font-family:'Outfit',sans-serif;font-weight:800;font-size:30px;">?</span>
                         </div>
                     </div>
+                    <div id="settings-name-display" style="font-family:'Outfit',sans-serif;font-weight:800;font-size:19px;color:#1A1A1A;margin-top:12px;">—</div>
+                    <div id="settings-email" style="font-size:13px;color:#8A8A8A;margin-top:2px;">—</div>
+                    <button onclick="showVelmToast('Zdjęcie profilowe będzie wkrótce.', false)" class="sd-svc-link" style="margin-top:4px;">Zmień zdjęcie profilowe</button>
+                </div>
 
+                <div class="home-anim sd-card" style="animation-delay:0.08s;">
+                    <div class="sd-seclabel">Dane</div>
                     <div class="s-field">
-                        <label class="s-label">Imię</label>
+                        <label class="s-label">Imię i nazwisko</label>
                         <input type="text" id="settings-edit-name" placeholder="Twoje imię" class="s-input">
                     </div>
                     <div class="s-row">
@@ -3952,7 +3961,7 @@
                         </div>
                     </div>
 
-                    <button onclick="saveProfileSettings()" class="s-btn-primary">Zapisz profil</button>
+                    <button onclick="saveProfileSettings()" class="s-btn-primary" style="min-height:54px;font-size:15px;">Zapisz zmiany</button>
                     <div id="settings-profile-msg" class="s-msg"></div>
 
                     <div class="s-divider">
@@ -4200,10 +4209,8 @@
                         <button class="s-back-btn" onclick="backToSettingsMenu()" aria-label="Wróć"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
                         <div class="s-pane-title">Subskrypcja</div>
                     </div>
-                <!-- SEKCJA 5 — SUBSKRYPCJA -->
-                <div class="home-anim s-card" style="animation-delay:0.22s;">
-                    <div id="subscription-section" style="font-size:13px;color:#8A8A8A;">Ładowanie…</div>
-                </div>
+                <!-- SEKCJA 5 — SUBSKRYPCJA (wg Figmy — hero + korzyści) -->
+                <div class="home-anim" id="subscription-section" style="animation-delay:0.05s;font-size:13px;color:#8A8A8A;">Ładowanie…</div>
 
                 </div>
 
@@ -4212,60 +4219,78 @@
                         <button class="s-back-btn" onclick="backToSettingsMenu()" aria-label="Wróć"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
                         <div class="s-pane-title">Konto</div>
                     </div>
-                <!-- SEKCJA 5.5 — ZMIANA EMAILA -->
-                <div class="home-anim s-card" style="animation-delay:0.24s;">
-                    <div class="s-section-title">Zmiana adresu email</div>
-                    <div class="s-field">
-                        <label class="s-label">Nowy email</label>
-                        <input type="email" id="settings-new-email" placeholder="nowy@email.com" autocomplete="email" class="s-input">
-                    </div>
-                    <div class="s-field" style="margin-bottom:14px;">
-                        <label class="s-label">Potwierdź hasłem</label>
-                        <input type="password" id="settings-email-pwd" placeholder="Twoje hasło" autocomplete="current-password" class="s-input">
-                    </div>
-                    <button onclick="changeEmail()" class="s-btn-secondary">Zmień email</button>
-                    <div id="settings-email-msg" class="s-msg"></div>
-                </div>
-
-                <!-- SEKCJA 6 — ZMIANA HASŁA -->
-                <div class="home-anim s-card" style="animation-delay:0.25s;">
-                    <div class="s-section-title">Zmiana hasła</div>
-                    <div class="s-field">
-                        <input type="password" id="settings-pwd-current" placeholder="Obecne hasło" autocomplete="current-password" class="s-input">
-                    </div>
-                    <div class="s-field">
-                        <input type="password" id="settings-pwd-new" placeholder="Nowe hasło (min. 8 znaków)" autocomplete="new-password" class="s-input">
-                    </div>
-                    <div class="s-field" style="margin-bottom:14px;">
-                        <input type="password" id="settings-pwd-confirm" placeholder="Potwierdź nowe hasło" autocomplete="new-password" class="s-input">
-                    </div>
-                    <button onclick="changePassword()" class="s-btn-secondary">Zmień hasło</button>
-                    <div id="settings-pwd-msg" class="s-msg"></div>
-                </div>
-
-                <!-- SEKCJA 6.5 — TWOJE DANE (GDPR) -->
-                <div class="home-anim s-card" style="margin-bottom:16px;animation-delay:0.27s;">
-                    <div class="s-section-title">Twoje dane</div>
-                    <p style="font-size:13px;color:#8A8A8A;line-height:1.5;margin:0 0 14px 0;">Pobierz wszystkie swoje dane (treningi, plany, czaty, ustawienia) jako plik JSON.</p>
-                    <button onclick="exportMyData()" id="export-data-btn" class="s-btn-secondary">
-                        Pobierz moje dane
+                <!-- SEKCJA KONTO (wg Figmy — lista z icon-chipami) -->
+                <div class="home-anim sd-card" style="animation-delay:0.05s;padding:4px 16px;">
+                    <!-- Email logowania -->
+                    <button class="sd-acc-row" onclick="toggleAccountSection('acc-email-form')">
+                        <span class="sd-action-icon" style="width:42px;height:42px;background:#E8EEF3;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5A7A92" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>
+                        </span>
+                        <span style="flex:1;min-width:0;">
+                            <span class="sd-acc-lbl">Email logowania</span>
+                            <span class="sd-acc-val" id="konto-email">—</span>
+                        </span>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#C4C4C4" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 013 3L7 19l-4 1 1-4z"/></svg>
                     </button>
-                    <div style="display:flex;gap:14px;margin-top:14px;font-size:12px;">
-                        <a href="/privacy.html" target="_blank" class="s-link">Polityka prywatności</a>
-                        <a href="/terms.html" target="_blank" class="s-link">Regulamin</a>
+                    <div id="acc-email-form" class="sd-acc-form" style="display:none;">
+                        <div class="s-field"><label class="s-label">Nowy email</label><input type="email" id="settings-new-email" placeholder="nowy@email.com" autocomplete="email" class="s-input"></div>
+                        <div class="s-field" style="margin-bottom:12px;"><label class="s-label">Potwierdź hasłem</label><input type="password" id="settings-email-pwd" placeholder="Twoje hasło" autocomplete="current-password" class="s-input"></div>
+                        <button onclick="changeEmail()" class="s-btn-primary">Zmień email</button>
+                        <div id="settings-email-msg" class="s-msg"></div>
                     </div>
-                </div>
 
-                <!-- SEKCJA 7 — KONTO -->
-                <div class="home-anim s-card" style="margin-bottom:32px;animation-delay:0.30s;">
-                    <div class="s-section-title">Konto</div>
-                    <button onclick="doLogout()" class="s-btn-danger" style="margin-bottom:8px;">
-                        Wyloguj się
+                    <!-- Hasło -->
+                    <button class="sd-acc-row" onclick="toggleAccountSection('acc-pwd-form')">
+                        <span class="sd-action-icon" style="width:42px;height:42px;background:#F6ECE7;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C08457" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="9" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg>
+                        </span>
+                        <span style="flex:1;min-width:0;">
+                            <span class="sd-acc-lbl">Hasło</span>
+                            <span class="sd-acc-val">Zmień hasło</span>
+                        </span>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#C4C4C4" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg>
                     </button>
-                    <button onclick="deleteAccount()" class="s-btn-ghost">
-                        Usuń konto
+                    <div id="acc-pwd-form" class="sd-acc-form" style="display:none;">
+                        <div class="s-field"><input type="password" id="settings-pwd-current" placeholder="Obecne hasło" autocomplete="current-password" class="s-input"></div>
+                        <div class="s-field"><input type="password" id="settings-pwd-new" placeholder="Nowe hasło (min. 8 znaków)" autocomplete="new-password" class="s-input"></div>
+                        <div class="s-field" style="margin-bottom:12px;"><input type="password" id="settings-pwd-confirm" placeholder="Potwierdź nowe hasło" autocomplete="new-password" class="s-input"></div>
+                        <button onclick="changePassword()" class="s-btn-primary">Zmień hasło</button>
+                        <div id="settings-pwd-msg" class="s-msg"></div>
+                    </div>
+
+                    <!-- Dane aplikacji -->
+                    <button class="sd-acc-row" onclick="exportMyData()">
+                        <span class="sd-action-icon" style="width:42px;height:42px;background:#E9F0EA;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5F8368" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>
+                        </span>
+                        <span style="flex:1;min-width:0;">
+                            <span class="sd-acc-lbl">Dane aplikacji</span>
+                            <span class="sd-acc-val" id="export-data-btn">Eksportuj swoje dane</span>
+                        </span>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#C4C4C4" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg>
                     </button>
                 </div>
+
+                <!-- Strefa bezpieczeństwa -->
+                <div class="home-anim sd-card" style="animation-delay:0.09s;padding:4px 16px;background:#FBF1EF;border-color:#F0DAD5;">
+                    <button class="sd-acc-row" onclick="deleteAccount()">
+                        <span class="sd-action-icon" style="width:42px;height:42px;background:#F5DED9;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C0564A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                        </span>
+                        <span style="flex:1;min-width:0;">
+                            <span class="sd-acc-lbl" style="color:#C9968E;">Strefa bezpieczeństwa</span>
+                            <span class="sd-acc-val" style="color:#C0564A;">Usuń konto</span>
+                        </span>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#D8A79F" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg>
+                    </button>
+                </div>
+
+                <div style="display:flex;gap:16px;justify-content:center;margin:4px 0 16px;font-size:12px;">
+                    <a href="/privacy.html" target="_blank" class="s-link">Polityka prywatności</a>
+                    <a href="/terms.html" target="_blank" class="s-link">Regulamin</a>
+                </div>
+
+                <button onclick="doLogout()" class="s-btn-primary" style="min-height:54px;font-size:15px;margin-bottom:32px;">Wyloguj się</button>
                 </div>
             </div>
 
@@ -8053,6 +8078,15 @@
             openSettingsPane('cel-edit');
         }
 
+        // Konto: rozwijane formularze (email / hasło) pod wierszami listy
+        function toggleAccountSection(id) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            const willOpen = el.style.display === 'none';
+            document.querySelectorAll('#s-pane-konto .sd-acc-form').forEach(f => { if (f !== el) f.style.display = 'none'; });
+            el.style.display = willOpen ? 'block' : 'none';
+        }
+
         function _celDistLabel(onb) {
             const map = { '5k':'5 km', '10k':'10 km', 'half':'Półmaraton', 'marathon':'Maraton', 'ultra':'Ultramaraton', 'other':'Cel własny' };
             const d = onb.time_distance || onb.endurance_dist || onb.dist_goal || onb.distance || null;
@@ -8177,6 +8211,8 @@
                 if (sInitials) sInitials.textContent = name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2) || '?';
                 const sEmail = document.getElementById('settings-email');
                 if (sEmail) sEmail.textContent = user?.email ?? '—';
+                const kEmail = document.getElementById('konto-email');
+                if (kEmail) kEmail.textContent = user?.email ?? '—';
                 const sId = document.getElementById('settings-user-id');
                 if (sId) sId.textContent = userId.slice(0, 8) + '...';
 
@@ -8314,29 +8350,42 @@
             try {
                 const res = await fetch(API_BASE + '/api/subscription/' + currentUserId, { headers: authHeaders() });
                 const data = await res.json();
+                const _benefit = t => '<div style="display:flex;align-items:center;gap:12px;padding:9px 0;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5F8368" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M20 6L9 17l-5-5"/></svg><span style="font-size:14px;color:#1A1A1A;font-family:Inter,sans-serif;">' + t + '</span></div>';
+                const _proBenefits = '<div class="sd-card"><div class="sd-seclabel">Twoje korzyści Pro</div>' +
+                    _benefit('Nielimitowane plany treningowe') + _benefit('Dokładna analiza tempa i tętna') +
+                    _benefit('Brak jakichkolwiek reklam') + _benefit('Automatyczny eksport do GPX &amp; Strava') + '</div>';
                 if (data.isPremium) {
                     const expiry = data.expiresAt
                         ? new Date(data.expiresAt).toLocaleDateString('pl-PL', { day: 'numeric', month: 'long', year: 'numeric' })
                         : null;
-                    const statusLabel = { active: '✓ Aktywna', trialing: '⏳ Trial (7 dni)', past_due: '⚠ Płatność nieudana', cancelled: '✗ Anulowana' }[data.status] ?? data.status;
-                    container.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;">' +
-                        '<div><div style="font-size:15px;font-weight:700;color:#1A1A1A;">✦ Premium</div>' +
-                        '<div style="font-size:12px;color:var(--accent-success);margin-top:2px;">' + statusLabel + '</div>' +
-                        (expiry ? '<div style="font-size:11px;color:#8A8A8A;margin-top:2px;">Odnawia się ' + expiry + '</div>' : '') +
-                        '</div></div>' +
-                        '<button onclick="openBillingPortal()" style="width:100%;padding:12px;background:transparent;border:1.5px solid #EBEBEB;border-radius:12px;font-size:13px;font-weight:600;cursor:pointer;color:#1A1A1A;font-family:Inter,sans-serif;">Zarządzaj subskrypcją →</button>';
+                    const statusPill = { active: 'Aktywna', trialing: 'Trial (7 dni)', past_due: 'Płatność nieudana', cancelled: 'Anulowana' }[data.status] ?? data.status;
+                    const pillOk = data.status === 'active' || data.status === 'trialing';
+                    container.innerHTML =
+                        '<div class="sd-hero">' +
+                            '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:16px;">' +
+                                '<div style="font-family:Outfit,sans-serif;font-weight:800;font-size:24px;">VELM Pro</div>' +
+                                '<span style="background:' + (pillOk ? '#2E4636' : '#4A2E2A') + ';color:' + (pillOk ? '#9FC7A9' : '#D9A79F') + ';font-size:12px;font-weight:700;padding:5px 12px;border-radius:20px;white-space:nowrap;">' + statusPill + '</span>' +
+                            '</div>' +
+                            (expiry ? '<div style="font-size:12px;color:#9A948C;">Następna płatność: ' + expiry + '</div>' : '') +
+                            '<div style="font-size:15px;font-weight:600;color:#EDEDED;margin-top:6px;">Plan miesięczny</div>' +
+                        '</div>' +
+                        _proBenefits +
+                        '<button onclick="openBillingPortal()" class="s-btn-danger" style="min-height:52px;">Zarządzaj subskrypcją</button>';
                 } else {
                     currentTrialMessagesLeft = data.trialMessagesLeft ?? 0;
                     currentSurveyCompleted = data.surveyCompleted ?? false;
                     const trialLine = currentTrialMessagesLeft > 0
                         ? 'Plan z rejestracji · ' + currentTrialMessagesLeft + ' ' + _trialMsgWord(currentTrialMessagesLeft)
                         : 'Plan z rejestracji · darmowe wiadomości wykorzystane';
-                    container.innerHTML = '<div style="margin-bottom:14px;">' +
-                        '<div style="font-size:15px;font-weight:700;color:#1A1A1A;margin-bottom:4px;">Plan darmowy</div>' +
-                        '<div style="font-size:13px;color:#8A8A8A;line-height:1.5;">' + trialLine + '</div></div>' +
-                        '<button onclick="showPaywall(\'Pełny sztab AI, narady tygodniowe i raporty — bez limitów.\', { surveyAvailable: !currentSurveyCompleted })" style="width:100%;padding:14px;background:#1A1A1A;border:none;border-radius:14px;color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:Inter,sans-serif;">Przejdź na Premium — 7 dni za darmo</button>' +
+                    container.innerHTML =
+                        '<div class="sd-hero">' +
+                            '<div style="font-family:Outfit,sans-serif;font-weight:800;font-size:22px;">Plan darmowy</div>' +
+                            '<div style="font-size:13px;color:#B9B4AC;margin-top:6px;line-height:1.5;">' + trialLine + '</div>' +
+                        '</div>' +
+                        _proBenefits +
+                        '<button onclick="showPaywall(\'Pełny sztab AI, narady tygodniowe i raporty — bez limitów.\', { surveyAvailable: !currentSurveyCompleted })" class="s-btn-primary" style="min-height:54px;font-size:15px;">Przejdź na Premium — 7 dni za darmo</button>' +
                         (!currentSurveyCompleted
-                            ? '<button onclick="openTrialSurvey()" style="width:100%;margin-top:8px;padding:12px;min-height:44px;background:transparent;border:1px solid #EBEBEB;border-radius:12px;font-size:13px;font-weight:600;color:#1A1A1A;cursor:pointer;font-family:Inter,sans-serif;">Ankieta → 5 darmowych wiadomości</button>'
+                            ? '<button onclick="openTrialSurvey()" class="s-btn-secondary" style="margin-top:10px;">Ankieta → 5 darmowych wiadomości</button>'
                             : '');
                 }
             } catch(e) {
@@ -10217,7 +10266,7 @@
 
         // Stempel buildu — dowód na urządzeniu, że działa świeży kod (trzymać
         // w zgodzie z CACHE_VERSION w sw.js; bump przy każdym deployu frontendu)
-        const VELM_BUILD = 'v47';
+        const VELM_BUILD = 'v48';
         console.log('velm build', VELM_BUILD, navigator.userAgent);
 
         async function hardReloadApp() {
