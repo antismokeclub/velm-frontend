@@ -3395,6 +3395,10 @@
         .sd-acc-form { padding:2px 0 14px; }
         .sd-acc-lbl { display:block; font-size:11px; font-weight:700; color:#A69C8E; text-transform:uppercase; letter-spacing:0.06em; }
         .sd-acc-val { display:block; font-size:15px; font-weight:700; color:#1A1A1A; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+        /* goal wizard choice rows */
+        .sd-choice { display:flex; align-items:center; justify-content:space-between; gap:10px; width:100%; text-align:left; background:#FAF8F4; border:1px solid #E7E1D9; border-radius:13px; padding:14px 16px; min-height:52px; font-size:14px; font-weight:600; font-family:'Inter',sans-serif; color:#1A1A1A; cursor:pointer; touch-action:manipulation; transition:border-color 0.18s ease, background 0.18s ease; }
+        .sd-choice.sel { border-color:#5F8368; background:#EFF4EF; color:#3E5D46; }
+        .sd-choice:active { transform:scale(0.99); }
         /* confirm modal */
         .sd-modal-back { position:fixed; inset:0; background:rgba(20,18,16,0.55); display:none; align-items:center; justify-content:center; z-index:10000; padding:28px; }
         .sd-modal-back.show { display:flex; animation:sdFade 200ms ease both; }
@@ -4061,36 +4065,13 @@
                     <button onclick="openCheckinSmart()" class="s-btn-primary" style="min-height:54px;font-size:15px;margin-top:2px;">Zaktualizuj postęp</button>
                 </div>
 
-                <!-- CEL — zmiana (krótki wybór nowego celu; docelowo z onboardingu) -->
+                <!-- CEL — zmiana (kreator: kafelki typu + parametry) -->
                 <div class="s-pane" id="s-pane-cel-edit" style="display:none;">
                     <div class="s-back-header">
-                        <button class="s-back-btn" onclick="openSettingsPane('cel')" aria-label="Wróć"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
-                        <div class="s-pane-title">Zmień cel</div>
+                        <button class="s-back-btn" onclick="goalWizBack()" aria-label="Wróć"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+                        <div class="s-pane-title" id="goal-wiz-title">Zmień cel</div>
                     </div>
-                    <div class="home-anim sd-info" style="animation-delay:0.03s;margin-bottom:14px;">
-                        Zapisanie <b>zakończy obecny cel</b> i sztab przebuduje plan od następnej narady. Ustaw nowy cel poniżej.
-                    </div>
-                    <div class="home-anim s-card" style="animation-delay:0.06s;">
-                        <div class="s-field">
-                            <label class="s-label">Data zawodów</label>
-                            <input type="date" id="settings-edit-race-date" class="s-input">
-                        </div>
-                        <div class="s-field">
-                            <label class="s-label">Cel czasowy</label>
-                            <input type="text" id="settings-edit-time-goal" placeholder="np. 45:00 lub 1:45:00" class="s-input">
-                        </div>
-                        <div class="s-field" style="margin-bottom:20px;">
-                            <label class="s-label">Km tygodniowo</label>
-                            <input type="number" id="settings-edit-weekly-km" min="10" max="200" class="s-input">
-                        </div>
-                        <button onclick="saveGoalSettings()" class="s-btn-primary" style="min-height:52px;font-size:15px;">
-                            Zapisz i zaktualizuj plan &rarr;
-                        </button>
-                        <div id="settings-save-msg" class="s-msg" style="color:#6B8F71;">Zapisano — trwa generowanie nowego planu</div>
-                    </div>
-                    <button onclick="switchView('history')" class="s-btn-secondary" style="margin-top:2px;">
-                        Historia treningów &rarr;
-                    </button>
+                    <div id="goal-wiz"></div>
                 </div>
 
                 <!-- Modal: potwierdzenie zmiany celu -->
@@ -8076,6 +8057,139 @@
         function proceedChangeGoal() {
             closeChangeGoalModal();
             openSettingsPane('cel-edit');
+            resetGoalWiz();
+        }
+
+        // ── Kreator "Zmień cel" (kafelki typu → parametry → zapis do /goal) ──
+        const GOAL_WIZ_TYPES = {
+            time:     { t:'Cel czasowy',     d:'Pobij rekord na wybranym dystansie' },
+            distance: { t:'Cel dystansowy',  d:'Zdobądź nowy dystans — półmaraton, maraton…' },
+            health:   { t:'Zdrowie i forma', d:'Biegam dla zdrowia i samopoczucia' },
+            comeback: { t:'Powrót',          d:'Wracam po przerwie lub kontuzji' },
+            start:    { t:'Zaczynam od zera', d:'Chcę zacząć regularnie biegać' },
+            walkrun:  { t:'Marszobieg',       d:'Naprzemienny bieg i marsz' }
+        };
+        const GOAL_WIZ_DIST = [['5k','5 km'],['10k','10 km'],['half','Półmaraton'],['marathon','Maraton'],['ultra','Ultra'],['other','Własny']];
+        let _goalWiz = null;
+
+        function resetGoalWiz() {
+            _goalWiz = { step:0, goalId:null, dist:null, customDist:10, raceDate:'', hasRace:true, timeGoal:'', healthFocus:null, comebackReason:null, comebackSince:null, startFocus:null };
+            renderGoalWiz();
+        }
+        function goalWizBack() {
+            if (_goalWiz && _goalWiz.step > 0) { _goalWiz.step = 0; renderGoalWiz(); }
+            else openSettingsPane('cel');
+        }
+        function _wizGoalIds() {
+            const cat = (window._settingsOnb || {}).goal_category;
+            return (cat === 'advanced' || !cat)
+                ? ['time','distance','health','comeback']
+                : ['start','walkrun','health','comeback'];
+        }
+        function wizPickType(id) { _goalWiz.goalId = id; _goalWiz.step = 1; renderGoalWiz(); }
+        function wizPickDist(id) { _goalWiz.dist = id; renderGoalWiz(); }
+        function wizPickChip(field, val) { _goalWiz[field] = val; renderGoalWiz(); }
+        function wizSetHasRace(v) { _goalWiz.hasRace = v; renderGoalWiz(); }
+
+        function _wizChipCard(label, field, opts) {
+            return '<div class="sd-card"><div class="sd-seclabel">' + label + '</div><div style="display:flex;flex-direction:column;gap:8px;">' +
+                opts.map(([v, l]) => '<button class="sd-choice' + (_goalWiz[field] === v ? ' sel' : '') + '" onclick="wizPickChip(\'' + field + '\',\'' + v + '\')"><span>' + l + '</span>' +
+                    (_goalWiz[field] === v ? '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5F8368" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M20 6L9 17l-5-5"/></svg>' : '') + '</button>').join('') +
+                '</div></div>';
+        }
+        function _wizStepReady() {
+            const w = _goalWiz;
+            if (!w) return false;
+            if (w.goalId === 'time') return !!(w.dist && w.raceDate);
+            if (w.goalId === 'distance') return !!(w.dist && (!w.hasRace || w.raceDate));
+            if (w.goalId === 'health') return !!w.healthFocus;
+            if (w.goalId === 'comeback') return !!(w.comebackReason && w.comebackSince);
+            if (w.goalId === 'start' || w.goalId === 'walkrun') return !!w.startFocus;
+            return false;
+        }
+        function renderGoalWiz() {
+            const host = document.getElementById('goal-wiz');
+            if (!host || !_goalWiz) return;
+            const titleEl = document.getElementById('goal-wiz-title');
+
+            if (_goalWiz.step === 0) {
+                if (titleEl) titleEl.textContent = 'Zmień cel';
+                host.innerHTML =
+                    '<div class="home-anim sd-info" style="margin-bottom:14px;">Wybierz nowy typ celu. Obecny cel zostanie zakończony, a sztab przebuduje plan od najbliższej narady.</div>' +
+                    _wizGoalIds().map((id, i) => {
+                        const g = GOAL_WIZ_TYPES[id];
+                        return '<button class="home-anim sd-action" style="animation-delay:' + (0.04 + i * 0.04) + 's;" onclick="wizPickType(\'' + id + '\')">' +
+                            '<span class="sd-action-icon" style="background:#E9F0EA;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#5F8368" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/></svg></span>' +
+                            '<span class="sd-action-body"><span class="sd-action-title" style="display:block;">' + g.t + '</span><span class="sd-action-sub" style="display:block;">' + g.d + '</span></span>' +
+                            '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#C4C4C4" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg>' +
+                        '</button>';
+                    }).join('');
+                return;
+            }
+
+            const id = _goalWiz.goalId;
+            if (titleEl) titleEl.textContent = (GOAL_WIZ_TYPES[id] || {}).t || 'Nowy cel';
+            const distChips = () => '<div class="sd-seclabel">Dystans</div><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">' +
+                GOAL_WIZ_DIST.map(([v, l]) => '<button class="s-day-btn' + (_goalWiz.dist === v ? ' selected' : '') + '" style="min-height:48px;font-size:13px;" onclick="wizPickDist(\'' + v + '\')">' + l + '</button>').join('') + '</div>' +
+                (_goalWiz.dist === 'other' ? '<div class="s-field" style="margin-top:12px;margin-bottom:0;"><label class="s-label">Ile km?</label><input type="number" min="1" max="200" class="s-input" value="' + _goalWiz.customDist + '" oninput="_goalWiz.customDist=this.value"></div>' : '');
+            let body = '';
+            if (id === 'time') {
+                body = '<div class="home-anim sd-card">' + distChips() +
+                    '<div class="s-field" style="margin-top:14px;"><label class="s-label">Data zawodów</label><input type="date" class="s-input" value="' + _goalWiz.raceDate + '" oninput="_goalWiz.raceDate=this.value"></div>' +
+                    '<div class="s-field" style="margin-bottom:0;"><label class="s-label">Cel czasowy (opcjonalnie)</label><input type="text" placeholder="np. 45:00 lub 1:45:00" class="s-input" value="' + _goalWiz.timeGoal + '" oninput="_goalWiz.timeGoal=this.value"></div></div>';
+            } else if (id === 'distance') {
+                body = '<div class="home-anim sd-card">' + distChips() +
+                    '<div class="s-field" style="margin-top:14px;margin-bottom:' + (_goalWiz.hasRace ? '12px' : '0') + ';"><label class="s-label">Masz konkretny wyścig?</label><div class="s-lang-toggle" style="margin-bottom:0;"><button class="s-lang-btn' + (_goalWiz.hasRace ? ' selected' : '') + '" onclick="wizSetHasRace(true)">Tak</button><button class="s-lang-btn' + (!_goalWiz.hasRace ? ' selected' : '') + '" onclick="wizSetHasRace(false)">Jeszcze nie</button></div></div>' +
+                    (_goalWiz.hasRace ? '<div class="s-field" style="margin-bottom:0;"><label class="s-label">Data zawodów</label><input type="date" class="s-input" value="' + _goalWiz.raceDate + '" oninput="_goalWiz.raceDate=this.value"></div>' : '') + '</div>';
+            } else if (id === 'health') {
+                body = _wizChipCard('Co jest dla Ciebie najważniejsze?', 'healthFocus', [['forma','Utrzymać formę'],['waga','Zrzucić wagę'],['kondycja','Ogólna kondycja'],['energia','Więcej energii']]);
+            } else if (id === 'comeback') {
+                body = _wizChipCard('Skąd wracasz?', 'comebackReason', [['injury','Po kontuzji'],['break','Po dłuższej przerwie']]) +
+                       _wizChipCard('Jak dawno ostatni bieg?', 'comebackSince', [['lt1','mniej niż miesiąc'],['1_3','1–3 miesiące'],['3_6','3–6 miesięcy'],['gt6','ponad pół roku']]);
+            } else if (id === 'start' || id === 'walkrun') {
+                body = _wizChipCard('Twój pierwszy cel?', 'startFocus', [['5k','Przebiec 5 km bez przerwy'],['30min','30 minut ciągłego biegu'],['fit','Ogólna sprawność']]);
+            }
+            const ready = _wizStepReady();
+            host.innerHTML = body +
+                '<button class="s-btn-primary" style="min-height:54px;font-size:15px;margin-top:6px;' + (ready ? '' : 'opacity:0.5;') + '" ' + (ready ? 'onclick="saveGoalWiz()"' : 'disabled') + '>Zapisz nowy cel</button>' +
+                '<div id="goal-wiz-msg" class="s-msg" style="color:#6B8F71;">Zapisano — plan zaktualizuje się przy najbliższej naradzie</div>';
+        }
+        async function saveGoalWiz() {
+            const userId = localStorage.getItem('velm_user_id');
+            if (!userId || !_goalWiz || !_wizStepReady()) return;
+            const w = _goalWiz;
+            const u = { goalId: w.goalId };
+            if (w.goalId === 'time') {
+                u.time_distance = w.dist;
+                if (w.dist === 'other') u.time_custom_dist = parseInt(w.customDist) || null;
+                u.time_race_date = w.raceDate; u.dist_goal_date = w.raceDate; u.time_race_target = w.raceDate;
+                const p = (w.timeGoal || '').split(':').map(Number).filter(n => !isNaN(n));
+                if (p.length === 2) { u.time_target_hours = 0; u.time_target_mins = p[0]; u.time_target_secs = p[1]; }
+                else if (p.length === 3) { u.time_target_hours = p[0]; u.time_target_mins = p[1]; u.time_target_secs = p[2]; }
+            } else if (w.goalId === 'distance') {
+                u.endurance_dist = w.dist;
+                if (w.dist === 'other') u.customDist = parseInt(w.customDist) || null;
+                u.dist_has_race = w.hasRace;
+                if (w.hasRace && w.raceDate) { u.dist_goal_date = w.raceDate; u.time_race_target = w.raceDate; }
+            } else if (w.goalId === 'health') {
+                u.health_focus = w.healthFocus;
+            } else if (w.goalId === 'comeback') {
+                u.comeback_reason = w.comebackReason; u.comeback_last_train = w.comebackSince;
+            } else if (w.goalId === 'start' || w.goalId === 'walkrun') {
+                u.start_focus = w.startFocus;
+            }
+            try {
+                const res = await fetch(`${API_BASE}/api/user/${userId}/goal`, { method: 'PUT', headers: authHeaders(), body: JSON.stringify(u) });
+                const data = await res.json();
+                if (data.success) {
+                    showVelmToast('Nowy cel zapisany. Sztab przebuduje plan przy najbliższej naradzie.', false);
+                    setTimeout(() => { loadSettings(); openSettingsPane('cel'); }, 900);
+                } else {
+                    showVelmToast(data.error || 'Nie udało się zapisać celu', true);
+                }
+            } catch(e) {
+                showVelmToast('Błąd połączenia', true);
+            }
         }
 
         // Konto: rozwijane formularze (email / hasło) pod wierszami listy
@@ -8107,6 +8221,7 @@
         // brak daty zawodów => myślnik/CTA, postęp = kalendarzowy do dnia startu).
         async function renderGoalPanes(user, planData) {
             const onb = user?.onboarding_data ?? {};
+            window._settingsOnb = onb;
             const raceDate = onb.time_race_target || onb.time_race_date || onb.dist_goal_date || null;
             _setText(['cel-sum-dist','cel-d-dist'], _celDistLabel(onb));
 
@@ -10266,7 +10381,7 @@
 
         // Stempel buildu — dowód na urządzeniu, że działa świeży kod (trzymać
         // w zgodzie z CACHE_VERSION w sw.js; bump przy każdym deployu frontendu)
-        const VELM_BUILD = 'v48';
+        const VELM_BUILD = 'v49';
         console.log('velm build', VELM_BUILD, navigator.userAgent);
 
         async function hardReloadApp() {
