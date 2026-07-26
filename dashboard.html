@@ -3934,66 +3934,75 @@
                 </div>
 
                 <div class="home-anim sd-card" style="animation-delay:0.08s;">
-                    <div class="sd-seclabel">Dane</div>
-                    <div class="s-field">
-                        <label class="s-label">Imię i nazwisko</label>
+                    <div class="sd-seclabel">Imię i nazwisko</div>
+                    <div class="s-field" style="margin-bottom:0;">
                         <input type="text" id="settings-edit-name" placeholder="Twoje imię" class="s-input">
                     </div>
+                </div>
+
+                <div class="home-anim sd-card" style="animation-delay:0.10s;">
                     <div class="s-row">
                         <div>
-                            <label class="s-label">Waga (kg)</label>
+                            <label class="s-label">Waga</label>
                             <input type="number" id="settings-edit-weight" placeholder="70" min="30" max="250" class="s-input">
                         </div>
                         <div>
-                            <label class="s-label">Wzrost (cm)</label>
+                            <label class="s-label">Wzrost</label>
                             <input type="number" id="settings-edit-height" placeholder="175" min="100" max="250" class="s-input">
                         </div>
                     </div>
-                    <div class="s-row">
+                    <div class="s-row" style="margin-bottom:0;">
                         <div>
-                            <label class="s-label">Rok urodzenia</label>
-                            <input type="number" id="settings-edit-dob-y" placeholder="1990" min="1940" max="2010" class="s-input">
+                            <label class="s-label">Wiek</label>
+                            <input type="number" id="settings-edit-age" placeholder="30" min="10" max="99" class="s-input">
                         </div>
                         <div>
-                            <label class="s-label">Dni/tydzień</label>
-                            <input type="number" id="settings-edit-days-per-week" placeholder="4" min="1" max="7" class="s-input">
+                            <label class="s-label">Płeć</label>
+                            <select id="settings-edit-sex" class="s-input" style="appearance:none;-webkit-appearance:none;background-image:url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2216%22 height=%2216%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%238A8A8A%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22><path d=%22M6 9l6 6 6-6%22/></svg>');background-repeat:no-repeat;background-position:right 12px center;padding-right:36px;cursor:pointer;">
+                                <option value="">—</option>
+                                <option value="M">Mężczyzna</option>
+                                <option value="K">Kobieta</option>
+                                <option value="I">Inna</option>
+                            </select>
                         </div>
                     </div>
+                </div>
 
-                    <div class="s-field">
-                        <label class="s-label">Dni treningowe</label>
-                        <div class="s-days-grid">
-                            <button class="s-day-btn" id="s-day-0" onclick="toggleSettingsDay(this,0)">Pn</button>
-                            <button class="s-day-btn" id="s-day-1" onclick="toggleSettingsDay(this,1)">Wt</button>
-                            <button class="s-day-btn" id="s-day-2" onclick="toggleSettingsDay(this,2)">Śr</button>
-                            <button class="s-day-btn" id="s-day-3" onclick="toggleSettingsDay(this,3)">Cz</button>
-                            <button class="s-day-btn" id="s-day-4" onclick="toggleSettingsDay(this,4)">Pt</button>
-                            <button class="s-day-btn" id="s-day-5" onclick="toggleSettingsDay(this,5)">So</button>
-                            <button class="s-day-btn" id="s-day-6" onclick="toggleSettingsDay(this,6)">Nd</button>
-                        </div>
+                <div class="home-anim sd-card" style="animation-delay:0.13s;">
+                    <div class="sd-seclabel">Dni treningowe</div>
+                    <div class="s-days-grid" style="margin-bottom:0;">
+                        <button class="s-day-btn" id="s-day-0" onclick="toggleSettingsDay(this,0)">Pon</button>
+                        <button class="s-day-btn" id="s-day-1" onclick="toggleSettingsDay(this,1)">Wt</button>
+                        <button class="s-day-btn" id="s-day-2" onclick="toggleSettingsDay(this,2)">Śr</button>
+                        <button class="s-day-btn" id="s-day-3" onclick="toggleSettingsDay(this,3)">Czw</button>
+                        <button class="s-day-btn" id="s-day-4" onclick="toggleSettingsDay(this,4)">Pt</button>
+                        <button class="s-day-btn" id="s-day-5" onclick="toggleSettingsDay(this,5)">Sob</button>
+                        <button class="s-day-btn" id="s-day-6" onclick="toggleSettingsDay(this,6)">Nd</button>
                     </div>
+                </div>
 
+                <button onclick="saveProfileSettings()" class="s-btn-primary" style="min-height:54px;font-size:15px;">Zapisz zmiany</button>
+                <div id="settings-profile-msg" class="s-msg"></div>
+
+                <!-- Preferencje + ID (poza projektem — apka ich potrzebuje) -->
+                <div class="home-anim sd-card" style="animation-delay:0.16s;margin-top:16px;">
+                    <div class="sd-seclabel">Preferencje</div>
                     <div class="s-field">
                         <label class="s-label">Język aplikacji</label>
-                        <div class="s-lang-toggle">
+                        <div class="s-lang-toggle" style="margin-bottom:0;">
                             <button class="s-lang-btn selected" id="s-lang-pl" onclick="selectSettingsLang('pl')">Polski</button>
                             <button class="s-lang-btn" id="s-lang-en" onclick="selectSettingsLang('en')">English</button>
                         </div>
                     </div>
-
-                    <div class="s-field">
+                    <div class="s-field" style="margin-top:12px;margin-bottom:14px;">
                         <label class="s-label">Jednostki</label>
-                        <div class="s-lang-toggle">
+                        <div class="s-lang-toggle" style="margin-bottom:0;">
                             <button class="s-lang-btn selected" id="s-unit-km" onclick="selectSettingsUnit('km')">Kilometry</button>
                             <button class="s-lang-btn" id="s-unit-mi" onclick="selectSettingsUnit('mi')">Mile</button>
                         </div>
                     </div>
-
-                    <button onclick="saveProfileSettings()" class="s-btn-primary" style="min-height:54px;font-size:15px;">Zapisz zmiany</button>
-                    <div id="settings-profile-msg" class="s-msg"></div>
-
-                    <div class="s-divider">
-                        <span style="font-size:14px;color:#1A1A1A;">ID konta</span>
+                    <div class="s-divider" style="padding-bottom:0;border-top:1px solid #F3EFE8;">
+                        <span style="font-size:13px;color:#8A8A8A;">ID konta</span>
                         <div style="display:flex;align-items:center;gap:8px;">
                             <span id="settings-user-id" style="font-size:12px;color:#C4C4C4;font-family:'SF Mono','Courier New',monospace;">—</span>
                             <button onclick="copyUserId()" aria-label="Kopiuj ID konta" style="background:none;border:1px solid #EBEBEB;border-radius:10px;min-width:44px;min-height:44px;cursor:pointer;display:flex;align-items:center;justify-content:center;touch-action:manipulation;">
@@ -4037,7 +4046,7 @@
                     <div class="home-anim sd-card" style="animation-delay:0.13s;">
                         <div class="sd-seclabel">Bieżące podsumowanie</div>
                         <div class="sd-kv"><span class="sd-k">Aktualny cel</span><span class="sd-pill" id="cel-sum-dist">—</span></div>
-                        <div class="sd-kv"><span class="sd-k">Data zawodów</span><span class="sd-v" id="cel-sum-date">—</span></div>
+                        <div class="sd-kv"><span class="sd-k">Data startu</span><span class="sd-v" id="cel-sum-date">—</span></div>
                         <div class="sd-kv"><span class="sd-k">Pozostało</span><span class="sd-v" id="cel-sum-left">—</span></div>
                         <div style="padding-top:15px;">
                             <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:9px;">
@@ -4074,7 +4083,7 @@
                     <div class="home-anim sd-card" style="animation-delay:0.09s;">
                         <div class="sd-seclabel">Szczegóły planu</div>
                         <div class="sd-kv"><span class="sd-k">Cel</span><span class="sd-pill" id="cel-d-dist">—</span></div>
-                        <div class="sd-kv"><span class="sd-k">Data zawodów</span><span class="sd-v" id="cel-d-date">—</span></div>
+                        <div class="sd-kv"><span class="sd-k">Data startu</span><span class="sd-v" id="cel-d-date">—</span></div>
                         <div class="sd-kv"><span class="sd-k">Pozostało</span><span class="sd-v" id="cel-d-left">—</span></div>
                     </div>
 
@@ -8337,10 +8346,10 @@
                 if (sId) sId.textContent = userId.slice(0, 8) + '...';
 
                 // Nowe pola profilu
-                const editDobY = document.getElementById('settings-edit-dob-y');
-                if (editDobY && onb.dob_y) editDobY.value = onb.dob_y;
-                const editDPW = document.getElementById('settings-edit-days-per-week');
-                if (editDPW && onb.daysPerWeek) editDPW.value = onb.daysPerWeek;
+                const editAge = document.getElementById('settings-edit-age');
+                if (editAge && onb.dob_y) editAge.value = new Date().getFullYear() - parseInt(onb.dob_y);
+                const editSex = document.getElementById('settings-edit-sex');
+                if (editSex && onb.sex) editSex.value = onb.sex;
                 _settingsSelectedDays = Array.isArray(onb.selectedDays) ? [...onb.selectedDays] : [];
                 document.querySelectorAll('.s-day-btn').forEach((btn, i) => {
                     btn.classList.toggle('selected', _settingsSelectedDays.includes(i));
@@ -8396,11 +8405,11 @@
             if (nameVal) updates.name = nameVal;
             if (weightVal && weightVal > 0) updates.weight = weightVal;
             if (heightVal && heightVal > 0) updates.height = heightVal;
-            const dobY = parseInt(document.getElementById('settings-edit-dob-y')?.value);
-            const dpw = parseInt(document.getElementById('settings-edit-days-per-week')?.value);
-            if (dobY > 1940 && dobY < 2010) updates.dob_y = dobY;
-            if (dpw >= 1 && dpw <= 7) updates.daysPerWeek = dpw;
-            if (_settingsSelectedDays.length > 0) updates.selectedDays = _settingsSelectedDays;
+            const ageVal = parseInt(document.getElementById('settings-edit-age')?.value);
+            if (ageVal >= 10 && ageVal <= 99) updates.dob_y = new Date().getFullYear() - ageVal;
+            const sexVal = document.getElementById('settings-edit-sex')?.value;
+            if (sexVal) updates.sex = sexVal;
+            if (_settingsSelectedDays.length > 0) { updates.selectedDays = _settingsSelectedDays; updates.daysPerWeek = _settingsSelectedDays.length; }
             if (_settingsLang) updates.language = _settingsLang;
             if (_settingsUnit) updates.unit = _settingsUnit;
             if (Object.keys(updates).length === 0) return;
@@ -8487,10 +8496,10 @@
                                 '<span style="background:' + (pillOk ? '#2E4636' : '#4A2E2A') + ';color:' + (pillOk ? '#9FC7A9' : '#D9A79F') + ';font-size:12px;font-weight:700;padding:5px 12px;border-radius:20px;white-space:nowrap;">' + statusPill + '</span>' +
                             '</div>' +
                             (expiry ? '<div style="font-size:12px;color:#9A948C;">Następna płatność: ' + expiry + '</div>' : '') +
-                            '<div style="font-size:15px;font-weight:600;color:#EDEDED;margin-top:6px;">Plan miesięczny</div>' +
+                            '<div style="margin-top:6px;"><span style="font-size:26px;font-weight:800;font-family:Outfit,sans-serif;">29,99 zł</span><span style="font-size:14px;color:#9A948C;font-weight:500;"> / miesięcznie</span></div>' +
                         '</div>' +
                         _proBenefits +
-                        '<button onclick="openBillingPortal()" class="s-btn-danger" style="min-height:52px;">Zarządzaj subskrypcją</button>';
+                        '<button onclick="openBillingPortal()" class="s-btn-danger" style="min-height:52px;">Anuluj subskrypcję</button>';
                 } else {
                     currentTrialMessagesLeft = data.trialMessagesLeft ?? 0;
                     currentSurveyCompleted = data.surveyCompleted ?? false;
@@ -10388,7 +10397,7 @@
 
         // Stempel buildu — dowód na urządzeniu, że działa świeży kod (trzymać
         // w zgodzie z CACHE_VERSION w sw.js; bump przy każdym deployu frontendu)
-        const VELM_BUILD = 'v51';
+        const VELM_BUILD = 'v52';
         console.log('velm build', VELM_BUILD, navigator.userAgent);
 
         async function hardReloadApp() {
