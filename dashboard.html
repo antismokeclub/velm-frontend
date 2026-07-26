@@ -2217,6 +2217,7 @@
             background: rgba(245,243,240,0.97);
             flex-shrink: 0;
         }
+        #view-coach { --agent-color: #5F8368; }
         #agent-pill-wrap {
             position: relative;
             background: #EDE8DC;
@@ -2243,7 +2244,7 @@
             letter-spacing: -0.01em;
         }
         #agent-pill-wrap button.agent-active {
-            color: var(--primary-color);
+            color: var(--agent-color, var(--primary-color));
             font-weight: 700;
         }
         #agent-slider {
@@ -2797,13 +2798,14 @@
             width: 88px;
             height: 88px;
             border-radius: 28px;
-            background: var(--primary-color);
+            background: var(--agent-color, var(--primary-color));
             display: flex;
             align-items: center;
             justify-content: center;
             margin-bottom: 20px;
             box-shadow: 0 8px 32px rgba(0,0,0,0.14), 0 2px 8px rgba(0,0,0,0.08);
             animation: monogramPop 0.5s cubic-bezier(0.34,1.56,0.64,1) 0.1s both;
+            transition: background 0.35s cubic-bezier(0.4,0,0.2,1);
         }
         @keyframes monogramPop {
             from { opacity: 0; transform: scale(0.7); }
@@ -2821,11 +2823,12 @@
             font-family: 'Outfit', sans-serif;
             font-size: 13px;
             font-weight: 700;
-            color: var(--primary-color);
+            color: var(--agent-color, var(--primary-color));
             letter-spacing: 0.14em;
             text-transform: uppercase;
             margin-bottom: 12px;
             animation: introFadeIn 0.5s cubic-bezier(0.4,0,0.2,1) 0.2s both;
+            transition: color 0.35s cubic-bezier(0.4,0,0.2,1);
         }
         #coach-intro-desc {
             font-size: 15px;
@@ -2851,7 +2854,7 @@
             width: 100%;
             background: white;
             border: 1px solid rgba(235,235,235,0.5);
-            border-left: 3px solid var(--primary-color);
+            border-left: 3px solid var(--agent-color, var(--primary-color));
             border-radius: 18px;
             padding: 18px 20px;
             font-family: 'Inter', sans-serif;
@@ -2864,14 +2867,14 @@
             cursor: pointer;
             box-shadow: 0 1px 4px rgba(0,0,0,0.05);
             -webkit-tap-highlight-color: transparent;
-            transition: transform 0.15s cubic-bezier(0.34,1.56,0.64,1), border-color 0.15s;
+            transition: transform 0.15s cubic-bezier(0.34,1.56,0.64,1), border-color 0.35s cubic-bezier(0.4,0,0.2,1);
             animation: fadeInUp 280ms cubic-bezier(0.4,0,0.2,1) both;
         }
         .coach-suggest-card:nth-child(1) { animation-delay: 0ms; }
         .coach-suggest-card:nth-child(2) { animation-delay: 60ms; }
         .coach-suggest-card:nth-child(3) { animation-delay: 120ms; }
-        .coach-suggest-card:hover { border-color: var(--primary-color); }
-        .coach-suggest-card:active { transform: scale(0.97); border-color: var(--primary-color); }
+        .coach-suggest-card:hover { border-color: var(--agent-color, var(--primary-color)); }
+        .coach-suggest-card:active { transform: scale(0.97); border-color: var(--agent-color, var(--primary-color)); }
         .coach-suggest-footer {
             font-size: 10px;
             font-weight: 600;
@@ -3564,7 +3567,7 @@
 
                 <!-- MAIN CARD: TODAY'S WORKOUT (dynamic) -->
                 <div class="home-section-title">Dzisiejszy trening</div>
-                <div class="card home-anim" id="home-main-workout-card" onclick="switchView('calendar')" style="border-top: 4px solid var(--primary-color); border: 1px solid rgba(235,235,235,0.5); border-top: 4px solid var(--primary-color); border-radius: 20px; margin-bottom: 16px; cursor: pointer; background: #FFFFFF; box-shadow: 0 4px 24px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04); animation-delay: 0.05s;">
+                <div class="card home-anim" id="home-main-workout-card" onclick="switchView('calendar')" style="border: 1px solid rgba(235,235,235,0.6); border-radius: 20px; margin-bottom: 16px; cursor: pointer; background: #FFFFFF; box-shadow: 0 4px 24px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04); animation-delay: 0.05s;">
                     <!-- hidden for JS compat -->
                     <div id="home-main-workout-badge" style="display:none;"></div>
                     <div id="home-main-workout-desc" style="display:none;"></div>
@@ -3601,7 +3604,8 @@
                     <button onclick="event.stopPropagation();calDayClick(toDateStr(new Date()));switchView('calendar');" style="width:100%;padding:14px;background:var(--primary-color);border:none;border-radius:14px;color:white;font-weight:700;font-size:14px;font-family:'Inter',sans-serif;cursor:pointer;transition:transform 0.15s cubic-bezier(0.22,1,0.36,1),opacity 0.15s;box-shadow:0 4px 16px rgba(26,26,26,0.2);" onmousedown="this.style.transform='scale(0.97)'" onmouseup="this.style.transform='scale(1)'">
                         Zobacz szczegóły &rarr;
                     </button>
-                    <button onclick="event.stopPropagation();enterCoachWithContext({source:'home_today',date:new Date().toISOString().split('T')[0],trainingRef:window._todayTyp&&window._todayTyp!=='rest'?(window._todayKm||'')+'km '+window._todayTyp:null})" style="width:100%;margin-top:10px;padding:13px;background:transparent;border:1.5px solid var(--primary-color);border-radius:14px;color:var(--primary-color);font-weight:700;font-size:14px;font-family:'Inter',sans-serif;cursor:pointer;letter-spacing:0.01em;">
+                    <button onclick="event.stopPropagation();enterCoachWithContext({source:'home_today',date:new Date().toISOString().split('T')[0],trainingRef:window._todayTyp&&window._todayTyp!=='rest'?(window._todayKm||'')+'km '+window._todayTyp:null})" style="width:100%;margin-top:10px;padding:13px;background:#EFF4EF;border:1.5px solid #5F8368;border-radius:14px;color:#3E5D46;font-weight:700;font-size:14px;font-family:'Inter',sans-serif;cursor:pointer;letter-spacing:0.01em;display:flex;align-items:center;justify-content:center;gap:8px;">
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#5F8368" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>
                         Zapytaj o trening
                     </button>
                 </div>
@@ -3719,12 +3723,14 @@
                 </div>
 
                 <!-- STREAK CARD -->
-                <div id="streak-card" class="home-anim" style="display:none;background:white;border-radius:20px;border:1px solid rgba(235,235,235,0.5);box-shadow:0 2px 16px rgba(0,0,0,0.04);padding:16px 20px;margin-bottom:12px;align-items:center;justify-content:space-between;">
+                <div id="streak-card" class="home-anim" style="display:none;background:#FBF6EC;border-radius:20px;border:1px solid #F0E6D2;box-shadow:0 2px 16px rgba(0,0,0,0.03);padding:16px 20px;margin-bottom:12px;align-items:center;justify-content:space-between;">
                     <div>
-                        <div style="font-size:11px;font-weight:700;color:#8A8A8A;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px;">Seria check-inów</div>
+                        <div style="font-size:11px;font-weight:700;color:#B08A4E;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px;">Seria check-inów</div>
                         <div id="streak-value" style="font-size:24px;font-weight:800;font-family:'Outfit',sans-serif;color:#1A1A1A;">0 dni</div>
                     </div>
-                    <div style="font-size:32px;">🔥</div>
+                    <div style="width:48px;height:48px;border-radius:14px;background:#F6EAD2;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#C9924E" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0011 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 11-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 002.5 2.5z"/></svg>
+                    </div>
                 </div>
 
                 <!-- POST CHECK-IN BANNER -->
@@ -4694,6 +4700,7 @@
         }
 
         const AGENT_LABELS = { szef_sztabu: 'Trener', analityk: 'Analityk', fizjo: 'Fizjo', psycholog: 'Psycholog' };
+        const AGENT_COLORS = { szef_sztabu: '#5F8368', analityk: '#5B8DB8', fizjo: '#6B8F71', psycholog: '#C9924E' };
         const AGENT_INITIALS = { szef_sztabu: 'T', analityk: 'A', fizjo: 'F', psycholog: 'P' };
         const AGENT_DESCS = {
             szef_sztabu: 'Twój główny trener — planuje treningi, analizuje postępy i koordynuje całą pracę sztabu.',
@@ -4777,6 +4784,8 @@
             selectedAgent = agent;
             document.querySelectorAll('#agent-pill-wrap button').forEach(b => b.classList.remove('agent-active'));
             btn.classList.add('agent-active');
+            const _vc = document.getElementById('view-coach');
+            if (_vc) _vc.style.setProperty('--agent-color', AGENT_COLORS[agent] || '#5F8368');
             const nameEl = document.getElementById('coach-agent-name');
             if (nameEl) nameEl.textContent = AGENT_LABELS[agent] || 'Trener';
             const introTitle = document.getElementById('coach-intro-title');
@@ -10381,7 +10390,7 @@
 
         // Stempel buildu — dowód na urządzeniu, że działa świeży kod (trzymać
         // w zgodzie z CACHE_VERSION w sw.js; bump przy każdym deployu frontendu)
-        const VELM_BUILD = 'v49';
+        const VELM_BUILD = 'v50';
         console.log('velm build', VELM_BUILD, navigator.userAgent);
 
         async function hardReloadApp() {
