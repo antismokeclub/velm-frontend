@@ -8465,6 +8465,9 @@
                 }
                 const data = await res.json();
                 currentUserPremium = data.isPremium ?? false;
+                // Premium nie może być blokowany starą flagą 402 (był free → dostał 402 →
+                // kupił premium) — inaczej auto-narada nigdy nie ruszy mimo aktywnej subskrypcji.
+                if (currentUserPremium) localStorage.removeItem('velm_narada_402_week');
                 currentTrialMessagesLeft = data.trialMessagesLeft ?? 0;
                 currentSurveyCompleted = data.surveyCompleted ?? false;
                 updateTrialCounter();
@@ -9539,8 +9542,9 @@
                     naradaKey = 'noplan';
                 }
 
-                // Darmowy user dostał już 402 dla tego przypadku? Nie męczymy.
-                if (localStorage.getItem('velm_narada_402_week') === naradaKey) return false;
+                // Darmowy user dostał już 402 dla tego przypadku? Nie męczymy. Premium NIGDY
+                // nie blokujemy tą flagą — inaczej po zmianie free→premium narada nie ruszy.
+                if (!currentUserPremium && localStorage.getItem('velm_narada_402_week') === naradaKey) return false;
 
                 _weeklyNaradaRunning = true;
                 const narada = showNaradaOverlay({ estimateMs: 60000 });
@@ -10180,9 +10184,12 @@
             const tileIntF = document.getElementById('home-tile-intensity-fill');
             const tileZone = document.getElementById('home-tile-hrzone');
             const tileBpm  = document.getElementById('home-tile-hrbpm');
+            // Domyślnie kafelek prowadzi do kalendarza; stany "brak/wygasły plan" nadpiszą to niżej.
+            if (mainCard) mainCard.onclick = () => switchView('calendar');
 
             if (!dni?.length) {
-                if (nameEl) nameEl.textContent = 'Brak planu — wróć po naradzie';
+                if (nameEl) nameEl.textContent = 'Brak planu — dotknij, aby zwołać naradę';
+                if (mainCard) mainCard.onclick = (e) => { e.stopPropagation(); generateNewPlan(); };
                 return;
             }
 
@@ -10196,8 +10203,11 @@
                 const lastDay = dni[dni.length - 1]?.data;
                 if (lastDay && todayStr > lastDay) {
                     window._todayTyp = 'rest'; window._todayKm = 0; window._todayStruktura = null;
-                    if (nameEl)  nameEl.textContent = 'Plan wygasł — czeka na naradę';
+                    if (nameEl)  nameEl.textContent = 'Plan wygasł — dotknij, aby zwołać naradę';
                     if (badgeEl) badgeEl.textContent = '🌙';
+                    // Awaryjny ręczny spust narady (gdyby auto-narada nie ruszyła) — kafelek
+                    // staje się przyciskiem generującym nowy plan (niezamykalne okno narady).
+                    if (mainCard) mainCard.onclick = (e) => { e.stopPropagation(); generateNewPlan(); };
                     updatePostCheckinBanner();
                     return;
                 }
@@ -10416,7 +10426,7 @@
 
         // Stempel buildu — dowód na urządzeniu, że działa świeży kod (trzymać
         // w zgodzie z CACHE_VERSION w sw.js; bump przy każdym deployu frontendu)
-        const VELM_BUILD = 'v54';
+        const VELM_BUILD = 'v55';
         console.log('velm build', VELM_BUILD, navigator.userAgent);
 
         async function hardReloadApp() {
