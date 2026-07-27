@@ -9497,8 +9497,8 @@
         let _weeklyNaradaRunning = false;
         async function checkWeeklyNarada() {
             try {
-                if (!currentUserId || _weeklyNaradaRunning) return;
-                if (document.getElementById('narada-overlay')) return;
+                if (!currentUserId || _weeklyNaradaRunning) return false;
+                if (document.getElementById('narada-overlay')) return false;
 
                 // apiFetch (nie goły fetch) — dostajemy darmowy retry po
                 // odświeżeniu tokenu. Goły fetch + "if (!res.ok) return" po
@@ -9507,32 +9507,45 @@
                 // nie dostać wymuszonej narady, bo nic tego nie ponawiało.
                 const data = await apiFetch(`/api/plan/${currentUserId}`);
                 // Dormant (30 dni ciszy) ma pierwszeństwo — okno powrotne zamiast zwykłej narady.
-                if (data?.dormant?.needed) { showReturnCheckin(data.dormant); return; }
+                if (data?.dormant?.needed) { showReturnCheckin(data.dormant); return true; }
                 renderCoachOutreach(data?.outreach);   // zaczepka przy absencji (niezależna od narady)
                 const plan = data?.plan?.plan ?? data?.plan ?? null;
                 const weekKey = plan?.tydzien_od || plan?.dni?.[0]?.data;
-                if (!weekKey) return;   // brak planu w ogóle — nie ruszamy (onboarding to załatwia)
 
                 // Maszyna stanów: user uprzedził o przerwie (wstrzymany) → nie zmuszamy narady
                 // dopóki data powrotu nie minie. Konwersacyjna pauza zamiast przycisku.
                 const _coaching = data?.coaching;
-                if (_coaching?.state === 'paused' && _coaching.hold_until && _coaching.hold_until > toDateStr(new Date())) return;
+                if (_coaching?.state === 'paused' && _coaching.hold_until && _coaching.hold_until > toDateStr(new Date())) return false;
 
-                // Rolling 7 dni: plan żyje 7 dni od tydzien_od. Aktualny, dopóki dziś
-                // nie przekroczy ostatniego dnia (start + 6). Koniec kalendarzowego
-                // pon-niedz — plan wygasa 8. dnia niezależnie od dnia tygodnia, i przy
-                // pierwszym wejściu do apki po wygaśnięciu wyskakuje niezamykalna narada.
-                const todayStr = toDateStr(new Date());
-                const planEnd = new Date(weekKey + 'T00:00:00');
-                planEnd.setDate(planEnd.getDate() + 6);
-                const planEndStr = toDateStr(planEnd);
-                if (todayStr <= planEndStr) return;   // plan w oknie 7 dni — nic do roboty
+                // Ustal czy trzeba naradę + klucz 402-guardu.
+                let naradaKey;
+                if (weekKey) {
+                    // Rolling 7 dni: plan żyje 7 dni od tydzien_od. Aktualny, dopóki dziś
+                    // nie przekroczy ostatniego dnia (start + 6). Plan wygasa 8. dnia i przy
+                    // pierwszym wejściu po wygaśnięciu wyskakuje niezamykalna narada.
+                    const planEnd = new Date(weekKey + 'T00:00:00');
+                    planEnd.setDate(planEnd.getDate() + 6);
+                    if (toDateStr(new Date()) <= toDateStr(planEnd)) return false;   // plan w oknie 7 dni — nic do roboty
+                    naradaKey = weekKey;
+                } else {
+                    // BRAK PLANU W OGÓLE (zgubiony / nieudany przy onboardingu) → wymuszona narada,
+                    // żeby user nie utknął bez planu widząc tylko check-in. ALE max raz dziennie:
+                    // gdyby weekly-update zwrócił 200 a plan i tak nie był potem parsowalny,
+                    // bez tego guardu narada (Sonnet) odpalałaby się przy KAŻDYM wejściu = pętla
+                    // i spalanie kasy. Guard ustawiamy przy PRÓBIE, niezależnie od wyniku.
+                    const _today = toDateStr(new Date());
+                    if (localStorage.getItem('velm_noplan_narada_day') === _today) return false;
+                    localStorage.setItem('velm_noplan_narada_day', _today);
+                    naradaKey = 'noplan';
+                }
 
-                // Darmowy user dostał już 402 dla TEGO wygasłego planu? Nie męczymy.
-                if (localStorage.getItem('velm_narada_402_week') === weekKey) return;
+                // Darmowy user dostał już 402 dla tego przypadku? Nie męczymy.
+                if (localStorage.getItem('velm_narada_402_week') === naradaKey) return false;
 
                 _weeklyNaradaRunning = true;
                 const narada = showNaradaOverlay({ estimateMs: 60000 });
+                // Narada przejmuje ekran — zamknij poranny check-in, gdyby zdążył się otworzyć.
+                if (typeof closeCheckin === 'function') closeCheckin();
                 try {
                     await apiFetch('/api/weekly-update', { method: 'POST', body: { userId: currentUserId } });
                     // calendarPlan to wspólny cache — loadCalendar/loadTodayCard
@@ -9546,19 +9559,21 @@
                 } catch (e) {
                     narada.abort();
                     if (e.status === 402) {
-                        // Free tier: stary plan zostaje; nie ponawiaj dla tego wygasłego planu
-                        localStorage.setItem('velm_narada_402_week', weekKey);
+                        // Free tier: stary plan zostaje; nie ponawiaj dla tego przypadku
+                        localStorage.setItem('velm_narada_402_week', naradaKey);
                     } else {
                         showVelmToast('Nie udało się zwołać narady — spróbujemy przy następnym wejściu', true);
                     }
                 } finally {
                     _weeklyNaradaRunning = false;
                 }
+                return true;
             } catch (e) {
                 // Offline / sesja wygasła bez odzysku — nie przerywamy usera
                 // toastem, ale zostawiamy ślad w konsoli zamiast cichej czarnej
                 // dziury (poprzednio zero logu, nie dało się tego zdiagnozować)
                 console.warn('checkWeeklyNarada: pominięto —', e?.message || e);
+                return false;
             }
         }
 
@@ -10401,7 +10416,7 @@
 
         // Stempel buildu — dowód na urządzeniu, że działa świeży kod (trzymać
         // w zgodzie z CACHE_VERSION w sw.js; bump przy każdym deployu frontendu)
-        const VELM_BUILD = 'v53';
+        const VELM_BUILD = 'v54';
         console.log('velm build', VELM_BUILD, navigator.userAgent);
 
         async function hardReloadApp() {
@@ -10764,9 +10779,12 @@
 
             // Force Home View on Load
             switchView('home');
-            checkAndRedirectCheckin();
             loadTodayCard();
-            checkWeeklyNarada();
+            // Narada (brak planu / plan wygasł) lub okno powrotne ma priorytet nad porannym
+            // check-inem — poranny otwieramy dopiero gdy narada niczego nie przejęła.
+            checkWeeklyNarada()
+                .then((tookOver) => { if (!tookOver) checkAndRedirectCheckin(); })
+                .catch(() => checkAndRedirectCheckin());
 
 
             // Header Scroll Effect
