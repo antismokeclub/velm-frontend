@@ -3406,6 +3406,8 @@
         .sd-choice { display:flex; align-items:center; justify-content:space-between; gap:10px; width:100%; text-align:left; background:#FAF8F4; border:1px solid #E7E1D9; border-radius:13px; padding:14px 16px; min-height:52px; font-size:14px; font-weight:600; font-family:'Inter',sans-serif; color:#1A1A1A; cursor:pointer; touch-action:manipulation; transition:border-color 0.18s ease, background 0.18s ease; }
         .sd-choice.sel { border-color:#5F8368; background:#EFF4EF; color:#3E5D46; }
         .sd-choice:active { transform:scale(0.99); }
+        .sd-choice .sd-check { flex-shrink:0; opacity:0; transition:opacity 0.15s ease; }
+        .sd-choice.sel .sd-check { opacity:1; }
         /* ── Połączenia — wg projektu Figma (round logo circles) ── */
         .cx-sub-head { font-size:13px; color:#999; line-height:1.6; margin:0 2px 14px; }
         .cx-active-pill { display:inline-flex; align-items:center; gap:6px; background:#fff; border-radius:20px; padding:5px 11px; box-shadow:0 1px 6px rgba(0,0,0,0.07); font-size:12px; font-weight:700; color:#333; }
@@ -3925,97 +3927,148 @@
                         <button class="s-back-btn" onclick="backToSettingsMenu()" aria-label="Wróć"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
                         <div class="s-pane-title">Profil</div>
                     </div>
-                <!-- SEKCJA 1 — PROFIL (wg Figmy) -->
-                <div class="home-anim" style="animation-delay:0.04s;text-align:center;margin-bottom:18px;">
-                    <div style="width:92px;height:92px;border-radius:50%;margin:0 auto;padding:4px;background:#fff;border:2px solid #CFE0D2;box-sizing:border-box;">
+                <!-- PROFIL — menu (avatar + podgrupy) -->
+                <div class="home-anim" style="animation-delay:0.04s;text-align:center;margin-bottom:20px;">
+                    <div style="width:92px;height:92px;border-radius:50%;margin:0 auto;padding:4px;background:#fff;border:2px solid #CFE0D2;box-sizing:border-box;box-shadow:var(--sd-shadow);">
                         <div id="settings-avatar" style="width:100%;height:100%;border-radius:50%;background:#E9F0EA;display:flex;align-items:center;justify-content:center;">
                             <span id="settings-initials" style="color:#4A6B52;font-family:'Outfit',sans-serif;font-weight:800;font-size:30px;">?</span>
                         </div>
                     </div>
-                    <div id="settings-name-display" style="font-family:'Outfit',sans-serif;font-weight:800;font-size:19px;color:#1A1A1A;margin-top:12px;">—</div>
+                    <div id="settings-name-display" style="font-family:var(--font-serif);font-weight:700;font-size:21px;color:#1A1A1A;margin-top:12px;">—</div>
                     <div id="settings-email" style="font-size:13px;color:#8A8A8A;margin-top:2px;">—</div>
                     <button onclick="showVelmToast('Zdjęcie profilowe będzie wkrótce.', false)" class="sd-svc-link" style="margin-top:4px;">Zmień zdjęcie profilowe</button>
                 </div>
 
-                <div class="home-anim sd-card" style="animation-delay:0.08s;">
-                    <div class="sd-seclabel">Imię i nazwisko</div>
-                    <div class="s-field" style="margin-bottom:0;">
-                        <input type="text" id="settings-edit-name" placeholder="Twoje imię" class="s-input">
-                    </div>
+                <button class="home-anim sd-action" style="animation-delay:0.08s;" onclick="openSettingsPane('profil-imie')">
+                    <span class="sd-action-icon" style="background:#E8EEF3;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#5A7A92" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
+                    <span class="sd-action-body"><span class="sd-action-title" style="display:block;">Imię i nazwisko</span><span class="sd-action-sub" style="display:block;" id="profil-row-name">Jak zwraca się do Ciebie trener</span></span>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#C4C4C4" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg>
+                </button>
+
+                <button class="home-anim sd-action" style="animation-delay:0.11s;" onclick="openSettingsPane('profil-dane')">
+                    <span class="sd-action-icon" style="background:#E9F0EA;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#5F8368" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></span>
+                    <span class="sd-action-body"><span class="sd-action-title" style="display:block;">Dane fizyczne</span><span class="sd-action-sub" style="display:block;" id="profil-row-dane">Waga, wzrost, wiek, płeć</span></span>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#C4C4C4" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg>
+                </button>
+
+                <button class="home-anim sd-action" style="animation-delay:0.14s;" onclick="openSettingsPane('profil-dni')">
+                    <span class="sd-action-icon" style="background:#F6F0E1;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#C08457" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></span>
+                    <span class="sd-action-body"><span class="sd-action-title" style="display:block;">Dni treningowe</span><span class="sd-action-sub" style="display:block;" id="profil-row-dni">Kiedy trenujesz</span></span>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#C4C4C4" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg>
+                </button>
+
+                <button class="home-anim sd-action" style="animation-delay:0.17s;" onclick="openSettingsPane('profil-jezyk')">
+                    <span class="sd-action-icon" style="background:#ECEAF3;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#7B6FA6" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15 15 0 010 20 15 15 0 010-20"/></svg></span>
+                    <span class="sd-action-body"><span class="sd-action-title" style="display:block;">Język i jednostki</span><span class="sd-action-sub" style="display:block;" id="profil-row-lang">Polski · km</span></span>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#C4C4C4" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg>
+                </button>
+
                 </div>
 
-                <div class="home-anim sd-card" style="animation-delay:0.10s;">
-                    <div class="s-row">
-                        <div>
-                            <label class="s-label">Waga</label>
-                            <input type="number" id="settings-edit-weight" placeholder="70" min="30" max="250" class="s-input">
-                        </div>
-                        <div>
-                            <label class="s-label">Wzrost</label>
-                            <input type="number" id="settings-edit-height" placeholder="175" min="100" max="250" class="s-input">
+                <!-- PROFIL → Imię -->
+                <div class="s-pane" id="s-pane-profil-imie" style="display:none;">
+                    <div class="s-back-header">
+                        <button class="s-back-btn" onclick="openSettingsPane('profil')" aria-label="Wróć"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+                        <div class="s-pane-title">Imię i nazwisko</div>
+                    </div>
+                    <p class="cx-sub-head home-anim" style="animation-delay:0.03s;">Tak zwraca się do Ciebie Twój sztab. Podaj imię (lub imię i nazwisko).</p>
+                    <div class="home-anim sd-card" style="animation-delay:0.06s;">
+                        <div class="s-field" style="margin-bottom:0;">
+                            <input type="text" id="settings-edit-name" placeholder="Twoje imię" class="s-input">
                         </div>
                     </div>
-                    <div class="s-row" style="margin-bottom:0;">
-                        <div>
-                            <label class="s-label">Wiek</label>
-                            <input type="number" id="settings-edit-age" placeholder="30" min="10" max="99" class="s-input">
-                        </div>
-                        <div>
-                            <label class="s-label">Płeć</label>
-                            <select id="settings-edit-sex" class="s-input" style="appearance:none;-webkit-appearance:none;background-image:url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2216%22 height=%2216%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%238A8A8A%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22><path d=%22M6 9l6 6 6-6%22/></svg>');background-repeat:no-repeat;background-position:right 12px center;padding-right:36px;cursor:pointer;">
-                                <option value="">—</option>
-                                <option value="M">Mężczyzna</option>
-                                <option value="K">Kobieta</option>
-                                <option value="I">Inna</option>
-                            </select>
-                        </div>
-                    </div>
+                    <button onclick="saveProfileSettings()" class="s-btn-primary" style="min-height:54px;font-size:15px;">Zapisz zmiany</button>
+                    <div id="settings-profile-msg" class="s-msg"></div>
                 </div>
 
-                <div class="home-anim sd-card" style="animation-delay:0.13s;">
-                    <div class="sd-seclabel">Dni treningowe</div>
-                    <div class="s-days-grid" style="margin-bottom:0;">
-                        <button class="s-day-btn" id="s-day-0" onclick="toggleSettingsDay(this,0)">Pon</button>
-                        <button class="s-day-btn" id="s-day-1" onclick="toggleSettingsDay(this,1)">Wt</button>
-                        <button class="s-day-btn" id="s-day-2" onclick="toggleSettingsDay(this,2)">Śr</button>
-                        <button class="s-day-btn" id="s-day-3" onclick="toggleSettingsDay(this,3)">Czw</button>
-                        <button class="s-day-btn" id="s-day-4" onclick="toggleSettingsDay(this,4)">Pt</button>
-                        <button class="s-day-btn" id="s-day-5" onclick="toggleSettingsDay(this,5)">Sob</button>
-                        <button class="s-day-btn" id="s-day-6" onclick="toggleSettingsDay(this,6)">Nd</button>
+                <!-- PROFIL → Dane fizyczne -->
+                <div class="s-pane" id="s-pane-profil-dane" style="display:none;">
+                    <div class="s-back-header">
+                        <button class="s-back-btn" onclick="openSettingsPane('profil')" aria-label="Wróć"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+                        <div class="s-pane-title">Dane fizyczne</div>
                     </div>
+                    <div class="home-anim sd-card" style="animation-delay:0.05s;">
+                        <div class="s-row">
+                            <div><label class="s-label">Waga (kg)</label><input type="number" id="settings-edit-weight" placeholder="70" min="30" max="250" class="s-input"></div>
+                            <div><label class="s-label">Wzrost (cm)</label><input type="number" id="settings-edit-height" placeholder="175" min="100" max="250" class="s-input"></div>
+                        </div>
+                        <div class="s-row" style="margin-bottom:0;">
+                            <div><label class="s-label">Wiek</label><input type="number" id="settings-edit-age" placeholder="30" min="10" max="99" class="s-input"></div>
+                            <div><label class="s-label">Płeć</label>
+                                <select id="settings-edit-sex" class="s-input" style="appearance:none;-webkit-appearance:none;background-image:url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2216%22 height=%2216%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%238A8A8A%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22><path d=%22M6 9l6 6 6-6%22/></svg>');background-repeat:no-repeat;background-position:right 12px center;padding-right:36px;cursor:pointer;">
+                                    <option value="">—</option>
+                                    <option value="M">Mężczyzna</option>
+                                    <option value="K">Kobieta</option>
+                                    <option value="I">Inna</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <button onclick="saveProfileSettings()" class="s-btn-primary" style="min-height:54px;font-size:15px;">Zapisz zmiany</button>
+                    <div class="s-msg" id="settings-profile-msg-dane"></div>
                 </div>
 
-                <button onclick="saveProfileSettings()" class="s-btn-primary" style="min-height:54px;font-size:15px;">Zapisz zmiany</button>
-                <div id="settings-profile-msg" class="s-msg"></div>
-
-                <!-- Preferencje + ID (poza projektem — apka ich potrzebuje) -->
-                <div class="home-anim sd-card" style="animation-delay:0.16s;margin-top:16px;">
-                    <div class="sd-seclabel">Preferencje</div>
-                    <div class="s-field">
-                        <label class="s-label">Język aplikacji</label>
-                        <div class="s-lang-toggle" style="margin-bottom:0;">
-                            <button class="s-lang-btn selected" id="s-lang-pl" onclick="selectSettingsLang('pl')">Polski</button>
-                            <button class="s-lang-btn" id="s-lang-en" onclick="selectSettingsLang('en')">English</button>
+                <!-- PROFIL → Dni treningowe -->
+                <div class="s-pane" id="s-pane-profil-dni" style="display:none;">
+                    <div class="s-back-header">
+                        <button class="s-back-btn" onclick="openSettingsPane('profil')" aria-label="Wróć"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+                        <div class="s-pane-title">Dni treningowe</div>
+                    </div>
+                    <div class="home-anim sd-info" style="animation-delay:0.03s;margin-bottom:14px;">
+                        <b>Uwaga:</b> zmiana dni zostanie uwzględniona przy układaniu planu na <b>następny tydzień</b> — bieżący plan zostaje bez zmian.
+                    </div>
+                    <div class="home-anim sd-card" style="animation-delay:0.06s;">
+                        <div class="sd-seclabel">Wybierz dni</div>
+                        <div class="s-days-grid" style="margin-bottom:0;">
+                            <button class="s-day-btn" id="s-day-0" onclick="toggleSettingsDay(this,0)">Pon</button>
+                            <button class="s-day-btn" id="s-day-1" onclick="toggleSettingsDay(this,1)">Wt</button>
+                            <button class="s-day-btn" id="s-day-2" onclick="toggleSettingsDay(this,2)">Śr</button>
+                            <button class="s-day-btn" id="s-day-3" onclick="toggleSettingsDay(this,3)">Czw</button>
+                            <button class="s-day-btn" id="s-day-4" onclick="toggleSettingsDay(this,4)">Pt</button>
+                            <button class="s-day-btn" id="s-day-5" onclick="toggleSettingsDay(this,5)">Sob</button>
+                            <button class="s-day-btn" id="s-day-6" onclick="toggleSettingsDay(this,6)">Nd</button>
                         </div>
                     </div>
-                    <div class="s-field" style="margin-top:12px;margin-bottom:14px;">
-                        <label class="s-label">Jednostki</label>
-                        <div class="s-lang-toggle" style="margin-bottom:0;">
-                            <button class="s-lang-btn selected" id="s-unit-km" onclick="selectSettingsUnit('km')">Kilometry</button>
-                            <button class="s-lang-btn" id="s-unit-mi" onclick="selectSettingsUnit('mi')">Mile</button>
-                        </div>
-                    </div>
-                    <div class="s-divider" style="padding-bottom:0;border-top:1px solid #F3EFE8;">
-                        <span style="font-size:13px;color:#8A8A8A;">ID konta</span>
-                        <div style="display:flex;align-items:center;gap:8px;">
-                            <span id="settings-user-id" style="font-size:12px;color:#C4C4C4;font-family:'SF Mono','Courier New',monospace;">—</span>
-                            <button onclick="copyUserId()" aria-label="Kopiuj ID konta" style="background:none;border:1px solid #EBEBEB;border-radius:10px;min-width:44px;min-height:44px;cursor:pointer;display:flex;align-items:center;justify-content:center;touch-action:manipulation;">
-                                <svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#8A8A8A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
-                            </button>
-                        </div>
-                    </div>
+                    <button onclick="saveProfileSettings()" class="s-btn-primary" style="min-height:54px;font-size:15px;">Zapisz zmiany</button>
+                    <div class="s-msg" id="settings-profile-msg-dni"></div>
                 </div>
 
+                <!-- PROFIL → Język i jednostki -->
+                <div class="s-pane" id="s-pane-profil-jezyk" style="display:none;">
+                    <div class="s-back-header">
+                        <button class="s-back-btn" onclick="openSettingsPane('profil')" aria-label="Wróć"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+                        <div class="s-pane-title">Język i jednostki</div>
+                    </div>
+                    <div class="home-anim sd-card" style="animation-delay:0.05s;">
+                        <div class="sd-seclabel">Język aplikacji</div>
+                        <div style="display:flex;flex-direction:column;gap:8px;">
+                            <button class="sd-choice" data-lang-opt="pl" onclick="selectSettingsLang('pl')"><span>Polski <span style="color:#A69C8E;font-weight:600;">· PL</span></span><svg class="sd-check" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5F8368" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></button>
+                            <button class="sd-choice" data-lang-opt="en" onclick="selectSettingsLang('en')"><span>English <span style="color:#A69C8E;font-weight:600;">· EN</span></span><svg class="sd-check" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5F8368" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></button>
+                            <button class="sd-choice" data-lang-opt="fr" onclick="selectSettingsLang('fr')"><span>Français <span style="color:#A69C8E;font-weight:600;">· FR</span></span><svg class="sd-check" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5F8368" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></button>
+                            <button class="sd-choice" data-lang-opt="es" onclick="selectSettingsLang('es')"><span>Español <span style="color:#A69C8E;font-weight:600;">· ES</span></span><svg class="sd-check" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5F8368" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></button>
+                            <button class="sd-choice" data-lang-opt="de" onclick="selectSettingsLang('de')"><span>Deutsch <span style="color:#A69C8E;font-weight:600;">· DE</span></span><svg class="sd-check" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5F8368" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></button>
+                        </div>
+                    </div>
+                    <div class="home-anim sd-card" style="animation-delay:0.09s;">
+                        <div class="sd-seclabel">Jednostki</div>
+                        <div style="display:flex;flex-direction:column;gap:8px;">
+                            <button class="sd-choice" data-unit-opt="km" onclick="selectSettingsUnit('km')"><span>Kilometry</span><svg class="sd-check" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5F8368" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></button>
+                            <button class="sd-choice" data-unit-opt="mi" onclick="selectSettingsUnit('mi')"><span>Mile</span><svg class="sd-check" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5F8368" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></button>
+                        </div>
+                    </div>
+                    <button onclick="saveProfileSettings()" class="s-btn-primary" style="min-height:54px;font-size:15px;">Zapisz zmiany</button>
+                    <div class="s-msg" id="settings-profile-msg-jezyk"></div>
+                    <div class="home-anim sd-card" style="animation-delay:0.13s;margin-top:16px;">
+                        <div class="s-divider" style="padding:0;border-top:none;">
+                            <span style="font-size:13px;color:#8A8A8A;">ID konta</span>
+                            <div style="display:flex;align-items:center;gap:8px;">
+                                <span id="settings-user-id" style="font-size:12px;color:#C4C4C4;font-family:'SF Mono','Courier New',monospace;">—</span>
+                                <button onclick="copyUserId()" aria-label="Kopiuj ID konta" style="background:none;border:1px solid #EBEBEB;border-radius:10px;min-width:44px;min-height:44px;cursor:pointer;display:flex;align-items:center;justify-content:center;touch-action:manipulation;">
+                                    <svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#8A8A8A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- CEL — przegląd (Zobacz / Zmień + podsumowanie) -->
@@ -8293,7 +8346,7 @@
                     const wd = new Date(ds); wd.setHours(0,0,0,0);
                     if (wd >= monday && wd < weekEnd) doneDays.add((wd.getDay() + 6) % 7);
                 });
-                const plannedSet = new Set(Array.isArray(onb.selectedDays) ? onb.selectedDays : []);
+                const plannedSet = new Set(_daysToIdx(onb.selectedDays));
                 const planned = plannedSet.size || onb.daysPerWeek || doneDays.size;
                 const countEl = document.getElementById('cel-d-week-count');
                 if (countEl) countEl.textContent = doneDays.size + ' z ' + planned + ' treningów';
@@ -8354,16 +8407,12 @@
                 if (editAge && onb.dob_y) editAge.value = new Date().getFullYear() - parseInt(onb.dob_y);
                 const editSex = document.getElementById('settings-edit-sex');
                 if (editSex && onb.sex) editSex.value = onb.sex;
-                _settingsSelectedDays = Array.isArray(onb.selectedDays) ? [...onb.selectedDays] : [];
+                _settingsSelectedDays = _daysToIdx(onb.selectedDays);
                 document.querySelectorAll('.s-day-btn').forEach((btn, i) => {
                     btn.classList.toggle('selected', _settingsSelectedDays.includes(i));
                 });
-                _settingsLang = onb.language ?? 'pl';
-                document.getElementById('s-lang-pl')?.classList.toggle('selected', _settingsLang === 'pl');
-                document.getElementById('s-lang-en')?.classList.toggle('selected', _settingsLang === 'en');
-                _settingsUnit = onb.unit ?? 'km';
-                document.getElementById('s-unit-km')?.classList.toggle('selected', _settingsUnit === 'km');
-                document.getElementById('s-unit-mi')?.classList.toggle('selected', _settingsUnit === 'mi');
+                selectSettingsLang(onb.language ?? 'pl');
+                selectSettingsUnit(onb.unit ?? 'km');
 
                 // Twój cel — inputs
                 const editRaceDate = document.getElementById('settings-edit-race-date');
@@ -8387,6 +8436,7 @@
 
                 // Cel i plan / Twój cel — realne dane (ring, podsumowanie, ten tydzień)
                 renderGoalPanes(user, planData);
+                _refreshProfilRows();
             } catch (e) { /* zostaw placeholdery */ }
         }
 
@@ -8413,7 +8463,7 @@
             if (ageVal >= 10 && ageVal <= 99) updates.dob_y = new Date().getFullYear() - ageVal;
             const sexVal = document.getElementById('settings-edit-sex')?.value;
             if (sexVal) updates.sex = sexVal;
-            if (_settingsSelectedDays.length > 0) { updates.selectedDays = _settingsSelectedDays; updates.daysPerWeek = _settingsSelectedDays.length; }
+            if (_settingsSelectedDays.length > 0) { updates.selectedDays = _idxToDays(_settingsSelectedDays); updates.daysPerWeek = _settingsSelectedDays.length; }
             if (_settingsLang) updates.language = _settingsLang;
             if (_settingsUnit) updates.unit = _settingsUnit;
             if (Object.keys(updates).length === 0) return;
@@ -8424,11 +8474,23 @@
                 });
                 const data = await res.json();
                 if (!data.success) throw new Error(data.error);
-                showSettingsMsg('settings-profile-msg', 'Zapisano');
-                loadSettings();
+                showVelmToast('Zapisano', false);   // toast — działa z każdego podekranu profilu
+                _refreshProfilRows();                // odśwież podglądy w menu profilu (bez resetu widoku)
             } catch(e) {
-                showSettingsMsg('settings-profile-msg', 'Błąd: ' + e.message, true);
+                showVelmToast('Błąd zapisu: ' + e.message, true);
             }
+        }
+
+        // Podglądy wartości w wierszach menu Profilu ("więcej się dzieje").
+        function _refreshProfilRows() {
+            const LANG = { pl:'Polski', en:'English', fr:'Français', es:'Español', de:'Deutsch' };
+            const nm = document.getElementById('settings-edit-name')?.value?.trim();
+            const rn = document.getElementById('profil-row-name');
+            if (rn) rn.textContent = nm || 'Jak zwraca się do Ciebie trener';
+            const rd = document.getElementById('profil-row-dni');
+            if (rd) rd.textContent = _settingsSelectedDays.length ? (_settingsSelectedDays.length + ' dni w tygodniu') : 'Kiedy trenujesz';
+            const rl = document.getElementById('profil-row-lang');
+            if (rl) rl.textContent = (LANG[_settingsLang] || 'Polski') + ' · ' + (_settingsUnit === 'mi' ? 'mile' : 'km');
         }
 
         function toggleSettingsDay(btn, idx) {
@@ -8440,14 +8502,12 @@
 
         function selectSettingsLang(lang) {
             _settingsLang = lang;
-            document.getElementById('s-lang-pl')?.classList.toggle('selected', lang === 'pl');
-            document.getElementById('s-lang-en')?.classList.toggle('selected', lang === 'en');
+            document.querySelectorAll('[data-lang-opt]').forEach(b => b.classList.toggle('sel', b.dataset.langOpt === lang));
         }
 
         function selectSettingsUnit(unit) {
             _settingsUnit = unit;
-            document.getElementById('s-unit-km')?.classList.toggle('selected', unit === 'km');
-            document.getElementById('s-unit-mi')?.classList.toggle('selected', unit === 'mi');
+            document.querySelectorAll('[data-unit-opt]').forEach(b => b.classList.toggle('sel', b.dataset.unitOpt === unit));
         }
 
         // ── SUBSCRIPTION ─────────────────────────────────────────
@@ -9937,6 +9997,12 @@
         let _settingsSelectedDays = [];
         let _settingsLang = 'pl';
         let _settingsUnit = 'km';
+        // Baza trzyma selectedDays jako angielskie NAZWY dni (["Monday",...]) — onboarding
+        // (index.html WDAYS) i plan-gen tak zapisują. UI ustawień działa na indeksach 0-6
+        // (0=Pn). Konwertujemy w obie strony, inaczej dni się nie zaznaczają ani nie zapisują.
+        const _WEEK_DAYS_EN = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+        function _daysToIdx(arr){ return (Array.isArray(arr)?arr:[]).map(d => typeof d === 'number' ? d : _WEEK_DAYS_EN.indexOf(d)).filter(i => i >= 0 && i <= 6); }
+        function _idxToDays(arr){ return (Array.isArray(arr)?arr:[]).map(i => _WEEK_DAYS_EN[i]).filter(Boolean); }
         async function loadChatHistory(agent) {
             if (!currentUserId) return;
             // Multi-conversation flow ładuje historię przez selectConversation/switchAgentConversation.
@@ -10426,7 +10492,7 @@
 
         // Stempel buildu — dowód na urządzeniu, że działa świeży kod (trzymać
         // w zgodzie z CACHE_VERSION w sw.js; bump przy każdym deployu frontendu)
-        const VELM_BUILD = 'v55';
+        const VELM_BUILD = 'v56';
         console.log('velm build', VELM_BUILD, navigator.userAgent);
 
         async function hardReloadApp() {
