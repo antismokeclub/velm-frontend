@@ -833,7 +833,7 @@ const WSHORT_PL=['Pn','Wt','Śr','Cz','Pt','So','Nd'];
 
 // ─── STATE ───────────────────────────────────────────────────
 const D={
-  language:'en',unit:null,hasWatch:null,goal_category:null,level:null,goalId:null,
+  language:'en',unit:null,hasWatch:null,goal_category:null,level:null,goalId:null,name:'',
   run_15min:null,stairs:null,gender:null,age:25,weight:null,height:null,
   daysPerWeek:3,selectedDays:[],sport_history:[],sport_other:'',
   walkrun_run_min:1,walkrun_walk_min:2,walkrun_series:5,walkrun_warmup:5,walkrun_rpe:null,
@@ -3578,29 +3578,29 @@ function showAuthScreen() {
 const AUTH_T = {
   pl: { title:'Zacznij trenować', subtitle:'Utwórz konto lub zaloguj się do istniejącego.', create:'Utwórz konto', haveAccount:'Mam już konto',
         regTitle:'Utwórz konto', regSubtitle:'Podaj email i hasło — użyjesz ich do logowania.',
-        emailPh:'Twój email', pwdPh:'Hasło (min. 8 znaków)', pwd2Ph:'Powtórz hasło', next:'Dalej →',
+        namePh:'Imię i nazwisko', errName:'Wpisz swoje imię', emailPh:'Twój email', pwdPh:'Hasło (min. 8 znaków)', pwd2Ph:'Powtórz hasło', next:'Dalej →',
         loginTitle:'Zaloguj się', loginSubtitle:'Wpisz dane konta, którym się rejestrowałeś', loginPwdPh:'Hasło', loginBtn:'Zaloguj', back:'← Wróć',
         forgot:'Zapomniałeś hasła?', resetTitle:'Reset hasła', resetSubtitle:'Wyślemy link do resetu na podany adres email.', resetBtn:'Wyślij link', resetSent:'Jeśli konto istnieje, wysłaliśmy instrukcje na podany adres email.',
         errEmail:'Wpisz prawidłowy adres email', errPwd:'Hasło musi mieć min. 8 znaków', errMatch:'Hasła nie są zgodne' },
   en: { title:'Start training', subtitle:'Create an account or sign in to an existing one.', create:'Create account', haveAccount:'I have an account',
         regTitle:'Create account', regSubtitle:'Enter email and password — you\'ll use them to sign in.',
-        emailPh:'Your email', pwdPh:'Password (min. 8 chars)', pwd2Ph:'Repeat password', next:'Next →',
+        namePh:'Full name', errName:'Enter your name', emailPh:'Your email', pwdPh:'Password (min. 8 chars)', pwd2Ph:'Repeat password', next:'Next →',
         loginTitle:'Sign in', loginSubtitle:'Enter the account details you registered with', loginPwdPh:'Password', loginBtn:'Sign in', back:'← Back',
         forgot:'Forgot password?', resetTitle:'Reset password', resetSubtitle:'We\'ll send a reset link to your email.', resetBtn:'Send link', resetSent:'If an account exists, we\'ve sent reset instructions to your email.',
         errEmail:'Enter a valid email address', errPwd:'Password must be at least 8 characters', errMatch:'Passwords don\'t match' },
   fr: { title:'Commencer à courir', subtitle:'Créez un compte ou connectez-vous à un compte existant.', create:'Créer un compte', haveAccount:'J\'ai déjà un compte',
         regTitle:'Créer un compte', regSubtitle:'Saisissez votre email et mot de passe — vous les utiliserez pour vous connecter.',
-        emailPh:'Votre email', pwdPh:'Mot de passe (min. 6 car.)', pwd2Ph:'Répéter le mot de passe', next:'Suivant →',
+        namePh:'Nom et prénom', errName:'Saisissez votre nom', emailPh:'Votre email', pwdPh:'Mot de passe (min. 6 car.)', pwd2Ph:'Répéter le mot de passe', next:'Suivant →',
         loginTitle:'Se connecter', loginSubtitle:'Saisissez les identifiants de votre compte', loginPwdPh:'Mot de passe', loginBtn:'Se connecter', back:'← Retour',
         errEmail:'Saisissez une adresse email valide', errPwd:'Le mot de passe doit comporter au moins 8 caractères', errMatch:'Les mots de passe ne correspondent pas' },
   es: { title:'Empieza a entrenar', subtitle:'Crea una cuenta o inicia sesión en una existente.', create:'Crear cuenta', haveAccount:'Ya tengo cuenta',
         regTitle:'Crear cuenta', regSubtitle:'Introduce email y contraseña — los usarás para iniciar sesión.',
-        emailPh:'Tu email', pwdPh:'Contraseña (mín. 6 caracteres)', pwd2Ph:'Repite la contraseña', next:'Siguiente →',
+        namePh:'Nombre y apellido', errName:'Introduce tu nombre', emailPh:'Tu email', pwdPh:'Contraseña (mín. 6 caracteres)', pwd2Ph:'Repite la contraseña', next:'Siguiente →',
         loginTitle:'Iniciar sesión', loginSubtitle:'Introduce los datos con los que te registraste', loginPwdPh:'Contraseña', loginBtn:'Iniciar sesión', back:'← Atrás',
         errEmail:'Introduce un email válido', errPwd:'La contraseña debe tener al menos 6 caracteres', errMatch:'Las contraseñas no coinciden' },
   de: { title:'Mit dem Training beginnen', subtitle:'Erstelle ein Konto oder melde dich bei einem bestehenden an.', create:'Konto erstellen', haveAccount:'Ich habe bereits ein Konto',
         regTitle:'Konto erstellen', regSubtitle:'Gib E-Mail und Passwort ein — damit meldest du dich an.',
-        emailPh:'Deine E-Mail', pwdPh:'Passwort (mind. 6 Zeichen)', pwd2Ph:'Passwort wiederholen', next:'Weiter →',
+        namePh:'Vor- und Nachname', errName:'Gib deinen Namen ein', emailPh:'Deine E-Mail', pwdPh:'Passwort (mind. 6 Zeichen)', pwd2Ph:'Passwort wiederholen', next:'Weiter →',
         loginTitle:'Anmelden', loginSubtitle:'Gib deine Anmeldedaten ein', loginPwdPh:'Passwort', loginBtn:'Anmelden', back:'← Zurück',
         errEmail:'Gib eine gültige E-Mail-Adresse ein', errPwd:'Das Passwort muss mindestens 6 Zeichen lang sein', errMatch:'Passwörter stimmen nicht überein' }
 };
@@ -3622,27 +3622,31 @@ function showRegisterForm() {
   document.getElementById('auth-card').innerHTML = `
     <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:20px;color:#111;margin-bottom:6px;">${t.regTitle}</h2>
     <p style="font-size:13px;color:#5C6B85;line-height:1.5;margin-bottom:22px;">${t.regSubtitle}</p>
+    <input class="auth-inp" id="reg-name" type="text" placeholder="${t.namePh}" autocomplete="name" onkeydown="if(event.key==='Enter')document.getElementById('reg-email').focus()"/>
     <input class="auth-inp" id="reg-email" type="email" placeholder="${t.emailPh}" autocomplete="email" onkeydown="if(event.key==='Enter')document.getElementById('reg-pwd').focus()"/>
     <input class="auth-inp" id="reg-pwd" type="password" placeholder="${t.pwdPh}" autocomplete="new-password" onkeydown="if(event.key==='Enter')document.getElementById('reg-pwd2').focus()"/>
     <input class="auth-inp" id="reg-pwd2" type="password" placeholder="${t.pwd2Ph}" autocomplete="new-password" onkeydown="if(event.key==='Enter')_confirmRegister()"/>
     <button class="btn-p" id="reg-btn" onclick="_confirmRegister()" style="margin-top:4px;">${t.next}</button>
     <div class="auth-err" id="reg-err"></div>
     <span class="auth-link" onclick="_renderAuthChoice()">${t.back}</span>`;
-  document.getElementById('reg-email').focus();
+  document.getElementById('reg-name').focus();
 }
 
 function _confirmRegister() {
   const t = _authT();
+  const name  = document.getElementById('reg-name')?.value.trim();
   const email = document.getElementById('reg-email')?.value.trim();
   const p1    = document.getElementById('reg-pwd')?.value;
   const p2    = document.getElementById('reg-pwd2')?.value;
   const err   = document.getElementById('reg-err');
   const btn   = document.getElementById('reg-btn');
   err.textContent = '';
+  if (!name)                         { err.textContent = t.errName;  return; }
   if (!email || !email.includes('@')) { err.textContent = t.errEmail; return; }
   if (p1.length < 8) { err.textContent = t.errPwd; return; }
   if (p1 !== p2)     { err.textContent = t.errMatch; return; }
   btn.disabled = true;
+  S.data.name     = name;
   S.data.email    = email;
   S.data.password = p1;
   _startOnboarding();
