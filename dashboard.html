@@ -8291,6 +8291,21 @@
             if (onb.customDist) return onb.customDist + ' km';
             return 'Plan biegowy';
         }
+        // Etykieta celu dopasowana do typu: cel czasowy → "10 km · 45:00", dystansowy → sam dystans.
+        function _celGoalLabel(onb) {
+            const dist = _celDistLabel(onb);
+            const h = parseInt(onb.time_target_hours) || 0;
+            const m = parseInt(onb.time_target_mins);
+            const s = parseInt(onb.time_target_secs) || 0;
+            const isTimeGoal = onb.goalId === 'time' || onb.time_distance;
+            if (isTimeGoal && !isNaN(m) && (h > 0 || m > 0)) {
+                const t = h > 0
+                    ? h + ':' + String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0')
+                    : m + ':' + String(s).padStart(2, '0');
+                return dist + ' · ' + t;
+            }
+            return dist;
+        }
         function _fmtPlDate(d) {
             try { return new Date(d).toLocaleDateString('pl-PL', { day:'numeric', month:'long', year:'numeric' }); }
             catch(e) { return '—'; }
@@ -8305,7 +8320,7 @@
             const onb = user?.onboarding_data ?? {};
             window._settingsOnb = onb;
             const raceDate = onb.time_race_target || onb.time_race_date || onb.dist_goal_date || null;
-            _setText(['cel-sum-dist','cel-d-dist'], _celDistLabel(onb));
+            _setText(['cel-sum-dist','cel-d-dist'], _celGoalLabel(onb));
 
             let dateTxt = '—', leftTxt = 'Ustaw datę zawodów', pct = null;
             if (raceDate) {
@@ -10503,7 +10518,7 @@
 
         // Stempel buildu — dowód na urządzeniu, że działa świeży kod (trzymać
         // w zgodzie z CACHE_VERSION w sw.js; bump przy każdym deployu frontendu)
-        const VELM_BUILD = 'v58';
+        const VELM_BUILD = 'v59';
         console.log('velm build', VELM_BUILD, navigator.userAgent);
 
         async function hardReloadApp() {
