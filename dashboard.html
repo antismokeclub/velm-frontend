@@ -3449,10 +3449,10 @@
     <!-- Login overlay — shown when no userId in localStorage -->
     <div id="login-overlay">
         <div class="login-logo">VELM</div>
-        <div class="login-tagline">Twój AI trener biegowy</div>
+        <div class="login-tagline" data-i18n="login.tagline">Twój AI trener biegowy</div>
         <div class="login-card">
-            <h2>Zaloguj się</h2>
-            <p>Wpisz email i hasło, których używałeś przy rejestracji</p>
+            <h2 data-i18n="login.title">Zaloguj się</h2>
+            <p data-i18n="login.sub">Wpisz email i hasło, których używałeś przy rejestracji</p>
             <input
                 class="login-input"
                 id="login-email"
@@ -3469,10 +3469,10 @@
                 autocomplete="current-password"
                 onkeydown="if(event.key==='Enter')doLogin()"
             />
-            <button class="login-btn" id="login-btn" onclick="doLogin()">Zaloguj się</button>
+            <button class="login-btn" id="login-btn" onclick="doLogin()" data-i18n="login.title">Zaloguj się</button>
             <div class="login-error" id="login-error"></div>
-            <div class="login-divider">lub</div>
-            <button class="login-onboarding-btn" onclick="window.location.href='onboarding.html'">Utwórz nowe konto →</button>
+            <div class="login-divider" data-i18n="login.or">lub</div>
+            <button class="login-onboarding-btn" onclick="window.location.href='onboarding.html'" data-i18n="login.create">Utwórz nowe konto →</button>
         </div>
     </div>
 
@@ -3599,25 +3599,25 @@
                     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;">
                         <!-- Dystans -->
                         <div style="background:var(--bg-color);padding:12px 14px;border-radius:14px;">
-                            <div style="font-size:11px;color:#8A8A8A;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px;">Dystans</div>
+                            <div style="font-size:11px;color:#8A8A8A;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px;" data-i18n="home.dist">Dystans</div>
                             <div id="home-tile-dist" style="font-size:26px;font-weight:900;color:#111;font-family:'Outfit',sans-serif;line-height:1;">—</div>
                             <div style="font-size:12px;color:#8A8A8A;margin-top:2px;font-weight:600;">km</div>
                         </div>
                         <!-- Tempo -->
                         <div style="background:var(--bg-color);padding:12px 14px;border-radius:14px;">
-                            <div style="font-size:11px;color:#8A8A8A;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px;">Tempo</div>
+                            <div style="font-size:11px;color:#8A8A8A;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px;" data-i18n="home.pace">Tempo</div>
                             <div id="home-tile-pace" style="font-size:26px;font-weight:900;color:#111;font-family:'Outfit',sans-serif;line-height:1;">—</div>
                             <div style="font-size:12px;color:#8A8A8A;margin-top:2px;font-weight:600;">min/km</div>
                         </div>
                         <!-- Intensywność -->
                         <div style="background:var(--bg-color);padding:12px 14px;border-radius:14px;">
-                            <div style="font-size:11px;color:#8A8A8A;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px;">Intensywność</div>
+                            <div style="font-size:11px;color:#8A8A8A;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px;" data-i18n="home.intensity">Intensywność</div>
                             <div id="home-tile-intensity" style="font-size:18px;font-weight:900;color:#111;font-family:'Outfit',sans-serif;line-height:1;">—</div>
                             <div id="home-tile-intensity-fill" style="display:none;"></div>
                         </div>
                         <!-- Strefa tętna -->
                         <div style="background:var(--bg-color);padding:12px 14px;border-radius:14px;">
-                            <div style="font-size:11px;color:#8A8A8A;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px;">Strefa tętna</div>
+                            <div style="font-size:11px;color:#8A8A8A;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px;" data-i18n="home.hrzone">Strefa tętna</div>
                             <div id="home-tile-hrbpm" style="font-size:18px;font-weight:900;color:var(--accent-heart);font-family:'Outfit',sans-serif;line-height:1;">—</div>
                             <div id="home-tile-hrzone" style="font-size:12px;color:#8A8A8A;font-weight:600;margin-top:3px;">—</div>
                         </div>
@@ -3626,11 +3626,11 @@
                     <div id="home-main-duration" style="display:none;"></div>
                     <div id="home-main-distance" style="display:none;"></div>
                     <button onclick="event.stopPropagation();calDayClick(toDateStr(new Date()));switchView('calendar');" style="width:100%;padding:14px;background:var(--primary-color);border:none;border-radius:14px;color:white;font-weight:700;font-size:14px;font-family:'Inter',sans-serif;cursor:pointer;transition:transform 0.15s cubic-bezier(0.22,1,0.36,1),opacity 0.15s;box-shadow:0 4px 16px rgba(26,26,26,0.2);" onmousedown="this.style.transform='scale(0.97)'" onmouseup="this.style.transform='scale(1)'">
-                        Zobacz szczegóły &rarr;
+                        <span data-i18n="home.seedetails">Zobacz szczegóły &rarr;</span>
                     </button>
                     <button onclick="event.stopPropagation();enterCoachWithContext({source:'home_today',date:new Date().toISOString().split('T')[0],trainingRef:window._todayTyp&&window._todayTyp!=='rest'?(window._todayKm||'')+'km '+window._todayTyp:null})" style="width:100%;margin-top:10px;padding:13px;background:#EFF4EF;border:1.5px solid #5F8368;border-radius:14px;color:#3E5D46;font-weight:700;font-size:14px;font-family:'Inter',sans-serif;cursor:pointer;letter-spacing:0.01em;display:flex;align-items:center;justify-content:center;gap:8px;">
                         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#5F8368" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>
-                        Zapytaj o trening
+                        <span data-i18n="home.askcoach">Zapytaj o trening</span>
                     </button>
                 </div>
 
@@ -3639,12 +3639,12 @@
                     <button onclick="openCheckin('post', window._todayTyp, window._todayKm)"
                         style="width:100%;padding:14px;background:white;border:1.5px solid #1A1A1A;border-radius:14px;font-size:14px;font-weight:600;color:#1A1A1A;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;font-family:'Inter',sans-serif;">
                         <span style="width:8px;height:8px;border-radius:50%;background:#6B8F71;display:inline-block;flex-shrink:0;"></span>
-                        Uzupełnij dzisiejszy trening
+                        <span data-i18n="home.fillin">Uzupełnij dzisiejszy trening</span>
                     </button>
                 </div>
                 <!-- PLAN CHANGES -->
                 <div id="plan-changes-section" style="display:none;margin-bottom:16px;">
-                    <div style="font-size:11px;font-weight:700;color:#8A8A8A;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px;">Zmiany w planie</div>
+                    <div style="font-size:11px;font-weight:700;color:#8A8A8A;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px;" data-i18n="home.planchanges">Zmiany w planie</div>
                     <div id="plan-changes-list" style="display:flex;flex-direction:column;gap:8px;"></div>
                 </div>
 
@@ -3652,9 +3652,9 @@
                 <div class="home-section-title" data-i18n="home.form">Twoja forma</div>
                 <div class="home-anim" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; animation-delay: 0.12s;">
                     <!-- 1. Readiness Battery -->
-                    <div class="card" onclick="openMetricDetails('BODY ENGINE')"
+                    <div class="card" onclick="openMetricDetails('body')"
                         style="margin: 0; padding: 20px 16px 16px; border-radius: 20px; display: flex; flex-direction: column; align-items: center; justify-content: space-between; height: 200px; text-align: center; cursor: pointer; transition: transform 0.22s cubic-bezier(0.22,1,0.36,1); background: var(--surface-color); border: 1px solid rgba(235,235,235,0.5); box-shadow: 0 2px 16px rgba(0,0,0,0.04);">
-                        <div style="font-size: 13px; color: #111111; text-transform: uppercase; font-weight: 800; letter-spacing: 0.6px;">Body Engine</div>
+                        <div style="font-size: 13px; color: #111111; text-transform: uppercase; font-weight: 800; letter-spacing: 0.6px;" data-i18n="metric.body">Body Engine</div>
                         <div class="battery-shell" style="transform: scale(0.62); margin: -14px 0;">
                             <div class="battery-level">
                                 <div class="liquid">
@@ -3673,10 +3673,10 @@
                         <div id="readiness-delta" style="font-size: 11px; font-weight: 700; color: #8A8A8A; letter-spacing: 0.02em;">—</div>
                     </div>
 
-                    <div class="card" onclick="openMetricDetails('Sen')"
+                    <div class="card" onclick="openMetricDetails('sleep')"
                         style="margin: 0; padding: 20px 16px 16px; border-radius: 20px; display: flex; flex-direction: column; align-items: center; justify-content: space-between; height: 200px; text-align: center; position: relative; overflow: visible; cursor: pointer; transition: transform 0.22s cubic-bezier(0.22,1,0.36,1); background: var(--surface-color); border: 1px solid rgba(235,235,235,0.5); box-shadow: 0 2px 16px rgba(0,0,0,0.04);">
                         <!-- Label above -->
-                        <div style="font-size: 13px; color: #111111; text-transform: uppercase; font-weight: 800; letter-spacing: 0.6px;">Sen</div>
+                        <div style="font-size: 13px; color: #111111; text-transform: uppercase; font-weight: 800; letter-spacing: 0.6px;" data-i18n="metric.sleep">Sen</div>
                         <!-- Sleep Ring -->
                         <div style="position:relative;width:120px;height:120px;">
                             <svg width="120" height="120" viewBox="0 0 120 120" style="overflow:visible;display:block;">
@@ -3720,23 +3720,23 @@
                         <!-- % below ring -->
                         <div style="display:flex;align-items:baseline;gap:3px;">
                             <span id="sleep-ring-pct" style="font-size:14px;font-weight:800;color:#111111;">—%</span>
-                            <span style="font-size:9.5px;font-weight:600;color:#B0A89E;letter-spacing:0.5px;text-transform:uppercase;">zalecanego</span>
+                            <span style="font-size:9.5px;font-weight:600;color:#B0A89E;letter-spacing:0.5px;text-transform:uppercase;" data-i18n="home.recommended">zalecanego</span>
                         </div>
                         <!-- Hidden for JS -->
                         <div id="sleep-today" style="display:none;">7h 24m</div>
                     </div>
 
                     <!-- 3. Resting HR -->
-                    <div class="card" onclick="openMetricDetails('Tętno Spoczynkowe')"
+                    <div class="card" onclick="openMetricDetails('hr')"
                         style="margin: 0; padding: 16px 16px 14px; border-radius: 20px; display: flex; flex-direction: column; align-items: center; justify-content: space-between; height: 160px; text-align: center; cursor: pointer; transition: transform 0.22s cubic-bezier(0.22,1,0.36,1); background: var(--surface-color); border: 1px solid rgba(235,235,235,0.5); box-shadow: 0 2px 16px rgba(0,0,0,0.04);">
-                        <div style="font-size: 13px; color: #111111; text-transform: uppercase; font-weight: 800; letter-spacing: 0.6px;">Tętno Spocz.</div>
+                        <div style="font-size: 13px; color: #111111; text-transform: uppercase; font-weight: 800; letter-spacing: 0.6px;" data-i18n="metric.hr">Tętno Spocz.</div>
                         <div class="heartbeat-container">
                             <svg class="heart-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
                                 <path class="main-heart"
                                     d="M50 88.9L16.7 55.6C7.2 46.1 7.2 30.9 16.7 21.4s24.7-9.5 33.3 0l0 0c8.6-9.5 23.8-9.5 33.3 0s9.5 24.7 0 34.3L50 88.9z" />
                             </svg>
                         </div>
-                        <div style="font-size: 28px; font-weight: 900; color: var(--accent-heart); line-height: 1; margin-bottom: 8px;"><span id="home-resting-hr-value">—</span> <span style="font-size: 12px; font-weight: 500; color: #8A8A8A;">bpm</span></div>
+                        <div style="font-size: 28px; font-weight: 900; color: var(--accent-heart); line-height: 1; margin-bottom: 8px;"><span id="home-resting-hr-value">—</span> <span style="font-size: 12px; font-weight: 500; color: #8A8A8A;" data-i18n="home.bpm">bpm</span></div>
                     </div>
 
                     <!-- 4. The Grinder Runner (Pro XP) -->
@@ -3749,7 +3749,7 @@
                 <!-- STREAK CARD -->
                 <div id="streak-card" class="home-anim" style="display:none;background:#FBF6EC;border-radius:20px;border:1px solid #F0E6D2;box-shadow:0 2px 16px rgba(0,0,0,0.03);padding:16px 20px;margin-bottom:12px;align-items:center;justify-content:space-between;">
                     <div>
-                        <div style="font-size:11px;font-weight:700;color:#B08A4E;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px;">Seria check-inów</div>
+                        <div style="font-size:11px;font-weight:700;color:#B08A4E;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px;" data-i18n="home.streak">Seria check-inów</div>
                         <div id="streak-value" style="font-size:24px;font-weight:800;font-family:'Outfit',sans-serif;color:#1A1A1A;">0 dni</div>
                     </div>
                     <div style="width:48px;height:48px;border-radius:14px;background:#F6EAD2;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
@@ -3762,9 +3762,9 @@
                     <div onclick="openCheckin('post',window._todayTyp,window._todayKm)"
                         style="background:white;border:1px solid rgba(235,235,235,0.5);border-radius:20px;padding:16px 20px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;box-shadow:0 4px 20px rgba(0,0,0,0.06);transition:transform 0.22s cubic-bezier(0.22,1,0.36,1);" onmousedown="this.style.transform='scale(0.97)'" onmouseup="this.style.transform='scale(1)'">
                         <div>
-                            <div style="font-size:11px;font-weight:700;color:#8A8A8A;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px;">Dzisiejszy trening</div>
-                            <div style="font-size:16px;font-weight:700;color:#1A1A1A;">Zrobiłeś trening? Uzupełnij →</div>
-                            <div style="font-size:13px;color:#8A8A8A;margin-top:2px;">Twój sztab AI przeanalizuje wyniki</div>
+                            <div style="font-size:11px;font-weight:700;color:#8A8A8A;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px;" data-i18n="home.today">Dzisiejszy trening</div>
+                            <div style="font-size:16px;font-weight:700;color:#1A1A1A;" data-i18n="home.didtrain">Zrobiłeś trening? Uzupełnij →</div>
+                            <div style="font-size:13px;color:#8A8A8A;margin-top:2px;" data-i18n="home.staffwill">Twój sztab AI przeanalizuje wyniki</div>
                         </div>
                         <div style="width:44px;height:44px;border-radius:12px;background:#F5F3F0;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
@@ -3777,12 +3777,12 @@
             <div id="view-calendar" class="view" style="padding:0;display:flex;flex-direction:column;">
                 <!-- Sticky header -->
                 <div style="position:sticky;top:0;z-index:10;background:rgba(245,243,240,0.88);backdrop-filter:blur(24px) saturate(1.4);-webkit-backdrop-filter:blur(24px) saturate(1.4);padding:12px 16px 12px;border-bottom:1px solid rgba(235,235,235,0.4);flex-shrink:0;">
-                    <h1 style="margin:0 0 12px;font-family:'Outfit',sans-serif;font-weight:800;font-size:26px;color:#111111;">Twój Plan</h1>
+                    <h1 style="margin:0 0 12px;font-family:'Outfit',sans-serif;font-weight:800;font-size:26px;color:#111111;" data-i18n="cal.yourplan">Twój Plan</h1>
                     <!-- View toggle pill switcher -->
                     <div id="cal-toggle-wrap" style="display:flex;background:rgba(237,232,220,0.6);border-radius:99px;padding:3px;position:relative;">
-                        <button onclick="switchCalView('month')" id="cal-btn-month" style="flex:1;padding:8px 0;border:none;background:transparent;border-radius:99px;font-size:13px;font-weight:400;color:#888;cursor:pointer;transition:color 0.28s,font-weight 0.28s;position:relative;z-index:1;">Miesiąc</button>
-                        <button onclick="switchCalView('week')"  id="cal-btn-week"  style="flex:1;padding:8px 0;border:none;background:transparent;border-radius:99px;font-size:13px;font-weight:400;color:#888;cursor:pointer;transition:color 0.28s,font-weight 0.28s;position:relative;z-index:1;">Tydzień</button>
-                        <button onclick="switchCalView('day')"   id="cal-btn-day"   style="flex:1;padding:8px 0;border:none;background:transparent;border-radius:99px;font-size:13px;font-weight:400;color:#888;cursor:pointer;transition:color 0.28s,font-weight 0.28s;position:relative;z-index:1;">Dzień</button>
+                        <button onclick="switchCalView('month')" id="cal-btn-month" style="flex:1;padding:8px 0;border:none;background:transparent;border-radius:99px;font-size:13px;font-weight:400;color:#888;cursor:pointer;transition:color 0.28s,font-weight 0.28s;position:relative;z-index:1;" data-i18n="cal.month">Miesiąc</button>
+                        <button onclick="switchCalView('week')"  id="cal-btn-week"  style="flex:1;padding:8px 0;border:none;background:transparent;border-radius:99px;font-size:13px;font-weight:400;color:#888;cursor:pointer;transition:color 0.28s,font-weight 0.28s;position:relative;z-index:1;" data-i18n="cal.week">Tydzień</button>
+                        <button onclick="switchCalView('day')"   id="cal-btn-day"   style="flex:1;padding:8px 0;border:none;background:transparent;border-radius:99px;font-size:13px;font-weight:400;color:#888;cursor:pointer;transition:color 0.28s,font-weight 0.28s;position:relative;z-index:1;" data-i18n="cal.day">Dzień</button>
                         <div id="cal-toggle-slider" style="position:absolute;top:3px;bottom:3px;left:3px;border-radius:99px;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,0.08),0 1px 2px rgba(0,0,0,0.04);transition:left 0.28s cubic-bezier(0.22,1,0.36,1),width 0.28s cubic-bezier(0.22,1,0.36,1);pointer-events:none;"></div>
                     </div>
                 </div>
@@ -4373,7 +4373,7 @@
                             <path d="M15 18l-6-6 6-6" />
                         </svg>
                     </button>
-                    <h1 id="details-title" style="margin: 0; font-size: 24px; flex: 1; text-align: center;">Szczegóły</h1>
+                    <h1 id="details-title" style="margin: 0; font-size: 24px; flex: 1; text-align: center;" data-i18n="details.title">Szczegóły</h1>
                 </div>
                 <div id="details-content"
                     style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 300px; text-align: center; color: #8A8A8A;">
@@ -5466,10 +5466,13 @@
         let currentChartLabels = null;
         let currentChartLongLabels = null;
 
-        async function openMetricDetails(title) {
+        // UWAGA: argument to STABILNY klucz ('body'/'sleep'/'hr'/'xp'), NIE widoczna
+        // nazwa — inaczej po zmianie języka żaden warunek poniżej by nie trafił.
+        async function openMetricDetails(metric) {
+            const METRIC_TITLE = { body: 'metric.body', sleep: 'metric.sleep', hr: 'metric.hr.full', xp: 'metric.xp' };
             const titleEl = document.getElementById('details-title');
             const contentEl = document.getElementById('details-content');
-            if (titleEl) titleEl.innerText = title;
+            if (titleEl) titleEl.innerText = t(METRIC_TITLE[metric] || 'details.title');
 
             // Clear previous content
             contentEl.innerHTML = '';
@@ -5484,20 +5487,20 @@
                 detailsView.classList.add('details-enter');
             }
 
-            if (title === 'BODY ENGINE') {
+            if (metric === 'body') {
                 await renderBigBattery(contentEl);
-            } else if (title === 'Sen') {
+            } else if (metric === 'sleep') {
                 await renderSimpleChart(contentEl, 'sleep');
-            } else if (title === 'Tętno Spoczynkowe') {
+            } else if (metric === 'hr') {
                 await renderSimpleChart(contentEl, 'hr');
-            } else if (title === 'Punkty XP') {
+            } else if (metric === 'xp') {
                 // Default WIP for others
                 contentEl.style.display = 'flex';
                 contentEl.style.height = '300px';
                 contentEl.innerHTML = `
                     <div style="font-size: 48px; margin-bottom: 16px;">🚧</div>
                     <h2 style="color: white; margin-bottom: 8px;">WIP</h2>
-                    <p>Statystyki XP wkrótce...</p>
+                    <p>${t('metric.xp.soon')}</p>
                 `;
             } else {
                 // Default WIP for others
@@ -5521,9 +5524,9 @@
             const isSleep = type === 'sleep';
             currentChartType = type;
             let data = [];
-            let dayLabels = ['Pon', 'Wt', 'Śr', 'Czw', 'Pt', 'Sob', 'Ndz'];
-            let longDayLabels = ['Poniedziałek', 'Wtorek', 'Środa', 'Czwartek', 'Piątek', 'Sobota', 'Niedziela'];
-            let todayLongName = 'NIEDZIELA';
+            let dayLabels = _i18nDayNames('short').map(_capFirst);
+            let longDayLabels = _i18nDayNames('long').map(_capFirst);
+            let todayLongName = longDayLabels[6].toUpperCase();
 
             try {
                 const apiType = isSleep ? 'sleep' : 'hr';
@@ -5533,11 +5536,11 @@
                 const result = await response.json();
                 if (result.metrics && result.metrics.length > 0) {
                     data = result.metrics.map(m => m.value);
-                    const plDays     = ['Ndz','Pon','Wt','Śr','Czw','Pt','Sob'];
-                    const plLongDays = ['Niedziela','Poniedziałek','Wtorek','Środa','Czwartek','Piątek','Sobota'];
-                    dayLabels     = result.metrics.map(m => plDays[new Date(m.metric_date+'T12:00:00').getDay()]);
-                    longDayLabels = result.metrics.map(m => plLongDays[new Date(m.metric_date+'T12:00:00').getDay()]);
-                    todayLongName = plLongDays[new Date(result.metrics[result.metrics.length-1].metric_date+'T12:00:00').getDay()].toUpperCase();
+                    const dshort = d => _capFirst(new Intl.DateTimeFormat(_appLang, { weekday: 'short' }).format(d));
+                    const dlong  = d => _capFirst(new Intl.DateTimeFormat(_appLang, { weekday: 'long'  }).format(d));
+                    dayLabels     = result.metrics.map(m => dshort(new Date(m.metric_date+'T12:00:00')));
+                    longDayLabels = result.metrics.map(m => dlong(new Date(m.metric_date+'T12:00:00')));
+                    todayLongName = dlong(new Date(result.metrics[result.metrics.length-1].metric_date+'T12:00:00')).toUpperCase();
                 }
             } catch(e) { console.error('chart fetch:', e?.message || e); }
 
@@ -5550,8 +5553,8 @@
                 container.style.height = '260px';
                 container.innerHTML = `
                     <div style="font-size:32px;margin-bottom:12px;opacity:0.5;">📊</div>
-                    <div style="color:#fff;font-weight:600;font-size:15px;margin-bottom:4px;">Brak danych</div>
-                    <div style="color:rgba(255,255,255,0.6);font-size:13px;text-align:center;max-width:240px;">${isSleep ? 'Połącz Stravę lub zaimportuj plik z zegarka, by zobaczyć dane snu.' : 'Połącz Stravę lub zaimportuj plik z zegarka, by zobaczyć tętno spoczynkowe.'}</div>
+                    <div style="color:#fff;font-weight:600;font-size:15px;margin-bottom:4px;">${t('chart.nodata')}</div>
+                    <div style="color:rgba(255,255,255,0.6);font-size:13px;text-align:center;max-width:240px;">${t(isSleep ? 'chart.nodata.sleep' : 'chart.nodata.hr')}</div>
                 `;
                 return;
             }
@@ -5877,7 +5880,7 @@
                     <!-- 4. Averages Section -->
                     <div class="averages-section">
                         <div class="averages-divider"></div>
-                        <div class="averages-title">BODY ENGINE STATUS</div>
+                        <div class="averages-title">${t('metric.body.status')}</div>
 
                         <div class="averages-grid">
                             ${averages.map(avg => `
@@ -8634,6 +8637,43 @@
             "acc.privacy": "Polityka prywatności",
             "acc.terms": "Regulamin",
             "acc.logout": "Wyloguj się",
+            "login.tagline": "Twój AI trener biegowy",
+            "login.title": "Zaloguj się",
+            "login.sub": "Wpisz email i hasło, których używałeś przy rejestracji",
+            "login.or": "lub",
+            "login.create": "Utwórz nowe konto →",
+            "greet.night": "Dobrej Nocy",
+            "greet.morning": "Dzień Dobry",
+            "greet.day": "Cześć",
+            "greet.evening": "Dobry Wieczór",
+            "home.dist": "Dystans",
+            "home.pace": "Tempo",
+            "home.intensity": "Intensywność",
+            "home.hrzone": "Strefa tętna",
+            "home.seedetails": "Zobacz szczegóły →",
+            "home.askcoach": "Zapytaj o trening",
+            "home.fillin": "Uzupełnij dzisiejszy trening",
+            "home.planchanges": "Zmiany w planie",
+            "home.recommended": "zalecanego",
+            "home.streak": "Seria check-inów",
+            "home.didtrain": "Zrobiłeś trening? Uzupełnij →",
+            "home.staffwill": "Twój sztab AI przeanalizuje wyniki",
+            "home.bpm": "bpm",
+            "metric.body": "Body Engine",
+            "metric.body.status": "BODY ENGINE STATUS",
+            "metric.sleep": "Sen",
+            "metric.hr": "Tętno Spocz.",
+            "metric.hr.full": "Tętno Spoczynkowe",
+            "metric.xp": "Punkty XP",
+            "metric.xp.soon": "Statystyki XP wkrótce...",
+            "details.title": "Szczegóły",
+            "chart.nodata": "Brak danych",
+            "chart.nodata.sleep": "Połącz Stravę lub zaimportuj plik z zegarka, by zobaczyć dane snu.",
+            "chart.nodata.hr": "Połącz Stravę lub zaimportuj plik z zegarka, by zobaczyć tętno spoczynkowe.",
+            "cal.yourplan": "Twój Plan",
+            "cal.month": "Miesiąc",
+            "cal.week": "Tydzień",
+            "cal.day": "Dzień",
             "day.short.0": "Pon",
             "day.short.1": "Wt",
             "day.short.2": "Śr",
@@ -8641,6 +8681,10 @@
             "day.short.4": "Pt",
             "day.short.5": "Sob",
             "day.short.6": "Nd",
+            "home.streak.count.one": "{n} dzień",
+            "home.streak.count.few": "{n} dni",
+            "home.streak.count.many": "{n} dni",
+            "home.streak.count.other": "{n} dni",
             "conn.active.one": "{n} aktywne",
             "conn.active.few": "{n} aktywne",
             "conn.active.many": "{n} aktywnych",
@@ -8753,6 +8797,43 @@
             "acc.privacy": "Privacy policy",
             "acc.terms": "Terms of use",
             "acc.logout": "Sign out",
+            "login.tagline": "Your AI running coach",
+            "login.title": "Sign in",
+            "login.sub": "Enter the email and password you signed up with",
+            "login.or": "or",
+            "login.create": "Create a new account →",
+            "greet.night": "Good night",
+            "greet.morning": "Good morning",
+            "greet.day": "Hi",
+            "greet.evening": "Good evening",
+            "home.dist": "Distance",
+            "home.pace": "Pace",
+            "home.intensity": "Intensity",
+            "home.hrzone": "Heart-rate zone",
+            "home.seedetails": "See details →",
+            "home.askcoach": "Ask about this workout",
+            "home.fillin": "Log today's workout",
+            "home.planchanges": "Plan changes",
+            "home.recommended": "of target",
+            "home.streak": "Check-in streak",
+            "home.didtrain": "Trained today? Log it →",
+            "home.staffwill": "Your AI team will analyse the result",
+            "home.bpm": "bpm",
+            "metric.body": "Body Engine",
+            "metric.body.status": "BODY ENGINE STATUS",
+            "metric.sleep": "Sleep",
+            "metric.hr": "Resting HR",
+            "metric.hr.full": "Resting heart rate",
+            "metric.xp": "XP points",
+            "metric.xp.soon": "XP stats coming soon...",
+            "details.title": "Details",
+            "chart.nodata": "No data yet",
+            "chart.nodata.sleep": "Connect Strava or import a watch file to see your sleep data.",
+            "chart.nodata.hr": "Connect Strava or import a watch file to see your resting heart rate.",
+            "cal.yourplan": "Your plan",
+            "cal.month": "Month",
+            "cal.week": "Week",
+            "cal.day": "Day",
             "day.short.0": "Mon",
             "day.short.1": "Tue",
             "day.short.2": "Wed",
@@ -8760,6 +8841,10 @@
             "day.short.4": "Fri",
             "day.short.5": "Sat",
             "day.short.6": "Sun",
+            "home.streak.count.one": "{n} day",
+            "home.streak.count.few": "{n} days",
+            "home.streak.count.many": "{n} days",
+            "home.streak.count.other": "{n} days",
             "conn.active.one": "{n} active",
             "conn.active.few": "{n} active",
             "conn.active.many": "{n} active",
@@ -8872,6 +8957,43 @@
             "acc.privacy": "Politique de confidentialité",
             "acc.terms": "Conditions d'utilisation",
             "acc.logout": "Se déconnecter",
+            "login.tagline": "Ton coach de course IA",
+            "login.title": "Se connecter",
+            "login.sub": "Saisis l'email et le mot de passe utilisés à l'inscription",
+            "login.or": "ou",
+            "login.create": "Créer un compte →",
+            "greet.night": "Bonne nuit",
+            "greet.morning": "Bonjour",
+            "greet.day": "Salut",
+            "greet.evening": "Bonsoir",
+            "home.dist": "Distance",
+            "home.pace": "Allure",
+            "home.intensity": "Intensité",
+            "home.hrzone": "Zone cardiaque",
+            "home.seedetails": "Voir le détail →",
+            "home.askcoach": "Poser une question sur la séance",
+            "home.fillin": "Enregistre ta séance du jour",
+            "home.planchanges": "Changements du plan",
+            "home.recommended": "de l'objectif",
+            "home.streak": "Série de check-ins",
+            "home.didtrain": "Tu as couru ? Ajoute ta séance →",
+            "home.staffwill": "Ton équipe IA analysera le résultat",
+            "home.bpm": "bpm",
+            "metric.body": "Body Engine",
+            "metric.body.status": "BODY ENGINE STATUS",
+            "metric.sleep": "Sommeil",
+            "metric.hr": "FC au repos",
+            "metric.hr.full": "Fréquence cardiaque au repos",
+            "metric.xp": "Points XP",
+            "metric.xp.soon": "Statistiques XP bientôt...",
+            "details.title": "Détails",
+            "chart.nodata": "Aucune donnée",
+            "chart.nodata.sleep": "Connecte Strava ou importe un fichier de montre pour voir tes données de sommeil.",
+            "chart.nodata.hr": "Connecte Strava ou importe un fichier de montre pour voir ta FC au repos.",
+            "cal.yourplan": "Ton plan",
+            "cal.month": "Mois",
+            "cal.week": "Semaine",
+            "cal.day": "Jour",
             "day.short.0": "Lun",
             "day.short.1": "Mar",
             "day.short.2": "Mer",
@@ -8879,6 +9001,10 @@
             "day.short.4": "Ven",
             "day.short.5": "Sam",
             "day.short.6": "Dim",
+            "home.streak.count.one": "{n} jour",
+            "home.streak.count.few": "{n} jours",
+            "home.streak.count.many": "{n} jours",
+            "home.streak.count.other": "{n} jours",
             "conn.active.one": "{n} actif",
             "conn.active.few": "{n} actifs",
             "conn.active.many": "{n} actifs",
@@ -8991,6 +9117,43 @@
             "acc.privacy": "Política de privacidad",
             "acc.terms": "Términos de uso",
             "acc.logout": "Cerrar sesión",
+            "login.tagline": "Tu entrenador de running con IA",
+            "login.title": "Iniciar sesión",
+            "login.sub": "Escribe el email y la contraseña con los que te registraste",
+            "login.or": "o",
+            "login.create": "Crear una cuenta nueva →",
+            "greet.night": "Buenas noches",
+            "greet.morning": "Buenos días",
+            "greet.day": "Hola",
+            "greet.evening": "Buenas tardes",
+            "home.dist": "Distancia",
+            "home.pace": "Ritmo",
+            "home.intensity": "Intensidad",
+            "home.hrzone": "Zona de frecuencia",
+            "home.seedetails": "Ver detalles →",
+            "home.askcoach": "Pregunta sobre el entrenamiento",
+            "home.fillin": "Registra el entrenamiento de hoy",
+            "home.planchanges": "Cambios en el plan",
+            "home.recommended": "del objetivo",
+            "home.streak": "Racha de check-ins",
+            "home.didtrain": "¿Entrenaste? Regístralo →",
+            "home.staffwill": "Tu equipo de IA analizará el resultado",
+            "home.bpm": "ppm",
+            "metric.body": "Body Engine",
+            "metric.body.status": "BODY ENGINE STATUS",
+            "metric.sleep": "Sueño",
+            "metric.hr": "FC en reposo",
+            "metric.hr.full": "Frecuencia cardíaca en reposo",
+            "metric.xp": "Puntos XP",
+            "metric.xp.soon": "Estadísticas XP muy pronto...",
+            "details.title": "Detalles",
+            "chart.nodata": "Sin datos",
+            "chart.nodata.sleep": "Conecta Strava o importa un archivo del reloj para ver tus datos de sueño.",
+            "chart.nodata.hr": "Conecta Strava o importa un archivo del reloj para ver tu FC en reposo.",
+            "cal.yourplan": "Tu plan",
+            "cal.month": "Mes",
+            "cal.week": "Semana",
+            "cal.day": "Día",
             "day.short.0": "Lun",
             "day.short.1": "Mar",
             "day.short.2": "Mié",
@@ -8998,6 +9161,10 @@
             "day.short.4": "Vie",
             "day.short.5": "Sáb",
             "day.short.6": "Dom",
+            "home.streak.count.one": "{n} día",
+            "home.streak.count.few": "{n} días",
+            "home.streak.count.many": "{n} días",
+            "home.streak.count.other": "{n} días",
             "conn.active.one": "{n} activa",
             "conn.active.few": "{n} activas",
             "conn.active.many": "{n} activas",
@@ -9110,6 +9277,43 @@
             "acc.privacy": "Datenschutz",
             "acc.terms": "Nutzungsbedingungen",
             "acc.logout": "Abmelden",
+            "login.tagline": "Dein KI-Lauftrainer",
+            "login.title": "Anmelden",
+            "login.sub": "Gib die E-Mail und das Passwort aus deiner Registrierung ein",
+            "login.or": "oder",
+            "login.create": "Neues Konto erstellen →",
+            "greet.night": "Gute Nacht",
+            "greet.morning": "Guten Morgen",
+            "greet.day": "Hallo",
+            "greet.evening": "Guten Abend",
+            "home.dist": "Distanz",
+            "home.pace": "Tempo",
+            "home.intensity": "Intensität",
+            "home.hrzone": "Herzfrequenzzone",
+            "home.seedetails": "Details ansehen →",
+            "home.askcoach": "Frag zum Training",
+            "home.fillin": "Heutiges Training eintragen",
+            "home.planchanges": "Änderungen im Plan",
+            "home.recommended": "des Ziels",
+            "home.streak": "Check-in-Serie",
+            "home.didtrain": "Trainiert? Jetzt eintragen →",
+            "home.staffwill": "Dein KI-Team wertet das Ergebnis aus",
+            "home.bpm": "bpm",
+            "metric.body": "Body Engine",
+            "metric.body.status": "BODY ENGINE STATUS",
+            "metric.sleep": "Schlaf",
+            "metric.hr": "Ruhepuls",
+            "metric.hr.full": "Ruheherzfrequenz",
+            "metric.xp": "XP-Punkte",
+            "metric.xp.soon": "XP-Statistiken folgen bald...",
+            "details.title": "Details",
+            "chart.nodata": "Keine Daten",
+            "chart.nodata.sleep": "Verbinde Strava oder importiere eine Uhren-Datei, um deine Schlafdaten zu sehen.",
+            "chart.nodata.hr": "Verbinde Strava oder importiere eine Uhren-Datei, um deinen Ruhepuls zu sehen.",
+            "cal.yourplan": "Dein Plan",
+            "cal.month": "Monat",
+            "cal.week": "Woche",
+            "cal.day": "Tag",
             "day.short.0": "Mo",
             "day.short.1": "Di",
             "day.short.2": "Mi",
@@ -9117,6 +9321,10 @@
             "day.short.4": "Fr",
             "day.short.5": "Sa",
             "day.short.6": "So",
+            "home.streak.count.one": "{n} Tag",
+            "home.streak.count.few": "{n} Tage",
+            "home.streak.count.many": "{n} Tage",
+            "home.streak.count.other": "{n} Tage",
             "conn.active.one": "{n} aktiv",
             "conn.active.few": "{n} aktiv",
             "conn.active.many": "{n} aktiv",
@@ -9189,6 +9397,7 @@
             try { document.documentElement.setAttribute('lang', _appLang); } catch(e) {}
             applyI18n();
             try { _refreshProfilRows(); } catch(e) {}
+            try { updateGreeting(); } catch(e) {}
         }
 
         function selectSettingsLang(lang) {
@@ -10868,10 +11077,10 @@
             const hour = new Date().getHours();
             const greetingEl = document.getElementById('home-greeting');
             if (greetingEl) {
-                if (hour < 6) greetingEl.innerText = 'Dobrej Nocy';
-                else if (hour < 12) greetingEl.innerText = 'Dzień Dobry';
-                else if (hour < 18) greetingEl.innerText = 'Cześć';
-                else greetingEl.innerText = 'Dobry Wieczór';
+                if (hour < 6) greetingEl.innerText = t('greet.night');
+                else if (hour < 12) greetingEl.innerText = t('greet.morning');
+                else if (hour < 18) greetingEl.innerText = t('greet.day');
+                else greetingEl.innerText = t('greet.evening');
             }
         }
 
@@ -11161,7 +11370,7 @@
                 const card = document.getElementById('streak-card');
                 const val = document.getElementById('streak-value');
                 if (card && val) {
-                    val.textContent = streak + (streak === 1 ? ' dzień' : ' dni');
+                    val.textContent = tp('home.streak.count', streak);
                     card.style.display = streak > 0 ? 'flex' : 'none';
                 }
             } catch(e) {}
@@ -11184,7 +11393,7 @@
 
         // Stempel buildu — dowód na urządzeniu, że działa świeży kod (trzymać
         // w zgodzie z CACHE_VERSION w sw.js; bump przy każdym deployu frontendu)
-        const VELM_BUILD = 'v62';
+        const VELM_BUILD = 'v63';
         console.log('velm build', VELM_BUILD, navigator.userAgent);
 
         async function hardReloadApp() {
