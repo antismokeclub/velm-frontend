@@ -3793,7 +3793,7 @@
             <div id="view-coach" class="view">
                 <!-- Header -->
                 <div id="coach-header">
-                    <button id="coach-back-btn" onclick="switchView('home')" aria-label="Wróć">
+                    <button id="coach-back-btn" onclick="switchView('home')" aria-label="Wróć" data-i18n-aria="com.back">
                         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                             <polyline points="15 18 9 12 15 6"></polyline>
@@ -3839,14 +3839,14 @@
                 <div id="coach-messages">
                     <div id="coach-intro">
                         <div id="coach-intro-monogram"><span>V</span></div>
-                        <div id="coach-intro-title">Trener</div>
-                        <div id="coach-intro-desc">Twój prywatny sztab AI. Trener, analityk, fizjoterapeuta i psycholog sportowy — wszystko w jednym miejscu. Zapytaj o cokolwiek.</div>
+                        <div id="coach-intro-title" data-i18n="coach.intro.title">Trener</div>
+                        <div id="coach-intro-desc" data-i18n="coach.intro.desc">Twój prywatny sztab AI. Trener, analityk, fizjoterapeuta i psycholog sportowy — wszystko w jednym miejscu. Zapytaj o cokolwiek.</div>
                     </div>
                     <div id="coach-quick-suggestions">
-                        <button class="coach-suggest-card" onclick="sendQuickSuggestion('Jaki mam dziś trening?')">Jaki mam dziś trening?</button>
-                        <button class="coach-suggest-card" onclick="sendQuickSuggestion('Jak wyglądają moje postępy?')">Jak wyglądają moje postępy?</button>
-                        <button class="coach-suggest-card" onclick="sendQuickSuggestion('Co powinienem jeść przed długim biegiem?')">Co powinienem jeść przed długim biegiem?</button>
-                        <div class="coach-suggest-footer">SZTAB AI</div>
+                        <button class="coach-suggest-card" onclick="sendQuickSuggestion(t('sug.szef_sztabu.0'))" data-i18n="sug.szef_sztabu.0">Jaki mam dziś trening?</button>
+                        <button class="coach-suggest-card" onclick="sendQuickSuggestion(t('sug.szef_sztabu.1'))" data-i18n="sug.szef_sztabu.1">Jak wyglądają moje postępy?</button>
+                        <button class="coach-suggest-card" onclick="sendQuickSuggestion(t('sug.szef_sztabu.2'))" data-i18n="sug.szef_sztabu.2">Co powinienem jeść przed długim biegiem?</button>
+                        <div class="coach-suggest-footer" data-i18n="coach.staff">SZTAB AI</div>
                     </div>
                 </div>
 
@@ -3855,7 +3855,7 @@
 
                 <!-- Input Area (bottom) -->
                 <div id="coach-input-area">
-                    <textarea id="chat-input" placeholder="Napisz wiadomość..."
+                    <textarea id="chat-input" placeholder="Napisz wiadomość..." data-i18n-ph="coach.input.ph"
                         onkeydown="handleEnterTA(event)"
                         oninput="updateSendBtn(); autoResizeInput(this)"
                         autocomplete="off" rows="1"></textarea>
@@ -4774,71 +4774,29 @@
             } catch(e) {}
         }
 
-        const AGENT_LABELS = { szef_sztabu: 'Trener', analityk: 'Analityk', fizjo: 'Fizjo', psycholog: 'Psycholog' };
         const AGENT_COLORS = { szef_sztabu: '#5F8368', analityk: '#5B8DB8', fizjo: '#6B8F71', psycholog: '#C9924E' };
         const AGENT_INITIALS = { szef_sztabu: 'T', analityk: 'A', fizjo: 'F', psycholog: 'P' };
-        const AGENT_DESCS = {
-            szef_sztabu: 'Twój główny trener — planuje treningi, analizuje postępy i koordynuje całą pracę sztabu.',
-            analityk:    'Analityk danych — czyta twoje tempo, tętno i obciążenie, wyłapuje trendy i wzorce w treningach.',
-            fizjo:       'Specjalista od biomechaniki i regeneracji — ocenia ryzyko kontuzji i dobiera zalecenia.',
-            psycholog:   'Coach mentalny — motywacja, nawyki i wsparcie w trudnych momentach treningowych.',
-        };
-        const AGENT_NAMES = { szef_sztabu: 'Trener', analityk: 'Analityk', fizjo: 'Fizjo', psycholog: 'Psycholog' };
+        function agentDesc(agent) {
+            const a = ['szef_sztabu', 'analityk', 'fizjo', 'psycholog'].includes(agent) ? agent : 'szef_sztabu';
+            return t('agent.' + a + '.desc');
+        }
+        function agentName(agent) {
+            const a = ['szef_sztabu', 'analityk', 'fizjo', 'psycholog'].includes(agent) ? agent : 'szef_sztabu';
+            return t('agent.' + a + '.name');
+        }
 
-        const AGENT_SUGGESTIONS = {
-            szef_sztabu: [
-                'Jaki mam dziś trening?',
-                'Jak wyglądają moje postępy?',
-                'Co powinienem jeść przed długim biegiem?',
-                'Czy moje tempo jest odpowiednie do mojego poziomu?',
-                'Kiedy powinienem zwiększyć objętość treningową?',
-                'Jak wygląda mój plan na ten tydzień?',
-                'Czy jestem gotowy na zawody?',
-                'Jak poprawić mój czas na 5 km?',
-                'Co zrobić gdy brakuje motywacji do biegu?',
-                'Czy moje tętno spoczynkowe jest w normie?',
-            ],
-            analityk: [
-                'Jak zmieniało się moje tempo w ostatnich tygodniach?',
-                'Czy mój ostatni trening był lepszy od poprzednich?',
-                'Jakie mam trendy w tętnie na łatwych biegach?',
-                'Ile kilometrów zrobiłem w tym miesiącu?',
-                'Czy moje obciążenie treningowe rośnie za szybko?',
-                'W jakie dni biegam najlepiej?',
-                'Jak wygląda moja realizacja planu?',
-                'Które treningi sprawiają mi największą trudność?',
-                'Czy widać postęp w moich długich biegach?',
-                'Co mówią dane o mojej formie przed zawodami?',
-            ],
-            fizjo: [
-                'Czuję ból w kolanie — co robić?',
-                'Jak się rozgrzać przed interwałami?',
-                'Czy mam ryzyko kontuzji przy takim planie?',
-                'Bolą mnie łydki po długim biegu — co to znaczy?',
-                'Jak często powinienem robić stretching?',
-                'Czy rolowanie pianką naprawdę pomaga?',
-                'Mam napięte biodra — jak to rozluźnić?',
-                'Co to jest syndrom pasma biodrowo-piszczelowego?',
-                'Jak zapobiegać "shin splints"?',
-                'Ile czasu potrzeba na regenerację po długim biegu?',
-                'Boli mnie stopa przy pierwszych krokach rano — co to może być?',
-            ],
-            psycholog: [
-                'Jak radzić sobie ze stresem przed zawodami?',
-                'Tracę motywację — co robić?',
-                'Jak mentalne nastawienie wpływa na wyniki?',
-                'Mam blokadę przed trudnym treningiem — jak ją przełamać?',
-                'Jak nie poddawać się w połowie biegu?',
-                'Jak zbudować rutynę treningową, która działa?',
-                'Boję się nie osiągnąć celu — jak to przepracować?',
-                'Czy myślenie o tempie w czasie biegu mi szkodzi?',
-                'Co robić gdy porównuję się z innymi biegaczami?',
-                'Jak celebrować małe sukcesy treningowe?',
-            ],
-        };
+        // Propozycje pytań trzymamy jako KLUCZE — treść bierzemy z I18N przy
+        // każdym renderze, żeby po zmianie języka nie zostały polskie pytania.
+        const AGENT_SUGGESTION_COUNT = 10;
+        function agentSuggestions(agent) {
+            const a = ['szef_sztabu', 'analityk', 'fizjo', 'psycholog'].includes(agent) ? agent : 'szef_sztabu';
+            const out = [];
+            for (let i = 0; i < AGENT_SUGGESTION_COUNT; i++) out.push(t('sug.' + a + '.' + i));
+            return out;
+        }
 
         function _pickSuggestions(agent) {
-            const pool = AGENT_SUGGESTIONS[agent] || AGENT_SUGGESTIONS.szef_sztabu;
+            const pool = agentSuggestions(agent);
             const shuffled = [...pool].sort(() => Math.random() - 0.5);
             return shuffled.slice(0, 3);
         }
@@ -4862,11 +4820,11 @@
             const _vc = document.getElementById('view-coach');
             if (_vc) _vc.style.setProperty('--agent-color', AGENT_COLORS[agent] || '#5F8368');
             const nameEl = document.getElementById('coach-agent-name');
-            if (nameEl) nameEl.textContent = AGENT_LABELS[agent] || 'Trener';
+            if (nameEl) nameEl.textContent = agentName(agent);
             const introTitle = document.getElementById('coach-intro-title');
-            if (introTitle) introTitle.textContent = AGENT_LABELS[agent] || 'Trener';
+            if (introTitle) introTitle.textContent = agentName(agent);
             const introDesc = document.getElementById('coach-intro-desc');
-            if (introDesc) introDesc.textContent = AGENT_DESCS[agent] || AGENT_DESCS.szef_sztabu;
+            if (introDesc) introDesc.textContent = agentDesc(agent);
             _renderSuggestions(agent);
             updateAgentSlider();
             // Multi-conversation: switch to this agent's last active conversation (or new if none)
@@ -4937,16 +4895,16 @@
             const list = document.getElementById('conv-list');
             if (!list) return;
             const agentLabel = document.getElementById('conv-drawer-agent-label');
-            if (agentLabel) agentLabel.textContent = AGENT_NAMES[selectedAgent] || selectedAgent;
+            if (agentLabel) agentLabel.textContent = agentName(selectedAgent);
             const cached = _conversationsCache[selectedAgent];
             if (cached && cached.length) {
                 _renderConvItems(list, cached);
             } else {
-                list.innerHTML = '<div class="conv-empty">Ładowanie…</div>';
+                list.innerHTML = '<div class="conv-empty">' + t('com.loading') + '</div>';
             }
             loadConversationsForAgent(selectedAgent).then((convs) => {
                 if (!convs.length) {
-                    list.innerHTML = '<div class="conv-empty">Brak rozmów. Napisz coś, żeby zacząć.</div>';
+                    list.innerHTML = '<div class="conv-empty">' + t('coach.noconv') + '</div>';
                     return;
                 }
                 _renderConvItems(list, convs);
@@ -4957,7 +4915,7 @@
             list.innerHTML = '';
             const filtered = convs.filter(c => c.last_message_at);
             if (!filtered.length) {
-                list.innerHTML = '<div class="conv-empty">Brak rozmów. Napisz coś, żeby zacząć.</div>';
+                list.innerHTML = '<div class="conv-empty">' + t('coach.noconv') + '</div>';
                 return;
             }
             filtered.forEach((c) => {
@@ -4969,7 +4927,7 @@
                         <div class="conv-title"></div>
                         <div class="conv-date">${_formatConvDate(c.last_message_at)}</div>
                     </div>
-                    <button class="conv-delete" title="Usuń rozmowę" aria-label="Usuń rozmowę">
+                    <button class="conv-delete" title="Usuń rozmowę" aria-label="Usuń rozmowę" data-i18n-aria="coach.delconv">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
                     </button>
                     <div class="conv-confirm-overlay">
@@ -5011,7 +4969,7 @@
 
         function _setCurrentConvTitle(title) {
             const el = document.getElementById('conv-current-title');
-            if (el) el.textContent = title || (AGENT_NAMES[selectedAgent] || 'Nowa rozmowa');
+            if (el) el.textContent = title || agentName(selectedAgent);
         }
 
         async function selectConversation(convId, title) {
@@ -8755,6 +8713,60 @@
             "ci.total.title": "Ile w sumie przebiegłeś?",
             "ci.total.desc": "Sztab policzy z tego Twoje realne tempo.",
             "ci.pain.warning": "Ból trwający ponad tydzień warto skonsultować ze specjalistą — fizjoterapeutą lub ortopedą — zanim wrócimy do pełnych obciążeń.",
+            "coach.intro.title": "Trener",
+            "coach.intro.desc": "Twój prywatny sztab AI. Trener, analityk, fizjoterapeuta i psycholog sportowy — wszystko w jednym miejscu. Zapytaj o cokolwiek.",
+            "coach.staff": "SZTAB AI",
+            "coach.input.ph": "Napisz wiadomość...",
+            "coach.noconv": "Brak rozmów. Napisz coś, żeby zacząć.",
+            "coach.delconv": "Usuń rozmowę",
+            "agent.szef_sztabu.name": "Trener",
+            "agent.analityk.name": "Analityk",
+            "agent.fizjo.name": "Fizjo",
+            "agent.psycholog.name": "Psycholog",
+            "agent.szef_sztabu.desc": "Twój główny trener — planuje treningi, analizuje postępy i koordynuje całą pracę sztabu.",
+            "agent.analityk.desc": "Analityk danych — czyta twoje tempo, tętno i obciążenie, wyłapuje trendy i wzorce w treningach.",
+            "agent.fizjo.desc": "Specjalista od biomechaniki i regeneracji — ocenia ryzyko kontuzji i dobiera zalecenia.",
+            "agent.psycholog.desc": "Coach mentalny — motywacja, nawyki i wsparcie w trudnych momentach treningowych.",
+            "sug.szef_sztabu.0": "Jaki mam dziś trening?",
+            "sug.szef_sztabu.1": "Jak wyglądają moje postępy?",
+            "sug.szef_sztabu.2": "Co powinienem jeść przed długim biegiem?",
+            "sug.szef_sztabu.3": "Czy moje tempo jest odpowiednie do mojego poziomu?",
+            "sug.szef_sztabu.4": "Kiedy powinienem zwiększyć objętość treningową?",
+            "sug.szef_sztabu.5": "Jak wygląda mój plan na ten tydzień?",
+            "sug.szef_sztabu.6": "Czy jestem gotowy na zawody?",
+            "sug.szef_sztabu.7": "Jak poprawić mój czas na 5 km?",
+            "sug.szef_sztabu.8": "Co zrobić gdy brakuje motywacji do biegu?",
+            "sug.szef_sztabu.9": "Czy moje tętno spoczynkowe jest w normie?",
+            "sug.analityk.0": "Jak zmieniało się moje tempo w ostatnich tygodniach?",
+            "sug.analityk.1": "Czy mój ostatni trening był lepszy od poprzednich?",
+            "sug.analityk.2": "Jakie mam trendy w tętnie na łatwych biegach?",
+            "sug.analityk.3": "Ile kilometrów zrobiłem w tym miesiącu?",
+            "sug.analityk.4": "Czy moje obciążenie treningowe rośnie za szybko?",
+            "sug.analityk.5": "W jakie dni biegam najlepiej?",
+            "sug.analityk.6": "Jak wygląda moja realizacja planu?",
+            "sug.analityk.7": "Które treningi sprawiają mi największą trudność?",
+            "sug.analityk.8": "Czy widać postęp w moich długich biegach?",
+            "sug.analityk.9": "Co mówią dane o mojej formie przed zawodami?",
+            "sug.fizjo.0": "Czuję ból w kolanie — co robić?",
+            "sug.fizjo.1": "Jak się rozgrzać przed interwałami?",
+            "sug.fizjo.2": "Czy mam ryzyko kontuzji przy takim planie?",
+            "sug.fizjo.3": "Bolą mnie łydki po długim biegu — co to znaczy?",
+            "sug.fizjo.4": "Jak często powinienem robić stretching?",
+            "sug.fizjo.5": "Czy rolowanie pianką naprawdę pomaga?",
+            "sug.fizjo.6": "Mam napięte biodra — jak to rozluźnić?",
+            "sug.fizjo.7": "Co to jest syndrom pasma biodrowo-piszczelowego?",
+            "sug.fizjo.8": "Jak zapobiegać \"shin splints\"?",
+            "sug.fizjo.9": "Ile czasu potrzeba na regenerację po długim biegu?",
+            "sug.psycholog.0": "Jak radzić sobie ze stresem przed zawodami?",
+            "sug.psycholog.1": "Tracę motywację — co robić?",
+            "sug.psycholog.2": "Jak mentalne nastawienie wpływa na wyniki?",
+            "sug.psycholog.3": "Mam blokadę przed trudnym treningiem — jak ją przełamać?",
+            "sug.psycholog.4": "Jak nie poddawać się w połowie biegu?",
+            "sug.psycholog.5": "Jak zbudować rutynę treningową, która działa?",
+            "sug.psycholog.6": "Boję się nie osiągnąć celu — jak to przepracować?",
+            "sug.psycholog.7": "Czy myślenie o tempie w czasie biegu mi szkodzi?",
+            "sug.psycholog.8": "Co robić gdy porównuję się z innymi biegaczami?",
+            "sug.psycholog.9": "Jak celebrować małe sukcesy treningowe?",
             "day.short.0": "Pon",
             "day.short.1": "Wt",
             "day.short.2": "Śr",
@@ -8996,6 +9008,60 @@
             "ci.total.title": "What was your total distance?",
             "ci.total.desc": "Your team will work out your real pace from this.",
             "ci.pain.warning": "Pain lasting more than a week is worth checking with a specialist — a physiotherapist or orthopaedist — before we go back to full load.",
+            "coach.intro.title": "Coach",
+            "coach.intro.desc": "Your private AI team: coach, analyst, physio and sports psychologist, all in one place. Ask them anything.",
+            "coach.staff": "AI TEAM",
+            "coach.input.ph": "Write a message...",
+            "coach.noconv": "No conversations yet. Say something to start.",
+            "coach.delconv": "Delete conversation",
+            "agent.szef_sztabu.name": "Coach",
+            "agent.analityk.name": "Analyst",
+            "agent.fizjo.name": "Physio",
+            "agent.psycholog.name": "Psychologist",
+            "agent.szef_sztabu.desc": "Your head coach — plans your training, reviews progress and coordinates the whole team.",
+            "agent.analityk.desc": "Data analyst — reads your pace, heart rate and load, and spots trends and patterns in your training.",
+            "agent.fizjo.desc": "Biomechanics and recovery specialist — assesses injury risk and tailors the advice.",
+            "agent.psycholog.desc": "Mental coach — motivation, habits and support through the hard patches.",
+            "sug.szef_sztabu.0": "What's my workout today?",
+            "sug.szef_sztabu.1": "How is my progress looking?",
+            "sug.szef_sztabu.2": "What should I eat before a long run?",
+            "sug.szef_sztabu.3": "Is my pace right for my level?",
+            "sug.szef_sztabu.4": "When should I increase my training volume?",
+            "sug.szef_sztabu.5": "What does my plan look like this week?",
+            "sug.szef_sztabu.6": "Am I ready to race?",
+            "sug.szef_sztabu.7": "How can I improve my 5K time?",
+            "sug.szef_sztabu.8": "What do I do when I don't feel like running?",
+            "sug.szef_sztabu.9": "Is my resting heart rate normal?",
+            "sug.analityk.0": "How has my pace changed in recent weeks?",
+            "sug.analityk.1": "Was my last workout better than the ones before?",
+            "sug.analityk.2": "What are my heart-rate trends on easy runs?",
+            "sug.analityk.3": "How many kilometres have I run this month?",
+            "sug.analityk.4": "Is my training load rising too fast?",
+            "sug.analityk.5": "Which days do I run best on?",
+            "sug.analityk.6": "How well am I sticking to the plan?",
+            "sug.analityk.7": "Which workouts do I find hardest?",
+            "sug.analityk.8": "Is there progress in my long runs?",
+            "sug.analityk.9": "What does the data say about my race shape?",
+            "sug.fizjo.0": "My knee hurts — what should I do?",
+            "sug.fizjo.1": "How should I warm up before intervals?",
+            "sug.fizjo.2": "Am I at risk of injury on this plan?",
+            "sug.fizjo.3": "My calves hurt after a long run — what does that mean?",
+            "sug.fizjo.4": "How often should I stretch?",
+            "sug.fizjo.5": "Does foam rolling actually help?",
+            "sug.fizjo.6": "My hips are tight — how do I loosen them?",
+            "sug.fizjo.7": "What is IT band syndrome?",
+            "sug.fizjo.8": "How do I prevent shin splints?",
+            "sug.fizjo.9": "How long does recovery take after a long run?",
+            "sug.psycholog.0": "How do I handle pre-race nerves?",
+            "sug.psycholog.1": "I'm losing motivation — what should I do?",
+            "sug.psycholog.2": "How does mindset affect performance?",
+            "sug.psycholog.3": "I freeze up before a hard workout — how do I get past it?",
+            "sug.psycholog.4": "How do I stop giving up mid-run?",
+            "sug.psycholog.5": "How do I build a training routine that sticks?",
+            "sug.psycholog.6": "I'm afraid I won't reach my goal — how do I work through that?",
+            "sug.psycholog.7": "Does thinking about pace while running hurt me?",
+            "sug.psycholog.8": "What do I do when I compare myself to other runners?",
+            "sug.psycholog.9": "How do I celebrate the small training wins?",
             "day.short.0": "Mon",
             "day.short.1": "Tue",
             "day.short.2": "Wed",
@@ -9237,6 +9303,60 @@
             "ci.total.title": "Quelle distance au total ?",
             "ci.total.desc": "Ton équipe en déduira ton allure réelle.",
             "ci.pain.warning": "Une douleur de plus d’une semaine mérite l’avis d’un spécialiste — kinésithérapeute ou orthopédiste — avant de reprendre à pleine charge.",
+            "coach.intro.title": "Coach",
+            "coach.intro.desc": "Ton équipe IA privée : coach, analyste, kiné et psychologue du sport, au même endroit. Pose-leur toutes tes questions.",
+            "coach.staff": "ÉQUIPE IA",
+            "coach.input.ph": "Écris un message...",
+            "coach.noconv": "Aucune conversation. Écris quelque chose pour commencer.",
+            "coach.delconv": "Supprimer la conversation",
+            "agent.szef_sztabu.name": "Coach",
+            "agent.analityk.name": "Analyste",
+            "agent.fizjo.name": "Kiné",
+            "agent.psycholog.name": "Psychologue",
+            "agent.szef_sztabu.desc": "Ton entraîneur principal — il planifie tes séances, suit tes progrès et coordonne toute l’équipe.",
+            "agent.analityk.desc": "Analyste de données — il lit ton allure, ta fréquence cardiaque et ta charge, et repère les tendances.",
+            "agent.fizjo.desc": "Spécialiste biomécanique et récupération — il évalue le risque de blessure et adapte les conseils.",
+            "agent.psycholog.desc": "Coach mental — motivation, habitudes et soutien dans les moments difficiles.",
+            "sug.szef_sztabu.0": "Quelle est ma séance aujourd'hui ?",
+            "sug.szef_sztabu.1": "Où en sont mes progrès ?",
+            "sug.szef_sztabu.2": "Que manger avant une sortie longue ?",
+            "sug.szef_sztabu.3": "Mon allure est-elle adaptée à mon niveau ?",
+            "sug.szef_sztabu.4": "Quand augmenter mon volume ?",
+            "sug.szef_sztabu.5": "À quoi ressemble mon plan cette semaine ?",
+            "sug.szef_sztabu.6": "Suis-je prêt pour la course ?",
+            "sug.szef_sztabu.7": "Comment améliorer mon temps sur 5 km ?",
+            "sug.szef_sztabu.8": "Que faire quand je manque de motivation ?",
+            "sug.szef_sztabu.9": "Ma FC au repos est-elle normale ?",
+            "sug.analityk.0": "Comment mon allure a-t-elle évolué ces dernières semaines ?",
+            "sug.analityk.1": "Ma dernière séance était-elle meilleure que les précédentes ?",
+            "sug.analityk.2": "Quelles tendances cardiaques sur mes sorties faciles ?",
+            "sug.analityk.3": "Combien de kilomètres ai-je courus ce mois-ci ?",
+            "sug.analityk.4": "Ma charge augmente-t-elle trop vite ?",
+            "sug.analityk.5": "Quels jours est-ce que je cours le mieux ?",
+            "sug.analityk.6": "Où en est le respect de mon plan ?",
+            "sug.analityk.7": "Quelles séances me posent le plus de difficulté ?",
+            "sug.analityk.8": "Y a-t-il des progrès sur mes sorties longues ?",
+            "sug.analityk.9": "Que disent les données sur ma forme avant la course ?",
+            "sug.fizjo.0": "J'ai mal au genou — que faire ?",
+            "sug.fizjo.1": "Comment m’échauffer avant du fractionné ?",
+            "sug.fizjo.2": "Ce plan me met-il à risque de blessure ?",
+            "sug.fizjo.3": "J'ai mal aux mollets après une sortie longue — qu'est-ce que ça veut dire ?",
+            "sug.fizjo.4": "À quelle fréquence dois-je m’étirer ?",
+            "sug.fizjo.5": "Le rouleau en mousse aide-t-il vraiment ?",
+            "sug.fizjo.6": "J'ai les hanches raides — comment les assouplir ?",
+            "sug.fizjo.7": "Qu’est-ce que le syndrome de la bandelette ilio-tibiale ?",
+            "sug.fizjo.8": "Comment prévenir la périostite tibiale ?",
+            "sug.fizjo.9": "Combien de temps pour récupérer après une sortie longue ?",
+            "sug.psycholog.0": "Comment gérer le stress d’avant-course ?",
+            "sug.psycholog.1": "Je perds ma motivation — que faire ?",
+            "sug.psycholog.2": "Comment le mental influence-t-il la performance ?",
+            "sug.psycholog.3": "Je bloque avant une séance dure — comment débloquer ?",
+            "sug.psycholog.4": "Comment ne pas abandonner en plein milieu ?",
+            "sug.psycholog.5": "Comment construire une routine qui tient ?",
+            "sug.psycholog.6": "J'ai peur de ne pas atteindre mon objectif — comment y travailler ?",
+            "sug.psycholog.7": "Penser à mon allure en courant, est-ce néfaste ?",
+            "sug.psycholog.8": "Que faire quand je me compare aux autres coureurs ?",
+            "sug.psycholog.9": "Comment célébrer les petites victoires ?",
             "day.short.0": "Lun",
             "day.short.1": "Mar",
             "day.short.2": "Mer",
@@ -9478,6 +9598,60 @@
             "ci.total.title": "¿Cuánto corriste en total?",
             "ci.total.desc": "Tu equipo calculará tu ritmo real a partir de esto.",
             "ci.pain.warning": "Un dolor de más de una semana conviene consultarlo con un especialista —fisioterapeuta o traumatólogo— antes de volver a la carga completa.",
+            "coach.intro.title": "Coach",
+            "coach.intro.desc": "Tu equipo de IA privado: entrenador, analista, fisio y psicólogo deportivo, todo en un sitio. Pregúntales lo que quieras.",
+            "coach.staff": "EQUIPO DE IA",
+            "coach.input.ph": "Escribe un mensaje...",
+            "coach.noconv": "Aún no hay conversaciones. Escribe algo para empezar.",
+            "coach.delconv": "Eliminar conversación",
+            "agent.szef_sztabu.name": "Entrenador",
+            "agent.analityk.name": "Analista",
+            "agent.fizjo.name": "Fisio",
+            "agent.psycholog.name": "Psicólogo",
+            "agent.szef_sztabu.desc": "Tu entrenador principal: planifica los entrenos, revisa tu progreso y coordina a todo el equipo.",
+            "agent.analityk.desc": "Analista de datos: lee tu ritmo, frecuencia cardíaca y carga, y detecta tendencias y patrones.",
+            "agent.fizjo.desc": "Especialista en biomecánica y recuperación: evalúa el riesgo de lesión y ajusta las recomendaciones.",
+            "agent.psycholog.desc": "Coach mental: motivación, hábitos y apoyo en los momentos difíciles.",
+            "sug.szef_sztabu.0": "¿Qué entrenamiento tengo hoy?",
+            "sug.szef_sztabu.1": "¿Cómo va mi progreso?",
+            "sug.szef_sztabu.2": "¿Qué debo comer antes de una tirada larga?",
+            "sug.szef_sztabu.3": "¿Mi ritmo es adecuado para mi nivel?",
+            "sug.szef_sztabu.4": "¿Cuándo debería subir el volumen?",
+            "sug.szef_sztabu.5": "¿Cómo es mi plan de esta semana?",
+            "sug.szef_sztabu.6": "¿Estoy listo para competir?",
+            "sug.szef_sztabu.7": "¿Cómo mejoro mi tiempo en 5 km?",
+            "sug.szef_sztabu.8": "¿Qué hago cuando me falta motivación?",
+            "sug.szef_sztabu.9": "¿Mi FC en reposo es normal?",
+            "sug.analityk.0": "¿Cómo ha cambiado mi ritmo en las últimas semanas?",
+            "sug.analityk.1": "¿Mi último entreno fue mejor que los anteriores?",
+            "sug.analityk.2": "¿Qué tendencias de FC tengo en los rodajes suaves?",
+            "sug.analityk.3": "¿Cuántos kilómetros llevo este mes?",
+            "sug.analityk.4": "¿Mi carga está subiendo demasiado rápido?",
+            "sug.analityk.5": "¿Qué días corro mejor?",
+            "sug.analityk.6": "¿Cómo voy de cumplimiento del plan?",
+            "sug.analityk.7": "¿Qué entrenos me cuestan más?",
+            "sug.analityk.8": "¿Se ve progreso en mis tiradas largas?",
+            "sug.analityk.9": "¿Qué dicen los datos sobre mi forma antes de competir?",
+            "sug.fizjo.0": "Me duele la rodilla, ¿qué hago?",
+            "sug.fizjo.1": "¿Cómo caliento antes de las series?",
+            "sug.fizjo.2": "¿Tengo riesgo de lesión con este plan?",
+            "sug.fizjo.3": "Me duelen los gemelos tras la tirada larga, ¿qué significa?",
+            "sug.fizjo.4": "¿Con qué frecuencia debo estirar?",
+            "sug.fizjo.5": "¿El foam roller sirve de verdad?",
+            "sug.fizjo.6": "Tengo las caderas tensas, ¿cómo las suelto?",
+            "sug.fizjo.7": "¿Qué es el síndrome de la cintilla iliotibial?",
+            "sug.fizjo.8": "¿Cómo prevengo la periostitis tibial?",
+            "sug.fizjo.9": "¿Cuánto tarda la recuperación tras una tirada larga?",
+            "sug.psycholog.0": "¿Cómo manejo los nervios antes de competir?",
+            "sug.psycholog.1": "Estoy perdiendo la motivación, ¿qué hago?",
+            "sug.psycholog.2": "¿Cómo influye la mentalidad en el rendimiento?",
+            "sug.psycholog.3": "Me bloqueo antes de un entreno duro, ¿cómo lo supero?",
+            "sug.psycholog.4": "¿Cómo evito rendirme a mitad de carrera?",
+            "sug.psycholog.5": "¿Cómo creo una rutina que funcione?",
+            "sug.psycholog.6": "Temo no llegar a mi objetivo, ¿cómo lo trabajo?",
+            "sug.psycholog.7": "¿Pensar en el ritmo mientras corro me perjudica?",
+            "sug.psycholog.8": "¿Qué hago cuando me comparo con otros corredores?",
+            "sug.psycholog.9": "¿Cómo celebro los pequeños logros?",
             "day.short.0": "Lun",
             "day.short.1": "Mar",
             "day.short.2": "Mié",
@@ -9719,6 +9893,60 @@
             "ci.total.title": "Wie weit insgesamt?",
             "ci.total.desc": "Dein Team berechnet daraus dein echtes Tempo.",
             "ci.pain.warning": "Schmerzen, die länger als eine Woche anhalten, solltest du mit einer Fachperson abklären — Physiotherapie oder Orthopädie — bevor wir wieder voll belasten.",
+            "coach.intro.title": "Coach",
+            "coach.intro.desc": "Dein privates KI-Team: Coach, Analyst, Physio und Sportpsychologe an einem Ort. Frag sie alles.",
+            "coach.staff": "KI-TEAM",
+            "coach.input.ph": "Schreib eine Nachricht...",
+            "coach.noconv": "Noch keine Gespräche. Schreib etwas, um zu starten.",
+            "coach.delconv": "Gespräch löschen",
+            "agent.szef_sztabu.name": "Coach",
+            "agent.analityk.name": "Analyst",
+            "agent.fizjo.name": "Physio",
+            "agent.psycholog.name": "Psychologe",
+            "agent.szef_sztabu.desc": "Dein Cheftrainer — plant deine Einheiten, wertet Fortschritte aus und koordiniert das Team.",
+            "agent.analityk.desc": "Datenanalyst — liest Tempo, Herzfrequenz und Belastung und erkennt Trends und Muster.",
+            "agent.fizjo.desc": "Fachperson für Biomechanik und Regeneration — schätzt das Verletzungsrisiko ein und passt Empfehlungen an.",
+            "agent.psycholog.desc": "Mentalcoach — Motivation, Gewohnheiten und Unterstützung in schwierigen Phasen.",
+            "sug.szef_sztabu.0": "Welches Training habe ich heute?",
+            "sug.szef_sztabu.1": "Wie steht es um meinen Fortschritt?",
+            "sug.szef_sztabu.2": "Was soll ich vor einem langen Lauf essen?",
+            "sug.szef_sztabu.3": "Passt mein Tempo zu meinem Niveau?",
+            "sug.szef_sztabu.4": "Wann sollte ich meinen Umfang steigern?",
+            "sug.szef_sztabu.5": "Wie sieht mein Plan diese Woche aus?",
+            "sug.szef_sztabu.6": "Bin ich bereit für den Wettkampf?",
+            "sug.szef_sztabu.7": "Wie verbessere ich meine 5-km-Zeit?",
+            "sug.szef_sztabu.8": "Was tun, wenn die Motivation fehlt?",
+            "sug.szef_sztabu.9": "Ist mein Ruhepuls normal?",
+            "sug.analityk.0": "Wie hat sich mein Tempo in den letzten Wochen verändert?",
+            "sug.analityk.1": "War mein letztes Training besser als die davor?",
+            "sug.analityk.2": "Welche Herzfrequenz-Trends habe ich bei lockeren Läufen?",
+            "sug.analityk.3": "Wie viele Kilometer bin ich diesen Monat gelaufen?",
+            "sug.analityk.4": "Steigt meine Belastung zu schnell?",
+            "sug.analityk.5": "An welchen Tagen laufe ich am besten?",
+            "sug.analityk.6": "Wie gut halte ich mich an den Plan?",
+            "sug.analityk.7": "Welche Einheiten fallen mir am schwersten?",
+            "sug.analityk.8": "Zeigt sich Fortschritt bei meinen langen Läufen?",
+            "sug.analityk.9": "Was sagen die Daten über meine Wettkampfform?",
+            "sug.fizjo.0": "Mein Knie tut weh — was tun?",
+            "sug.fizjo.1": "Wie wärme ich mich vor Intervallen auf?",
+            "sug.fizjo.2": "Besteht bei diesem Plan Verletzungsrisiko?",
+            "sug.fizjo.3": "Meine Waden schmerzen nach dem langen Lauf — was heißt das?",
+            "sug.fizjo.4": "Wie oft sollte ich dehnen?",
+            "sug.fizjo.5": "Hilft Faszienrollen wirklich?",
+            "sug.fizjo.6": "Meine Hüften sind verspannt — wie löse ich das?",
+            "sug.fizjo.7": "Was ist das Läuferknie (ITBS)?",
+            "sug.fizjo.8": "Wie beuge ich einem Schienbeinkantensyndrom vor?",
+            "sug.fizjo.9": "Wie lange dauert die Erholung nach einem langen Lauf?",
+            "sug.psycholog.0": "Wie gehe ich mit Wettkampfnervosität um?",
+            "sug.psycholog.1": "Ich verliere die Motivation — was tun?",
+            "sug.psycholog.2": "Wie beeinflusst die Einstellung die Leistung?",
+            "sug.psycholog.3": "Ich blockiere vor harten Einheiten — wie überwinde ich das?",
+            "sug.psycholog.4": "Wie halte ich durch, statt mittendrin aufzugeben?",
+            "sug.psycholog.5": "Wie baue ich eine Routine auf, die hält?",
+            "sug.psycholog.6": "Ich fürchte, mein Ziel nicht zu erreichen — wie gehe ich damit um?",
+            "sug.psycholog.7": "Schadet es, beim Laufen ständig ans Tempo zu denken?",
+            "sug.psycholog.8": "Was tun, wenn ich mich mit anderen vergleiche?",
+            "sug.psycholog.9": "Wie feiere ich kleine Trainingserfolge?",
             "day.short.0": "Mo",
             "day.short.1": "Di",
             "day.short.2": "Mi",
@@ -11798,7 +12026,7 @@
 
         // Stempel buildu — dowód na urządzeniu, że działa świeży kod (trzymać
         // w zgodzie z CACHE_VERSION w sw.js; bump przy każdym deployu frontendu)
-        const VELM_BUILD = 'v64';
+        const VELM_BUILD = 'v65';
         console.log('velm build', VELM_BUILD, navigator.userAgent);
 
         async function hardReloadApp() {
