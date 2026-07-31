@@ -3936,30 +3936,30 @@
                     </div>
                     <div id="settings-name-display" style="font-family:'Outfit',sans-serif;font-weight:800;font-size:20px;color:#1A1A1A;margin-top:12px;">—</div>
                     <div id="settings-email" style="font-size:13px;color:#8A8A8A;margin-top:2px;">—</div>
-                    <button onclick="showVelmToast('Zdjęcie profilowe będzie wkrótce.', false)" class="sd-svc-link" style="margin-top:4px;">Zmień zdjęcie profilowe</button>
+                    <button onclick="showVelmToast(t('prof.photo.soon'), false)" class="sd-svc-link" style="margin-top:4px;" data-i18n="prof.photo">Zmień zdjęcie profilowe</button>
                 </div>
 
                 <button class="home-anim sd-action" style="animation-delay:0.08s;" onclick="openSettingsPane('profil-imie')">
                     <span class="sd-action-icon" style="background:#E8EEF3;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#5A7A92" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
-                    <span class="sd-action-body"><span class="sd-action-title" style="display:block;">Imię i nazwisko</span><span class="sd-action-sub" style="display:block;" id="profil-row-name">Jak zwraca się do Ciebie trener</span></span>
+                    <span class="sd-action-body"><span class="sd-action-title" style="display:block;" data-i18n="prof.name">Imię i nazwisko</span><span class="sd-action-sub" style="display:block;" id="profil-row-name">Jak zwraca się do Ciebie trener</span></span>
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#C4C4C4" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg>
                 </button>
 
                 <button class="home-anim sd-action" style="animation-delay:0.11s;" onclick="openSettingsPane('profil-dane')">
                     <span class="sd-action-icon" style="background:#E9F0EA;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#5F8368" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></span>
-                    <span class="sd-action-body"><span class="sd-action-title" style="display:block;">Dane fizyczne</span><span class="sd-action-sub" style="display:block;" id="profil-row-dane">Waga, wzrost, wiek, płeć</span></span>
+                    <span class="sd-action-body"><span class="sd-action-title" style="display:block;" data-i18n="prof.body">Dane fizyczne</span><span class="sd-action-sub" style="display:block;" id="profil-row-dane" data-i18n="prof.body.sub">Waga, wzrost, wiek, płeć</span></span>
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#C4C4C4" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg>
                 </button>
 
                 <button class="home-anim sd-action" style="animation-delay:0.14s;" onclick="openSettingsPane('profil-dni')">
                     <span class="sd-action-icon" style="background:#F6F0E1;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#C08457" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></span>
-                    <span class="sd-action-body"><span class="sd-action-title" style="display:block;">Dni treningowe</span><span class="sd-action-sub" style="display:block;" id="profil-row-dni">Kiedy trenujesz</span></span>
+                    <span class="sd-action-body"><span class="sd-action-title" style="display:block;" data-i18n="prof.days">Dni treningowe</span><span class="sd-action-sub" style="display:block;" id="profil-row-dni">Kiedy trenujesz</span></span>
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#C4C4C4" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg>
                 </button>
 
                 <button class="home-anim sd-action" style="animation-delay:0.17s;" onclick="openSettingsPane('profil-jezyk')">
                     <span class="sd-action-icon" style="background:#ECEAF3;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#7B6FA6" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15 15 0 010 20 15 15 0 010-20"/></svg></span>
-                    <span class="sd-action-body"><span class="sd-action-title" style="display:block;">Język i jednostki</span><span class="sd-action-sub" style="display:block;" id="profil-row-lang">Polski · km</span></span>
+                    <span class="sd-action-body"><span class="sd-action-title" style="display:block;" data-i18n="prof.lang">Język i jednostki</span><span class="sd-action-sub" style="display:block;" id="profil-row-lang">Polski · km</span></span>
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#C4C4C4" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg>
                 </button>
 
@@ -3968,90 +3968,90 @@
                 <!-- PROFIL → Imię -->
                 <div class="s-pane" id="s-pane-profil-imie" style="display:none;">
                     <div class="s-back-header">
-                        <button class="s-back-btn" onclick="openSettingsPane('profil')" aria-label="Wróć"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
-                        <div class="s-pane-title">Imię i nazwisko</div>
+                        <button class="s-back-btn" onclick="openSettingsPane('profil')" aria-label="Wróć" data-i18n-aria="com.back"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+                        <div class="s-pane-title" data-i18n="prof.name">Imię i nazwisko</div>
                     </div>
-                    <p class="cx-sub-head home-anim" style="animation-delay:0.03s;">Tak zwraca się do Ciebie Twój sztab. Podaj imię (lub imię i nazwisko).</p>
+                    <p class="cx-sub-head home-anim" style="animation-delay:0.03s;" data-i18n="prof.name.hint">Tak zwraca się do Ciebie Twój sztab. Podaj imię (lub imię i nazwisko).</p>
                     <div class="home-anim sd-card" style="animation-delay:0.06s;">
                         <div class="s-field" style="margin-bottom:0;">
-                            <input type="text" id="settings-edit-name" placeholder="Twoje imię" class="s-input">
+                            <input type="text" id="settings-edit-name" placeholder="Twoje imię" data-i18n-ph="prof.name.ph" class="s-input">
                         </div>
                     </div>
-                    <button onclick="saveProfileSettings()" class="s-btn-primary" style="min-height:54px;font-size:15px;">Zapisz zmiany</button>
+                    <button onclick="saveProfileSettings()" class="s-btn-primary" style="min-height:54px;font-size:15px;" data-i18n="com.save">Zapisz zmiany</button>
                     <div id="settings-profile-msg" class="s-msg"></div>
                 </div>
 
                 <!-- PROFIL → Dane fizyczne -->
                 <div class="s-pane" id="s-pane-profil-dane" style="display:none;">
                     <div class="s-back-header">
-                        <button class="s-back-btn" onclick="openSettingsPane('profil')" aria-label="Wróć"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
-                        <div class="s-pane-title">Dane fizyczne</div>
+                        <button class="s-back-btn" onclick="openSettingsPane('profil')" aria-label="Wróć" data-i18n-aria="com.back"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+                        <div class="s-pane-title" data-i18n="prof.body">Dane fizyczne</div>
                     </div>
-                    <p class="cx-sub-head home-anim" style="animation-delay:0.03s;">Trener używa ich do stref tętna, tempa i objętości. Im dokładniej, tym lepszy plan.</p>
+                    <p class="cx-sub-head home-anim" style="animation-delay:0.03s;" data-i18n="prof.body.hint">Trener używa ich do stref tętna, tempa i objętości. Im dokładniej, tym lepszy plan.</p>
                     <div class="home-anim sd-card" style="animation-delay:0.06s;">
                         <div class="s-row">
                             <div>
-                                <label class="s-label">Waga</label>
+                                <label class="s-label" data-i18n="prof.weight">Waga</label>
                                 <div class="s-inp-wrap"><input type="number" id="settings-edit-weight" placeholder="70" min="30" max="250" class="s-input" style="padding-right:44px;"><span class="s-unit-suffix">kg</span></div>
                             </div>
                             <div>
-                                <label class="s-label">Wzrost</label>
+                                <label class="s-label" data-i18n="prof.height">Wzrost</label>
                                 <div class="s-inp-wrap"><input type="number" id="settings-edit-height" placeholder="175" min="100" max="250" class="s-input" style="padding-right:44px;"><span class="s-unit-suffix">cm</span></div>
                             </div>
                         </div>
                         <div class="s-row" style="margin-bottom:0;">
                             <div>
-                                <label class="s-label">Wiek</label>
-                                <div class="s-inp-wrap"><input type="number" id="settings-edit-age" placeholder="30" min="10" max="99" class="s-input" style="padding-right:42px;"><span class="s-unit-suffix">lat</span></div>
+                                <label class="s-label" data-i18n="prof.age">Wiek</label>
+                                <div class="s-inp-wrap"><input type="number" id="settings-edit-age" placeholder="30" min="10" max="99" class="s-input" style="padding-right:42px;"><span class="s-unit-suffix" data-i18n="prof.age.unit">lat</span></div>
                             </div>
                             <div>
-                                <label class="s-label">Płeć</label>
+                                <label class="s-label" data-i18n="prof.sex">Płeć</label>
                                 <select id="settings-edit-sex" class="s-input" style="appearance:none;-webkit-appearance:none;background-image:url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2216%22 height=%2216%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%238A8A8A%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22><path d=%22M6 9l6 6 6-6%22/></svg>');background-repeat:no-repeat;background-position:right 12px center;padding-right:36px;cursor:pointer;">
                                     <option value="">—</option>
-                                    <option value="M">Mężczyzna</option>
-                                    <option value="K">Kobieta</option>
-                                    <option value="I">Inna</option>
+                                    <option value="M" data-i18n="prof.sex.m">Mężczyzna</option>
+                                    <option value="K" data-i18n="prof.sex.f">Kobieta</option>
+                                    <option value="I" data-i18n="prof.sex.o">Inna</option>
                                 </select>
                             </div>
                         </div>
                     </div>
-                    <button onclick="saveProfileSettings()" class="s-btn-primary" style="min-height:54px;font-size:15px;">Zapisz zmiany</button>
+                    <button onclick="saveProfileSettings()" class="s-btn-primary" style="min-height:54px;font-size:15px;" data-i18n="com.save">Zapisz zmiany</button>
                     <div class="s-msg" id="settings-profile-msg-dane"></div>
                 </div>
 
                 <!-- PROFIL → Dni treningowe -->
                 <div class="s-pane" id="s-pane-profil-dni" style="display:none;">
                     <div class="s-back-header">
-                        <button class="s-back-btn" onclick="openSettingsPane('profil')" aria-label="Wróć"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
-                        <div class="s-pane-title">Dni treningowe</div>
+                        <button class="s-back-btn" onclick="openSettingsPane('profil')" aria-label="Wróć" data-i18n-aria="com.back"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+                        <div class="s-pane-title" data-i18n="prof.days">Dni treningowe</div>
                     </div>
-                    <div class="home-anim sd-info" style="animation-delay:0.03s;margin-bottom:14px;">
+                    <div class="home-anim sd-info" style="animation-delay:0.03s;margin-bottom:14px;" data-i18n-html="prof.days.note">
                         <b>Uwaga:</b> zmiana dni zostanie uwzględniona przy układaniu planu na <b>następny tydzień</b> — bieżący plan zostaje bez zmian.
                     </div>
                     <div class="home-anim sd-card" style="animation-delay:0.06s;">
-                        <div class="sd-seclabel">Wybierz dni</div>
+                        <div class="sd-seclabel" data-i18n="prof.days.pick">Wybierz dni</div>
                         <div class="s-days-grid" style="margin-bottom:0;">
-                            <button class="s-day-btn" id="s-day-0" onclick="toggleSettingsDay(this,0)">Pon</button>
-                            <button class="s-day-btn" id="s-day-1" onclick="toggleSettingsDay(this,1)">Wt</button>
-                            <button class="s-day-btn" id="s-day-2" onclick="toggleSettingsDay(this,2)">Śr</button>
-                            <button class="s-day-btn" id="s-day-3" onclick="toggleSettingsDay(this,3)">Czw</button>
-                            <button class="s-day-btn" id="s-day-4" onclick="toggleSettingsDay(this,4)">Pt</button>
-                            <button class="s-day-btn" id="s-day-5" onclick="toggleSettingsDay(this,5)">Sob</button>
-                            <button class="s-day-btn" id="s-day-6" onclick="toggleSettingsDay(this,6)">Nd</button>
+                            <button class="s-day-btn" id="s-day-0" onclick="toggleSettingsDay(this,0)" data-i18n-day="0">Pon</button>
+                            <button class="s-day-btn" id="s-day-1" onclick="toggleSettingsDay(this,1)" data-i18n-day="1">Wt</button>
+                            <button class="s-day-btn" id="s-day-2" onclick="toggleSettingsDay(this,2)" data-i18n-day="2">Śr</button>
+                            <button class="s-day-btn" id="s-day-3" onclick="toggleSettingsDay(this,3)" data-i18n-day="3">Czw</button>
+                            <button class="s-day-btn" id="s-day-4" onclick="toggleSettingsDay(this,4)" data-i18n-day="4">Pt</button>
+                            <button class="s-day-btn" id="s-day-5" onclick="toggleSettingsDay(this,5)" data-i18n-day="5">Sob</button>
+                            <button class="s-day-btn" id="s-day-6" onclick="toggleSettingsDay(this,6)" data-i18n-day="6">Nd</button>
                         </div>
                     </div>
-                    <button onclick="saveProfileSettings()" class="s-btn-primary" style="min-height:54px;font-size:15px;">Zapisz zmiany</button>
+                    <button onclick="saveProfileSettings()" class="s-btn-primary" style="min-height:54px;font-size:15px;" data-i18n="com.save">Zapisz zmiany</button>
                     <div class="s-msg" id="settings-profile-msg-dni"></div>
                 </div>
 
                 <!-- PROFIL → Język i jednostki -->
                 <div class="s-pane" id="s-pane-profil-jezyk" style="display:none;">
                     <div class="s-back-header">
-                        <button class="s-back-btn" onclick="openSettingsPane('profil')" aria-label="Wróć"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
-                        <div class="s-pane-title">Język i jednostki</div>
+                        <button class="s-back-btn" onclick="openSettingsPane('profil')" aria-label="Wróć" data-i18n-aria="com.back"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+                        <div class="s-pane-title" data-i18n="prof.lang">Język i jednostki</div>
                     </div>
                     <div class="home-anim sd-card" style="animation-delay:0.05s;">
-                        <div class="sd-seclabel">Język aplikacji</div>
+                        <div class="sd-seclabel" data-i18n="prof.lang.app">Język aplikacji</div>
                         <div style="display:flex;flex-direction:column;gap:8px;">
                             <button class="sd-choice" data-lang-opt="pl" onclick="selectSettingsLang('pl')"><span>Polski <span style="color:#A69C8E;font-weight:600;">· PL</span></span><svg class="sd-check" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5F8368" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></button>
                             <button class="sd-choice" data-lang-opt="en" onclick="selectSettingsLang('en')"><span>English <span style="color:#A69C8E;font-weight:600;">· EN</span></span><svg class="sd-check" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5F8368" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></button>
@@ -4061,20 +4061,20 @@
                         </div>
                     </div>
                     <div class="home-anim sd-card" style="animation-delay:0.09s;">
-                        <div class="sd-seclabel">Jednostki</div>
+                        <div class="sd-seclabel" data-i18n="prof.units">Jednostki</div>
                         <div style="display:flex;flex-direction:column;gap:8px;">
-                            <button class="sd-choice" data-unit-opt="km" onclick="selectSettingsUnit('km')"><span>Kilometry</span><svg class="sd-check" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5F8368" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></button>
-                            <button class="sd-choice" data-unit-opt="mi" onclick="selectSettingsUnit('mi')"><span>Mile</span><svg class="sd-check" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5F8368" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></button>
+                            <button class="sd-choice" data-unit-opt="km" onclick="selectSettingsUnit('km')"><span data-i18n="prof.units.km">Kilometry</span><svg class="sd-check" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5F8368" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></button>
+                            <button class="sd-choice" data-unit-opt="mi" onclick="selectSettingsUnit('mi')"><span data-i18n="prof.units.mi">Mile</span><svg class="sd-check" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5F8368" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></button>
                         </div>
                     </div>
-                    <button onclick="saveProfileSettings()" class="s-btn-primary" style="min-height:54px;font-size:15px;">Zapisz zmiany</button>
+                    <button onclick="saveProfileSettings()" class="s-btn-primary" style="min-height:54px;font-size:15px;" data-i18n="com.save">Zapisz zmiany</button>
                     <div class="s-msg" id="settings-profile-msg-jezyk"></div>
                     <div class="home-anim sd-card" style="animation-delay:0.13s;margin-top:16px;">
                         <div class="s-divider" style="padding:0;border-top:none;">
-                            <span style="font-size:13px;color:#8A8A8A;">ID konta</span>
+                            <span style="font-size:13px;color:#8A8A8A;" data-i18n="prof.accid">ID konta</span>
                             <div style="display:flex;align-items:center;gap:8px;">
                                 <span id="settings-user-id" style="font-size:12px;color:#C4C4C4;font-family:'SF Mono','Courier New',monospace;">—</span>
-                                <button onclick="copyUserId()" aria-label="Kopiuj ID konta" style="background:none;border:1px solid #EBEBEB;border-radius:10px;min-width:44px;min-height:44px;cursor:pointer;display:flex;align-items:center;justify-content:center;touch-action:manipulation;">
+                                <button onclick="copyUserId()" aria-label="Kopiuj ID konta" data-i18n-aria="prof.copyid" style="background:none;border:1px solid #EBEBEB;border-radius:10px;min-width:44px;min-height:44px;cursor:pointer;display:flex;align-items:center;justify-content:center;touch-action:manipulation;">
                                     <svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#8A8A8A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
                                 </button>
                             </div>
@@ -8514,11 +8514,11 @@
             const LANG = { pl:'Polski', en:'English', fr:'Français', es:'Español', de:'Deutsch' };
             const nm = document.getElementById('settings-edit-name')?.value?.trim();
             const rn = document.getElementById('profil-row-name');
-            if (rn) rn.textContent = nm || 'Jak zwraca się do Ciebie trener';
+            if (rn) rn.textContent = nm || t('prof.name.sub');
             const rd = document.getElementById('profil-row-dni');
-            if (rd) rd.textContent = _settingsSelectedDays.length ? (_settingsSelectedDays.length + ' dni w tygodniu') : 'Kiedy trenujesz';
+            if (rd) rd.textContent = _settingsSelectedDays.length ? tp('prof.days.count', _settingsSelectedDays.length) : t('prof.days.sub');
             const rl = document.getElementById('profil-row-lang');
-            if (rl) rl.textContent = (LANG[_settingsLang] || 'Polski') + ' · ' + (_settingsUnit === 'mi' ? 'mile' : 'km');
+            if (rl) rl.textContent = (LANG[_settingsLang] || 'Polski') + ' · ' + t(_settingsUnit === 'mi' ? 'prof.units.mi' : 'prof.units.km');
         }
 
         function toggleSettingsDay(btn, idx) {
@@ -8532,49 +8532,344 @@
         //    (placeholder). Faza 1: nawigacja, menu ustawień, nagłówki. Rozszerzamy stopniowo. ──
         const I18N = {
           pl: {
-            'nav.home':'Dom','nav.calendar':'Kalendarz','nav.coach':'Trener','nav.charts':'Laboratorium','nav.settings':'Opcje',
-            'settings.title':'Ustawienia','charts.title':'Laboratorium','home.today':'Dzisiejszy trening','home.form':'Twoja forma',
-            'set.profil':'Profil','set.profil.sub':'Imię, waga, wzrost, dni, język',
-            'set.goal':'Cel i plan','set.goal.sub':'Zobacz i zmień swój cel biegowy',
-            'set.conn':'Połączenia','set.conn.sub':'Zegarek, Strava, Garmin',
-            'set.sub':'Subskrypcja','set.sub.sub':'Twój plan i płatności',
-            'set.acc':'Konto','set.acc.sub':'Email, hasło, dane, wyloguj'
+            "nav.home": "Dom",
+            "nav.calendar": "Kalendarz",
+            "nav.coach": "Trener",
+            "nav.charts": "Laboratorium",
+            "nav.settings": "Opcje",
+            "settings.title": "Ustawienia",
+            "charts.title": "Laboratorium",
+            "home.today": "Dzisiejszy trening",
+            "home.form": "Twoja forma",
+            "set.profil": "Profil",
+            "set.profil.sub": "Imię, waga, wzrost, dni, język",
+            "set.goal": "Cel i plan",
+            "set.goal.sub": "Zobacz i zmień swój cel biegowy",
+            "set.conn": "Połączenia",
+            "set.conn.sub": "Zegarek, Strava, Garmin",
+            "set.sub": "Subskrypcja",
+            "set.sub.sub": "Twój plan i płatności",
+            "set.acc": "Konto",
+            "set.acc.sub": "Email, hasło, dane, wyloguj",
+            "com.save": "Zapisz zmiany",
+            "com.back": "Wróć",
+            "com.cancel": "Anuluj",
+            "com.saving": "Zapisywanie…",
+            "com.loading": "Ładowanie…",
+            "com.saved": "Zapisano",
+            "com.error": "Błąd",
+            "com.err.conn": "Błąd połączenia",
+            "prof.photo": "Zmień zdjęcie profilowe",
+            "prof.photo.soon": "Zdjęcie profilowe będzie wkrótce.",
+            "prof.name": "Imię i nazwisko",
+            "prof.name.sub": "Jak zwraca się do Ciebie trener",
+            "prof.name.hint": "Tak zwraca się do Ciebie Twój sztab. Podaj imię (lub imię i nazwisko).",
+            "prof.name.ph": "Twoje imię",
+            "prof.body": "Dane fizyczne",
+            "prof.body.sub": "Waga, wzrost, wiek, płeć",
+            "prof.body.hint": "Trener używa ich do stref tętna, tempa i objętości. Im dokładniej, tym lepszy plan.",
+            "prof.weight": "Waga",
+            "prof.height": "Wzrost",
+            "prof.age": "Wiek",
+            "prof.age.unit": "lat",
+            "prof.sex": "Płeć",
+            "prof.sex.m": "Mężczyzna",
+            "prof.sex.f": "Kobieta",
+            "prof.sex.o": "Inna",
+            "prof.days": "Dni treningowe",
+            "prof.days.sub": "Kiedy trenujesz",
+            "prof.days.note": "<b>Uwaga:</b> zmiana dni zostanie uwzględniona przy układaniu planu na <b>następny tydzień</b> — bieżący plan zostaje bez zmian.",
+            "prof.days.pick": "Wybierz dni",
+            "prof.lang": "Język i jednostki",
+            "prof.lang.app": "Język aplikacji",
+            "prof.units": "Jednostki",
+            "prof.units.km": "Kilometry",
+            "prof.units.mi": "Mile",
+            "prof.accid": "ID konta",
+            "prof.copyid": "Kopiuj ID konta",
+            "day.short.0": "Pon",
+            "day.short.1": "Wt",
+            "day.short.2": "Śr",
+            "day.short.3": "Czw",
+            "day.short.4": "Pt",
+            "day.short.5": "Sob",
+            "day.short.6": "Nd",
+            "prof.days.count.one": "{n} dzień w tygodniu",
+            "prof.days.count.few": "{n} dni w tygodniu",
+            "prof.days.count.many": "{n} dni w tygodniu",
+            "prof.days.count.other": "{n} dni w tygodniu"
           },
           en: {
-            'nav.home':'Home','nav.calendar':'Calendar','nav.coach':'Coach','nav.charts':'Lab','nav.settings':'Settings',
-            'settings.title':'Settings','charts.title':'Lab','home.today':"Today's workout",'home.form':'Your form',
-            'set.profil':'Profile','set.profil.sub':'Name, weight, height, days, language',
-            'set.goal':'Goal & plan','set.goal.sub':'View and change your running goal',
-            'set.conn':'Connections','set.conn.sub':'Watch, Strava, Garmin',
-            'set.sub':'Subscription','set.sub.sub':'Your plan and payments',
-            'set.acc':'Account','set.acc.sub':'Email, password, data, sign out'
+            "nav.home": "Home",
+            "nav.calendar": "Calendar",
+            "nav.coach": "Coach",
+            "nav.charts": "Lab",
+            "nav.settings": "Settings",
+            "settings.title": "Settings",
+            "charts.title": "Lab",
+            "home.today": "Today's workout",
+            "home.form": "Your form",
+            "set.profil": "Profile",
+            "set.profil.sub": "Name, weight, height, days, language",
+            "set.goal": "Goal & plan",
+            "set.goal.sub": "View and change your running goal",
+            "set.conn": "Connections",
+            "set.conn.sub": "Watch, Strava, Garmin",
+            "set.sub": "Subscription",
+            "set.sub.sub": "Your plan and payments",
+            "set.acc": "Account",
+            "set.acc.sub": "Email, password, data, sign out",
+            "com.save": "Save changes",
+            "com.back": "Back",
+            "com.cancel": "Cancel",
+            "com.saving": "Saving…",
+            "com.loading": "Loading…",
+            "com.saved": "Saved",
+            "com.error": "Error",
+            "com.err.conn": "Connection error",
+            "prof.photo": "Change profile photo",
+            "prof.photo.soon": "Profile photos are coming soon.",
+            "prof.name": "Name",
+            "prof.name.sub": "How your coach addresses you",
+            "prof.name.hint": "This is how your team will address you. Enter your first name (or full name).",
+            "prof.name.ph": "Your name",
+            "prof.body": "Body data",
+            "prof.body.sub": "Weight, height, age, sex",
+            "prof.body.hint": "Your coach uses these to set heart-rate zones, pace and volume. The more accurate, the better the plan.",
+            "prof.weight": "Weight",
+            "prof.height": "Height",
+            "prof.age": "Age",
+            "prof.age.unit": "yrs",
+            "prof.sex": "Sex",
+            "prof.sex.m": "Male",
+            "prof.sex.f": "Female",
+            "prof.sex.o": "Other",
+            "prof.days": "Training days",
+            "prof.days.sub": "When you train",
+            "prof.days.note": "<b>Note:</b> changing your days takes effect when <b>next week's</b> plan is built — your current plan stays as it is.",
+            "prof.days.pick": "Choose your days",
+            "prof.lang": "Language & units",
+            "prof.lang.app": "App language",
+            "prof.units": "Units",
+            "prof.units.km": "Kilometres",
+            "prof.units.mi": "Miles",
+            "prof.accid": "Account ID",
+            "prof.copyid": "Copy account ID",
+            "day.short.0": "Mon",
+            "day.short.1": "Tue",
+            "day.short.2": "Wed",
+            "day.short.3": "Thu",
+            "day.short.4": "Fri",
+            "day.short.5": "Sat",
+            "day.short.6": "Sun",
+            "prof.days.count.one": "{n} day a week",
+            "prof.days.count.few": "{n} days a week",
+            "prof.days.count.many": "{n} days a week",
+            "prof.days.count.other": "{n} days a week"
           },
           fr: {
-            'nav.home':'Accueil','nav.calendar':'Calendrier','nav.coach':'Coach','nav.charts':'Labo','nav.settings':'Options',
-            'settings.title':'Réglages','charts.title':'Labo','home.today':'Séance du jour','home.form':'Ta forme',
-            'set.profil':'Profil','set.profil.sub':'Nom, poids, taille, jours, langue',
-            'set.goal':'Objectif et plan','set.goal.sub':'Voir et modifier ton objectif',
-            'set.conn':'Connexions','set.conn.sub':'Montre, Strava, Garmin',
-            'set.sub':'Abonnement','set.sub.sub':'Ton offre et paiements',
-            'set.acc':'Compte','set.acc.sub':'Email, mot de passe, données, déconnexion'
+            "nav.home": "Accueil",
+            "nav.calendar": "Calendrier",
+            "nav.coach": "Coach",
+            "nav.charts": "Labo",
+            "nav.settings": "Options",
+            "settings.title": "Réglages",
+            "charts.title": "Labo",
+            "home.today": "Séance du jour",
+            "home.form": "Ta forme",
+            "set.profil": "Profil",
+            "set.profil.sub": "Nom, poids, taille, jours, langue",
+            "set.goal": "Objectif et plan",
+            "set.goal.sub": "Voir et modifier ton objectif",
+            "set.conn": "Connexions",
+            "set.conn.sub": "Montre, Strava, Garmin",
+            "set.sub": "Abonnement",
+            "set.sub.sub": "Ton offre et paiements",
+            "set.acc": "Compte",
+            "set.acc.sub": "Email, mot de passe, données, déconnexion",
+            "com.save": "Enregistrer",
+            "com.back": "Retour",
+            "com.cancel": "Annuler",
+            "com.saving": "Enregistrement…",
+            "com.loading": "Chargement…",
+            "com.saved": "Enregistré",
+            "com.error": "Erreur",
+            "com.err.conn": "Erreur de connexion",
+            "prof.photo": "Changer la photo de profil",
+            "prof.photo.soon": "Les photos de profil arrivent bientôt.",
+            "prof.name": "Nom",
+            "prof.name.sub": "Comment ton coach s'adresse à toi",
+            "prof.name.hint": "C'est ainsi que ton équipe s'adressera à toi. Indique ton prénom (ou ton nom complet).",
+            "prof.name.ph": "Ton prénom",
+            "prof.body": "Données physiques",
+            "prof.body.sub": "Poids, taille, âge, sexe",
+            "prof.body.hint": "Ton coach s'en sert pour tes zones cardiaques, ton allure et ton volume. Plus c'est précis, meilleur est le plan.",
+            "prof.weight": "Poids",
+            "prof.height": "Taille",
+            "prof.age": "Âge",
+            "prof.age.unit": "ans",
+            "prof.sex": "Sexe",
+            "prof.sex.m": "Homme",
+            "prof.sex.f": "Femme",
+            "prof.sex.o": "Autre",
+            "prof.days": "Jours d'entraînement",
+            "prof.days.sub": "Quand tu t'entraînes",
+            "prof.days.note": "<b>À noter :</b> le changement de jours sera pris en compte pour le plan de <b>la semaine prochaine</b> — ton plan actuel reste inchangé.",
+            "prof.days.pick": "Choisis tes jours",
+            "prof.lang": "Langue et unités",
+            "prof.lang.app": "Langue de l'application",
+            "prof.units": "Unités",
+            "prof.units.km": "Kilomètres",
+            "prof.units.mi": "Miles",
+            "prof.accid": "ID du compte",
+            "prof.copyid": "Copier l'ID du compte",
+            "day.short.0": "Lun",
+            "day.short.1": "Mar",
+            "day.short.2": "Mer",
+            "day.short.3": "Jeu",
+            "day.short.4": "Ven",
+            "day.short.5": "Sam",
+            "day.short.6": "Dim",
+            "prof.days.count.one": "{n} jour par semaine",
+            "prof.days.count.few": "{n} jours par semaine",
+            "prof.days.count.many": "{n} jours par semaine",
+            "prof.days.count.other": "{n} jours par semaine"
           },
           es: {
-            'nav.home':'Inicio','nav.calendar':'Calendario','nav.coach':'Coach','nav.charts':'Lab','nav.settings':'Opciones',
-            'settings.title':'Ajustes','charts.title':'Lab','home.today':'Entrenamiento de hoy','home.form':'Tu forma',
-            'set.profil':'Perfil','set.profil.sub':'Nombre, peso, altura, días, idioma',
-            'set.goal':'Objetivo y plan','set.goal.sub':'Ver y cambiar tu objetivo',
-            'set.conn':'Conexiones','set.conn.sub':'Reloj, Strava, Garmin',
-            'set.sub':'Suscripción','set.sub.sub':'Tu plan y pagos',
-            'set.acc':'Cuenta','set.acc.sub':'Email, contraseña, datos, cerrar sesión'
+            "nav.home": "Inicio",
+            "nav.calendar": "Calendario",
+            "nav.coach": "Coach",
+            "nav.charts": "Lab",
+            "nav.settings": "Opciones",
+            "settings.title": "Ajustes",
+            "charts.title": "Lab",
+            "home.today": "Entrenamiento de hoy",
+            "home.form": "Tu forma",
+            "set.profil": "Perfil",
+            "set.profil.sub": "Nombre, peso, altura, días, idioma",
+            "set.goal": "Objetivo y plan",
+            "set.goal.sub": "Ver y cambiar tu objetivo",
+            "set.conn": "Conexiones",
+            "set.conn.sub": "Reloj, Strava, Garmin",
+            "set.sub": "Suscripción",
+            "set.sub.sub": "Tu plan y pagos",
+            "set.acc": "Cuenta",
+            "set.acc.sub": "Email, contraseña, datos, cerrar sesión",
+            "com.save": "Guardar cambios",
+            "com.back": "Volver",
+            "com.cancel": "Cancelar",
+            "com.saving": "Guardando…",
+            "com.loading": "Cargando…",
+            "com.saved": "Guardado",
+            "com.error": "Error",
+            "com.err.conn": "Error de conexión",
+            "prof.photo": "Cambiar foto de perfil",
+            "prof.photo.soon": "Las fotos de perfil llegarán pronto.",
+            "prof.name": "Nombre",
+            "prof.name.sub": "Cómo te llama tu entrenador",
+            "prof.name.hint": "Así es como te llamará tu equipo. Escribe tu nombre (o nombre y apellido).",
+            "prof.name.ph": "Tu nombre",
+            "prof.body": "Datos físicos",
+            "prof.body.sub": "Peso, altura, edad, sexo",
+            "prof.body.hint": "Tu entrenador los usa para las zonas de frecuencia cardíaca, el ritmo y el volumen. Cuanto más exactos, mejor el plan.",
+            "prof.weight": "Peso",
+            "prof.height": "Altura",
+            "prof.age": "Edad",
+            "prof.age.unit": "años",
+            "prof.sex": "Sexo",
+            "prof.sex.m": "Hombre",
+            "prof.sex.f": "Mujer",
+            "prof.sex.o": "Otro",
+            "prof.days": "Días de entrenamiento",
+            "prof.days.sub": "Cuándo entrenas",
+            "prof.days.note": "<b>Nota:</b> el cambio de días se aplicará al crear el plan de <b>la próxima semana</b>: tu plan actual no cambia.",
+            "prof.days.pick": "Elige tus días",
+            "prof.lang": "Idioma y unidades",
+            "prof.lang.app": "Idioma de la aplicación",
+            "prof.units": "Unidades",
+            "prof.units.km": "Kilómetros",
+            "prof.units.mi": "Millas",
+            "prof.accid": "ID de cuenta",
+            "prof.copyid": "Copiar ID de cuenta",
+            "day.short.0": "Lun",
+            "day.short.1": "Mar",
+            "day.short.2": "Mié",
+            "day.short.3": "Jue",
+            "day.short.4": "Vie",
+            "day.short.5": "Sáb",
+            "day.short.6": "Dom",
+            "prof.days.count.one": "{n} día a la semana",
+            "prof.days.count.few": "{n} días a la semana",
+            "prof.days.count.many": "{n} días a la semana",
+            "prof.days.count.other": "{n} días a la semana"
           },
           de: {
-            'nav.home':'Start','nav.calendar':'Kalender','nav.coach':'Coach','nav.charts':'Labor','nav.settings':'Optionen',
-            'settings.title':'Einstellungen','charts.title':'Labor','home.today':'Heutiges Training','home.form':'Deine Form',
-            'set.profil':'Profil','set.profil.sub':'Name, Gewicht, Größe, Tage, Sprache',
-            'set.goal':'Ziel & Plan','set.goal.sub':'Dein Laufziel ansehen und ändern',
-            'set.conn':'Verbindungen','set.conn.sub':'Uhr, Strava, Garmin',
-            'set.sub':'Abo','set.sub.sub':'Dein Plan und Zahlungen',
-            'set.acc':'Konto','set.acc.sub':'E-Mail, Passwort, Daten, abmelden'
+            "nav.home": "Start",
+            "nav.calendar": "Kalender",
+            "nav.coach": "Coach",
+            "nav.charts": "Labor",
+            "nav.settings": "Optionen",
+            "settings.title": "Einstellungen",
+            "charts.title": "Labor",
+            "home.today": "Heutiges Training",
+            "home.form": "Deine Form",
+            "set.profil": "Profil",
+            "set.profil.sub": "Name, Gewicht, Größe, Tage, Sprache",
+            "set.goal": "Ziel & Plan",
+            "set.goal.sub": "Dein Laufziel ansehen und ändern",
+            "set.conn": "Verbindungen",
+            "set.conn.sub": "Uhr, Strava, Garmin",
+            "set.sub": "Abo",
+            "set.sub.sub": "Dein Plan und Zahlungen",
+            "set.acc": "Konto",
+            "set.acc.sub": "E-Mail, Passwort, Daten, abmelden",
+            "com.save": "Änderungen speichern",
+            "com.back": "Zurück",
+            "com.cancel": "Abbrechen",
+            "com.saving": "Wird gespeichert…",
+            "com.loading": "Wird geladen…",
+            "com.saved": "Gespeichert",
+            "com.error": "Fehler",
+            "com.err.conn": "Verbindungsfehler",
+            "prof.photo": "Profilbild ändern",
+            "prof.photo.soon": "Profilbilder gibt es in Kürze.",
+            "prof.name": "Name",
+            "prof.name.sub": "Wie dein Coach dich anspricht",
+            "prof.name.hint": "So spricht dich dein Team an. Gib deinen Vornamen (oder vollständigen Namen) ein.",
+            "prof.name.ph": "Dein Name",
+            "prof.body": "Körperdaten",
+            "prof.body.sub": "Gewicht, Größe, Alter, Geschlecht",
+            "prof.body.hint": "Dein Coach nutzt sie für Herzfrequenzzonen, Tempo und Umfang. Je genauer, desto besser der Plan.",
+            "prof.weight": "Gewicht",
+            "prof.height": "Größe",
+            "prof.age": "Alter",
+            "prof.age.unit": "J.",
+            "prof.sex": "Geschlecht",
+            "prof.sex.m": "Männlich",
+            "prof.sex.f": "Weiblich",
+            "prof.sex.o": "Divers",
+            "prof.days": "Trainingstage",
+            "prof.days.sub": "Wann du trainierst",
+            "prof.days.note": "<b>Hinweis:</b> Die Änderung gilt ab dem Plan für <b>nächste Woche</b> — dein aktueller Plan bleibt unverändert.",
+            "prof.days.pick": "Wähle deine Tage",
+            "prof.lang": "Sprache & Einheiten",
+            "prof.lang.app": "App-Sprache",
+            "prof.units": "Einheiten",
+            "prof.units.km": "Kilometer",
+            "prof.units.mi": "Meilen",
+            "prof.accid": "Konto-ID",
+            "prof.copyid": "Konto-ID kopieren",
+            "day.short.0": "Mo",
+            "day.short.1": "Di",
+            "day.short.2": "Mi",
+            "day.short.3": "Do",
+            "day.short.4": "Fr",
+            "day.short.5": "Sa",
+            "day.short.6": "So",
+            "prof.days.count.one": "{n} Tag pro Woche",
+            "prof.days.count.few": "{n} Tage pro Woche",
+            "prof.days.count.many": "{n} Tage pro Woche",
+            "prof.days.count.other": "{n} Tage pro Woche"
           }
         };
         let _appLang = (function(){ try { return localStorage.getItem('velm_lang') || 'pl'; } catch(e) { return 'pl'; } })();
@@ -8582,16 +8877,63 @@
             const L = I18N[_appLang] || I18N.pl;
             return (L && L[key] != null) ? L[key] : (I18N.pl[key] != null ? I18N.pl[key] : key);
         }
+        // Liczebniki. Polski ma 3 formy (1 / 2–4 / 5+ z wyjątkiem nastek), reszta 2.
+        // Zamiast pisać warunki per język bierzemy Intl.PluralRules i klucze
+        // `klucz.one` / `.few` / `.many` / `.other`. {n} w wartości → liczba.
+        const _plRules = {};
+        function tp(key, n) {
+            let r = _plRules[_appLang];
+            if (r === undefined) {
+                try { r = _plRules[_appLang] = new Intl.PluralRules(_appLang); }
+                catch(e) { r = _plRules[_appLang] = null; }
+            }
+            const cat = r ? r.select(n) : (n === 1 ? 'one' : 'other');
+            const L = I18N[_appLang] || I18N.pl;
+            const pick = k => (L && L[k] != null) ? L[k] : (I18N.pl[k] != null ? I18N.pl[k] : null);
+            const v = pick(key + '.' + cat) ?? pick(key + '.other') ?? pick(key) ?? key;
+            return String(v).split('{n}').join(n);
+        }
+        // Nazwy dni i miesięcy z Intl — nie trzymamy pięciu ręcznych tablic
+        // (a polski i tak wymagałby osobnej formy dopełniaczowej dla dat).
+        function _i18nDayNames(style) {          // indeks 0 = poniedziałek
+            const out = [];
+            for (let i = 0; i < 7; i++) {
+                const d = new Date(Date.UTC(2024, 0, 1 + i));   // 2024-01-01 to poniedziałek
+                out.push(new Intl.DateTimeFormat(_appLang, { weekday: style, timeZone: 'UTC' }).format(d));
+            }
+            return out;
+        }
+        function _i18nMonthNames(style) {
+            const out = [];
+            for (let i = 0; i < 12; i++) {
+                out.push(new Intl.DateTimeFormat(_appLang, { month: style, timeZone: 'UTC' })
+                    .format(new Date(Date.UTC(2024, i, 15))));
+            }
+            return out;
+        }
+        function _capFirst(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : s; }
         function applyI18n(root) {
             const scope = root || document;
+            // UWAGA: data-i18n nadpisuje textContent, więc NIE wolno go stawiać na
+            // elemencie, który ma dzieci (ikonę/SVG) — tylko na tekstowym liściu.
             scope.querySelectorAll('[data-i18n]').forEach(el => { const v = t(el.getAttribute('data-i18n')); if (v != null) el.textContent = v; });
             scope.querySelectorAll('[data-i18n-ph]').forEach(el => { const v = t(el.getAttribute('data-i18n-ph')); if (v != null) el.setAttribute('placeholder', v); });
+            // treści z prostym markupem (<b>) — wartości pochodzą wyłącznie z I18N, nie od usera
+            scope.querySelectorAll('[data-i18n-html]').forEach(el => { const v = t(el.getAttribute('data-i18n-html')); if (v != null) el.innerHTML = v; });
+            scope.querySelectorAll('[data-i18n-aria]').forEach(el => { const v = t(el.getAttribute('data-i18n-aria')); if (v != null) el.setAttribute('aria-label', v); });
+            // Skróty dni: ze słownika, nie z Intl — polski short z Intl to "Niedz.",
+            // a kafelek ma ~36px szerokości (siatka 7 kolumn, font 11px).
+            scope.querySelectorAll('[data-i18n-day]').forEach(el => {
+                const i = parseInt(el.getAttribute('data-i18n-day'), 10);
+                if (i >= 0 && i < 7) el.textContent = t('day.short.' + i);
+            });
         }
         function setAppLanguage(lang) {
             _appLang = I18N[lang] ? lang : 'pl';
             try { localStorage.setItem('velm_lang', _appLang); } catch(e) {}
             try { document.documentElement.setAttribute('lang', _appLang); } catch(e) {}
             applyI18n();
+            try { _refreshProfilRows(); } catch(e) {}
         }
 
         function selectSettingsLang(lang) {
@@ -10587,7 +10929,7 @@
 
         // Stempel buildu — dowód na urządzeniu, że działa świeży kod (trzymać
         // w zgodzie z CACHE_VERSION w sw.js; bump przy każdym deployu frontendu)
-        const VELM_BUILD = 'v60';
+        const VELM_BUILD = 'v61';
         console.log('velm build', VELM_BUILD, navigator.userAgent);
 
         async function hardReloadApp() {
