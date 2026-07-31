@@ -3839,8 +3839,8 @@
                 <div id="coach-messages">
                     <div id="coach-intro">
                         <div id="coach-intro-monogram"><span>V</span></div>
-                        <div id="coach-intro-title" data-i18n="coach.intro.title">Trener</div>
-                        <div id="coach-intro-desc" data-i18n="coach.intro.desc">Twój prywatny sztab AI. Trener, analityk, fizjoterapeuta i psycholog sportowy — wszystko w jednym miejscu. Zapytaj o cokolwiek.</div>
+                        <div id="coach-intro-title">Trener</div>
+                        <div id="coach-intro-desc">Twój prywatny sztab AI. Trener, analityk, fizjoterapeuta i psycholog sportowy — wszystko w jednym miejscu. Zapytaj o cokolwiek.</div>
                     </div>
                     <div id="coach-quick-suggestions">
                         <button class="coach-suggest-card" onclick="sendQuickSuggestion(t('sug.szef_sztabu.0'))" data-i18n="sug.szef_sztabu.0">Jaki mam dziś trening?</button>
@@ -4144,7 +4144,7 @@
                                 <div class="sd-ring-cap" data-i18n="goal.done">Ukończono</div>
                             </div>
                         </div>
-                        <div id="cel-d-motiv" style="margin-top:18px;font-size:15px;font-weight:700;color:#4A6B52;font-family:'Outfit',sans-serif;" data-i18n="goal.oncourse">Trzymasz kurs.</div>
+                        <div id="cel-d-motiv" style="margin-top:18px;font-size:15px;font-weight:700;color:#4A6B52;font-family:'Outfit',sans-serif;">Trzymasz kurs.</div>
                         <div style="margin-top:6px;font-size:13px;color:#8A8A8A;line-height:1.5;max-width:280px;margin:6px auto 0;" data-i18n="goal.quote">„Każdy krok, bez względu na to jak mały, przybliża Cię do celu."</div>
                     </div>
 
@@ -4373,7 +4373,7 @@
                             <path d="M15 18l-6-6 6-6" />
                         </svg>
                     </button>
-                    <h1 id="details-title" style="margin: 0; font-size: 24px; flex: 1; text-align: center;" data-i18n="details.title">Szczegóły</h1>
+                    <h1 id="details-title" style="margin: 0; font-size: 24px; flex: 1; text-align: center;">Szczegóły</h1>
                 </div>
                 <div id="details-content"
                     style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 300px; text-align: center; color: #8A8A8A;">
@@ -4805,12 +4805,25 @@
             const container = document.getElementById('coach-quick-suggestions');
             if (!container) return;
             const footer = container.querySelector('.coach-suggest-footer');
-            const footerLabel = { szef_sztabu: 'SZTAB AI', analityk: 'ANALITYK', fizjo: 'FIZJOTERAPEUTA', psycholog: 'PSYCHOLOG' }[agent] || 'SZTAB AI';
+            const footerLabel = t('agent.' + (['szef_sztabu','analityk','fizjo','psycholog'].includes(agent) ? agent : 'szef_sztabu') + '.footer');
             const picks = _pickSuggestions(agent);
             const btns = picks.map(q =>
                 `<button class="coach-suggest-card" onclick="sendQuickSuggestion(${JSON.stringify(q)})">${q}</button>`
             ).join('');
             container.innerHTML = btns + `<div class="coach-suggest-footer">${footerLabel}</div>`;
+        }
+
+        // Nagłówek czatu i karty propozycji są budowane z JS (per agent), więc
+        // NIE mają data-i18n — przy zmianie języka trzeba je przerysować ręcznie.
+        function _refreshCoachUi() {
+            const a = ['szef_sztabu', 'analityk', 'fizjo', 'psycholog'].includes(selectedAgent) ? selectedAgent : 'szef_sztabu';
+            const nameEl = document.getElementById('coach-agent-name');
+            if (nameEl) nameEl.textContent = agentName(a);
+            const introTitle = document.getElementById('coach-intro-title');
+            if (introTitle) introTitle.textContent = agentName(a);
+            const introDesc = document.getElementById('coach-intro-desc');
+            if (introDesc) introDesc.textContent = agentDesc(a);
+            _renderSuggestions(a);
         }
 
         function selectAgent(agent, btn) {
@@ -5482,7 +5495,7 @@
             const isSleep = type === 'sleep';
             currentChartType = type;
             let data = [];
-            let dayLabels = _i18nDayNames('short').map(_capFirst);
+            let dayLabels = _i18nDayNames('short').map(s => _capFirst(s).replace(/\.$/, ''));
             let longDayLabels = _i18nDayNames('long').map(_capFirst);
             let todayLongName = longDayLabels[6].toUpperCase();
 
@@ -5494,7 +5507,7 @@
                 const result = await response.json();
                 if (result.metrics && result.metrics.length > 0) {
                     data = result.metrics.map(m => m.value);
-                    const dshort = d => _capFirst(new Intl.DateTimeFormat(_appLang, { weekday: 'short' }).format(d));
+                    const dshort = d => _capFirst(new Intl.DateTimeFormat(_appLang, { weekday: 'short' }).format(d)).replace(/\.$/, '');
                     const dlong  = d => _capFirst(new Intl.DateTimeFormat(_appLang, { weekday: 'long'  }).format(d));
                     dayLabels     = result.metrics.map(m => dshort(new Date(m.metric_date+'T12:00:00')));
                     longDayLabels = result.metrics.map(m => dlong(new Date(m.metric_date+'T12:00:00')));
@@ -8316,7 +8329,7 @@
             const ring = document.getElementById('cel-ring-fill');
             if (ring) setTimeout(() => { ring.style.strokeDashoffset = (395.8 * (1 - (pct === null ? 0 : pct) / 100)).toFixed(1); }, 60);
             const motiv = document.getElementById('cel-d-motiv');
-            if (motiv && pct !== null) motiv.textContent = pct >= 75 ? 'Ostatnia prosta!' : pct >= 40 ? 'Świetne tempo!' : 'Dobry początek.';
+            if (motiv && pct !== null) motiv.textContent = t(pct >= 75 ? 'goal.motiv.high' : pct >= 40 ? 'goal.motiv.mid' : 'goal.motiv.low');
 
             // Ten tydzień — realne treningi (Pn–Nd zawierający dziś)
             try {
@@ -8548,6 +8561,18 @@
             "prof.units.mi": "Mile",
             "prof.accid": "ID konta",
             "prof.copyid": "Kopiuj ID konta",
+            "ci.p0.meters": "Ile metrów miał odcinek?",
+            "ci.reps.actual": "Ile powtórzeń faktycznie zrobiłeś?",
+            "ci.sets.actual": "Ile serii faktycznie zrobiłeś?",
+            "ci.reps.title": "Ile powtórzeń zrobiłeś?",
+            "ci.sets.title": "Ile serii zrobiłeś?",
+            "ci.planassumed": "Plan zakładał {v}.",
+            "ci.ready.desc.plan": "Twój trener czeka. Dziś masz: {type} · {km} km.",
+            "goal.motiv.high": "Ostatnia prosta!",
+            "goal.motiv.mid": "Świetne tempo!",
+            "goal.motiv.low": "Dobry początek.",
+            "com.downloading": "Pobieranie…",
+            "login.progress": "Logowanie…",
             "goal.see": "Zobacz swój cel",
             "goal.see.sub": "Twój aktualny cel i postęp",
             "goal.change": "Zmień swój cel",
@@ -8723,6 +8748,10 @@
             "agent.analityk.name": "Analityk",
             "agent.fizjo.name": "Fizjo",
             "agent.psycholog.name": "Psycholog",
+            "agent.szef_sztabu.footer": "SZTAB AI",
+            "agent.analityk.footer": "ANALITYK",
+            "agent.fizjo.footer": "FIZJOTERAPEUTA",
+            "agent.psycholog.footer": "PSYCHOLOG",
             "agent.szef_sztabu.desc": "Twój główny trener — planuje treningi, analizuje postępy i koordynuje całą pracę sztabu.",
             "agent.analityk.desc": "Analityk danych — czyta twoje tempo, tętno i obciążenie, wyłapuje trendy i wzorce w treningach.",
             "agent.fizjo.desc": "Specjalista od biomechaniki i regeneracji — ocenia ryzyko kontuzji i dobiera zalecenia.",
@@ -8843,6 +8872,18 @@
             "prof.units.mi": "Miles",
             "prof.accid": "Account ID",
             "prof.copyid": "Copy account ID",
+            "ci.p0.meters": "How many metres was the segment?",
+            "ci.reps.actual": "How many reps did you actually do?",
+            "ci.sets.actual": "How many sets did you actually do?",
+            "ci.reps.title": "How many reps did you do?",
+            "ci.sets.title": "How many sets did you do?",
+            "ci.planassumed": "The plan called for {v}.",
+            "ci.ready.desc.plan": "Your coach is waiting. Today: {type} · {km} km.",
+            "goal.motiv.high": "Home straight!",
+            "goal.motiv.mid": "Great pace!",
+            "goal.motiv.low": "Good start.",
+            "com.downloading": "Downloading…",
+            "login.progress": "Signing in…",
             "goal.see": "See your goal",
             "goal.see.sub": "Your current goal and progress",
             "goal.change": "Change your goal",
@@ -9018,6 +9059,10 @@
             "agent.analityk.name": "Analyst",
             "agent.fizjo.name": "Physio",
             "agent.psycholog.name": "Psychologist",
+            "agent.szef_sztabu.footer": "AI TEAM",
+            "agent.analityk.footer": "ANALYST",
+            "agent.fizjo.footer": "PHYSIO",
+            "agent.psycholog.footer": "PSYCHOLOGIST",
             "agent.szef_sztabu.desc": "Your head coach — plans your training, reviews progress and coordinates the whole team.",
             "agent.analityk.desc": "Data analyst — reads your pace, heart rate and load, and spots trends and patterns in your training.",
             "agent.fizjo.desc": "Biomechanics and recovery specialist — assesses injury risk and tailors the advice.",
@@ -9138,6 +9183,18 @@
             "prof.units.mi": "Miles",
             "prof.accid": "ID du compte",
             "prof.copyid": "Copier l'ID du compte",
+            "ci.p0.meters": "Quelle longueur faisait la portion ?",
+            "ci.reps.actual": "Combien de répétitions as-tu réellement faites ?",
+            "ci.sets.actual": "Combien de séries as-tu réellement faites ?",
+            "ci.reps.title": "Combien de répétitions as-tu faites ?",
+            "ci.sets.title": "Combien de séries as-tu faites ?",
+            "ci.planassumed": "Le plan prévoyait {v}.",
+            "ci.ready.desc.plan": "Ton coach t’attend. Aujourd’hui : {type} · {km} km.",
+            "goal.motiv.high": "Dernière ligne droite !",
+            "goal.motiv.mid": "Excellent rythme !",
+            "goal.motiv.low": "Bon début.",
+            "com.downloading": "Téléchargement…",
+            "login.progress": "Connexion…",
             "goal.see": "Voir ton objectif",
             "goal.see.sub": "Ton objectif actuel et ta progression",
             "goal.change": "Changer d'objectif",
@@ -9313,6 +9370,10 @@
             "agent.analityk.name": "Analyste",
             "agent.fizjo.name": "Kiné",
             "agent.psycholog.name": "Psychologue",
+            "agent.szef_sztabu.footer": "ÉQUIPE IA",
+            "agent.analityk.footer": "ANALYSTE",
+            "agent.fizjo.footer": "KINÉ",
+            "agent.psycholog.footer": "PSYCHOLOGUE",
             "agent.szef_sztabu.desc": "Ton entraîneur principal — il planifie tes séances, suit tes progrès et coordonne toute l’équipe.",
             "agent.analityk.desc": "Analyste de données — il lit ton allure, ta fréquence cardiaque et ta charge, et repère les tendances.",
             "agent.fizjo.desc": "Spécialiste biomécanique et récupération — il évalue le risque de blessure et adapte les conseils.",
@@ -9433,6 +9494,18 @@
             "prof.units.mi": "Millas",
             "prof.accid": "ID de cuenta",
             "prof.copyid": "Copiar ID de cuenta",
+            "ci.p0.meters": "¿Cuántos metros tenía el tramo?",
+            "ci.reps.actual": "¿Cuántas repeticiones hiciste en realidad?",
+            "ci.sets.actual": "¿Cuántas series hiciste en realidad?",
+            "ci.reps.title": "¿Cuántas repeticiones hiciste?",
+            "ci.sets.title": "¿Cuántas series hiciste?",
+            "ci.planassumed": "El plan preveía {v}.",
+            "ci.ready.desc.plan": "Tu entrenador te espera. Hoy: {type} · {km} km.",
+            "goal.motiv.high": "¡Recta final!",
+            "goal.motiv.mid": "¡Buen ritmo!",
+            "goal.motiv.low": "Buen comienzo.",
+            "com.downloading": "Descargando…",
+            "login.progress": "Iniciando sesión…",
             "goal.see": "Ver tu objetivo",
             "goal.see.sub": "Tu objetivo actual y tu progreso",
             "goal.change": "Cambiar tu objetivo",
@@ -9608,6 +9681,10 @@
             "agent.analityk.name": "Analista",
             "agent.fizjo.name": "Fisio",
             "agent.psycholog.name": "Psicólogo",
+            "agent.szef_sztabu.footer": "EQUIPO DE IA",
+            "agent.analityk.footer": "ANALISTA",
+            "agent.fizjo.footer": "FISIO",
+            "agent.psycholog.footer": "PSICÓLOGO",
             "agent.szef_sztabu.desc": "Tu entrenador principal: planifica los entrenos, revisa tu progreso y coordina a todo el equipo.",
             "agent.analityk.desc": "Analista de datos: lee tu ritmo, frecuencia cardíaca y carga, y detecta tendencias y patrones.",
             "agent.fizjo.desc": "Especialista en biomecánica y recuperación: evalúa el riesgo de lesión y ajusta las recomendaciones.",
@@ -9728,6 +9805,18 @@
             "prof.units.mi": "Meilen",
             "prof.accid": "Konto-ID",
             "prof.copyid": "Konto-ID kopieren",
+            "ci.p0.meters": "Wie viele Meter hatte der Abschnitt?",
+            "ci.reps.actual": "Wie viele Wiederholungen hast du tatsächlich gemacht?",
+            "ci.sets.actual": "Wie viele Sätze hast du tatsächlich gemacht?",
+            "ci.reps.title": "Wie viele Wiederholungen hast du gemacht?",
+            "ci.sets.title": "Wie viele Sätze hast du gemacht?",
+            "ci.planassumed": "Der Plan sah {v} vor.",
+            "ci.ready.desc.plan": "Dein Coach wartet. Heute: {type} · {km} km.",
+            "goal.motiv.high": "Auf die Zielgerade!",
+            "goal.motiv.mid": "Super Tempo!",
+            "goal.motiv.low": "Guter Anfang.",
+            "com.downloading": "Wird heruntergeladen…",
+            "login.progress": "Anmeldung läuft…",
             "goal.see": "Dein Ziel ansehen",
             "goal.see.sub": "Dein aktuelles Ziel und dein Fortschritt",
             "goal.change": "Dein Ziel ändern",
@@ -9903,6 +9992,10 @@
             "agent.analityk.name": "Analyst",
             "agent.fizjo.name": "Physio",
             "agent.psycholog.name": "Psychologe",
+            "agent.szef_sztabu.footer": "KI-TEAM",
+            "agent.analityk.footer": "ANALYST",
+            "agent.fizjo.footer": "PHYSIO",
+            "agent.psycholog.footer": "PSYCHOLOGE",
             "agent.szef_sztabu.desc": "Dein Cheftrainer — plant deine Einheiten, wertet Fortschritte aus und koordiniert das Team.",
             "agent.analityk.desc": "Datenanalyst — liest Tempo, Herzfrequenz und Belastung und erkennt Trends und Muster.",
             "agent.fizjo.desc": "Fachperson für Biomechanik und Regeneration — schätzt das Verletzungsrisiko ein und passt Empfehlungen an.",
@@ -10031,6 +10124,7 @@
             applyI18n();
             try { _refreshProfilRows(); } catch(e) {}
             try { updateGreeting(); } catch(e) {}
+            try { _refreshCoachUi(); } catch(e) {}
         }
 
         function selectSettingsLang(lang) {
@@ -12026,7 +12120,7 @@
 
         // Stempel buildu — dowód na urządzeniu, że działa świeży kod (trzymać
         // w zgodzie z CACHE_VERSION w sw.js; bump przy każdym deployu frontendu)
-        const VELM_BUILD = 'v65';
+        const VELM_BUILD = 'v66';
         console.log('velm build', VELM_BUILD, navigator.userAgent);
 
         async function hardReloadApp() {
@@ -12069,7 +12163,7 @@
             }
 
             btn.disabled = true;
-            btn.textContent = 'Logowanie…';
+            btn.textContent = t('login.progress');
 
             try {
                 const res  = await fetch(`${API_BASE}/api/login`, {
@@ -12193,7 +12287,7 @@
             if (!btn) return;
             const orig = btn.textContent;
             btn.disabled = true;
-            btn.textContent = 'Pobieranie…';
+            btn.textContent = t('com.downloading');
             try {
                 const res = await fetch(`${API_BASE}/api/user/${currentUserId}/export`, {
                     headers: authHeaders()
@@ -12368,6 +12462,9 @@
             applyI18n();   // natychmiast podmień statyczny UI (nawigacja, nagłówki) na zapamiętany język
             document.documentElement.setAttribute('lang', _appLang);
             updateGreeting();
+            // Nagłówek czatu i karty propozycji buduje JS (per agent), więc nie mają
+            // data-i18n — trzeba je przerysować, inaczej do 1. wyboru agenta zostaje polski.
+            try { _refreshCoachUi(); } catch(e) {}
             updateDate();
             loadUserMemory();
             loadUserProfile();
@@ -12786,7 +12883,7 @@
                 previewSub.textContent = parts.join(' · ');
             }
             const m2desc = document.getElementById('step-morning-4-desc');
-            if (m2desc) m2desc.textContent = `Twój trener czeka. Dziś masz: ${TYPE_LABEL_CI[workoutType] || workoutType} · ${workoutData.dystans_km} km.`;
+            if (m2desc) m2desc.textContent = t('ci.ready.desc.plan').replace('{type}', TYPE_LABEL_CI[workoutType] || workoutType).replace('{km}', workoutData.dystans_km);
 
             _checkinStepsLockedHeight = 0;
             // Reset all steps to inactive
@@ -13573,12 +13670,12 @@
             const descEl  = document.getElementById('more-step-desc');
             if (workoutType === 'interval') {
                 moreVal = (workoutData.powtorzenia || 6) + 1;
-                if (titleEl) titleEl.textContent = 'Ile powtórzeń zrobiłeś?';
-                if (descEl) descEl.textContent = 'Plan zakładał ' + (workoutData.powtorzenia || '—') + '.';
+                if (titleEl) titleEl.textContent = t('ci.reps.title');
+                if (descEl) descEl.textContent = t('ci.planassumed').replace('{v}', workoutData.powtorzenia || '—');
             } else if (workoutType === 'walkrun') {
                 moreVal = (workoutData.serie || 6) + 1;
-                if (titleEl) titleEl.textContent = 'Ile serii zrobiłeś?';
-                if (descEl) descEl.textContent = 'Plan zakładał ' + (workoutData.serie || '—') + '.';
+                if (titleEl) titleEl.textContent = t('ci.sets.title');
+                if (descEl) descEl.textContent = t('ci.planassumed').replace('{v}', workoutData.serie || '—');
             } else if (workoutType === 'tempo') {
                 moreVal = Math.round(((workoutData.odcinek_km || 5) + 0.5) * 2) / 2;
                 if (titleEl) titleEl.textContent = 'Ile trwał odcinek tempo?';
@@ -13719,7 +13816,7 @@
                     if (needsMeters) {
                         const planM = workoutData.dystans_odcinka_m || 400;
                         fuKmVal = Math.max(50, Math.round((planM - 100) / 50) * 50);
-                        if (lbl) lbl.textContent = 'Ile metrów miał odcinek?';
+                        if (lbl) lbl.textContent = t('ci.p0.meters');
                         if (el) el.textContent = fuKmVal + ' m';
                         intervalDistanceM = fuKmVal;
                     } else {
@@ -13745,7 +13842,7 @@
                     const plan = needsRepeats ? (workoutData.powtorzenia || 6) : (workoutData.serie || 6);
                     fuCountVal = Math.max(1, plan - 1);
                     const lbl = document.getElementById('fuCountLabel');
-                    if (lbl) lbl.textContent = needsRepeats ? 'Ile powtórzeń faktycznie zrobiłeś?' : 'Ile serii faktycznie zrobiłeś?';
+                    if (lbl) lbl.textContent = t(needsRepeats ? 'ci.reps.actual' : 'ci.sets.actual');
                     const el = document.getElementById('fuCountVal');
                     if (el) el.textContent = String(fuCountVal);
                     if (needsRepeats) segmentRepeats = fuCountVal; else segmentSeries = fuCountVal;
@@ -14078,7 +14175,7 @@
                 <!-- M4: Gotowość -->
                 <div class="step" id="step-morning-4">
                     <div class="step-title" data-i18n="ci.ready.title">Gotowy?</div>
-                    <div class="step-desc" id="step-morning-4-desc" data-i18n="ci.ready.desc">Twój trener czeka.</div>
+                    <div class="step-desc" id="step-morning-4-desc">Twój trener czeka.</div>
                     <div class="section-label" data-i18n="ci.todayplan">Dzisiejszy plan</div>
                     <div class="workout-preview-card">
                         <div class="workout-preview-dot"></div>
@@ -14197,7 +14294,7 @@
                          "krótszy/nieukończony odcinek" (tempo) w km; "krótsze odcinki"
                          (interval) w metrach — jednostkę przełącza _fuKmUnit -->
                     <div class="fu-counter-wrap" id="fuKmWrap">
-                        <div class="section-label" id="fuKmLabel" style="margin-top:14px;" data-i18n="ci.km.title">Ile km faktycznie przebiegłeś?</div>
+                        <div class="section-label" id="fuKmLabel" style="margin-top:14px;">Ile km faktycznie przebiegłeś?</div>
                         <div class="fu-counter">
                             <button class="counter-btn" onclick="adjustFuKm(-1)">−</button>
                             <div class="fu-counter-val" id="fuKmVal">—</div>
@@ -14207,7 +14304,7 @@
                     <!-- Faktyczna liczba: "mniej powtórzeń" (interval) lub "mniej serii"
                          (walkrun) — ten sam wzorzec co licznik km wyżej -->
                     <div class="fu-counter-wrap" id="fuCountWrap">
-                        <div class="section-label" id="fuCountLabel" style="margin-top:14px;" data-i18n="ci.actual.title">Ile faktycznie zrobiłeś?</div>
+                        <div class="section-label" id="fuCountLabel" style="margin-top:14px;">Ile faktycznie zrobiłeś?</div>
                         <div class="fu-counter">
                             <button class="counter-btn" onclick="adjustFuCount(-1)">−</button>
                             <div class="fu-counter-val" id="fuCountVal">—</div>
@@ -14262,8 +14359,8 @@
                      to, co user faktycznie policzył: powtórzenia/serie/km odcinka
                      (patrz _initMoreStep/adjustMore) -->
                 <div class="step" id="step-post-3">
-                    <div class="step-title" id="more-step-title" data-i18n="ci.total.title">Ile w sumie przebiegłeś?</div>
-                    <div class="step-desc" id="more-step-desc" data-i18n="ci.total.desc">Sztab policzy z tego Twoje realne tempo.</div>
+                    <div class="step-title" id="more-step-title">Ile w sumie przebiegłeś?</div>
+                    <div class="step-desc" id="more-step-desc">Sztab policzy z tego Twoje realne tempo.</div>
                     <div class="fu-counter">
                         <button class="counter-btn" onclick="adjustMore(-1)">−</button>
                         <div class="fu-counter-val" id="moreValDisplay">—</div>
