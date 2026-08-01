@@ -5963,7 +5963,8 @@
             cross:    `<span style="width:9px;height:9px;border-radius:50%;display:inline-block;background:#7B98B0;flex-shrink:0;"></span>`,
             walkrun:  `<span style="width:9px;height:9px;border-radius:50%;display:inline-block;background:#C4A35A;flex-shrink:0;"></span>`
         };
-        const TYPE_LABEL  = { easy:'Easy Run', interval:'Interwały', tempo:'Tempo', long:'Long Run', rest:'Odpoczynek', cross:'Cross', walkrun:'Marsz-Bieg' };
+        function TYPE_LABEL(typ) { return typ ? t('wtype.' + typ) : ''; }
+
         const MONTHS_PL   = ['Styczeń','Luty','Marzec','Kwiecień','Maj','Czerwiec','Lipiec','Sierpień','Wrzesień','Październik','Listopad','Grudzień'];
         const MONTHS_GEN  = ['stycznia','lutego','marca','kwietnia','maja','czerwca','lipca','sierpnia','września','października','listopada','grudnia'];
         const DAYS_SHORT  = ['Pn','Wt','Śr','Cz','Pt','So','Nd'];
@@ -6547,7 +6548,7 @@
             </div>`;
 
             const color = TYPE_COLORS[day.typ] || '#ccc';
-            const label = TYPE_LABEL[day.typ]  || day.typ;
+            const label = TYPE_LABEL(day.typ)  || day.typ;
             const s     = day.struktura || null;
 
             const optionalBadge = day.optional === true
@@ -7519,7 +7520,7 @@
                 const x = (cx - barW/2).toFixed(1), y = (bottom - barH).toFixed(1);
                 const tipD = d.full || d.abbr;
                 const tipV = d.km > 0 ? `${d.km.toFixed(1)} km` : (d.isRest ? 'Odpoczynek' : '—');
-                const tipT = d.typ ? (TYPE_LABEL[d.typ] || d.typ) : '';
+                const tipT = d.typ ? (TYPE_LABEL(d.typ) || d.typ) : '';
 
                 // Today: soft glow ring
                 if (d.isToday) rects += `<rect x="${(cx-barW/2-3).toFixed(1)}" y="${(bottom-barH-3).toFixed(1)}" width="${(barW+6).toFixed(1)}" height="${(barH+3).toFixed(1)}" rx="${barR+2}" fill="none" stroke="${color}" stroke-width="1.5" opacity="0.25" stroke-dasharray="3 3"/>`;
@@ -7601,7 +7602,7 @@
             const typeLabels = days.map((d, i) => {
                 const x = xAt(i).toFixed(1);
                 const col = d.typ && TYPE_COLORS[d.typ] ? TYPE_COLORS[d.typ] : '#C8C2B8';
-                const lbl = d.typ && d.typ !== 'rest' ? (TYPE_LABEL[d.typ] || d.typ).slice(0, 5) : '·';
+                const lbl = d.typ && d.typ !== 'rest' ? (TYPE_LABEL(d.typ) || d.typ).slice(0, 5) : '·';
                 return `<text x="${x}" y="${rowY2}" text-anchor="middle" font-size="7.5" fill="${col}" font-family="Inter,sans-serif" font-weight="700" style="animation:fadeIn 0.3s ease ${680 + i * 50}ms both;">${lbl}</text>`;
             }).join('');
 
@@ -7617,7 +7618,7 @@
                 const col = d.typ && TYPE_COLORS[d.typ] ? TYPE_COLORS[d.typ] : '#888';
                 const r = d.isToday ? '5.5' : '4';
                 const dl = 900 + i * 60;
-                const tipD = d.full || d.abbr, tipT = d.typ ? (TYPE_LABEL[d.typ] || d.typ) : '';
+                const tipD = d.full || d.abbr, tipT = d.typ ? (TYPE_LABEL(d.typ) || d.typ) : '';
                 return `<circle cx="${x}" cy="${y}" r="${r}" fill="${col}" stroke="#FFFFFF" stroke-width="1.5" onclick="showStatsTip('pace',this,'${tipD}','${_p2t(d.pace)} min/km','${tipT}')" style="cursor:pointer;transform-origin:${x}px ${y}px;animation:popDot 0.35s cubic-bezier(0.34,1.56,0.64,1) ${dl}ms both;"/>`;
             }).join('');
 
@@ -7706,7 +7707,7 @@
             const typesPresent = [...new Set(days.map(d => d.typ).filter(t => t && t !== 'rest'))];
             const legendHTML = typesPresent.length > 0
                 ? `<div class="stats-legend">${typesPresent.map(t =>
-                    `<div class="stats-legend-item"><div class="stats-legend-dot" style="background:${TYPE_COLORS[t]||'#ccc'}"></div>${TYPE_LABEL[t]||t}</div>`
+                    `<div class="stats-legend-item"><div class="stats-legend-dot" style="background:${TYPE_COLORS[t]||'#ccc'}"></div>${TYPE_LABEL(t)||t}</div>`
                   ).join('')}</div>`
                 : '';
 
@@ -7896,7 +7897,7 @@
                 const typesPresent = [...new Set(days.map(d => d.typ).filter(t => t && t !== 'rest'))];
                 const legendHTML = typesPresent.length > 0
                     ? `<div class="stats-legend">${typesPresent.map(t =>
-                        `<div class="stats-legend-item"><div class="stats-legend-dot" style="background:${TYPE_COLORS[t]||'#ccc'}"></div>${TYPE_LABEL[t]||t}</div>`
+                        `<div class="stats-legend-item"><div class="stats-legend-dot" style="background:${TYPE_COLORS[t]||'#ccc'}"></div>${TYPE_LABEL(t)||t}</div>`
                       ).join('')}</div>` : '';
                 newHTML = `
                     <div class="sc-header">
@@ -8803,6 +8804,19 @@
             "day.short.4": "Pt",
             "day.short.5": "Sob",
             "day.short.6": "Nd",
+            "wtype.easy": "Easy Run",
+            "wtype.interval": "Interwały",
+            "wtype.tempo": "Tempo",
+            "wtype.long": "Long Run",
+            "wtype.rest": "Odpoczynek",
+            "wtype.cross": "Cross",
+            "wtype.walkrun": "Marsz-Bieg",
+            "wtypeci.easy": "Spokojny bieg",
+            "wtypeci.long": "Długi bieg",
+            "wtypeci.interval": "Interwały",
+            "wtypeci.tempo": "Tempo Run",
+            "wtypeci.walkrun": "Marsz-bieg",
+            "wtypeci.rest": "Odpoczynek",
             "home.streak.count.one": "{n} dzień",
             "home.streak.count.few": "{n} dni",
             "home.streak.count.many": "{n} dni",
@@ -9114,6 +9128,19 @@
             "day.short.4": "Fri",
             "day.short.5": "Sat",
             "day.short.6": "Sun",
+            "wtype.easy": "Easy Run",
+            "wtype.interval": "Intervals",
+            "wtype.tempo": "Tempo",
+            "wtype.long": "Long Run",
+            "wtype.rest": "Rest",
+            "wtype.cross": "Cross",
+            "wtype.walkrun": "Walk-Run",
+            "wtypeci.easy": "Easy run",
+            "wtypeci.long": "Long run",
+            "wtypeci.interval": "Intervals",
+            "wtypeci.tempo": "Tempo run",
+            "wtypeci.walkrun": "Walk-run",
+            "wtypeci.rest": "Rest",
             "home.streak.count.one": "{n} day",
             "home.streak.count.few": "{n} days",
             "home.streak.count.many": "{n} days",
@@ -9425,6 +9452,19 @@
             "day.short.4": "Ven",
             "day.short.5": "Sam",
             "day.short.6": "Dim",
+            "wtype.easy": "Footing",
+            "wtype.interval": "Fractionné",
+            "wtype.tempo": "Tempo",
+            "wtype.long": "Sortie longue",
+            "wtype.rest": "Repos",
+            "wtype.cross": "Cross",
+            "wtype.walkrun": "Marche-course",
+            "wtypeci.easy": "Footing tranquille",
+            "wtypeci.long": "Sortie longue",
+            "wtypeci.interval": "Fractionné",
+            "wtypeci.tempo": "Tempo",
+            "wtypeci.walkrun": "Marche-course",
+            "wtypeci.rest": "Repos",
             "home.streak.count.one": "{n} jour",
             "home.streak.count.few": "{n} jours",
             "home.streak.count.many": "{n} jours",
@@ -9736,6 +9776,19 @@
             "day.short.4": "Vie",
             "day.short.5": "Sáb",
             "day.short.6": "Dom",
+            "wtype.easy": "Rodaje suave",
+            "wtype.interval": "Series",
+            "wtype.tempo": "Tempo",
+            "wtype.long": "Tirada larga",
+            "wtype.rest": "Descanso",
+            "wtype.cross": "Cross",
+            "wtype.walkrun": "Caminar-correr",
+            "wtypeci.easy": "Rodaje suave",
+            "wtypeci.long": "Tirada larga",
+            "wtypeci.interval": "Series",
+            "wtypeci.tempo": "Tempo",
+            "wtypeci.walkrun": "Caminar-correr",
+            "wtypeci.rest": "Descanso",
             "home.streak.count.one": "{n} día",
             "home.streak.count.few": "{n} días",
             "home.streak.count.many": "{n} días",
@@ -10047,6 +10100,19 @@
             "day.short.4": "Fr",
             "day.short.5": "Sa",
             "day.short.6": "So",
+            "wtype.easy": "Lockerer Lauf",
+            "wtype.interval": "Intervalle",
+            "wtype.tempo": "Tempo",
+            "wtype.long": "Langer Lauf",
+            "wtype.rest": "Ruhetag",
+            "wtype.cross": "Cross",
+            "wtype.walkrun": "Geh-Lauf",
+            "wtypeci.easy": "Ruhiger Lauf",
+            "wtypeci.long": "Langer Lauf",
+            "wtypeci.interval": "Intervalle",
+            "wtypeci.tempo": "Tempolauf",
+            "wtypeci.walkrun": "Geh-Lauf",
+            "wtypeci.rest": "Ruhetag",
             "home.streak.count.one": "{n} Tag",
             "home.streak.count.few": "{n} Tage",
             "home.streak.count.many": "{n} Tage",
@@ -10718,7 +10784,7 @@
         function renderWorkoutCard(w) {
             const type = w.type || w.typ || 'easy';
             const color = TYPE_COLORS[type] || '#8A8A8A';
-            const label = TYPE_LABEL[type] || type;
+            const label = TYPE_LABEL(type) || type;
             const date = w.date || (w.logged_at ? w.logged_at.split('T')[0] : '—');
             const dateFormatted = date !== '—'
                 ? new Date(date + 'T12:00:00').toLocaleDateString('pl-PL', { weekday:'short', day:'numeric', month:'short' })
@@ -11929,7 +11995,7 @@
             window._todayStruktura = day.struktura || null;
 
             // (usunięto kolorowy lewy pasek kafelka — mylił; kafelek zostaje neutralny)
-            if (nameEl)  nameEl.textContent = TYPE_LABEL[day.typ] ?? day.typ;
+            if (nameEl)  nameEl.textContent = TYPE_LABEL(day.typ) ?? day.typ;
             if (badgeEl) badgeEl.innerHTML = TYPE_EMOJI[day.typ] ?? '⚫';
 
 
@@ -12001,8 +12067,8 @@
                 list.innerHTML = changes.map(c => {
                     const fromEmoji = TYPE_EMOJI[c.original_typ] || '⚫';
                     const toEmoji = TYPE_EMOJI[c.new_typ] || '⚫';
-                    const fromLabel = TYPE_LABEL[c.original_typ] || c.original_typ || '—';
-                    const toLabel = TYPE_LABEL[c.new_typ] || c.new_typ || '—';
+                    const fromLabel = TYPE_LABEL(c.original_typ) || c.original_typ || '—';
+                    const toLabel = TYPE_LABEL(c.new_typ) || c.new_typ || '—';
                     const hasChange = c.new_day && c.new_day !== c.original_day;
 
                     return `<div style="background:var(--surface-color);border:1px solid rgba(235,235,235,0.5);border-left:3px solid var(--primary-color);border-radius:14px;box-shadow:0 2px 12px rgba(0,0,0,0.03);padding:12px 14px;animation:fadeInUp 0.25s ease both;">
@@ -12120,7 +12186,7 @@
 
         // Stempel buildu — dowód na urządzeniu, że działa świeży kod (trzymać
         // w zgodzie z CACHE_VERSION w sw.js; bump przy każdym deployu frontendu)
-        const VELM_BUILD = 'v66';
+        const VELM_BUILD = 'v67';
         console.log('velm build', VELM_BUILD, navigator.userAgent);
 
         async function hardReloadApp() {
@@ -12867,10 +12933,10 @@
             }
 
             // Update workout preview card
-            const TYPE_LABEL_CI = {easy:'Spokojny bieg',long:'Długi bieg',interval:'Interwały',tempo:'Tempo Run',walkrun:'Marsz-bieg',rest:'Odpoczynek'};
+            function TYPE_LABEL_CI(typ) { return typ ? t('wtypeci.' + typ) : ''; }
             const previewTitle = document.getElementById('ci-preview-title');
             const previewSub   = document.getElementById('ci-preview-sub');
-            if (previewTitle) previewTitle.textContent = TYPE_LABEL_CI[workoutType] || workoutType;
+            if (previewTitle) previewTitle.textContent = TYPE_LABEL_CI(workoutType) || workoutType;
             if (previewSub) {
                 // Pełny obraz planu: dystans · szacowany czas (zawsze, dzięki fallbackowi
                 // w _ciEstTotalMin — nie znika, gdy plan nie ma wpisanego realnego tempa)
@@ -12883,7 +12949,7 @@
                 previewSub.textContent = parts.join(' · ');
             }
             const m2desc = document.getElementById('step-morning-4-desc');
-            if (m2desc) m2desc.textContent = t('ci.ready.desc.plan').replace('{type}', TYPE_LABEL_CI[workoutType] || workoutType).replace('{km}', workoutData.dystans_km);
+            if (m2desc) m2desc.textContent = t('ci.ready.desc.plan').replace('{type}', TYPE_LABEL_CI(workoutType) || workoutType).replace('{km}', workoutData.dystans_km);
 
             _checkinStepsLockedHeight = 0;
             // Reset all steps to inactive
