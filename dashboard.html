@@ -3344,6 +3344,38 @@
         .s-lang-btn:active { transform:scale(0.98); }
         .s-lang-btn.selected { background:#1A1A1A; border-color:#1A1A1A; color:#fff; box-shadow:0 3px 12px rgba(26,26,26,0.16); }
 
+        /* ── Kreator celu w stylu ONBOARDINGU (index.html) — prefiks ob-* ──
+           Te same wartości co w index.html: ciepłe tło #FDFBF7, ramka #D8D2C4,
+           zaznaczenie = czarna karta. Prefiks, bo settings ma własny system sd-*
+           i nie chcemy, żeby kiedyś zderzyły się nazwy. */
+        .ob-hl{font-family:'Bricolage Grotesque',sans-serif;font-size:clamp(26px,7.5vw,36px);font-weight:800;line-height:1.08;letter-spacing:-.04em;color:#111;margin:0 0 14px}
+        .ob-sub{font-size:14px;color:#5C6B85;line-height:1.5;margin:-6px 0 18px}
+        .ob-list{display:flex;flex-direction:column;gap:10px}
+        .ob-cc{width:100%;padding:16px 18px;border-radius:18px;border:1.5px solid #D8D2C4;background:#FDFBF7;cursor:pointer;transition:all .2s cubic-bezier(.22,1,.36,1);display:flex;align-items:center;gap:14px;text-align:left;font:inherit;touch-action:manipulation}
+        .ob-cc:active{transform:scale(.985)}
+        .ob-cc.s{border-color:#111;background:#111}
+        .ob-cc.s .ob-ct{color:#fff}
+        .ob-cc.s .ob-cs{color:rgba(255,255,255,.52)}
+        .ob-cc.s .ob-ci{background:rgba(255,255,255,.1);color:#fff}
+        .ob-cc.s .ob-ck{opacity:1}
+        .ob-ci{width:46px;height:46px;border-radius:13px;background:#EDE8DC;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#6B7FA8;transition:all .2s}
+        .ob-cv{flex:1;min-width:0}
+        .ob-ct{font-size:15px;font-weight:600;color:#111;letter-spacing:-.01em;line-height:1.3;transition:color .2s}
+        .ob-cs{font-size:13px;color:#5C6B85;margin-top:2px;line-height:1.4;transition:color .2s}
+        .ob-ck{width:20px;height:20px;flex-shrink:0;opacity:0;transition:opacity .2s;color:#fff}
+        .ob-txt{width:100%;border-radius:12px;border:1.5px solid #D8D2C4;background:#FDFBF7;color:#111;padding:13px 14px;font:inherit;outline:none;transition:border-color .2s;font-size:15px;box-sizing:border-box}
+        .ob-txt:focus{border-color:#111}
+        .ob-txt:disabled{opacity:.45}
+        .ob-label{display:block;font-size:13.5px;font-weight:700;margin-bottom:8px;color:#111;letter-spacing:.02em}
+        .ob-panel{background:#FDFBF7;border:1.5px solid #D8D2C4;border-radius:18px;padding:20px;margin-bottom:14px}
+        .ob-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+        .ob-tile{padding:15px 6px;border-radius:16px;border:1.5px solid #D8D2C4;background:#FDFBF7;font:inherit;font-size:14px;font-weight:600;color:#111;cursor:pointer;transition:all .2s;touch-action:manipulation}
+        .ob-tile.s{border-color:#111;background:#111;color:#fff}
+        .ob-note{font-size:13px;color:#5C6B85;line-height:1.5;margin-top:12px}
+        .ob-cta{width:100%;padding:17px;border-radius:16px;border:none;background:#111;color:#fff;font:inherit;font-size:16px;font-weight:700;cursor:pointer;transition:opacity .2s;margin-top:6px;touch-action:manipulation}
+        .ob-cta:disabled{opacity:.35;cursor:default}
+        @media (min-width:420px){ .ob-cc{padding:18px;min-height:72px} .ob-ct{font-size:16px} .ob-cs{font-size:14px} .ob-ci{width:48px;height:48px} }
+
         /* ── Figma settings design system (sd-*) — sage-green accent, warm cards ── */
         .sd-card { background:#fff; border:1px solid rgba(70,55,40,0.04); border-radius:22px; padding:19px; margin-bottom:14px; box-shadow:var(--sd-shadow); }
         .sd-seclabel { font-size:11px; font-weight:800; color:#A69C8E; text-transform:uppercase; letter-spacing:0.08em; margin:0 0 12px; }
@@ -8150,11 +8182,19 @@
         function wizPickChip(field, val) { _goalWiz[field] = val; renderGoalWiz(); }
         function wizSetHasRace(v) { _goalWiz.hasRace = v; renderGoalWiz(); }
 
+        function _obCard(title, sub, selected, onclick, icon) {
+            return '<button class="ob-cc' + (selected ? ' s' : '') + '" onclick="' + onclick + '">' +
+                (icon ? '<span class="ob-ci">' + icon + '</span>' : '') +
+                '<span class="ob-cv"><span class="ob-ct" style="display:block;">' + title + '</span>' +
+                (sub ? '<span class="ob-cs" style="display:block;">' + sub + '</span>' : '') + '</span>' +
+                '<svg class="ob-ck" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></button>';
+        }
+
         function _wizChipCard(label, field, opts) {
-            return '<div class="sd-card"><div class="sd-seclabel">' + label + '</div><div style="display:flex;flex-direction:column;gap:8px;">' +
-                opts.map(([v, l]) => '<button class="sd-choice' + (_goalWiz[field] === v ? ' sel' : '') + '" onclick="wizPickChip(\'' + field + '\',\'' + v + '\')"><span>' + l + '</span>' +
-                    (_goalWiz[field] === v ? '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5F8368" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M20 6L9 17l-5-5"/></svg>' : '') + '</button>').join('') +
-                '</div></div>';
+            return '<div class="ob-label" style="margin-top:18px;">' + label + '</div>' +
+                '<div class="ob-list">' + opts.map(([v, l]) =>
+                    _obCard(l, '', _goalWiz[field] === v, "wizPickChip('" + field + "','" + v + "')")
+                ).join('') + '</div>';
         }
         function _wizStepReady() {
             const w = _goalWiz;
@@ -8178,27 +8218,31 @@
         // zwykle pochodzi sprzed korzystania z apki.
         function _wizPbCard() {
             const w = _goalWiz;
-            return '<div class="home-anim sd-card" style="animation-delay:0.06s;">' +
-                '<div class="sd-seclabel">Twój rekord na tym dystansie</div>' +
-                '<div class="s-field" style="margin-bottom:8px;"><input type="text" class="s-input" placeholder="np. 21:30 lub 1:45:00"' +
-                ' value="' + (w.pb || '') + '" oninput="_goalWiz.pb=this.value" ' + (w.pbNone ? 'disabled' : '') + '></div>' +
-                '<button class="sd-choice' + (w.pbNone ? ' sel' : '') + '" onclick="_goalWiz.pbNone=!_goalWiz.pbNone;renderGoalWiz()">' +
-                '<span>Nie mam / nie pamiętam</span>' +
-                (w.pbNone ? '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5F8368" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>' : '') +
-                '</button>' +
-                '<div class="sd-info" style="margin:10px 0 0;">Pomaga trenerowi ustawić tempa. Resztę — ile i jak trenujesz — sztab już wie z Twoich treningów.</div></div>';
+            return '<div class="ob-label" style="margin-top:18px;">Twój rekord na tym dystansie</div>' +
+                '<div class="ob-panel">' +
+                '<input type="text" class="ob-txt" placeholder="np. 21:30 lub 1:45:00" value="' + (w.pb || '') + '"' +
+                ' oninput="_goalWiz.pb=this.value" ' + (w.pbNone ? 'disabled' : '') + '>' +
+                '<div class="ob-list" style="margin-top:12px;">' +
+                _obCard('Nie mam / nie pamiętam', '', !!w.pbNone,
+                        '_goalWiz.pbNone=!_goalWiz.pbNone;renderGoalWiz()') +
+                '</div>' +
+                '<div class="ob-note">Pomaga trenerowi ustawić tempa. Resztę — ile i jak trenujesz — sztab już wie z Twoich treningów.</div>' +
+                '</div>';
         }
 
         // Szczegóły kontuzji. Świadomie NIE pytamy tu o objętość ani typ treningu —
         // to mamy z historii. Pytamy wyłącznie o to, czego w danych nie ma.
         function _wizInjuryCards() {
             const w = _goalWiz;
-            return '<div class="home-anim sd-card" style="animation-delay:0.06s;">' +
-                '<div class="sd-seclabel">Co dokładnie się stało</div>' +
-                '<div class="s-field"><label class="s-label">Co boli / bolało</label>' +
-                '<input type="text" class="s-input" placeholder="np. kolano, ścięgno Achillesa" value="' + (w.injArea || '') + '" oninput="_goalWiz.injArea=this.value"></div>' +
-                '<div class="s-field" style="margin-bottom:0;"><label class="s-label">Dodatkowe uwagi (opcjonalnie)</label>' +
-                '<input type="text" class="s-input" placeholder="np. od biegania po asfalcie" value="' + (w.injNotes || '') + '" oninput="_goalWiz.injNotes=this.value"></div></div>' +
+            return '<div class="ob-label" style="margin-top:18px;">Co dokładnie się stało</div>' +
+                '<div class="ob-panel">' +
+                '<label class="ob-label">Co boli / bolało</label>' +
+                '<input type="text" class="ob-txt" style="margin-bottom:18px;" placeholder="np. kolano, ścięgno Achillesa"' +
+                ' value="' + (w.injArea || '') + '" oninput="_goalWiz.injArea=this.value">' +
+                '<label class="ob-label">Dodatkowe uwagi (opcjonalnie)</label>' +
+                '<input type="text" class="ob-txt" placeholder="np. od biegania po asfalcie"' +
+                ' value="' + (w.injNotes || '') + '" oninput="_goalWiz.injNotes=this.value">' +
+                '</div>' +
                 _wizChipCard('Jak się teraz czujesz?', 'injState', [
                     ['healed', 'Nic już nie boli'],
                     ['mild', 'Lekko czuję przy większym wysiłku'],
@@ -8212,49 +8256,83 @@
             const host = document.getElementById('goal-wiz');
             if (!host || !_goalWiz) return;
             const titleEl = document.getElementById('goal-wiz-title');
+            // Nagłówek panelu chowamy — w stylu onboardingu pytanie JEST nagłówkiem (.ob-hl)
+            if (titleEl) titleEl.textContent = '';
 
             if (_goalWiz.step === 0) {
-                if (titleEl) titleEl.textContent = 'Zmień cel';
                 host.innerHTML =
-                    '<div class="home-anim sd-info" style="margin-bottom:14px;">Wybierz nowy typ celu. Obecny cel zostanie zakończony, a sztab przebuduje plan od najbliższej narady.</div>' +
-                    _wizGoalIds().map((id, i) => {
+                    '<h1 class="ob-hl">Jaki masz teraz cel?</h1>' +
+                    '<div class="ob-sub">Obecny cel zostanie zakończony, a sztab przebuduje plan od najbliższej narady.</div>' +
+                    '<div class="ob-list">' +
+                    _wizGoalIds().map(id => {
                         const g = GOAL_WIZ_TYPES[id];
-                        return '<button class="home-anim sd-action" style="animation-delay:' + (0.04 + i * 0.04) + 's;" onclick="wizPickType(\'' + id + '\')">' +
-                            '<span class="sd-action-icon" style="background:#E9F0EA;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#5F8368" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/></svg></span>' +
-                            '<span class="sd-action-body"><span class="sd-action-title" style="display:block;">' + g.t + '</span><span class="sd-action-sub" style="display:block;">' + g.d + '</span></span>' +
-                            '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#C4C4C4" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg>' +
-                        '</button>';
-                    }).join('');
+                        return _obCard(g.t, g.d, false, "wizPickType('" + id + "')", _wizGoalIcon(id));
+                    }).join('') + '</div>';
                 return;
             }
 
             const id = _goalWiz.goalId;
-            if (titleEl) titleEl.textContent = (GOAL_WIZ_TYPES[id] || {}).t || 'Nowy cel';
-            const distChips = () => '<div class="sd-seclabel">Dystans</div><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">' +
-                GOAL_WIZ_DIST.map(([v, l]) => '<button class="s-day-btn' + (_goalWiz.dist === v ? ' selected' : '') + '" style="min-height:48px;font-size:13px;" onclick="wizPickDist(\'' + v + '\')">' + l + '</button>').join('') + '</div>' +
-                (_goalWiz.dist === 'other' ? '<div class="s-field" style="margin-top:12px;margin-bottom:0;"><label class="s-label">Ile km?</label><input type="number" min="1" max="200" class="s-input" value="' + _goalWiz.customDist + '" oninput="_goalWiz.customDist=this.value"></div>' : '');
+            const head = (t, sub) => '<h1 class="ob-hl">' + t + '</h1>' + (sub ? '<div class="ob-sub">' + sub + '</div>' : '');
+
+            const distTiles = () =>
+                '<div class="ob-label" style="margin-top:4px;">Dystans</div>' +
+                '<div class="ob-grid">' + GOAL_WIZ_DIST.map(([v, l]) =>
+                    '<button class="ob-tile' + (_goalWiz.dist === v ? ' s' : '') + '" onclick="wizPickDist(\'' + v + '\')">' + l + '</button>'
+                ).join('') + '</div>' +
+                (_goalWiz.dist === 'other'
+                    ? '<div style="margin-top:12px;"><label class="ob-label">Ile kilometrów?</label>' +
+                      '<input type="number" min="1" max="200" class="ob-txt" value="' + _goalWiz.customDist + '" oninput="_goalWiz.customDist=this.value"></div>'
+                    : '');
+
             let body = '';
             if (id === 'time') {
-                body = '<div class="home-anim sd-card">' + distChips() +
-                    '<div class="s-field" style="margin-top:14px;"><label class="s-label">Data zawodów</label><input type="date" class="s-input" value="' + _goalWiz.raceDate + '" oninput="_goalWiz.raceDate=this.value"></div>' +
-                    '<div class="s-field" style="margin-bottom:0;"><label class="s-label">Cel czasowy (opcjonalnie)</label><input type="text" placeholder="np. 45:00 lub 1:45:00" class="s-input" value="' + _goalWiz.timeGoal + '" oninput="_goalWiz.timeGoal=this.value"></div></div>' + _wizPbCard();
+                body = head('Jaki dystans i na kiedy?', 'Cel czasowy możesz podać teraz albo zostawić trenerowi.') +
+                    distTiles() +
+                    '<div class="ob-label" style="margin-top:18px;">Data zawodów</div>' +
+                    '<input type="date" class="ob-txt" value="' + _goalWiz.raceDate + '" oninput="_goalWiz.raceDate=this.value">' +
+                    '<div class="ob-label" style="margin-top:18px;">Cel czasowy (opcjonalnie)</div>' +
+                    '<input type="text" class="ob-txt" placeholder="np. 45:00 lub 1:45:00" value="' + _goalWiz.timeGoal + '" oninput="_goalWiz.timeGoal=this.value">' +
+                    _wizPbCard();
             } else if (id === 'distance') {
-                body = '<div class="home-anim sd-card">' + distChips() +
-                    '<div class="s-field" style="margin-top:14px;margin-bottom:' + (_goalWiz.hasRace ? '12px' : '0') + ';"><label class="s-label">Masz konkretny wyścig?</label><div class="s-lang-toggle" style="margin-bottom:0;"><button class="s-lang-btn' + (_goalWiz.hasRace ? ' selected' : '') + '" onclick="wizSetHasRace(true)">Tak</button><button class="s-lang-btn' + (!_goalWiz.hasRace ? ' selected' : '') + '" onclick="wizSetHasRace(false)">Jeszcze nie</button></div></div>' +
-                    (_goalWiz.hasRace ? '<div class="s-field" style="margin-bottom:0;"><label class="s-label">Data zawodów</label><input type="date" class="s-input" value="' + _goalWiz.raceDate + '" oninput="_goalWiz.raceDate=this.value"></div>' : '') + '</div>' + _wizPbCard();
+                body = head('Jaki dystans chcesz zdobyć?') +
+                    distTiles() +
+                    '<div class="ob-label" style="margin-top:18px;">Masz konkretny wyścig?</div>' +
+                    '<div class="ob-list">' +
+                    _obCard('Tak, mam datę', '', _goalWiz.hasRace === true, 'wizSetHasRace(true)') +
+                    _obCard('Jeszcze nie', '', _goalWiz.hasRace === false, 'wizSetHasRace(false)') +
+                    '</div>' +
+                    (_goalWiz.hasRace
+                        ? '<div class="ob-label" style="margin-top:18px;">Data zawodów</div>' +
+                          '<input type="date" class="ob-txt" value="' + _goalWiz.raceDate + '" oninput="_goalWiz.raceDate=this.value">'
+                        : '') +
+                    _wizPbCard();
             } else if (id === 'health') {
-                body = _wizChipCard('Co jest dla Ciebie najważniejsze?', 'healthFocus', [['forma','Utrzymać formę'],['waga','Zrzucić wagę'],['kondycja','Ogólna kondycja'],['energia','Więcej energii']]);
+                body = head('Co jest dla Ciebie najważniejsze?') +
+                    _wizChipCard('Wybierz jedno', 'healthFocus', [['forma','Utrzymać formę'],['waga','Zrzucić wagę'],['kondycja','Ogólna kondycja'],['energia','Więcej energii']]);
             } else if (id === 'comeback') {
-                body = _wizChipCard('Skąd wracasz?', 'comebackReason', [['injury','Po kontuzji'],['break','Po dłuższej przerwie']]) +
-                       _wizChipCard('Jak dawno ostatni bieg?', 'comebackSince', [['lt1','mniej niż miesiąc'],['1_3','1–3 miesiące'],['3_6','3–6 miesięcy'],['gt6','ponad pół roku']]) +
-                       (_goalWiz.comebackReason === 'injury' ? _wizInjuryCards() : '');
+                body = head('Skąd wracasz?', 'Im więcej wiemy, tym ostrożniej sztab ułoży pierwsze tygodnie.') +
+                    _wizChipCard('Powód przerwy', 'comebackReason', [['injury','Po kontuzji'],['break','Po dłuższej przerwie']]) +
+                    _wizChipCard('Jak dawno ostatni bieg?', 'comebackSince', [['lt1','mniej niż miesiąc'],['1_3','1–3 miesiące'],['3_6','3–6 miesięcy'],['gt6','ponad pół roku']]) +
+                    (_goalWiz.comebackReason === 'injury' ? _wizInjuryCards() : '');
             } else if (id === 'start' || id === 'walkrun') {
-                body = _wizChipCard('Twój pierwszy cel?', 'startFocus', [['5k','Przebiec 5 km bez przerwy'],['30min','30 minut ciągłego biegu'],['fit','Ogólna sprawność']]);
+                body = head('Twój pierwszy cel?') +
+                    _wizChipCard('Wybierz jedno', 'startFocus', [['5k','Przebiec 5 km bez przerwy'],['30min','30 minut ciągłego biegu'],['fit','Ogólna sprawność']]);
             }
+
             const ready = _wizStepReady();
             host.innerHTML = body +
-                '<button class="s-btn-primary" style="min-height:54px;font-size:15px;margin-top:6px;' + (ready ? '' : 'opacity:0.5;') + '" ' + (ready ? 'onclick="saveGoalWiz()"' : 'disabled') + '>Zapisz nowy cel</button>' +
+                '<button class="ob-cta" style="margin-top:22px;" ' + (ready ? 'onclick="saveGoalWiz()"' : 'disabled') + '>Zapisz nowy cel</button>' +
                 '<div id="goal-wiz-msg" class="s-msg" style="color:#6B8F71;">Zapisano — plan zaktualizuje się przy najbliższej naradzie</div>';
+        }
+
+        // Ikony typów celu — te same kształty co w onboardingu (cel, dystans, serce, powrót)
+        function _wizGoalIcon(id) {
+            const w = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">';
+            if (id === 'time')     return w + '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>';
+            if (id === 'distance') return w + '<path d="M3 18h4l3-12 4 16 3-8h4"/></svg>';
+            if (id === 'health')   return w + '<path d="M20.8 5.6a5 5 0 00-7.1 0L12 7.3l-1.7-1.7a5 5 0 10-7.1 7.1L12 21.5l8.8-8.8a5 5 0 000-7.1z"/></svg>';
+            if (id === 'comeback') return w + '<path d="M3 12a9 9 0 109-9"/><path d="M3 4v5h5"/></svg>';
+            return w + '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/></svg>';
         }
         // Rekord życiowy z pola tekstowego ("21:30" / "1:45:00") na pola onboardingu.
         // Puste albo "nie mam" -> zapisujemy flagę, nie zmyślamy zera.
@@ -12254,7 +12332,7 @@
 
         // Stempel buildu — dowód na urządzeniu, że działa świeży kod (trzymać
         // w zgodzie z CACHE_VERSION w sw.js; bump przy każdym deployu frontendu)
-        const VELM_BUILD = 'v68';
+        const VELM_BUILD = 'v69';
         console.log('velm build', VELM_BUILD, navigator.userAgent);
 
         async function hardReloadApp() {
