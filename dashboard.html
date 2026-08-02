@@ -3353,10 +3353,39 @@
         .ob-bar{flex:1;height:3px;border-radius:2px;background:#E5DFD2;overflow:hidden}
         .ob-pf{height:100%;width:0%;background:#111;border-radius:0 2px 2px 0;transition:width .5s cubic-bezier(.4,0,.2,1)}
         .ob-pill{font-size:11px;font-weight:500;color:#5C6B85;letter-spacing:.07em;text-transform:uppercase;background:#EDE8DC;border-radius:99px;padding:5px 13px;flex-shrink:0}
-        @keyframes obIn {from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:translateY(0)}}
-        @keyframes obOut{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(-24px)}}
-        .ob-screen{animation:obIn .32s cubic-bezier(.22,1,.36,1) both}
-        .ob-screen.leaving{animation:obOut .18s cubic-bezier(.4,0,1,1) both;pointer-events:none}
+        /* Przejscia: wylacznie transform+opacity (kompozytowane na GPU). Zadnych
+           wlasciwosci wymuszajacych layout — inaczej na telefonie widac zacinanie. */
+        @keyframes obIn {from{opacity:0;transform:translate3d(0,26px,0)}to{opacity:1;transform:translate3d(0,0,0)}}
+        @keyframes obOut{from{opacity:1;transform:translate3d(0,0,0)}to{opacity:0;transform:translate3d(0,-18px,0)}}
+        .ob-screen{animation:obIn .42s cubic-bezier(.16,1,.3,1) both;will-change:transform,opacity}
+        .ob-screen.leaving{animation:obOut .22s cubic-bezier(.4,0,1,1) both;pointer-events:none}
+        /* Kaskada kart — to jest roznica miedzy "pojawilo sie" a "wjechalo". */
+        @keyframes obCard{from{opacity:0;transform:translate3d(0,14px,0)}to{opacity:1;transform:translate3d(0,0,0)}}
+        .ob-screen .ob-hl{animation:obCard .40s cubic-bezier(.16,1,.3,1) both}
+        .ob-screen .ob-sub{animation:obCard .40s cubic-bezier(.16,1,.3,1) both;animation-delay:.04s}
+        .ob-screen .ob-list > .ob-cc,
+        .ob-screen .ob-grid > .ob-tile{animation:obCard .44s cubic-bezier(.16,1,.3,1) both}
+        .ob-screen .ob-list > .ob-cc:nth-child(1),.ob-screen .ob-grid > .ob-tile:nth-child(1){animation-delay:.06s}
+        .ob-screen .ob-list > .ob-cc:nth-child(2),.ob-screen .ob-grid > .ob-tile:nth-child(2){animation-delay:.11s}
+        .ob-screen .ob-list > .ob-cc:nth-child(3),.ob-screen .ob-grid > .ob-tile:nth-child(3){animation-delay:.16s}
+        .ob-screen .ob-list > .ob-cc:nth-child(4),.ob-screen .ob-grid > .ob-tile:nth-child(4){animation-delay:.21s}
+        .ob-screen .ob-grid > .ob-tile:nth-child(5){animation-delay:.26s}
+        .ob-screen .ob-grid > .ob-tile:nth-child(6){animation-delay:.31s}
+        /* Wybrana karta "dociska sie" zanim ekran odjedzie — potwierdzenie wyboru. */
+        .ob-cc{transition:transform .16s cubic-bezier(.22,1,.36,1),border-color .2s,background .2s}
+        .ob-cc:active{transform:scale(.975)}
+        .ob-cc.picked{transform:scale(.97)}
+        .ob-tile{transition:transform .14s cubic-bezier(.22,1,.36,1),border-color .2s,background .2s}
+        .ob-tile:active{transform:scale(.95)}
+        .ob-cta{transition:opacity .2s,transform .15s cubic-bezier(.22,1,.36,1)}
+        .ob-cta:active:not(:disabled){transform:scale(.985)}
+        .ob-pf{transition:width .55s cubic-bezier(.16,1,.3,1)}
+        /* Kto wylaczyl animacje w systemie, ten ich nie dostaje. */
+        @media (prefers-reduced-motion:reduce){
+            .ob-screen,.ob-screen.leaving,.ob-screen .ob-hl,.ob-screen .ob-sub,
+            .ob-screen .ob-list > .ob-cc,.ob-screen .ob-grid > .ob-tile{animation:none}
+            .ob-pf{transition:none}
+        }
 
         /* ── Kreator celu w stylu ONBOARDINGU (index.html) — prefiks ob-* ──
            Te same wartości co w index.html: ciepłe tło #FDFBF7, ramka #D8D2C4,
@@ -8174,7 +8203,7 @@
             start:    { t:'Zaczynam od zera', d:'Chcę zacząć regularnie biegać' },
             walkrun:  { t:'Marszobieg',       d:'Naprzemienny bieg i marsz' }
         };
-        const GOAL_WIZ_DIST = [['5k','5 km'],['10k','10 km'],['half','Półmaraton'],['marathon','Maraton'],['ultra','Ultra'],['other','Własny']];
+        const GOAL_WIZ_DIST = [['5k','5 km'],['10k','10 km'],['half','Półmaraton'],['marathon','Maraton'],['ultra','Ultra 50+ km'],['other','Własny']];
         let _goalWiz = null;
 
         function resetGoalWiz() {
@@ -8194,7 +8223,10 @@
         
 
         function _obCard(title, sub, selected, onclick, icon) {
-            return '<button class="ob-cc' + (selected ? ' s' : '') + '" onclick="' + onclick + '">' +
+            // classList.add('picked') daje krótkie potwierdzenie wyboru zanim ekran
+            // odjedzie — bez tego kliknięcie i przejście zlewają się w jeden przeskok.
+            return '<button class="ob-cc' + (selected ? ' s' : '') +
+                '" onclick="this.classList.add(\'picked\');' + onclick + '">' +
                 (icon ? '<span class="ob-ci">' + icon + '</span>' : '') +
                 '<span class="ob-cv"><span class="ob-ct" style="display:block;">' + title + '</span>' +
                 (sub ? '<span class="ob-cs" style="display:block;">' + sub + '</span>' : '') + '</span>' +
@@ -8358,7 +8390,7 @@ function _wizSteps() {
                     break;
                 case 'racedate':
                     body = head('Kiedy startujesz?', 'Od tej daty sztab liczy ostrzenie i tygodnie budowania.') +
-                        '<input type="date" class="ob-txt" value="' + _goalWiz.raceDate + '" oninput="_goalWiz.raceDate=this.value;_wizSyncCta()">';
+                        '<input type="date" class="ob-txt" value="' + _goalWiz.raceDate + '" oninput="_goalWiz.raceDate=this.value;_wizSyncCta()" onchange="_goalWiz.raceDate=this.value;_wizSyncCta()">';
                     break;
                 case 'target':
                     body = head('Masz cel czasowy?', 'Możesz zostawić puste — trener zaproponuje realny cel.') +
@@ -8423,8 +8455,13 @@ function _wizSteps() {
                 '</div>' +
                 '<div class="ob-screen">' + body +
                     (step.cta
-                        ? '<button class="ob-cta" id="wiz-cta" style="margin-top:22px;" ' +
-                          (blocked ? 'disabled' : (isLast ? 'onclick="saveGoalWiz()"' : 'onclick="wizNext()"')) + '>' +
+                        // onclick MUSI być zawsze. Wcześniej dostawał go tylko przycisk
+                        // odblokowany w momencie renderu — więc po wybraniu daty z kalendarza
+                        // _wizSyncCta() zdejmowało `disabled`, ale kliknięcie nie miało czego
+                        // wywołać i flow stawał w miejscu.
+                        ? '<button class="ob-cta" id="wiz-cta" style="margin-top:22px;"' +
+                          ' onclick="' + (isLast ? 'saveGoalWiz()' : 'wizNext()') + '"' +
+                          (blocked ? ' disabled' : '') + '>' +
                           (isLast ? 'Zapisz nowy cel' : 'Dalej') + '</button>'
                         : '') +
                     '<div id="goal-wiz-msg" class="s-msg" style="color:#6B8F71;"></div>' +
@@ -12441,7 +12478,7 @@ function _wizSteps() {
 
         // Stempel buildu — dowód na urządzeniu, że działa świeży kod (trzymać
         // w zgodzie z CACHE_VERSION w sw.js; bump przy każdym deployu frontendu)
-        const VELM_BUILD = 'v70';
+        const VELM_BUILD = 'v71';
         console.log('velm build', VELM_BUILD, navigator.userAgent);
 
         async function hardReloadApp() {
