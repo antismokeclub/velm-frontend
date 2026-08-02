@@ -4719,6 +4719,9 @@
                 if (res.status === 401) { forceReauth('Sesja wygasła — zaloguj się ponownie'); return; }
                 const data = await res.json();
                 const u = data?.user;
+                // Onboarding globalnie — check-in musi wiedzieć, czy DZIŚ jest dzień
+                // startu, a _settingsOnb zapełnia się dopiero po wejściu w ustawienia.
+                window._userOnb = u?.onboarding_data ?? null;
                 // dob_y przechowywane w onboarding_data, nie na poziomie wiersza
                 const dob_y = u?.onboarding_data?.dob_y ?? u?.dob_y;
                 if (dob_y) {
@@ -12478,7 +12481,7 @@ function _wizSteps() {
 
         // Stempel buildu — dowód na urządzeniu, że działa świeży kod (trzymać
         // w zgodzie z CACHE_VERSION w sw.js; bump przy każdym deployu frontendu)
-        const VELM_BUILD = 'v72';
+        const VELM_BUILD = 'v73';
         console.log('velm build', VELM_BUILD, navigator.userAgent);
 
         async function hardReloadApp() {
@@ -13053,6 +13056,35 @@ function _wizSteps() {
         // Bez wymyślonych liczb. Wcześniej ziarno miało dystans_km:10 i gdy plan nie
         // zdążył się doładować (albo przyszło km=0), zawodnik z planem na 6 km widział
         // w check-inie 10 km. null = "nie wiem" i UI ma to przyznać, nie zgadywać.
+        // ── START ZAWODÓW ──────────────────────────────────────────────────
+        let _ciRaceTime = '', _ciRaceSkipped = false;
+
+        /** Czy DZIŚ jest dzień celu. Data celu z onboardingu — jedyne pewne źródło;
+            faza planu mówi o TYGODNIU zawodów, a nas interesuje konkretny dzień. */
+        function _ciIsRaceDay() {
+            const onb = window._settingsOnb || window._userOnb || {};
+            const raw = onb.time_race_date || onb.time_race_target || onb.dist_goal_date;
+            if (!raw) return false;
+            return String(raw).slice(0, 10) === new Date().toISOString().split('T')[0];
+        }
+
+        /** "19:42" / "1:38:20" → sekundy. null gdy pusto albo bez sensu. */
+        function _ciParseRaceSec(v) {
+            const p = String(v || '').trim().split(':').map(x => parseInt(x, 10));
+            if (!p.length || p.some(x => !Number.isFinite(x) || x < 0)) return null;
+            const sec = p.length === 2 ? p[0] * 60 + p[1]
+                      : p.length === 3 ? p[0] * 3600 + p[1] * 60 + p[2] : null;
+            return (sec && sec > 60 && sec < 24 * 3600) ? sec : null;
+        }
+
+        function _ciToggleRaceSkip() {
+            _ciRaceSkipped = !_ciRaceSkipped;
+            const btn = document.getElementById('ci-race-skip');
+            const inp = document.getElementById('ci-race-time');
+            if (btn) btn.classList.toggle('s', _ciRaceSkipped);
+            if (inp) { inp.disabled = _ciRaceSkipped; if (_ciRaceSkipped) { inp.value = ''; _ciRaceTime = ''; } }
+        }
+
         let workoutData = { dystans_km:null, struktura:true, powtorzenia:null, serie:null, odcinek_km:null };
         let inFollowUp       = false;
         let followUpSubStep  = 0;
@@ -13251,6 +13283,17 @@ function _wizSteps() {
                 previewSub.textContent = parts.length ? parts.join(' · ')
                     : 'Szczegóły planu wczytają się za chwilę';
             }
+            // Panel startu tylko w dniu celu i tylko w trybie potreningowym.
+            _ciRaceTime = ''; _ciRaceSkipped = false;
+            const raceBox = document.getElementById('ci-race-box');
+            if (raceBox) {
+                const show = (mode === 'post') && _ciIsRaceDay();
+                raceBox.style.display = show ? '' : 'none';
+                const inp = document.getElementById('ci-race-time');
+                if (inp) { inp.value = ''; inp.disabled = false; }
+                document.getElementById('ci-race-skip')?.classList.remove('s');
+            }
+
             const m2desc = document.getElementById('step-morning-4-desc');
             if (m2desc) m2desc.textContent = workoutData.dystans_km
                 ? t('ci.ready.desc.plan').replace('{type}', TYPE_LABEL_CI(workoutType) || workoutType).replace('{km}', workoutData.dystans_km)
@@ -13613,6 +13656,15 @@ function _wizSteps() {
                 source: 'manual',
                 skipped_parts: skippedParts.size > 0 ? [...skippedParts] : null
             };
+            // Start zapisujemy TYLKO gdy user faktycznie wystartował i podał czas —
+            // inaczej flaga bez czasu i tak nie zakotwiczy formy ani nie rozstrzygnie celu.
+            if (_ciIsRaceDay() && !_ciRaceSkipped) {
+                const _raceSec = _ciParseRaceSec(_ciRaceTime);
+                if (_raceSec) {
+                    workoutPayload.is_race = true;
+                    workoutPayload.race_official_time_sec = _raceSec;
+                }
+            }
             if (workoutType === 'interval') {
                 if (segmentRepeats > 0) workoutPayload.completed_repeats = segmentRepeats;
                 if (workoutData.powtorzenia) workoutPayload.planned_repeats = workoutData.powtorzenia;
@@ -14583,6 +14635,21 @@ function _wizSteps() {
 
                 <!-- P0: Trening — zależy od typu -->
                 <div class="step" id="step-post-0">
+                    <!-- START ZAWODÓW — pokazywany TYLKO w dniu celu (_ciIsRaceDay).
+                         Czas oficjalny trzymamy osobno od GPS-a: przy celu "5 km w 19:30"
+                         różnica chip vs zegarek decyduje, czy cel padł. -->
+                    <div class="ob-panel" id="ci-race-box" style="display:none;margin-bottom:18px;">
+                        <div class="ob-label">Dziś był Twój start</div>
+                        <div class="ob-sub" style="margin:0 0 14px;">Podaj czas oficjalny — po nim sztab pozna, czy cel padł.</div>
+                        <input type="text" class="ob-txt" id="ci-race-time" placeholder="np. 19:42 lub 1:38:20"
+                               oninput="_ciRaceTime=this.value" autocomplete="off">
+                        <div class="ob-list" style="margin-top:12px;">
+                            <button class="ob-cc" id="ci-race-skip" onclick="_ciToggleRaceSkip()">
+                                <span class="ob-cv"><span class="ob-ct" style="display:block;">Nie wystartowałem</span></span>
+                                <svg class="ob-ck" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                            </button>
+                        </div>
+                    </div>
                     <!-- Easy / Long / Rest -->
                     <div class="post0-section active" id="post0-duration">
                         <div class="step-title" data-i18n="ci.p0.dur">Ile trwał trening?</div>
