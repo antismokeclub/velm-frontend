@@ -12493,7 +12493,7 @@ function _wizSteps() {
 
         // Stempel buildu — dowód na urządzeniu, że działa świeży kod (trzymać
         // w zgodzie z CACHE_VERSION w sw.js; bump przy każdym deployu frontendu)
-        const VELM_BUILD = 'v75';
+        const VELM_BUILD = 'v76';
         console.log('velm build', VELM_BUILD, navigator.userAgent);
 
         async function hardReloadApp() {
@@ -13714,10 +13714,14 @@ function _wizSteps() {
                 if (segmentSeries > 0) workoutPayload.completed_series = segmentSeries;
                 if (workoutData.serie) workoutPayload.planned_series = workoutData.serie;
             }
-            fetch(`${API_BASE}/api/workout`, {
-                method:'POST', headers: authHeaders(),
-                body: JSON.stringify({ userId, workout: workoutPayload })
-            }).catch(() => {});
+            // Wcześniej: goły fetch z .catch(() => {}). To gubiło trening na DWA sposoby —
+            // błąd sieci szedł w pustą funkcję, a 401 w ogóle nie jest odrzuceniem
+            // (fetch rozwiązuje się z res.ok === false), więc wygasły token oznaczał
+            // cichą utratę danych. apiFetch odświeża token i RZUCA, gdy się nie uda.
+            return apiFetch('/api/workout', {
+                method: 'POST',
+                body: { userId, workout: workoutPayload }
+            });
         }
 
         function updateProgress() {
@@ -14079,8 +14083,17 @@ function _wizSteps() {
                 sendMorningCheckinToAI(); // saves to /api/chat + /api/checkin internally
             } else {
                 const userId = localStorage.getItem('velm_user_id');
+                // Flagę stawiamy OPTYMISTYCZNIE (żeby UI od razu zareagował), ale gdy
+                // zapis padnie — cofamy ją. Inaczej trening przepadał, a użytkownik
+                // nie mógł go powtórzyć, bo apka uważała check-in za zrobiony.
                 localStorage.setItem('velm_checkin_post_done', today);
-                sendPostCheckinToAI(); // saves to /api/chat + /api/workout internally
+                Promise.resolve(sendPostCheckinToAI()).catch(err => {
+                    localStorage.removeItem('velm_checkin_post_done');
+                    _checkinSending = false;
+                    console.error('checkin: zapis treningu nieudany —', err?.message || err);
+                    showVelmToast('Nie udało się zapisać treningu — otwórz check-in jeszcze raz', true);
+                    try { updatePostCheckinBanner(); } catch (e) {}
+                });
                 if (userId) {
                     const dur = durH * 60 + durM + durS / 60;
                     fetch(`${API_BASE}/api/checkin`, {
