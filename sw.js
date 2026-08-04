@@ -6,7 +6,7 @@
 // - Static assets (icons, manifest): cache-first
 // - API calls: network-first z fallback do offline page
 
-const CACHE_VERSION = 'velm-v77';
+const CACHE_VERSION = 'velm-v78';
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const RUNTIME_CACHE = `${CACHE_VERSION}-runtime`;
 
@@ -14,6 +14,7 @@ const STATIC_ASSETS = [
   '/',
   '/index.html',
   '/dashboard.html',
+  '/css/dashboard.css',
   '/manifest.json',
   '/icon-192.png',
   '/icon-512.png'
@@ -54,8 +55,18 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Static assets (PNG, JSON, CSS, fonts) — cache-first with network fallback
-  if (request.destination === 'image' || request.destination === 'style' || request.destination === 'font' || url.pathname.endsWith('.json')) {
+  // CSS i JS — network-first, tak samo jak HTML.
+  // Muszą iść parą z powłoką: świeży dashboard.html z zakeszowanym starym
+  // skryptem to wersja, której nigdy nie testowaliśmy. Bump CACHE_VERSION
+  // czyści cache dopiero przy aktywacji nowego SW, a to bywa PO tym, jak
+  // strona zdążyła pobrać swoje zasoby. Cache zostaje jako zapas offline.
+  if (request.destination === 'script' || request.destination === 'style') {
+    event.respondWith(networkFirst(request, RUNTIME_CACHE));
+    return;
+  }
+
+  // Reszta statyków (ikony, czcionki, JSON) — cache-first z fallbackiem do sieci
+  if (request.destination === 'image' || request.destination === 'font' || url.pathname.endsWith('.json')) {
     event.respondWith(cacheFirst(request, RUNTIME_CACHE));
     return;
   }
