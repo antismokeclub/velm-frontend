@@ -3703,7 +3703,7 @@
                     <button onclick="event.stopPropagation();calDayClick(toDateStr(new Date()));switchView('calendar');" style="width:100%;padding:14px;background:var(--primary-color);border:none;border-radius:14px;color:white;font-weight:700;font-size:14px;font-family:'Inter',sans-serif;cursor:pointer;transition:transform 0.15s cubic-bezier(0.22,1,0.36,1),opacity 0.15s;box-shadow:0 4px 16px rgba(26,26,26,0.2);" onmousedown="this.style.transform='scale(0.97)'" onmouseup="this.style.transform='scale(1)'">
                         <span data-i18n="home.seedetails">Zobacz szczegóły &rarr;</span>
                     </button>
-                    <button onclick="event.stopPropagation();enterCoachWithContext({source:'home_today',date:new Date().toISOString().split('T')[0],trainingRef:window._todayTyp&&window._todayTyp!=='rest'?(window._todayKm||'')+'km '+window._todayTyp:null})" style="width:100%;margin-top:10px;padding:13px;background:#EFF4EF;border:1.5px solid #5F8368;border-radius:14px;color:#3E5D46;font-weight:700;font-size:14px;font-family:'Inter',sans-serif;cursor:pointer;letter-spacing:0.01em;display:flex;align-items:center;justify-content:center;gap:8px;">
+                    <button onclick="event.stopPropagation();enterCoachWithContext({source:'home_today',date:todayStr(),trainingRef:window._todayTyp&&window._todayTyp!=='rest'?(window._todayKm||'')+'km '+window._todayTyp:null})" style="width:100%;margin-top:10px;padding:13px;background:#EFF4EF;border:1.5px solid #5F8368;border-radius:14px;color:#3E5D46;font-weight:700;font-size:14px;font-family:'Inter',sans-serif;cursor:pointer;letter-spacing:0.01em;display:flex;align-items:center;justify-content:center;gap:8px;">
                         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#5F8368" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>
                         <span data-i18n="home.askcoach">Zapytaj o trening</span>
                     </button>
@@ -12079,7 +12079,7 @@ function _wizSteps() {
                 return `[KONTEKST DEEP-LINK: Użytkownik otworzył chat z widoku kalendarza. Pyta o konkretny dzień: ${ctx.date}.${ctx.trainingRef ? ' Trening w tym dniu: ' + ctx.trainingRef + '.' : ''} Jeśli pytanie jest ogólne ("co mam?"), odpowiedz w kontekście tego dnia.]`;
             }
             if (ctx.source === 'home_today') {
-                const today = new Date().toISOString().split('T')[0];
+                const today = todayStr();
                 return `[KONTEKST DEEP-LINK: Użytkownik otworzył chat z ekranu głównego, sekcja "Dzisiejszy trening". Pyta o dzisiaj: ${today}.]`;
             }
             if (ctx.source === 'home_week') {
@@ -12260,7 +12260,7 @@ function _wizSteps() {
                 return;
             }
 
-            const todayStr = new Date().toISOString().split('T')[0];
+            const todayStr = todayStr();
             let day = dni.find(d => d.data === todayStr);
             if (!day) {
                 // Plan, którego tydzień już się skończył (dziś jest PO ostatnim
@@ -12493,7 +12493,7 @@ function _wizSteps() {
 
         // Stempel buildu — dowód na urządzeniu, że działa świeży kod (trzymać
         // w zgodzie z CACHE_VERSION w sw.js; bump przy każdym deployu frontendu)
-        const VELM_BUILD = 'v74';
+        const VELM_BUILD = 'v75';
         console.log('velm build', VELM_BUILD, navigator.userAgent);
 
         async function hardReloadApp() {
@@ -12710,8 +12710,12 @@ function _wizSteps() {
         }
 
         // ── CHECK-IN REDIRECT ─────────────────────────────────
+        /** Dzisiejsza data w strefie UŻYTKOWNIKA. Jedyne źródło prawdy dla "dziś".
+            NIE toISOString() — to UTC: w Los Angeles bieg o 18:00 dostawał datę
+            jutrzejszą, nie pasował do dnia planu, a flaga check-inu ustawiona na
+            jutro blokowała check-in nazajutrz. */
         function todayStr() {
-            return new Date().toISOString().split('T')[0];
+            return toDateStr(new Date());
         }
 
         function hasTodayWorkout() {
@@ -13077,7 +13081,7 @@ function _wizSteps() {
             const onb = window._settingsOnb || window._userOnb || {};
             const raw = onb.time_race_date || onb.time_race_target || onb.dist_goal_date;
             if (!raw) return false;
-            return String(raw).slice(0, 10) === new Date().toISOString().split('T')[0];
+            return String(raw).slice(0, 10) === todayStr();
         }
 
         /** "19:42" / "1:38:20" → sekundy. null gdy pusto albo bez sensu. */
@@ -13447,6 +13451,7 @@ function _wizSteps() {
         // zamknij->otwórz (<300ms) chowa świeżo otwarty check-in
         let _ciCloseTimer = null;
         function closeCheckin() {
+            _checkinSending = false;   // zwalniamy blokade podwojnego wyslania
             const ov   = document.getElementById('checkin-overlay');
             const card = document.getElementById('ci-card');
             card.style.transition = 'transform 280ms cubic-bezier(0.4,0,1,1), opacity 200ms ease-in';
@@ -13679,7 +13684,7 @@ function _wizSteps() {
                 ? moreVal
                 : workoutData.dystans_km;
             const workoutPayload = {
-                date: new Date().toISOString().split('T')[0],
+                date: todayStr(),
                 distance_km: actualKm,
                 duration_min: durH * 60 + durM + durS / 60, rpe: rpeVal,
                 type: workoutType, completion, notes: msg,
@@ -14058,8 +14063,17 @@ function _wizSteps() {
             return daysSince >= 30;
         }
 
+        let _checkinSending = false;
+
         function _sendCheckinData() {
-            const today = new Date().toISOString().split('T')[0];
+            // Podwójne dotknięcie "Gotowe" tworzyło DWA wiersze w workouts —
+            // POST /api/workout robi zwykły INSERT, backend nie ma dedupe po dacie,
+            // a runner może legalnie mieć dwa treningi dziennie, więc twardy unique
+            // byłby błędny. Blokada musi być tutaj. Zwalniamy dopiero po zamknięciu
+            // nakładki, bo do tego czasu przycisk jest widoczny i klikalny.
+            if (_checkinSending) return;
+            _checkinSending = true;
+            const today = todayStr();
             if (currentMode === 'morning') {
                 localStorage.setItem('velm_checkin_morning_done', today);
                 sendMorningCheckinToAI(); // saves to /api/chat + /api/checkin internally
