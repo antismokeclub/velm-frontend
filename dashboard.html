@@ -8842,6 +8842,7 @@ function _wizSteps() {
             "com.err.conn": "Błąd połączenia",
             "prof.photo": "Zmień zdjęcie profilowe",
             "prof.photo.soon": "Zdjęcie profilowe będzie wkrótce.",
+            "checkin.save.failed": "Nie udało się zapisać treningu — otwórz check-in jeszcze raz.",
             "prof.name": "Imię i nazwisko",
             "prof.name.sub": "Jak zwraca się do Ciebie trener",
             "prof.name.hint": "Tak zwraca się do Ciebie Twój sztab. Podaj imię (lub imię i nazwisko).",
@@ -9166,6 +9167,7 @@ function _wizSteps() {
             "com.err.conn": "Connection error",
             "prof.photo": "Change profile photo",
             "prof.photo.soon": "Profile photos are coming soon.",
+            "checkin.save.failed": "Couldn't save your workout — open the check-in again.",
             "prof.name": "Name",
             "prof.name.sub": "How your coach addresses you",
             "prof.name.hint": "This is how your team will address you. Enter your first name (or full name).",
@@ -9490,6 +9492,7 @@ function _wizSteps() {
             "com.err.conn": "Erreur de connexion",
             "prof.photo": "Changer la photo de profil",
             "prof.photo.soon": "Les photos de profil arrivent bientôt.",
+            "checkin.save.failed": "Impossible d'enregistrer la séance — rouvre le check-in.",
             "prof.name": "Nom",
             "prof.name.sub": "Comment ton coach s'adresse à toi",
             "prof.name.hint": "C'est ainsi que ton équipe s'adressera à toi. Indique ton prénom (ou ton nom complet).",
@@ -9814,6 +9817,7 @@ function _wizSteps() {
             "com.err.conn": "Error de conexión",
             "prof.photo": "Cambiar foto de perfil",
             "prof.photo.soon": "Las fotos de perfil llegarán pronto.",
+            "checkin.save.failed": "No se pudo guardar el entrenamiento — abre el check-in otra vez.",
             "prof.name": "Nombre",
             "prof.name.sub": "Cómo te llama tu entrenador",
             "prof.name.hint": "Así es como te llamará tu equipo. Escribe tu nombre (o nombre y apellido).",
@@ -10138,6 +10142,7 @@ function _wizSteps() {
             "com.err.conn": "Verbindungsfehler",
             "prof.photo": "Profilbild ändern",
             "prof.photo.soon": "Profilbilder gibt es in Kürze.",
+            "checkin.save.failed": "Training konnte nicht gespeichert werden — öffne den Check-in erneut.",
             "prof.name": "Name",
             "prof.name.sub": "Wie dein Coach dich anspricht",
             "prof.name.hint": "So spricht dich dein Team an. Gib deinen Vornamen (oder vollständigen Namen) ein.",
@@ -12493,7 +12498,7 @@ function _wizSteps() {
 
         // Stempel buildu — dowód na urządzeniu, że działa świeży kod (trzymać
         // w zgodzie z CACHE_VERSION w sw.js; bump przy każdym deployu frontendu)
-        const VELM_BUILD = 'v76';
+        const VELM_BUILD = 'v77';
         console.log('velm build', VELM_BUILD, navigator.userAgent);
 
         async function hardReloadApp() {
@@ -13659,14 +13664,13 @@ function _wizSteps() {
             }).catch(() => {});
         }
 
-        function sendPostCheckinToAI() {
+        async function sendPostCheckinToAI() {
             const userId = localStorage.getItem('velm_user_id');
-            if (!userId) return;
+            // Wcześniej ciche `return` — flaga "check-in zrobiony" zostawała ustawiona,
+            // więc wylogowany użytkownik tracił trening bez śladu. Rzucamy, żeby
+            // zadziałało cofnięcie flagi i komunikat.
+            if (!userId) throw new Error('Brak zalogowanego użytkownika');
             const msg = buildAiMessage();
-            fetch(`${API_BASE}/api/chat`, {
-                method:'POST', headers: authHeaders(),
-                body: JSON.stringify({ userId, message: msg, agent: 'analityk' })
-            }).catch(() => {});
             const completion = selectedCompletion || 'exact';
             // Faktyczny dystans: "krótszy dystans" (easy/long) lub "mniejszy dystans
             // całkowity" (walkrun) → licznik z kroku 2b; "więcej niż w planie" →
@@ -13718,10 +13722,18 @@ function _wizSteps() {
             // błąd sieci szedł w pustą funkcję, a 401 w ogóle nie jest odrzuceniem
             // (fetch rozwiązuje się z res.ok === false), więc wygasły token oznaczał
             // cichą utratę danych. apiFetch odświeża token i RZUCA, gdy się nie uda.
-            return apiFetch('/api/workout', {
+            await apiFetch('/api/workout', {
                 method: 'POST',
                 body: { userId, workout: workoutPayload }
             });
+            // Analityka wołamy DOPIERO gdy trening jest w bazie. Odwrotna kolejność
+            // (jak było) przy nieudanym zapisie zostawiała wiadomość w czacie bez
+            // treningu, a powtórzony check-in dokładał jej duplikat. Błąd samej
+            // wiadomości nie może już cofać zapisanego treningu — ale nie chowamy go.
+            apiFetch('/api/chat', {
+                method: 'POST',
+                body: { userId, message: msg, agent: 'analityk' }
+            }).catch(err => console.error('checkin: wiadomość do analityka nie poszła —', err?.message || err));
         }
 
         function updateProgress() {
@@ -14091,7 +14103,7 @@ function _wizSteps() {
                     localStorage.removeItem('velm_checkin_post_done');
                     _checkinSending = false;
                     console.error('checkin: zapis treningu nieudany —', err?.message || err);
-                    showVelmToast('Nie udało się zapisać treningu — otwórz check-in jeszcze raz', true);
+                    showVelmToast(t('checkin.save.failed'), true);
                     try { updatePostCheckinBanner(); } catch (e) {}
                 });
                 if (userId) {
