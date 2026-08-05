@@ -42,6 +42,8 @@ context rozmowy.txt
 velm_zadania_natywna_apka.docx
 run-velm-backend.cmd
 run-velm-frontend.cmd
+serve-frontend.js
+tools/
 *.log
 
 # Backend (has its own repo)
@@ -53,9 +55,9 @@ velm-backend/
 # Video promo project (local only)
 velm-promo/
 
-# Debug artefakty check-inu (lokalne, nie deployować)
-checkin-debug.html
-checkin-diag.js
-narada-dymki.html
-narada-plansza.html
-onboarding-final.html
+# Sprzatanie martwego kodu: migawka sprzed zmian + harness QA.
+# Nigdy nie deployowac — _before/ to druga kopia calej apki.
+_before/
+_probe.html
+_cssdiff.html
+_shot.html

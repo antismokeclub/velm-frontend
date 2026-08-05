@@ -4,3 +4,12 @@ velm-backend/
 node_modules/
 .env
 .env.local
+
+# Harness QA i migawka sprzed sprzatania — "*.html" w vercel.json zlapaloby
+# _probe/_cssdiff/_shot, a _before/ to druga kopia calej apki
+_before/
+_probe.html
+_cssdiff.html
+_shot.html
+serve-frontend.js
+tools/
