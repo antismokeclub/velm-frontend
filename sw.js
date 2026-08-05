@@ -6,10 +6,13 @@
 // - Static assets (icons, manifest): cache-first
 // - API calls: network-first z fallback do offline page
 
-const CACHE_VERSION = 'velm-v80';
+const CACHE_VERSION = 'velm-v81';
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const RUNTIME_CACHE = `${CACHE_VERSION}-runtime`;
 
+// UWAGA: cache.addAll jest ATOMOWE — jeden URL z 404 odrzuca cala liste, a
+// .catch() nizej to polyka po cichu, wiec do cache nie trafia NIC. Po kazdej
+// zmianie nazw plikow w js/dashboard/ trzeba poprawic te liste.
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -17,7 +20,27 @@ const STATIC_ASSETS = [
   '/js/index.js',
   '/dashboard.html',
   '/css/dashboard.css',
-  '/js/dashboard.js',
+  '/js/dashboard/01-core.js',
+  '/js/dashboard/02-profil.js',
+  '/js/dashboard/03-rozmowy.js',
+  '/js/dashboard/04-home.js',
+  '/js/dashboard/05-kalendarz.js',
+  '/js/dashboard/06-statystyki-wspolne.js',
+  '/js/dashboard/07-laboratorium.js',
+  '/js/dashboard/08-statystyki.js',
+  '/js/dashboard/09-nawigacja.js',
+  '/js/dashboard/10-kreator-celu.js',
+  '/js/dashboard/11-ustawienia.js',
+  '/js/dashboard/12-i18n.js',
+  '/js/dashboard/13-subskrypcja.js',
+  '/js/dashboard/14-integracje.js',
+  '/js/dashboard/15-historia.js',
+  '/js/dashboard/16-narada.js',
+  '/js/dashboard/17-czat.js',
+  '/js/dashboard/18-dzis.js',
+  '/js/dashboard/19-konto.js',
+  '/js/dashboard/20-checkin.js',
+  '/js/dashboard/21-start.js',
   '/manifest.json',
   '/icon-192.png',
   '/icon-512.png'

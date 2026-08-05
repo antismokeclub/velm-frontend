@@ -980,7 +980,33 @@
         </button>
     </div>
 
-    <script src="js/dashboard.js"></script>
+    <!-- Kod apki, pociety tematycznie. KOLEJNOSC JEST ZNACZACA i musi zostac
+         taka jak numeracja: pliki dziela jeden zakres globalny, a kod
+         wykonywany od razu (np. IIFE w 19-konto.js wolajacy switchView) widzi
+         tylko to, co zdazylo sie zaladowac wyzej. Zadnego "defer" ani
+         "type=module" — 75 nazw funkcji jest wolanych z inline'owych on*="",
+         a defer przesunalby straznik autoryzacji z 01-core.js za render. -->
+    <script src="js/dashboard/01-core.js"></script>
+    <script src="js/dashboard/02-profil.js"></script>
+    <script src="js/dashboard/03-rozmowy.js"></script>
+    <script src="js/dashboard/04-home.js"></script>
+    <script src="js/dashboard/05-kalendarz.js"></script>
+    <script src="js/dashboard/06-statystyki-wspolne.js"></script>
+    <script src="js/dashboard/07-laboratorium.js"></script>
+    <script src="js/dashboard/08-statystyki.js"></script>
+    <script src="js/dashboard/09-nawigacja.js"></script>
+    <script src="js/dashboard/10-kreator-celu.js"></script>
+    <script src="js/dashboard/11-ustawienia.js"></script>
+    <script src="js/dashboard/12-i18n.js"></script>
+    <script src="js/dashboard/13-subskrypcja.js"></script>
+    <script src="js/dashboard/14-integracje.js"></script>
+    <script src="js/dashboard/15-historia.js"></script>
+    <script src="js/dashboard/16-narada.js"></script>
+    <script src="js/dashboard/17-czat.js"></script>
+    <script src="js/dashboard/18-dzis.js"></script>
+    <script src="js/dashboard/19-konto.js"></script>
+    <script src="js/dashboard/20-checkin.js"></script>
+    <script src="js/dashboard/21-start.js"></script>
 
 <!-- ── CHECKIN OVERLAY ──────────────────────────────────────────── -->
 <div id="checkin-overlay" style="display:none;">
