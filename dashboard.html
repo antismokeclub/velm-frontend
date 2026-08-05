@@ -37,10 +37,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@700;800;900&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/TextPlugin.min.js"></script>
-    <style>
-        body { opacity: 0; }
-        body.loaded { opacity: 1; transition: opacity 0.3s ease; }
-    </style>
     <link rel="stylesheet" href="css/dashboard.css">
 </head>
 
@@ -91,66 +87,6 @@
 
             <!-- Center: Animated VELM Logo -->
             <div class="header-center">
-                <style>
-                    .velm-anim-wrap {
-                        opacity: 0;
-                        transform: translateY(80px);
-                        animation: velmBounceIn 1.4s cubic-bezier(0.16, 1, 0.3, 1) 0.2s forwards;
-                        will-change: transform, opacity;
-                    }
-
-                    @keyframes velmBounceIn {
-                        0% {
-                            opacity: 0;
-                            transform: translateY(80px);
-                        }
-
-                        40% {
-                            opacity: 1;
-                            transform: translateY(-6px);
-                        }
-
-                        100% {
-                            opacity: 1;
-                            transform: translateY(0);
-                        }
-                    }
-
-                    .velm-anim-letter {
-                        opacity: 0;
-                        transform: translateY(18px);
-                        animation: velmLetterUp 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-                        will-change: transform, opacity;
-                    }
-
-                    .velm-anim-letter:nth-child(1) {
-                        animation-delay: 0.5s;
-                    }
-
-                    .velm-anim-letter:nth-child(2) {
-                        animation-delay: 0.65s;
-                    }
-
-                    .velm-anim-letter:nth-child(3) {
-                        animation-delay: 0.8s;
-                    }
-
-                    .velm-anim-letter:nth-child(4) {
-                        animation-delay: 0.95s;
-                    }
-
-                    @keyframes velmLetterUp {
-                        0% {
-                            opacity: 0;
-                            transform: translateY(18px);
-                        }
-
-                        100% {
-                            opacity: 1;
-                            transform: translateY(0);
-                        }
-                    }
-                </style>
                 <div class="velm-anim-wrap" style="display:flex;align-items:baseline;gap:0;">
                     <span class="velm-anim-letter" style="font-family:'Outfit',sans-serif;font-weight:800;font-size:30px;color:var(--primary-color);letter-spacing:-0.04em;line-height:1;">V</span>
                     <span class="velm-anim-letter" style="font-family:'Outfit',sans-serif;font-weight:800;font-size:30px;color:var(--primary-color);letter-spacing:-0.04em;line-height:1;">E</span>
