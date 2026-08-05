@@ -8,9 +8,21 @@
 
 ```
 aspireflow/                — frontend repo (this one)
-  dashboard.html          — Frontend SPA (mobile-first PWA, ~10 000 lines, 5 views + check-in overlay)
-  index.html              — Onboarding / registration (~4 000 lines, multilingual pl/en/fr/es/de)
-  sw.js                   — Service worker (network-first HTML, cache-first assets)
+  dashboard.html          — SPA markup only (~1 480 lines, 5 views + check-in overlay)
+  index.html              — Onboarding markup only (~66 lines) + 2 inline scripts in <head>
+  css/dashboard.css       — dashboard stylesheet   (~2 640 lines)
+  css/index.css           — onboarding stylesheet  (~600 lines)
+  js/index.js             — onboarding wizard      (~2 570 lines)
+  js/dashboard/           — dashboard app, split into 21 files loaded IN ORDER:
+      01-core.js          — auth guard, sanitizeHTML, tokens, apiFetch
+      02-profil.js  03-rozmowy.js  04-home.js  05-kalendarz.js
+      06-statystyki-wspolne.js  07-laboratorium.js  08-statystyki.js
+      09-nawigacja.js  10-kreator-celu.js  11-ustawienia.js
+      12-i18n.js (largest, ~1 700)  13-subskrypcja.js  14-integracje.js
+      15-historia.js  16-narada.js  17-czat.js  18-dzis.js
+      19-konto.js         — API_BASE, VELM_BUILD, login, bootstrap IIFE
+      20-checkin.js (~1 350)  21-start.js — runs last
+  sw.js                   — Service worker; STATIC_ASSETS must list every js/dashboard/* file
   manifest.json           — PWA manifest; capacitor.config.json — native wrapper
   velm-backend/           — SEPARATE git repo (github.com/antismokeclub/velm-backend), gitignored here
     server.js             — Express API server (port 3000) — all endpoints, middleware, cron
@@ -53,8 +65,23 @@ cd velm-backend && node server.js
 - NEVER commit .env files or secrets
 - NEVER change Claude model without confirmation
 - NEVER change Supabase schema without confirmation
-- Run `node --check` after every .js file change
+- Run `node --check` after every .js file change (or `python tools/syntax_check.py`
+  for the whole frontend — it walks `js/` recursively plus inline `<script>` blocks)
 - Prefer editing existing files over creating new ones
+
+### Frontend loading rules (breaking these takes the app down silently)
+- `js/dashboard/*` are **classic scripts, loaded in numbered order, sharing one
+  global scope**. Never add `defer` or `type="module"`: ~75 function names are
+  called from inline `on*=""` attributes, and `defer` would move the auth guard
+  in `01-core.js` after render.
+- Function declarations hoist **within a file only**. Code that runs immediately
+  sees only files numbered at or below its own. The fragile spot is the IIFE in
+  `19-konto.js`, which calls `switchView('home')`.
+- Renaming or adding a file in `js/dashboard/` means updating BOTH the script
+  tags in `dashboard.html` and `STATIC_ASSETS` in `sw.js`. `cache.addAll` is
+  atomic — one 404 silently drops the entire offline cache.
+- Bump `VELM_BUILD` (`19-konto.js`) and `CACHE_VERSION` (`sw.js`) together.
+- After deploying, curl production — `vercel.json` `builds` is a whitelist.
 
 ## Velm-Specific Agents (RuFlo)
 
