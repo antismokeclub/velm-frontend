@@ -30,9 +30,6 @@ const GI={start:I.gs,walkrun:I.gw,health:I.gh,comeback:I.gc,time:I.gt,distance:I
 const SPORTS=[['none','sport_none_lbl',I.sport_none],['football','sport_football_lbl',I.sport_football],['gym','sport_gym_lbl',I.sport_gym],['swimming','sport_swim_lbl',I.sport_swim],['cycling','sport_cycle_lbl',I.sport_cycle],['tennis','sport_tennis_lbl',I.sport_tennis],['other','sport_other_lbl',I.sport_other]];
 const WCOLORS={easy:'#4ade80',long:'#60a5fa',tempo:'#f59e0b',interval:'#f87171',rest:'rgba(15,31,61,.08)'};
 const WDAYS=['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
-const WSHORT=['Mo','Tu','We','Th','Fr','Sa','Su'];
-const WSHORT_PL=['Pn','Wt','Śr','Cz','Pt','So','Nd'];
-
 // ─── STATE ───────────────────────────────────────────────────
 const D={
   language:'en',unit:null,hasWatch:null,goal_category:null,level:null,goalId:null,name:'',
@@ -227,15 +224,6 @@ function card(ico,title,sub,selected,onclick){
   return`<div class="cc ${selected?'s':''}" onclick="${onclick}">
     <div class="ci">${ico}</div>
     <div class="cv"><div class="ct">${e(title)}</div>${sub?`<div class="cs">${e(sub)}</div>`:''}</div>
-    <svg class="ck" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-  </div>`;
-}
-
-function cardTile(ico,title,sub,selected,onclick){
-  return`<div class="ctile ${selected?'s':''}" onclick="${onclick}">
-    <div class="ti">${ico}</div>
-    <div class="tt">${e(title)}</div>
-    ${sub?`<div class="ts">${e(sub)}</div>`:''}
     <svg class="ck" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
   </div>`;
 }
@@ -952,338 +940,7 @@ const AGENTS = {
   psychologist:{ key:'psychologist',ico:'gh',   nameEN:'Psychologist', namePL:'Psycholog',   nameFR:'Psychologue', nameES:'Psicólogo',   nameDE:'Psychologe',    tagEN:'Mindset',      tagPL:'Nastawienie',  tagFR:'Mental',      tagES:'Mentalidad',  tagDE:'Mentalität',  color:'#F5F0FF', accent:'#6D28D9' },
 };
 
-const AGENT_MSGS = {
-  units: {
-    agent: 'analyst',
-    en: "I work with your numbers every week — pace, distance, load. Getting the units right means my analysis is always accurate for you.",
-    pl: "Co tydzień pracuję z Twoimi liczbami — tempem, dystansem, obciążeniem. Właściwe jednostki to podstawa precyzyjnej analizy.",
-    fr: "Je travaille avec vos données chaque semaine. Des unités correctes garantissent l'exactitude de mes analyses.",
-    es: "Trabajo con tus números cada semana. Elegir bien las unidades garantiza que mis análisis sean siempre precisos.",
-    de: "Ich arbeite jede Woche mit deinen Zahlen. Die richtigen Einheiten sind die Basis für präzise Analysen."
-  },
-  watch: {
-    agent: 'coach',
-    en: "A sports watch unlocks heart rate zones and real-time pace. Without it we use RPE — still effective, just less precise.",
-    pl: "Zegarek sportowy odblokuje strefy tętna i tempo w czasie rzeczywistym. Bez niego używamy RPE — skuteczna metoda, choć mniej precyzyjna.",
-    fr: "Une montre sportive donne accès aux zones cardiaques. Sans elle, on utilise le RPE — efficace, mais moins précis.",
-    es: "Un reloj deportivo desbloquea zonas de frecuencia cardíaca. Sin él usamos RPE — efectivo, pero menos preciso.",
-    de: "Eine Sportuhr erschließt Herzfrequenzzonen. Ohne sie nutzen wir RPE — wirksam, aber weniger präzise."
-  },
-  level: {
-    agent: 'physio',
-    en: "Your level determines how hard I can push your body. Be honest — I'd rather protect you from injury than impress anyone.",
-    pl: "Twój poziom decyduje o tym, jak mocno mogę obciążać Twoje ciało. Bądź szczery — wolę Cię chronić niż kogoś imponować.",
-    fr: "Votre niveau détermine l'intensité que je peux vous imposer. Soyez honnête — ma priorité est d'éviter les blessures.",
-    es: "Tu nivel determina cuánto puedo exigirle a tu cuerpo. Sé honesto — prefiero protegerte a impresionar a alguien.",
-    de: "Dein Level bestimmt, wie stark ich deinen Körper belasten kann. Sei ehrlich — ich schütze dich lieber als jemanden zu beeindrucken."
-  },
-  goal: {
-    agent: 'headtrainer',
-    en: "This is the most important question. Your goal shapes every session, every week, every recovery block for the next months.",
-    pl: "To najważniejsze pytanie. Twój cel kształtuje każdą sesję, każdy tydzień i każdy blok regeneracji przez najbliższe miesiące.",
-    fr: "C'est la question la plus importante. Votre objectif façonne chaque séance, chaque semaine pendant les prochains mois.",
-    es: "Esta es la pregunta más importante. Tu objetivo define cada sesión, cada semana y cada bloque de recuperación.",
-    de: "Das ist die wichtigste Frage. Dein Ziel gestaltet jede Einheit, jede Woche und jeden Erholungsblock der nächsten Monate."
-  },
-  diag_15min: {
-    agent: 'psychologist',
-    en: "No right or wrong answer here. I just want to understand where you are today so I can motivate you from exactly that point.",
-    pl: "Nie ma złej odpowiedzi. Chcę zrozumieć, gdzie jesteś dziś, żeby motywować Cię dokładnie od tego miejsca.",
-    fr: "Il n'y a pas de mauvaise réponse. Je veux juste comprendre où vous en êtes pour vous motiver depuis ce point précis.",
-    es: "No hay respuesta correcta o incorrecta. Solo quiero entender dónde estás hoy para motivarte desde ese punto.",
-    de: "Es gibt keine richtige oder falsche Antwort. Ich möchte verstehen, wo du heute stehst, um dich genau von dort zu motivieren."
-  },
-  diag_stairs: {
-    agent: 'analyst',
-    en: "Breathlessness on stairs tells me your current aerobic ceiling. It's not a judgement — it's data I use to calibrate your starting zones.",
-    pl: "Zadyszka na schodach mówi mi o Twoim obecnym pułapie tlenowym. To nie ocena — to dane do kalibracji stref startowych.",
-    fr: "L'essoufflement dans les escaliers m'indique votre plafond aérobie actuel. Ce n'est pas un jugement, c'est une donnée de calibration.",
-    es: "La falta de aliento en las escaleras me dice tu techo aeróbico actual. No es un juicio — es un dato para calibrar tus zonas.",
-    de: "Kurzatmigkeit beim Treppensteigen zeigt mir deine aktuelle aerobe Kapazität. Kein Urteil — nur Daten zur Kalibrierung."
-  },
-  training_history: {
-    agent: 'coach',
-    en: "Cross-training history matters. A swimmer brings different endurance than a footballer. Select everything that applies — I'll use it all.",
-    pl: "Historia treningu ma znaczenie. Pływak wnosi inną wytrzymałość niż piłkarz. Zaznacz wszystko co dotyczy — wykorzystam to wszystko.",
-    fr: "L'historique d'entraînement compte. Un nageur apporte une endurance différente de celle d'un footballeur. Cochez tout ce qui s'applique.",
-    es: "El historial de entrenamiento importa. Un nadador aporta resistencia diferente a la de un futbolista. Marca todo lo que aplique.",
-    de: "Trainingsgeschichte zählt. Ein Schwimmer bringt andere Ausdauer als ein Fußballer. Alles ankreuzen was zutrifft — ich nutze alles."
-  },
-  health_train_type: {
-    agent: 'physio',
-    en: "I need to know what your body is already used to before I add load. Starting from your current base protects you from overuse injuries.",
-    pl: "Muszę wiedzieć, do czego Twoje ciało jest już przyzwyczajone. Zaczynając od Twojej bazy, chronię Cię przed kontuzjami z przeciążenia.",
-    fr: "Je dois savoir à quoi votre corps est déjà habitué avant d'ajouter de la charge. Cela vous protège des blessures de surmenage.",
-    es: "Necesito saber a qué está acostumbrado tu cuerpo antes de añadir carga. Empezar desde tu base te protege de lesiones por sobreuso.",
-    de: "Ich muss wissen, woran dein Körper schon gewöhnt ist, bevor ich Belastung hinzufüge. Das schützt vor Überlastungsverletzungen."
-  },
-  health_easy_pace: {
-    agent: 'headtrainer',
-    en: "Your easy pace anchors every training zone I'll give you. Honest input here is more valuable than a fast-looking number.",
-    pl: "Twoje spokojne tempo wyznacza każdą strefę treningową, którą Ci wyznaczę. Szczera odpowiedź jest tu cenniejsza niż imponująca liczba.",
-    fr: "Votre allure facile ancre toutes vos zones d'entraînement. Une réponse honnête vaut plus qu'un chiffre impressionnant.",
-    es: "Tu ritmo fácil ancla todas tus zonas de entrenamiento. Una respuesta honesta vale más que un número impresionante.",
-    de: "Dein lockeres Tempo verankert alle Trainingszonen. Eine ehrliche Antwort ist wertvoller als eine beeindruckende Zahl."
-  },
-  health_easy_km: {
-    agent: 'analyst',
-    en: "Weekly volume is the first metric I track. I'll grow it safely — most overuse injuries come from jumping volume too fast.",
-    pl: "Tygodniowy kilometraż to pierwsza metryka, którą śledzę. Będę go bezpiecznie zwiększał — większość kontuzji pochodzi ze zbyt szybkiego wzrostu.",
-    fr: "Le volume hebdomadaire est la première métrique que je suis. Je l'augmenterai prudemment — la plupart des blessures viennent d'une hausse trop rapide.",
-    es: "El volumen semanal es la primera métrica que rastreo. Lo aumentaré de forma segura — la mayoría de lesiones vienen de subir demasiado rápido.",
-    de: "Das Wochenvolumen ist die erste Metrik, die ich verfolge. Ich steigere es sicher — die meisten Überlastungsverletzungen entstehen durch zu schnelles Erhöhen."
-  },
-  health_easy_rpe: {
-    agent: 'psychologist',
-    en: "How hard runs feel tells me as much as your watch data. If easy runs feel hard, that's not failure — it's a signal I act on.",
-    pl: "To, jak trudne wydają się biegi, mówi mi tyle samo co dane z zegarka. Jeśli spokojne biegi czujesz jako ciężkie — to sygnał, nie porażka.",
-    fr: "La difficulté ressentie m'apprend autant que les données de votre montre. Si les footings semblent difficiles, c'est un signal, pas un échec.",
-    es: "Lo difícil que se siente correr me dice tanto como los datos de tu reloj. Si las carreras fáciles se sienten duras, es una señal, no un fracaso.",
-    de: "Das Belastungsgefühl sagt mir genauso viel wie deine Uhrdaten. Wenn lockere Läufe schwer fühlen, ist das ein Signal — kein Versagen."
-  },
-  health_mixed_week: {
-    agent: 'headtrainer',
-    en: "How you distribute effort across the week is as important as total load. Assign each day — I'll optimize the sequence.",
-    pl: "Rozkład wysiłku przez tydzień jest równie ważny jak łączne obciążenie. Przypisz każdy dzień — zoptymalizuję kolejność.",
-    fr: "La distribution de l'effort sur la semaine est aussi importante que le volume total. Assignez chaque jour — j'optimiserai la séquence.",
-    es: "Cómo distribuyes el esfuerzo a lo largo de la semana es tan importante como la carga total. Asigna cada día — yo optimizaré la secuencia.",
-    de: "Die Verteilung der Belastung über die Woche ist genauso wichtig wie das Gesamtvolumen. Weise jeden Tag zu — ich optimiere die Reihenfolge."
-  },
-  health_mixed_volume: {
-    agent: 'analyst',
-    en: "Total volume and easy pace together give me your aerobic capacity. This is the baseline I compare every future week against.",
-    pl: "Łączna objętość i spokojne tempo razem dają mi Twoją wydolność tlenową. To punkt odniesienia dla każdego przyszłego tygodnia.",
-    fr: "Le volume total et l'allure facile ensemble me donnent votre capacité aérobie. C'est la référence pour chaque semaine future.",
-    es: "El volumen total y el ritmo fácil juntos me dan tu capacidad aeróbica. Esta es la referencia contra la que comparo cada semana futura.",
-    de: "Gesamtvolumen und lockeres Tempo zusammen geben mir deine aerobe Kapazität — die Referenz für jede zukünftige Woche."
-  },
-  comeback_reason: {
-    agent: 'physio',
-    en: "The reason you stopped completely changes the return protocol. Injury and burnout need very different re-entry strategies.",
-    pl: "Powód przerwy całkowicie zmienia protokół powrotu. Kontuzja i wypalenie wymagają zupełnie różnych strategii.",
-    fr: "La raison de votre arrêt change complètement le protocole de retour. Blessure et épuisement nécessitent des stratégies très différentes.",
-    es: "La razón por la que paraste cambia completamente el protocolo de regreso. La lesión y el agotamiento necesitan estrategias muy diferentes.",
-    de: "Der Grund für die Pause ändert das Rückkehrprotokoll komplett. Verletzung und Burnout brauchen sehr unterschiedliche Strategien."
-  },
-  comeback_injury_area: {
-    agent: 'physio',
-    en: "The location tells me which movements to load first and which to avoid. Each area has a specific return-to-run pathway.",
-    pl: "Lokalizacja mówi mi, które ruchy obciążać jako pierwsze, a których unikać. Każdy obszar ma specyficzną ścieżkę powrotu do biegania.",
-    fr: "La localisation m'indique quels mouvements charger en premier. Chaque zone a son propre protocole de retour à la course.",
-    es: "La localización me dice qué movimientos cargar primero y cuáles evitar. Cada zona tiene su propia vía de regreso a la carrera.",
-    de: "Der Ort sagt mir, welche Bewegungen zuerst belastet werden sollen. Jede Zone hat ihren eigenen Weg zurück zum Laufen."
-  },
-  comeback_injury_type: {
-    agent: 'physio',
-    en: "A tendon heals differently from a muscle. The type determines how quickly I can progress your loads without causing a setback.",
-    pl: "Ścięgno goi się inaczej niż mięsień. Typ kontuzji decyduje o tym, jak szybko mogę bezpiecznie zwiększać obciążenia.",
-    fr: "Un tendon guérit différemment d'un muscle. Le type détermine la vitesse à laquelle je peux progresser les charges.",
-    es: "Un tendón se cura diferente a un músculo. El tipo determina con qué rapidez puedo progresar las cargas sin causar una recaída.",
-    de: "Eine Sehne heilt anders als ein Muskel. Der Typ bestimmt, wie schnell ich die Belastung steigern kann."
-  },
-  comeback_severity: {
-    agent: 'physio',
-    en: "Severity sets the length of your return phase. Critical injuries need 3–4 weeks of walking before any running attempt.",
-    pl: "Ciężkość kontuzji wyznacza długość fazy powrotu. Poważne urazy wymagają 3-4 tygodni marszu zanim w ogóle spróbujemy biegać.",
-    fr: "La gravité détermine la durée de votre phase de retour. Les blessures critiques nécessitent 3 à 4 semaines de marche avant toute course.",
-    es: "La gravedad determina la duración de tu fase de regreso. Las lesiones críticas necesitan 3-4 semanas caminando antes de cualquier intento de correr.",
-    de: "Der Schweregrad bestimmt die Länge deiner Rückkehrphase. Kritische Verletzungen brauchen 3–4 Wochen Gehen vor jedem Laufversuch."
-  },
-  comeback_doctor: {
-    agent: 'physio',
-    en: "Medical clearance lets me be more aggressive. Without it I'll still build a plan — just with a longer, more conservative re-entry.",
-    pl: "Zgoda lekarska pozwala mi być bardziej agresywnym. Bez niej stworzę plan, ale z dłuższym, bardziej konserwatywnym powrotem.",
-    fr: "Une autorisation médicale me permet d'être plus agressif. Sans elle, je construis quand même un plan, mais avec un retour plus conservateur.",
-    es: "El permiso médico me permite ser más agresivo. Sin él igualmente construyo un plan — pero con un regreso más conservador.",
-    de: "Eine ärztliche Freigabe erlaubt mir, aggressiver vorzugehen. Ohne sie erstelle ich trotzdem einen Plan — aber mit konservativerem Wiedereinstieg."
-  },
-  comeback_recovery: {
-    agent: 'physio',
-    en: "Still in rehab? We start with walking and mobility — no running yet. Fully recovered? We can move faster. Tell me where you are.",
-    pl: "Nadal w rehabilitacji? Zaczynamy od marszu i mobilności — na razie bez biegania. W pełni wyleczony? Możemy działać szybciej.",
-    fr: "Encore en rééducation ? On commence par la marche — pas encore de course. Complètement remis ? On peut aller plus vite.",
-    es: "¿Todavía en rehabilitación? Empezamos caminando — nada de correr aún. ¿Completamente recuperado? Podemos movernos más rápido.",
-    de: "Noch in der Reha? Wir beginnen mit Gehen — noch kein Laufen. Vollständig erholt? Wir können schneller vorgehen."
-  },
-  comeback_injury_notes: {
-    agent: 'physio',
-    en: "Any extra detail helps — physio guidance, movements that cause pain, or how long you've been symptom-free. Optional but valuable.",
-    pl: "Każdy dodatkowy szczegół pomaga — wskazówki fizjoterapeuty, ruchy powodujące ból, czas bez objawów. Opcjonalne, ale cenne.",
-    fr: "Tout détail supplémentaire aide — conseils du kiné, mouvements douloureux, durée sans symptômes. Facultatif mais précieux.",
-    es: "Cualquier detalle adicional ayuda — indicaciones del fisio, movimientos dolorosos, tiempo sin síntomas. Opcional pero valioso.",
-    de: "Jedes Extra-Detail hilft — Physiotherapeuten-Hinweise, schmerzhafte Bewegungen, Zeit ohne Symptome. Optional aber wertvoll."
-  },
-  comeback_last_train: {
-    agent: 'coach',
-    en: "After 6+ months off, you lose ~30% of aerobic fitness. Knowing the gap lets me plan the right volume to reconnect your engine.",
-    pl: "Po ponad 6 miesiącach przerwy tracisz ~30% wydolności tlenowej. Znając przerwę, planuję właściwy wolumen, by odpalić silnik.",
-    fr: "Après 6+ mois d'arrêt, vous perdez ~30% de condition aérobie. Connaître l'écart me permet de planifier le bon volume pour relancer.",
-    es: "Después de 6+ meses parado, pierdes ~30% de condición aeróbica. Conocer el tiempo me permite planificar el volumen correcto.",
-    de: "Nach 6+ Monaten Pause verlierst du ~30% aerobe Fitness. Die Pause zu kennen, hilft mir das richtige Volumen zum Wiederstart zu planen."
-  },
-  comeback_train_type: {
-    agent: 'coach',
-    en: "What you did before is still in your muscle memory. I'll rebuild you faster by connecting to those familiar movement patterns.",
-    pl: "To co robiłeś wcześniej nadal tkwi w Twojej pamięci mięśniowej. Szybciej odbuduję Cię łącząc ze znajomymi wzorcami ruchowymi.",
-    fr: "Ce que vous faisiez avant est encore dans votre mémoire musculaire. Je vous reconstruirai plus vite en m'appuyant sur ces schémas.",
-    es: "Lo que hacías antes sigue en tu memoria muscular. Te reconstruiré más rápido conectando con esos patrones de movimiento familiares.",
-    de: "Was du vorher gemacht hast, steckt noch in deinem Muskelgedächtnis. Ich baue dich schneller wieder auf, indem ich daran anknüpfe."
-  },
-  adv_volume: {
-    agent: 'analyst',
-    en: "Weekly mileage is the single most predictive metric for performance. I track this every week and flag both under-training and overload.",
-    pl: "Tygodniowy kilometraż to najważniejsza metryka wyników. Śledzę go co tydzień i sygnalizuję zarówno niedotrenowanie jak i przeciążenie.",
-    fr: "Le kilométrage hebdomadaire est la métrique la plus prédictive de la performance. Je la suis chaque semaine.",
-    es: "El kilometraje semanal es la métrica más predictiva del rendimiento. Lo sigo cada semana y señalo tanto el sub-entrenamiento como la sobrecarga.",
-    de: "Wöchentliche Laufleistung ist die einzeln prädiktivste Leistungsmetrik. Ich verfolge sie jede Woche und melde sowohl Unter- als auch Übertraining."
-  },
-  adv_pace: {
-    agent: 'analyst',
-    en: "Your easy pace anchors all five training zones. Every interval, tempo and threshold pace I give you is calculated from this number.",
-    pl: "Twoje spokojne tempo wyznacza wszystkie pięć stref treningowych. Każde tempo interwałów, tempa i progu obliczam od tej liczby.",
-    fr: "Votre allure facile ancre les 5 zones d'entraînement. Chaque allure de tempo, seuil et intervalles est calculée depuis ce chiffre.",
-    es: "Tu ritmo fácil ancla las cinco zonas de entrenamiento. Cada ritmo de intervalos, tempo y umbral que te doy se calcula desde este número.",
-    de: "Dein lockeres Tempo verankert alle fünf Trainingszonen. Jedes Intervall-, Tempo- und Schwellentempo wird von dieser Zahl berechnet."
-  },
-  endurance_target: {
-    agent: 'headtrainer',
-    en: "The distance determines your entire plan architecture — long run progression, taper timing, and peak week structure.",
-    pl: "Dystans wyznacza całą architekturę Twojego planu — progresję długich wybiegań, timing taperingu i strukturę szczytowego tygodnia.",
-    fr: "La distance détermine toute l'architecture du plan — progression des longues sorties, timing de l'affûtage, structure de la semaine de pointe.",
-    es: "La distancia determina toda la arquitectura del plan — progresión de tiradas largas, timing del tapering y estructura de la semana pico.",
-    de: "Die Distanz bestimmt die gesamte Planarchitektur — Langstreckenentwicklung, Taper-Timing und Spitzenwochenstruktur."
-  },
-  dist_longest_run: {
-    agent: 'coach',
-    en: "Your longest recent run is your aerobic ceiling right now. I build from here — never jumping more than 10% volume per week.",
-    pl: "Twój ostatni najdłuższy bieg to Twój obecny pułap tlenowy. Buduję od tego miejsca — nigdy nie zwiększam objętości więcej niż o 10% tygodniowo.",
-    fr: "Votre plus longue sortie récente est votre plafond aérobie actuel. Je construis depuis là — jamais plus de 10% de volume par semaine.",
-    es: "Tu carrera más larga reciente es tu techo aeróbico actual. Construyo desde ahí — nunca saltando más del 10% de volumen por semana.",
-    de: "Dein längster letzter Lauf ist deine aktuelle aerobe Decke. Ich baue von hier auf — niemals mehr als 10% Volumen pro Woche."
-  },
-  dist_race: {
-    agent: 'headtrainer',
-    en: "A race date gives me a hard deadline to reverse-engineer your entire block from. No race? I'll set the optimal target date for you.",
-    pl: "Data zawodów daje mi twardy termin, od którego buduję cały blok wstecz. Brak zawodów? Wyznaczę optymalną datę docelową.",
-    fr: "Une date de course me donne un délai ferme pour construire votre bloc en sens inverse. Pas de course ? Je fixerai la date optimale.",
-    es: "Una fecha de carrera me da un plazo fijo para construir tu bloque desde el final. ¿Sin carrera? Estableceré la fecha óptima para ti.",
-    de: "Ein Wettkampfdatum gibt mir eine feste Deadline, von der ich deinen gesamten Block rückwärts aufbaue."
-  },
-  dist_race_date: {
-    agent: 'headtrainer',
-    en: "From this date I calculate your taper entry, peak training weeks, and the final long session before race day.",
-    pl: "Od tej daty obliczam wejście w tapering, szczytowe tygodnie treningowe i ostatni długi bieg przed zawodami.",
-    fr: "À partir de cette date, je calcule votre entrée en affûtage, vos semaines d'entraînement de pointe et la dernière longue sortie.",
-    es: "Desde esta fecha calculo tu entrada al tapering, las semanas de entrenamiento pico y la última tirada larga antes del día de carrera.",
-    de: "Von diesem Datum berechne ich deinen Taper-Eintritt, Spitzenwochentraining und die letzte lange Einheit vor dem Wettkampf."
-  },
-  time_dist: {
-    agent: 'headtrainer',
-    en: "Each distance needs a different training emphasis. 5k is speed and neuromuscular power. Marathon is fat oxidation and time on feet.",
-    pl: "Każdy dystans wymaga innego akcentu treningowego. 5km to szybkość i siła nerwowo-mięśniowa. Maraton to utlenianie tłuszczu i czas na nogach.",
-    fr: "Chaque distance nécessite un accent différent. 5km = vitesse. Marathon = oxydation des graisses et endurance.",
-    es: "Cada distancia necesita un énfasis diferente. 5k es velocidad y potencia neuromuscular. Maratón es oxidación de grasas y tiempo de pie.",
-    de: "Jede Distanz braucht anderen Trainingsfokus. 5k ist Geschwindigkeit. Marathon ist Fettoxidation und Dauerbelastung."
-  },
-  time_pb: {
-    agent: 'analyst',
-    en: "Your current PB is my baseline. I calculate the exact pace gap to your target and map out the physiological work to close it.",
-    pl: "Twój obecny rekord to mój punkt bazowy. Obliczam dokładną różnicę tempa do celu i mapuję fizjologiczną pracę potrzebną do jego osiągnięcia.",
-    fr: "Votre PB actuel est ma référence. Je calcule l'écart exact d'allure vers votre objectif et planifie le travail physiologique nécessaire.",
-    es: "Tu PB actual es mi referencia. Calculo la diferencia exacta de ritmo hacia tu objetivo y mapeo el trabajo fisiológico necesario.",
-    de: "Deine aktuelle Bestzeit ist meine Referenz. Ich berechne die genaue Pace-Lücke zum Ziel und bilde das physiologische Werk ab, sie zu schließen."
-  },
-  time_target: {
-    agent: 'analyst',
-    en: "I'll assess if your target is realistic, aggressive, or out of reach for the timeframe — then adjust the plan to maximize your chances.",
-    pl: "Ocenię, czy Twój cel jest realistyczny, ambitny czy poza zasięgiem w danym czasie — i dostosuję plan, by zmaksymalizować Twoje szanse.",
-    fr: "Je vais évaluer si votre objectif est réaliste, ambitieux ou hors de portée pour ce délai — puis adapter le plan.",
-    es: "Evaluaré si tu objetivo es realista, agresivo o fuera de alcance para el tiempo disponible — luego ajustaré el plan.",
-    de: "Ich beurteile, ob dein Ziel realistisch, aggressiv oder außer Reichweite ist — und passe den Plan entsprechend an."
-  },
-  time_race: {
-    agent: 'headtrainer',
-    en: "A race date locks the plan. I'll build in a 10–14 day taper so you arrive at the start line fresh, sharp, and ready.",
-    pl: "Data zawodów blokuje plan. Wbuduję 10-14-dniowy tapering, żebyś na linię startową dotarł świeży, skupiony i gotowy.",
-    fr: "Une date de course fixe le plan. Je prévois un affûtage de 10 à 14 jours pour que vous arriviez sur la ligne de départ frais et prêt.",
-    es: "Una fecha de carrera fija el plan. Incluiré un tapering de 10-14 días para que llegues a la línea de salida fresco y listo.",
-    de: "Ein Wettkampfdatum fixiert den Plan. Ich baue einen 10–14-tägigen Taper ein, damit du frisch und bereit an der Startlinie ankommst."
-  },
-  time_race_date: {
-    agent: 'headtrainer',
-    en: "From this date I'll calculate your taper entry, build-up weeks, and the last hard workout before race day.",
-    pl: "Od tej daty obliczę wejście w tapering, tygodnie budowania formy i ostatni ciężki trening przed zawodami.",
-    fr: "À partir de cette date, je calcule l'entrée en affûtage, les semaines de progression et le dernier entraînement difficile.",
-    es: "Desde esta fecha calcularé tu entrada al tapering, semanas de construcción y el último entrenamiento duro antes del día de carrera.",
-    de: "Von diesem Datum berechne ich Taper-Eintritt, Aufbauwochen und die letzte harte Einheit vor dem Wettkampftag."
-  },
-  profile: {
-    agent: 'physio',
-    en: "Age, weight, and height feed my recovery time estimates and load calculations. A 55-year-old needs more rest days than a 22-year-old.",
-    pl: "Wiek, waga i wzrost zasilają moje szacunki czasu regeneracji i obliczenia obciążeń. 55-latek potrzebuje więcej dni odpoczynku niż 22-latek.",
-    fr: "Âge, poids et taille alimentent mes estimations de récupération. Un athlète de 55 ans a besoin de plus de repos qu'un athlète de 22 ans.",
-    es: "Edad, peso y altura alimentan mis estimaciones de recuperación. Un atleta de 55 años necesita más días de descanso que uno de 22.",
-    de: "Alter, Gewicht und Größe fließen in meine Erholungszeit-Schätzungen ein. Ein 55-Jähriger braucht mehr Ruhetage als ein 22-Jähriger."
-  },
-  availability: {
-    agent: 'coach',
-    en: "I build your plan around your real life — not an ideal scenario. Tell me exactly which days work and I'll fit quality sessions in.",
-    pl: "Buduję plan wokół Twojego prawdziwego życia — nie idealnego scenariusza. Powiedz mi które dni działają, a wcisnę w nie wartościowe sesje.",
-    fr: "Je construis votre plan autour de votre vraie vie — pas d'un scénario idéal. Dites-moi quels jours conviennent et j'y placerai des séances de qualité.",
-    es: "Construyo tu plan alrededor de tu vida real — no de un escenario ideal. Dime exactamente qué días funcionan y colocaré sesiones de calidad.",
-    de: "Ich baue deinen Plan um dein echtes Leben — kein Idealfall. Sag mir genau welche Tage passen und ich platziere Qualitätseinheiten darin."
-  },
-  ready: {
-    agent: 'headtrainer',
-    en: "The whole staff has your profile. When you tap Generate, we run our first council session and produce your personalised plan.",
-    pl: "Cały sztab ma Twój profil. Gdy naciśniesz Generuj, przeprowadzamy pierwszą sesję rady i tworzymy Twój spersonalizowany plan.",
-    fr: "Toute l'équipe a votre profil. En appuyant sur Générer, nous tenons notre première réunion et produisons votre plan personnalisé.",
-    es: "Todo el equipo tiene tu perfil. Al pulsar Generar, realizamos nuestra primera sesión de consejo y producimos tu plan personalizado.",
-    de: "Das ganze Team hat dein Profil. Wenn du auf Generieren tippst, halten wir unsere erste Ratssitzung ab und erstellen deinen personalisierten Plan."
-  },
-  default: {
-    agent: 'coach',
-    en: "Building your profile step by step. Every answer makes your plan more precise.",
-    pl: "Budujemy Twój profil krok po kroku. Każda odpowiedź sprawia, że Twój plan jest bardziej precyzyjny.",
-    fr: "Nous construisons votre profil étape par étape. Chaque réponse rend votre plan plus précis.",
-    es: "Construyendo tu perfil paso a paso. Cada respuesta hace tu plan más preciso.",
-    de: "Dein Profil wird Schritt für Schritt aufgebaut. Jede Antwort macht deinen Plan präziser."
-  }
-};
-
 // Speaking badge translations
-const SPEAKING_LABEL = { en:'Speaking', pl:'Mówi', fr:'Parle', es:'Habla', de:'Spricht' };
-const MEET_STAFF_LABEL = { en:'Meet your training staff', pl:'Poznaj swoich trenerów', fr:'Rencontrez votre équipe', es:'Conoce a tu equipo', de:'Dein Trainerstab' };
-const MEET_STAFF_SUB = {
-  en:'Five AI specialists collaborate every week to build and refine your plan.',
-  pl:'Pięciu specjalistów AI współpracuje co tydzień, budując i doskonaląc Twój plan.',
-  fr:'Cinq spécialistes IA collaborent chaque semaine pour construire votre plan.',
-  es:'Cinco especialistas de IA colaboran cada semana para construir y refinar tu plan.',
-  de:'Fünf KI-Spezialisten arbeiten jede Woche zusammen, um deinen Plan zu erstellen.'
-};
-
-function agentCard(stepId){
-  const m = AGENT_MSGS[stepId] || AGENT_MSGS.default;
-  const ag = AGENTS[m.agent];
-  const lang = S.data.language || 'en';
-  const name = ag['name'+lang.charAt(0).toUpperCase()+lang.slice(1)] || ag.nameEN;
-  const tag  = ag['tag' +lang.charAt(0).toUpperCase()+lang.slice(1)] || ag.tagEN;
-  const msg  = m[lang] || m.en;
-  const speaking = SPEAKING_LABEL[lang] || SPEAKING_LABEL.en;
-  const ico  = I[ag.ico] || '';
-  return`<div class="ag-card" style="background:${ag.color}">
-    <div class="ag-header">
-      <div class="ag-ico" style="background:${ag.accent}22;color:${ag.accent}">${ico}</div>
-      <div class="ag-meta">
-        <div class="ag-name">${name}</div>
-        <div class="ag-tag" style="color:${ag.accent}">${tag}</div>
-      </div>
-      <div class="ag-badge" style="background:${ag.accent}">${speaking}</div>
-    </div>
-    <div class="ag-msg">"${msg}"</div>
-  </div>`;
-}
-
 // Tab labels per language
 const MEET_TAB = {
   en:'Meet your training staff', pl:'Poznaj swoich trenerów',
@@ -1379,10 +1036,6 @@ function meetOneAgent(idx){
   </div>`;
 }
 
-function agentPromo(){ return agentCard('default'); }
-
-
-
 function bLang(){
   return`<h1 class="hl">${e(c('lh')).replace('\n','<br>')}</h1><p class="sh">${e(c('ls'))}</p>
 <div class="llist">${LANGS.map(l=>`<div class="li ${S.data.language===l.code?'s':''}" onclick="selLang('${l.code}')">
@@ -1455,16 +1108,6 @@ ${pickers}`;
 }
 
 // ── WATCH ──
-function bWatch(){
-  return`<h1 class="hl">${e(c('wh2')).replace('\n','<br>')}</h1><p class="sh">${e(c('ws2'))}</p>
-<div class="clist">
-  ${card(I.wy,c('wyes'),c('wyess'),S.data.hasWatch===true,"pickWatch(true)")}
-  ${card(I.wn,c('wno'),c('wnos'),S.data.hasWatch===false,"pickWatch(false)")}
-</div>
-${meetOneAgent(1)}`;
-}
-function pickWatch(v){S.data.hasWatch=v;setTimeout(next,190);}
-
 // ── LEVEL ──
 function bLevel(){
   const lang = S.data.language||'en';
@@ -1838,8 +1481,6 @@ function cyclePlanDayDom(planKey,d,btnEl){
   }
   updateMixedWeekStatus(planKey);
 }
-function cyclePlanDay(planKey,d){cyclePlanDayDom(planKey,d,null);render(false);}
-
 function bMixedVolume(isComeback=false, prefix='health'){
   const u=S.data.unit==='mi'?'mi':'km';const pu=S.data.unit==='mi'?c('paceUnit_mi'):c('paceUnit_km');
   const lang=S.data.language||'en';
@@ -1980,33 +1621,6 @@ function wrAdj(key,dir,mn,mx){
 }
 
 // ── ADVANCED ──
-function bAdvVolume(){
-  const u=S.data.unit==='mi'?'mi':'km';
-  const lang=S.data.language||'en';
-  if(!S.data.current_weekly_mileage)S.data.current_weekly_mileage=S.data.unit==='mi'?35:60;
-  const v=S.data.current_weekly_mileage;
-  const h={en:'How many km do you run per week?',pl:'Ile kilometrów tygodniowo pokonujesz?',fr:'Combien de km courez-vous par semaine ?',es:'¿Cuántos km corres por semana?',de:'Wie viele km läufst du pro Woche?'}[lang]||'Weekly distance';
-  return`<h1 class="hl">${e(h)}</h1>
-<div style="max-width:280px;margin:20px auto">${picker(v,1,S.data.unit==='mi'?120:200,5,'current_weekly_mileage',u)}</div>`;
-}
-function bAdvPace(){
-  const pu=S.data.unit==='mi'?c('paceUnit_mi'):c('paceUnit_km');
-  const lang=S.data.language||'en';
-  if(!S.data.easy_pace_min)S.data.easy_pace_min=S.data.unit==='mi'?9:6;
-  if(!S.data.easy_pace_sec)S.data.easy_pace_sec=0;
-  const pm=S.data.easy_pace_min,ps=S.data.easy_pace_sec;
-  const h={en:'How fast do you run on easy days?',pl:'Jak szybko biegniesz w spokojne dni?',fr:'A quelle vitesse courez-vous les jours faciles ?',es:'¿A qué ritmo corres los días tranquilos?',de:'Wie schnell läufst du an lockeren Tagen?'}[lang]||'Easy pace';
-  const minLbl={en:'MIN',pl:'MIN'}[lang]||'MIN';const secLbl={en:'SEC',pl:'SEK'}[lang]||'SEC';
-  return`<h1 class="hl">${e(h)}</h1>
-<p class="sh">${pu}</p>
-<div class="pk-row">
-  <div><div class="pk-label">${minLbl}</div>${picker(pm,3,20,1,'easy_pace_min','')}</div>
-  <div class="pk-sep">:</div>
-  <div><div class="pk-label">${secLbl}</div>${picker(ps,0,55,5,'easy_pace_sec','')}</div>
-</div>
-<div class="pace-display" id="pace-display" data-mkey="easy_pace_min" data-skey="easy_pace_sec" data-pu="${pu}">${pm}:${String(ps).padStart(2,'0')} ${pu}</div>`;
-}
-
 // ── ENDURANCE ──
 function bEnduranceTarget(){
   const lang=S.data.language||'en';
@@ -2285,8 +1899,6 @@ function pickDate(dk,mk,yk,iso, el){
   if(ctab) ctab.disabled = cant(S.step === STEPS.findIndex(st=>st.id==='time_race_date'||st.id==='dist_race_date') ? STEPS[S.step].id : '');
 }
 function shiftCal(mk,yk,d){let m=S.data[mk]+d,y=S.data[yk];while(m<0){m+=12;y--;}while(m>11){m-=12;y++;}S.data[mk]=m;S.data[yk]=y;render(false);}
-function formatDate(iso,months){if(!iso)return'';const[y,m,d]=iso.split('-').map(Number);return`${d} ${Array.isArray(months)?months[m-1]:''} ${y}`;}
-
 // ── DISTANCE GOAL ──
 function bDistanceDist(){
   const lang=S.data.language||'en';
@@ -2318,25 +1930,6 @@ function pickDistanceDist(id){
     Object.assign(S.data,def);
     setTimeout(next,190);
   }
-}
-
-function formatDistanceDistTitle(){
-  const dst = S.data.distance_distance;
-  const lang = S.data.language||'en';
-  if (lang === 'pl') {
-    if(dst==='10k') return '10 km';
-    if(dst==='half') return 'półmaratonu';
-    if(dst==='marathon') return 'maratonu';
-    if(dst==='ultra') return 'ultramaratonu 50 km';
-    if(dst==='other') return `${S.data.distance_custom_dist} ${S.data.unit==='mi'?'mil':'km'}`;
-  } else {
-    if(dst==='10k') return '10k';
-    if(dst==='half') return 'the half marathon';
-    if(dst==='marathon') return 'the marathon';
-    if(dst==='ultra') return 'the 50k ultra';
-    if(dst==='other') return `${S.data.distance_custom_dist} ${S.data.unit}`;
-  }
-  return '';
 }
 
 function renderDistanceAdjUI(pbt, title){
@@ -2437,17 +2030,6 @@ function noDistPb() {
   next();
 }
 
-function bDistanceTarget(){
-  const lang=S.data.language||'en';
-  if(S.data.distance_target_km===undefined||S.data.distance_target_km===null)S.data.distance_target_km=10;
-  if(!S.data.distance_target_m)S.data.distance_target_m=0;
-  const h={en:`What distance do you want to achieve?`,pl:`Jaki docelowy dystans chcesz osiągnąć?`,fr:`Quelle distance voulez-vous atteindre ?`,es:`¿Qué distancia quieres lograr?`,de:`Welche Distanz möchtest du erreichen?`}[lang]||'Target distance';
-  const pbOk=(S.data.distance_pb_km||0)*1000+(S.data.distance_pb_m||0);
-  const tgOk=(S.data.distance_target_km||0)*1000+(S.data.distance_target_m||0);
-  const err=pbOk>0&&tgOk<=pbOk?`<div style="color:#ef4444;font-size:13px;margin-top:20px;text-align:center;font-weight:600;">${e(lang==='pl'?'Cel musi być większy niż Twój obecny rekord!':'Target must be greater than your current record!')}</div>`:'';
-  return renderDistanceAdjUI('target', h) + err;
-}
-
 function bDistanceRace(){
   const lang=S.data.language||'en';
   const h={en:'Do you have a race planned?',pl:'Masz już zaplanowane zawody?',fr:'Avez-vous une course prevue ?',es:'¿Tienes una carrera planeada?',de:'Hast du ein Rennen geplant?'}[lang]||'Race planned?';
@@ -2513,11 +2095,6 @@ function bComebackRec(){
 <div class="clist">${pcts.map(p=>card(I.gh,p,'',S.data.comeback_recovery===p,`pickRec('${p}')`)).join('')}</div>`;
 }
 function pickRec(v){S.data.comeback_recovery=v;setTimeout(next,190);}
-
-function bInjuryNotes(){
-  return`<h1 class="hl">${e(c('qcbnotes'))}</h1>
-<textarea class="txt" rows="4" placeholder="${e(c('cbnph'))}" oninput="set('comeback_notes',this.value)">${e(S.data.comeback_notes||'')}</textarea>`;
-}
 
 function bLastTrain(){
   const opts=c('cblast')||['< 1 month','1-3 months','3-6 months','> 1 year'];
@@ -2737,22 +2314,8 @@ function initPickers(){
   });
 }
 
-function spin(val,mn,mx,step,setKey,suf,cls){
-  return picker(val,mn,mx,step,setKey,suf||'');
-}
-
 let HOLD_T=null,HOLD_I=null;
 function spinStop(){if(HOLD_T){clearTimeout(HOLD_T);HOLD_T=null;}if(HOLD_I){clearInterval(HOLD_I);HOLD_I=null;}}
-function spinStart(ev,cbId,val,mn,mx,step,dir){
-  ev&&ev.preventDefault&&ev.preventDefault();spinStop();
-  let v=Number(val);const mn2=Number(mn),mx2=Number(mx),st=Number(step),d=Number(dir);
-  if(!Number.isFinite(v))v=mn2;
-  const fn=window._spinCBs[cbId];if(!fn)return;
-  const tick=()=>{v=Math.min(mx2,Math.max(mn2,+(v+d*st).toFixed(6)));fn(v);};
-  tick();let interval=160;let accelCount=0;
-  function startInterval(){HOLD_I=setInterval(()=>{tick();accelCount++;if(accelCount%5===0&&interval>40){clearInterval(HOLD_I);interval=Math.max(40,Math.round(interval*0.65));startInterval();}},interval);}
-  HOLD_T=setTimeout(startInterval,320);
-}
 window.addEventListener('pointerup',spinStop);
 window.addEventListener('pointercancel',spinStop);
 window.addEventListener('blur',spinStop);

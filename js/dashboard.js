@@ -331,7 +331,6 @@
         }
 
         const AGENT_COLORS = { szef_sztabu: '#5F8368', analityk: '#5B8DB8', fizjo: '#6B8F71', psycholog: '#C9924E' };
-        const AGENT_INITIALS = { szef_sztabu: 'T', analityk: 'A', fizjo: 'F', psycholog: 'P' };
         function agentDesc(agent) {
             const a = ['szef_sztabu', 'analityk', 'fizjo', 'psycholog'].includes(agent) ? agent : 'szef_sztabu';
             return t('agent.' + a + '.desc');
@@ -628,64 +627,6 @@
         // Init sleep ring with stored/default data
         setTimeout(updateSleepRing, 300);
 
-        // --- 3D Logo Logic ---
-        let _l3dCtx = null;
-        function init3DLogo() {
-            if (_l3dCtx) _l3dCtx.revert();
-            const container = document.querySelector(".l3d-container");
-            const tube = document.querySelector(".l3d-tube");
-            if (!container || !tube) return;
-
-            _l3dCtx = gsap.context(() => {
-                const infinityContent = `
-                    <span class="l3d-char-inf">
-                        <svg viewBox="0 0 36 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <defs>
-                                <linearGradient id="logo-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                                    <stop offset="0%" style="stop-color:#7B98B0" />
-                                    <stop offset="100%" style="stop-color:#8BA8BC" />
-                                </linearGradient>
-                            </defs>
-                            <path d="M10.5 4.5C7.5 4.5 5 7 5 10C5 13 7.5 15.5 10.5 15.5C13.5 15.5 16 13 18 10C20 7 22.5 4.5 25.5 4.5C28.5 4.5 31 7 31 10C31 13 28.5 15.5 25.5 15.5C22.5 15.5 20 13 18 10C16 7 13.5 4.5 10.5 4.5Z" 
-                                  stroke="url(#logo-gradient)" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" />
-                        </svg>
-                    </span>
-                `;
-
-                const lineHTML = `
-                    <div class="l3d-line">
-                        <span class="l3d-char-h">H</span>${infinityContent}<span class="l3d-char-p">P</span>
-                    </div>
-                `;
-                tube.innerHTML = lineHTML; // One line only
-
-                const chars = document.querySelectorAll(".l3d-line > span");
-                const depth = -25;
-                const transformOrigin = `50% 50% ${depth}px`;
-
-                // One-time entrance animation
-                gsap.fromTo(chars,
-                    {
-                        rotationX: -360,
-                        opacity: 0,
-                        scale: 0.5,
-                        y: 20
-                    },
-                    {
-                        rotationX: 0,
-                        opacity: 1,
-                        scale: 1,
-                        y: 0,
-                        duration: 2.5,
-                        ease: "elastic.out(1, 0.75)",
-                        stagger: 0.15,
-                        transformOrigin: transformOrigin,
-                        delay: 0.5
-                    }
-                );
-            }, container);
-        }
-
         // --- Inertia & Slosh Engine ---
         function triggerSlosh(element, delta) {
             if (!element) return;
@@ -711,47 +652,6 @@
         }
 
         // --- Readiness & Trend Logic ---
-        function getCoachComment(percent) {
-            if (percent >= 85) return "Pełen gaz! Dziś jest Twój dzień.";
-            if (percent >= 70) return "Solidna baza. Trzymaj tempo.";
-            if (percent >= 55) return "Zwróć uwagę na regenerację.";
-            return "Oszczędzaj siły. Słabszy okres.";
-        }
-
-        function generateReadinessInsight(week, month, year) {
-            if (week <= 25 || month <= 25 || year <= 25) {
-                return `Krytycznie niskie poziomy (${Math.min(week, month, year)}%). Twoje ciało domaga się natychmiastowego resetu i snu.`;
-            }
-
-            // Relationship patterns
-            if (week > month && month > year) {
-                return `Twój tydzień (${week}%) jest znacznie silniejszy od średniej miesięcznej (${month}%) i rocznej (${year}%). Jesteś w szczytowej formie!`;
-            }
-
-            if (week < month && month < year) {
-                return `Obserwujemy spadek – tydzień (${week}%) jest słabszy niż miesiąc (${month}%) i rok (${year}%). Czas poluzować trening i zadbać o sen.`;
-            }
-
-            if (month > week && month > year) {
-                return `Średnia miesięczna (${month}%) pokazuje Twoją wysoką stabilność, mimo że ten tydzień (${week}%) był nieco bardziej wymagający.`;
-            }
-
-            if (week > month && week < year) {
-                return `Dobry tydzień (${week}%)! Odrabiasz straty względem poprzedniego miesiąca, choć wciąż jesteś poniżej swojej normy rocznej (${year}%).`;
-            }
-
-            if (Math.abs(week - month) < 5 && Math.abs(month - year) < 5) {
-                return `Niesamowita powtarzalność! Twoje wskaźniki (ok. ${month}%) są niemal identyczne we wszystkich okresach. Pełna kontrola formy.`;
-            }
-
-            // Fallback for mixed states
-            if (week > year) {
-                return `Twój ostatni tydzień (${week}%) jest powyżej średniej rocznej (${year}%). Trend jest pozytywny, trzymaj ten kurs.`;
-            } else {
-                return `Twoja gotowość z tygodnia (${week}%) odstaje od rocznej bazy (${year}%). Warto zweryfikować jakość odpoczynku w ostatnich dniach.`;
-            }
-        }
-
         function updateReadiness(percent) {
             // Ensure percent is between 0 and 100
             percent = Math.max(0, Math.min(100, Math.round(percent)));
@@ -812,11 +712,6 @@
         // --- Liquid Wave Logic ---
         // Wave animation is now 100% CSS driven (@keyframes wave-spin).
         // This function stub is kept so existing init calls don't error.
-        function startChaosLiquid() {
-            // No-op: CSS handles the wave rotation on .liquid::before and .liquid::after
-        }
-
-
         // --- Premium Rolling Counter Logic ---
         function initPremiumCounter(element) {
             if (!element) return;
@@ -865,117 +760,8 @@
             });
         }
 
-        // --- XP Runner: V9 Physics Engine ---
-        let runnerXP = 20;
-        let extraGoalXP = 0;
-        let viewStartX = 0;
-        const MAX_BACK_DISTANCE = 20;
-        const runnerLevels = ["AMATOR II", "AMATOR III", "ZAWODOWIEC I", "ZAWODOWIEC II", "ELITA"];
-        let rLevelIndex = 0;
-        let rStatus = 'IDLE';
-
-        const runElems = {
-            box: document.getElementById('runner-box'),
-            body: document.getElementById('runner'),
-            track: document.getElementById('track'),
-            lanes: document.querySelector('.lanes'),
-            tex: document.querySelector('.track-texture'),
-            goal: document.getElementById('goal'),
-            xpText: document.getElementById('xp-text'),
-            lvlTitle: document.getElementById('level-title'),
-            finishLabel: document.querySelector('.finish-label'),
-            flash: document.getElementById('level-flash'),
-            legs: [document.getElementById('leg-l-u'), document.getElementById('leg-l-l'), document.getElementById('leg-r-u'), document.getElementById('leg-r-l')],
-            arms: [document.getElementById('arm-l-u'), document.getElementById('arm-l-l'), document.getElementById('arm-r-u'), document.getElementById('arm-r-l')]
-        };
-
-        let runCycle, idleCycle;
-
-        function updateRunnerUI(fast = false, immediate = false) {
-            if (!runElems.box) return;
-            viewStartX = Math.max(viewStartX, runnerXP - MAX_BACK_DISTANCE);
-            const dur = immediate ? 0 : (fast ? 0.3 : 1.5);
-            const xpToPct = (xp) => 15 + ((xp - viewStartX) * 0.7);
-
-            gsap.to([runElems.lanes, runElems.tex], { x: -(viewStartX * 0.7) + "%", duration: dur, ease: "power3.out" });
-            gsap.to(runElems.box, { left: xpToPct(runnerXP) + "%", duration: dur, ease: "power3.out" });
-            gsap.to(runElems.goal, { left: xpToPct(100 + extraGoalXP) + "%", duration: dur, ease: "power3.out" });
-
-            runElems.xpText.innerText = Math.max(0, 100 - runnerXP) + " XP do awansu";
-            runElems.lvlTitle.innerText = runnerLevels[rLevelIndex];
-            const xpDisplay = document.getElementById('xp-points-display');
-            if (xpDisplay) {
-                // We'll update points here if needed, but the jumping logic is separate
-                // For now just keep it in sync with a base value 2450 + runnerXP
-                const totalXP = 2450 + runnerXP;
-                xpDisplay.innerText = totalXP.toLocaleString();
-            }
-            runElems.finishLabel.innerText = runnerLevels[rLevelIndex + 1] || "MAX LEVEL";
-        }
-
-        function startRunnerIdle() {
-            if (runCycle) runCycle.kill();
-            idleCycle = gsap.to(runElems.body, { y: -4, duration: 0.8, repeat: -1, yoyo: true, ease: "power1.inOut" });
-        }
-
-        function startRunnerRun() {
-            if (idleCycle) idleCycle.kill();
-            gsap.set(runElems.body, { rotation: 15, y: 0 });
-            runCycle = gsap.timeline({ repeat: -1 });
-            const [llu, lll, rlu, rll] = runElems.legs;
-            const [alu, all, aru, arl] = runElems.arms;
-
-            runCycle.to(llu, { rotation: 40, duration: 0.25, ease: "power1.inOut" }, 0)
-                .to(lll, { rotation: 45, duration: 0.25, ease: "power1.inOut" }, 0)
-                .to(llu, { rotation: -35, duration: 0.25, ease: "power1.inOut" }, 0.25)
-                .to(lll, { rotation: 10, duration: 0.25, ease: "power1.inOut" }, 0.25)
-                .to(llu, { rotation: 0, duration: 0.25, ease: "power1.inOut" }, 0.5);
-            runCycle.to(rlu, { rotation: -35, duration: 0.25, ease: "power1.inOut" }, 0)
-                .to(rll, { rotation: 10, duration: 0.25, ease: "power1.inOut" }, 0)
-                .to(rlu, { rotation: 40, duration: 0.25, ease: "power1.inOut" }, 0.25)
-                .to(rll, { rotation: 45, duration: 0.25, ease: "power1.inOut" }, 0.25)
-                .to(rlu, { rotation: 0, duration: 0.25, ease: "power1.inOut" }, 0.5);
-            runCycle.to(alu, { rotation: -30, duration: 0.25, ease: "power1.inOut" }, 0)
-                .to(all, { rotation: -60, duration: 0.25, ease: "power1.inOut" }, 0)
-                .to(alu, { rotation: 40, duration: 0.25, ease: "power1.inOut" }, 0.25)
-                .to(all, { rotation: -20, duration: 0.25, ease: "power1.inOut" }, 0.25)
-                .to(alu, { rotation: 0, duration: 0.25, ease: "power1.inOut" }, 0.5);
-            runCycle.to(aru, { rotation: 40, duration: 0.25, ease: "power1.inOut" }, 0)
-                .to(arl, { rotation: -20, duration: 0.25, ease: "power1.inOut" }, 0)
-                .to(aru, { rotation: -30, duration: 0.25, ease: "power1.inOut" }, 0.25)
-                .to(arl, { rotation: -60, duration: 0.25, ease: "power1.inOut" }, 0.25)
-                .to(aru, { rotation: 0, duration: 0.25, ease: "power1.inOut" }, 0.5);
-            runCycle.to(runElems.body, { y: -2, duration: 0.125, repeat: 3, yoyo: true, ease: "power1.inOut" }, 0);
-        }
-
-        function stopRunnerAnims() {
-            if (runCycle) runCycle.kill();
-            if (idleCycle) idleCycle.kill();
-            gsap.set([...runElems.legs, ...runElems.arms, runElems.body], { rotation: 0, y: 0 });
-        }
-
-        function runnerLevelUp() {
-            gsap.timeline()
-                .to(runElems.flash, { opacity: 1, duration: 0.2 })
-                .add(() => {
-                    rLevelIndex++;
-                    runnerXP = 0; extraGoalXP = 0; viewStartX = 0;
-                    gsap.set([runElems.lanes, runElems.tex, runElems.goal, runElems.box], { x: 0 });
-                    updateRunnerUI(true, true);
-                })
-                .to(runElems.flash, { opacity: 0, duration: 0.8, ease: "power2.in" });
-        }
-
-
         // Call on initial load
         document.addEventListener('DOMContentLoaded', () => {
-            init3DLogo();
-
-            // Initialize Systems
-            // readiness populated from real data via loadReadinessDelta() — no placeholder fill
-            updateRunnerUI(true, true);
-            startRunnerIdle();
-
             // Adjust background for desktop realism
             if (window.innerWidth > 480) {
                 document.body.style.background = "#000";
@@ -983,10 +769,6 @@
         });
 
         // --- Navigation Logic ---
-        function toggleCoachView() {
-            switchView('coach');
-        }
-
         /* --- Detailed View Logic --- */
         let currentChartData = null;
         let currentChartType = null;
@@ -1780,18 +1562,6 @@
                     ? pT + (d.pace - minP) / pSpan * cH : null);
 
                 // Catmull-Rom bezier (tension 0.28)
-                const crPath = pts => {
-                    const v = pts.filter(Boolean);
-                    if (v.length < 2) return '';
-                    let p = `M${v[0][0].toFixed(1)},${v[0][1].toFixed(1)}`;
-                    const t = 0.28;
-                    for (let i = 0; i < v.length - 1; i++) {
-                        const a = v[Math.max(0,i-1)], b = v[i], c = v[i+1], e = v[Math.min(v.length-1,i+2)];
-                        p += ` C${(b[0]+(c[0]-a[0])*t).toFixed(1)},${(b[1]+(c[1]-a[1])*t).toFixed(1)} ${(c[0]-(e[0]-b[0])*t).toFixed(1)},${(c[1]-(e[1]-b[1])*t).toFixed(1)} ${c[0].toFixed(1)},${c[1].toFixed(1)}`;
-                    }
-                    return p;
-                };
-
                 // KM line — all 7 points, straight lines, rest days at y=0 (baseline)
                 const kmPath = cd.map((_, i) => `${i === 0 ? 'M' : 'L'}${xs[i].toFixed(1)},${kmYs[i].toFixed(1)}`).join(' ');
                 const areaPath = kmPath
@@ -1804,8 +1574,6 @@
                     const y = paceYs[i] !== null ? paceYs[i] : paceBaseline;
                     return `${i === 0 ? 'M' : 'L'}${xs[i].toFixed(1)},${y.toFixed(1)}`;
                 }).join(' ');
-                const paceDashes = '';
-
                 // Grid (2 lines, subtle dashed)
                 const grid = [0.4, 0.75].map(f => {
                     const y = (pT + f * cH).toFixed(1);
@@ -2080,21 +1848,6 @@
                 ${day.opis ? `<div style="font-size:14px;color:#333;line-height:1.75;font-weight:400;font-family:'Inter',sans-serif;">${day.opis}</div>` : ''}
                 ${day.uwagi ? `<div style="margin-top:12px;padding-top:12px;border-top:1px solid #EBEBEB;font-size:13px;color:#8A8A8A;font-style:italic;line-height:1.6;font-family:'Inter',sans-serif;">💡 ${day.uwagi}</div>` : ''}
             </div>`;
-        }
-
-        function _distDelta(day) {
-            if (!day.dystans_km || !calendarPlan?.dni) return '';
-            const allDni = calendarPlan.dni;
-            const idx = allDni.findIndex(d => d.data === calSelectedDay);
-            for (let i = idx - 1; i >= 0; i--) {
-                const prev = allDni[i];
-                if (prev.typ !== 'rest' && prev.dystans_km) {
-                    const pct = ((parseFloat(day.dystans_km) - parseFloat(prev.dystans_km)) / parseFloat(prev.dystans_km)) * 100;
-                    const col = pct > 0 ? '#6B8F71' : pct < 0 ? '#C07264' : '#8A8A8A';
-                    return `<div style="margin-top:5px;font-size:11px;font-weight:700;color:${col};">${pct > 0 ? '+' : ''}${pct.toFixed(1)}% vs poprzedni</div>`;
-                }
-            }
-            return '';
         }
 
         function buildDayHTML(day) {
@@ -3700,7 +3453,6 @@
         }
         
         
-        function wizPickChip(field, val) { _goalWiz[field] = val; renderGoalWiz(); }
         
 
         function _obCard(title, sub, selected, onclick, icon) {
@@ -5947,14 +5699,6 @@ function _wizSteps() {
             }
             return out;
         }
-        function _i18nMonthNames(style) {
-            const out = [];
-            for (let i = 0; i < 12; i++) {
-                out.push(new Intl.DateTimeFormat(_appLang, { month: style, timeZone: 'UTC' })
-                    .format(new Date(Date.UTC(2024, i, 15))));
-            }
-            return out;
-        }
         function _capFirst(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : s; }
         function applyI18n(root) {
             const scope = root || document;
@@ -6328,11 +6072,6 @@ function _wizSteps() {
             // window.HealthConnect.requestPermissions([...]) → odczyt → POST /api/health/sync
             showVelmToast('Łączę z Health Connect…', false);
         }
-        function syncWatchNow() { connectWatch(); }
-        function disconnectWatch() {
-            showVelmToast('Rozłączanie zegarka będzie dostępne w aplikacji mobilnej.', false);
-        }
-
         async function stravaConnect() {
             const userId = localStorage.getItem('velm_user_id');
             const token = localStorage.getItem('velm_token');
@@ -6364,23 +6103,6 @@ function _wizSteps() {
                 loadStravaStatus();
             } catch (e) {
                 alert('Błąd: ' + e.message);
-            }
-        }
-
-        async function stravaImport() {
-            const userId = localStorage.getItem('velm_user_id');
-            const token = localStorage.getItem('velm_token');
-            const msg = document.getElementById('strava-import-msg');
-            if (msg) { msg.style.display = 'block'; msg.textContent = 'Importuję...'; msg.style.color = '#8A8A8A'; }
-            try {
-                const res = await fetch(API_BASE + '/api/strava/import/' + userId, {
-                    method: 'POST',
-                    headers: { 'Authorization': 'Bearer ' + token }
-                });
-                const data = await res.json();
-                if (msg) { msg.textContent = 'Zaimportowano ' + (data.imported || 0) + ' treningów'; msg.style.color = '#6B8F71'; }
-            } catch (e) {
-                if (msg) { msg.textContent = 'Błąd: ' + e.message; msg.style.color = '#C07264'; }
             }
         }
 
@@ -7299,50 +7021,7 @@ function _wizSteps() {
             }
         }
 
-        function toggleMemoryDetails() {
-            const details = document.getElementById('memory-details');
-            const icon = document.getElementById('mem-toggle-icon');
-            if (details.style.display === 'none') {
-                details.style.display = 'block';
-                icon.style.transform = 'rotate(180deg)';
-                loadUserMemory();
-            } else {
-                details.style.display = 'none';
-                icon.style.transform = 'rotate(0deg)';
-            }
-        }
-
         // --- Chat Logic ---
-        const COACH_QUESTIONS = [
-            "Cel dzisiejszego biegu?",
-            "Co to bieg regeneracyjny?",
-            "Zalecane tętno na dziś?"
-        ];
-
-        function displaySuggestions() {
-            const container = document.getElementById('coach-suggestions');
-            if (!container) return;
-            container.innerHTML = '';
-            container.style.display = 'flex';
-
-            // Show exactly the 3 fixed questions
-            COACH_QUESTIONS.forEach(q => {
-                const chip = document.createElement('div');
-                chip.className = 'suggestion-chip';
-                chip.innerText = q;
-                chip.onclick = () => {
-                    document.getElementById('chat-input').value = q;
-                    container.style.display = 'none'; // Hide suggestions on click
-                    sendMessage();
-                };
-                container.appendChild(chip);
-            });
-        }
-
-        function handleEnter(e) {
-            if (e.key === 'Enter') sendMessage();
-        }
-
         function handleEnterTA(e) {
             if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
@@ -7487,41 +7166,6 @@ function _wizSteps() {
         const _WEEK_DAYS_EN = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
         function _daysToIdx(arr){ return (Array.isArray(arr)?arr:[]).map(d => typeof d === 'number' ? d : _WEEK_DAYS_EN.indexOf(d)).filter(i => i >= 0 && i <= 6); }
         function _idxToDays(arr){ return (Array.isArray(arr)?arr:[]).map(i => _WEEK_DAYS_EN[i]).filter(Boolean); }
-        async function loadChatHistory(agent) {
-            if (!currentUserId) return;
-            // Multi-conversation flow ładuje historię przez selectConversation/switchAgentConversation.
-            // Zostawiamy ten helper jako no-op żeby nie nadpisywał wiadomości.
-            return;
-            // eslint-disable-next-line no-unreachable
-            const cacheKey = `${currentUserId}::${agent}`;
-            if (_chatHistoryLoaded[cacheKey]) return;
-            const container = document.getElementById('coach-messages');
-            if (!container) return;
-            // Only inject history if conversation is empty (no msg divs yet)
-            if (container.querySelectorAll('.msg').length > 0) return;
-            try {
-                const res = await fetch(`${API_BASE}/api/messages/${currentUserId}?agent=${agent}&limit=10`, { headers: authHeaders() });
-                const data = await res.json();
-                const msgs = data?.messages;
-                if (!msgs?.length) return;
-                _chatHistoryLoaded[cacheKey] = true;
-                const sep = document.createElement('div');
-                sep.className = 'chat-history-separator';
-                sep.innerHTML = '<span>Poprzednia rozmowa</span>';
-                container.insertBefore(sep, container.firstChild);
-                for (const m of msgs) {
-                    const div = document.createElement('div');
-                    div.className = (m.role === 'user' ? 'msg msg-user' : 'msg msg-ai') + ' msg-history';
-                    div.textContent = m.content;
-                    container.appendChild(div);
-                }
-                const sep2 = document.createElement('div');
-                sep2.className = 'chat-history-separator';
-                sep2.innerHTML = '<span>Teraz</span>';
-                container.appendChild(sep2);
-            } catch(e) { /* historia niedostępna — kontynuuj bez niej */ }
-        }
-
         function enterCoachWithContext(ctx) {
             window.chatContext = ctx;
             switchView('coach');
@@ -7679,11 +7323,6 @@ function _wizSteps() {
                 dateStr = dateStr.charAt(0).toUpperCase() + dateStr.slice(1);
                 dateEl.innerText = dateStr;
             }
-        }
-
-        function simulateLiveStatus() {
-            // Logic to update numbers if we had dynamic data
-            // For now, static HTML is used as per premium design
         }
 
         // --- Theme — Cal AI: czarno-biały, bez kolorowych akcentów ---
@@ -8056,17 +7695,6 @@ function _wizSteps() {
             }
         }
 
-        function dismissLoginOverlay() {
-            const overlay = document.getElementById('login-overlay');
-            if (overlay) {
-                overlay.classList.add('hidden');
-                setTimeout(() => overlay.remove(), 420);
-            }
-            const profileIdEl = document.getElementById('profile-user-id');
-            if (profileIdEl) profileIdEl.textContent = currentUserId ?? '—';
-            loadTodayCard();
-        }
-
         // ── PASSWORD RESET MODAL (gdy user przyszedł z linku w mailu) ─────
         function openPasswordResetModal(token) {
             const existing = document.getElementById('pwd-reset-modal');
@@ -8201,14 +7829,6 @@ function _wizSteps() {
             return toDateStr(new Date());
         }
 
-        function hasTodayWorkout() {
-            const today = todayStr();
-            const dni = calendarPlan?.dni;
-            if (!dni) return false;
-            const day = dni.find(d => d.data === today);
-            return day && day.typ && day.typ !== 'rest';
-        }
-
         function checkAndRedirectCheckin() {
             if (!currentUserId) return;
             const today = todayStr();
@@ -8338,14 +7958,6 @@ function _wizSteps() {
             const tickers = document.querySelectorAll('.ticker');
             tickers.forEach(t => initPremiumCounter(t));
 
-            if (typeof startXPNumberAnimation === 'function') startXPNumberAnimation();
-            startChaosLiquid(); // New Chaos Init
-
-            // Initialize Systems
-            // readiness populated from real data via loadReadinessDelta() — no placeholder fill
-            updateRunnerUI(true, true);
-            startRunnerIdle();
-
             // Force Home View on Load
             switchView('home');
             loadTodayCard();
@@ -8400,147 +8012,12 @@ function _wizSteps() {
         }
 
         // --- The Grinder Runner (Pro Jointed Edition) ---
-        function initGrinderRunner() {
-            const sprite = document.getElementById('runner-sprite');
-            const sweatContainer = document.getElementById('sweat-container');
-            if (!sprite || !sweatContainer) return;
-
-            const armL = sprite.querySelector('.arm-left-pro');
-            const armR = sprite.querySelector('.arm-right-pro');
-            const legL = sprite.querySelector('.leg-left-pro');
-            const legR = sprite.querySelector('.leg-right-pro');
-            const body = sprite.querySelector('.runner-body');
-            const head = sprite.querySelector('.runner-head');
-
-            let gaitTimeline, bounceTimeline, leanTween;
-            let sweatInterval = null;
-            let isRunning = false;
-
-            function startRun() {
-                isRunning = true;
-                if (gaitTimeline) gaitTimeline.kill();
-                if (bounceTimeline) bounceTimeline.kill();
-                if (leanTween) leanTween.kill();
-
-                // 1. Pro Running Gait (4-Phase Cycle)
-                // Duration of one full double-step cycle
-                const cycleTime = 0.5;
-                gaitTimeline = gsap.timeline({ repeat: -1 });
-
-                // Phase 1: Contact (Left foot strikes, right arm forward)
-                // Legs: Left (50,55 42,68 32,82) -> Straightish strike
-                // Legs: Right (50,55 58,68 45,72) -> Highly bent recovery
-                gaitTimeline.to(legL, { attr: { points: "50,55 42,68 32,82" }, duration: cycleTime / 4, ease: "power2.out" }, 0);
-                gaitTimeline.to(legR, { attr: { points: "50,55 60,65 48,65" }, duration: cycleTime / 4, ease: "power2.out" }, 0);
-                gaitTimeline.to(armL, { attr: { points: "50,35 60,40 65,30" }, duration: cycleTime / 4, ease: "power2.out" }, 0);
-                gaitTimeline.to(armR, { attr: { points: "50,35 38,42 25,48" }, duration: cycleTime / 4, ease: "power2.out" }, 0);
-
-                // Phase 2: Drive/Flight (Both legs driving back and up)
-                gaitTimeline.to(legL, { attr: { points: "50,55 55,75 70,80" }, duration: cycleTime / 4, ease: "none" }, cycleTime / 4);
-                gaitTimeline.to(legR, { attr: { points: "50,55 40,65 25,60" }, duration: cycleTime / 4, ease: "none" }, cycleTime / 4);
-                gaitTimeline.to(armL, { attr: { points: "50,35 40,45 35,55" }, duration: cycleTime / 4, ease: "none" }, cycleTime / 4);
-                gaitTimeline.to(armR, { attr: { points: "50,35 65,45 70,35" }, duration: cycleTime / 4, ease: "none" }, cycleTime / 4);
-
-                // Phase 3: Contact (Right foot strikes)
-                gaitTimeline.to(legL, { attr: { points: "50,55 60,65 48,65" }, duration: cycleTime / 4, ease: "power2.out" }, cycleTime / 2);
-                gaitTimeline.to(legR, { attr: { points: "50,55 42,68 32,82" }, duration: cycleTime / 4, ease: "power2.out" }, cycleTime / 2);
-                gaitTimeline.to(armL, { attr: { points: "50,35 38,42 25,48" }, duration: cycleTime / 4, ease: "power2.out" }, cycleTime / 2);
-                gaitTimeline.to(armR, { attr: { points: "50,35 60,40 65,30" }, duration: cycleTime / 4, ease: "power2.out" }, cycleTime / 2);
-
-                // Phase 4: Drive/Flight (Opposite)
-                gaitTimeline.to(legL, { attr: { points: "50,55 40,65 25,60" }, duration: cycleTime / 4, ease: "none" }, 3 * cycleTime / 4);
-                gaitTimeline.to(legR, { attr: { points: "50,55 55,75 70,80" }, duration: cycleTime / 4, ease: "none" }, 3 * cycleTime / 4);
-                gaitTimeline.to(armL, { attr: { points: "50,35 65,45 70,35" }, duration: cycleTime / 4, ease: "none" }, 3 * cycleTime / 4);
-                gaitTimeline.to(armR, { attr: { points: "50,35 40,45 35,55" }, duration: cycleTime / 4, ease: "none" }, 3 * cycleTime / 4);
-
-                // 2. Lean and Bounce
-                leanTween = gsap.to(sprite, { rotation: 12, transformOrigin: "50% 100%", duration: 1, ease: "power2.out" });
-                bounceTimeline = gsap.timeline({ repeat: -1 });
-                bounceTimeline.to(sprite, { y: -6, duration: cycleTime / 4, ease: "power2.out", yoyo: true, repeat: 1 }, 0); // Jump during flight
-                bounceTimeline.to(sprite, { y: 0, duration: cycleTime / 4, ease: "power2.in" }, cycleTime / 4);
-
-                startSweat();
-            }
-
-            function startWalk() {
-                isRunning = false;
-                if (gaitTimeline) gaitTimeline.kill();
-                if (bounceTimeline) bounceTimeline.kill();
-                if (leanTween) leanTween.kill();
-
-                const cycleTime = 1.6;
-                gaitTimeline = gsap.timeline({ repeat: -1, yoyo: true });
-
-                // Relaxed Walk gait (bending joints)
-                // Left Step
-                gaitTimeline.to(legL, { attr: { points: "50,55 48,68 45,80" }, duration: cycleTime / 2, ease: "sine.inOut" }, 0);
-                gaitTimeline.to(legR, { attr: { points: "50,55 55,68 60,78" }, duration: cycleTime / 2, ease: "sine.inOut" }, 0);
-                gaitTimeline.to(armL, { attr: { points: "50,35 45,45 42,55" }, duration: cycleTime / 2, ease: "sine.inOut" }, 0);
-                gaitTimeline.to(armR, { attr: { points: "50,35 55,45 58,55" }, duration: cycleTime / 2, ease: "sine.inOut" }, 0);
-
-                leanTween = gsap.to(sprite, { rotation: 0, transformOrigin: "50% 100%", y: 0, duration: 2, ease: "power2.inOut" });
-                stopSweat();
-            }
-
-            function emitSweatDrop() {
-                const drop = document.createElement('div');
-                drop.classList.add('sweat-drop');
-                const startX = 25 + Math.random() * 10;
-                const startY = 8 + Math.random() * 8;
-                drop.style.left = startX + 'px';
-                drop.style.top = startY + 'px';
-                sweatContainer.appendChild(drop);
-
-                gsap.to(drop, {
-                    x: -(15 + Math.random() * 20),
-                    y: 25 + Math.random() * 15,
-                    opacity: 0,
-                    duration: 0.6 + Math.random() * 0.4,
-                    ease: "power1.out",
-                    onComplete: () => drop.remove()
-                });
-            }
-
-            function startSweat() {
-                stopSweat();
-                sweatInterval = setInterval(() => {
-                    if (isRunning) {
-                        emitSweatDrop();
-                        if (Math.random() > 0.4) emitSweatDrop();
-                    }
-                }, 400);
-            }
-
-            function stopSweat() {
-                if (sweatInterval) {
-                    clearInterval(sweatInterval);
-                    sweatInterval = null;
-                }
-            }
-
-            startRun();
-            function cycle() {
-                setTimeout(() => {
-                    startWalk();
-                    setTimeout(() => {
-                        startRun();
-                        cycle();
-                    }, 15000);
-                }, 30000);
-            }
-            cycle();
-        }
         // --- Page Init ---
         (function () {
-            init3DLogo();
-            startChaosLiquid();
             startHeartAnimation();
-            initGrinderRunner();
             // readiness populated from real data via loadReadinessDelta() — no placeholder fill
             // Init rolling counters
             document.querySelectorAll('.ticker').forEach(el => initPremiumCounter(el));
-            // Start Zzz animation
-            if (typeof emitZ === 'function') emitZ();
             // Ensure we start at home
             switchView('home');
         })();
@@ -8636,8 +8113,6 @@ function _wizSteps() {
         // interwałowy) — jeden widget, inny krok/format zależnie od _fuKmUnit
         let _fuKmUnit = 'km';
         let _checkinStepsLockedHeight = 0;
-        let _checkinHeightRaf = 0;
-
         function openCheckinSmart() {
             const today = todayStr();
             const morningDone = localStorage.getItem('velm_checkin_morning_done');
@@ -9454,10 +8929,6 @@ function _wizSteps() {
             else if (key === 'workSegS') workSegS = val;
         }
 
-        function selectSleepHours(h) {}
-        function adjustSleepH(d) {}
-        function adjustSleepM(d) {}
-
         function showPost0Section() {
             ['duration', 'interval', 'tempo', 'walkrun'].forEach(id => {
                 const el = document.getElementById('post0-' + id);
@@ -9524,39 +8995,6 @@ function _wizSteps() {
             setTimeout(() => updateStepsHeight(), 50);
         }
 
-        async function connectStrava() {
-            const userId = localStorage.getItem('velm_user_id') || currentUserId;
-            const token = localStorage.getItem('velm_token');
-            if (!userId || !token) {
-                alert('Zaloguj się ponownie, żeby połączyć Stravę.');
-                return;
-            }
-            try {
-                const res = await fetch(`${API_BASE}/api/strava/connect/${encodeURIComponent(userId)}`, {
-                    headers: { 'Authorization': 'Bearer ' + token }
-                });
-                const data = await res.json();
-                if (!res.ok || !data.redirectUrl) {
-                    alert(data.error || 'Nie udało się rozpocząć połączenia ze Stravą');
-                    return;
-                }
-                window.location.href = data.redirectUrl;
-            } catch (e) {
-                alert('Błąd połączenia z serwerem');
-            }
-        }
-
-        function _shouldShowStrava() {
-            const connected = !!localStorage.getItem('velm_strava_connected');
-            if (connected) return false;
-            const skipCount = parseInt(localStorage.getItem('velm_strava_skip_count') || '0', 10);
-            if (skipCount < 3) return true;
-            // After 3 skips, only re-prompt every 30 days (not "never")
-            const lastSkip = parseInt(localStorage.getItem('velm_strava_last_skip_at') || '0', 10);
-            const daysSince = (Date.now() - lastSkip) / (24 * 60 * 60 * 1000);
-            return daysSince >= 30;
-        }
-
         let _checkinSending = false;
 
         function _sendCheckinData() {
@@ -9593,14 +9031,6 @@ function _wizSteps() {
                 }
             }
             setTimeout(() => { closeCheckin(); loadTodayCard(); updatePostCheckinBanner(); if (_gotoCoachAfterCheckin) setTimeout(() => switchView('coach'), 400); }, 300);
-        }
-
-        function skipStrava() {
-            const count = parseInt(localStorage.getItem('velm_strava_skip_count') || '0', 10);
-            const newCount = count >= 3 ? 0 : count + 1; // re-arm the cooldown after 30 days
-            localStorage.setItem('velm_strava_skip_count', String(newCount));
-            localStorage.setItem('velm_strava_last_skip_at', String(Date.now()));
-            _sendCheckinData();
         }
 
         // Skala RPE — 3 kotwice (Lekko/Umiarkowanie/Ciężko) to TE SAME progi co
@@ -9681,13 +9111,6 @@ function _wizSteps() {
             moreVal = Math.max(min, Math.round((moreVal + dir * step) * 10) / 10);
             _renderMoreVal();
             _commitMoreVal();
-        }
-        function isPartialCompletion() {
-            return selectedCompletion === 'less';
-        }
-        function toggleSkip(btn, key) {
-            if (skippedParts.has(key)) { skippedParts.delete(key); btn.classList.remove('selected'); }
-            else { skippedParts.add(key); btn.classList.add('selected'); }
         }
         function isFightingReadiness() {
             const sel = document.querySelector('#step-morning-4 .readiness-btn.selected');
