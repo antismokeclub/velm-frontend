@@ -6,13 +6,14 @@
 // - Static assets (icons, manifest): cache-first
 // - API calls: network-first z fallback do offline page
 
-const CACHE_VERSION = 'velm-v79';
+const CACHE_VERSION = 'velm-v80';
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const RUNTIME_CACHE = `${CACHE_VERSION}-runtime`;
 
 const STATIC_ASSETS = [
   '/',
   '/index.html',
+  '/css/index.css',
   '/dashboard.html',
   '/css/dashboard.css',
   '/js/dashboard.js',
