@@ -55,7 +55,7 @@
                     const nt = await refreshAccessToken();
                     if (nt) res = await fetch(`${API_BASE}/api/user/${currentUserId}`, { headers: authHeaders() });
                 }
-                if (res.status === 401) { forceReauth('Sesja wygasła — zaloguj się ponownie'); return; }
+                if (res.status === 401) { forceReauth(t('err.session.relogin')); return; }
                 const data = await res.json();
                 const u = data?.user;
                 // Onboarding globalnie — check-in musi wiedzieć, czy DZIŚ jest dzień
@@ -97,9 +97,9 @@
             banner.id = 'email-verify-banner';
             banner.style.cssText = 'position:fixed;top:0;left:0;right:0;background:#FFF7ED;border-bottom:1px solid #FED7AA;color:#9A3412;padding:10px 16px;font-size:13px;font-weight:500;z-index:9998;display:flex;align-items:center;gap:12px;font-family:Inter,sans-serif;';
             banner.innerHTML = `
-                <span style="flex:1;line-height:1.4;">Potwierdź adres email <strong style="font-weight:600;">${(email || '').replace(/[<>"']/g, '')}</strong> żeby aktywować konto.</span>
-                <button id="email-verify-resend-btn" style="background:#1A1A1A;color:#fff;border:none;padding:6px 14px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Wyślij link</button>
-                <button id="email-verify-dismiss-btn" style="background:none;border:none;color:#9A3412;font-size:18px;cursor:pointer;padding:0 4px;line-height:1;" aria-label="Zamknij">&times;</button>`;
+                <span style="flex:1;line-height:1.4;">${t('verify.banner.a')} <strong style="font-weight:600;">${(email || '').replace(/[<>"']/g, '')}</strong> ${t('verify.banner.b')}</span>
+                <button id="email-verify-resend-btn" style="background:#1A1A1A;color:#fff;border:none;padding:6px 14px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">${t('verify.resend')}</button>
+                <button id="email-verify-dismiss-btn" style="background:none;border:none;color:#9A3412;font-size:18px;cursor:pointer;padding:0 4px;line-height:1;" aria-label="${t('com.close')}">&times;</button>`;
             document.body.appendChild(banner);
             document.getElementById('email-verify-resend-btn').onclick = async () => {
                 const btn = document.getElementById('email-verify-resend-btn');
@@ -108,15 +108,15 @@
                     const res = await fetch(`${API_BASE}/api/email/send-verification`, { method: 'POST', headers: authHeaders() });
                     const data = await res.json().catch(() => ({}));
                     if (res.ok) {
-                        btn.textContent = 'Wysłano ✓';
+                        btn.textContent = t('verify.sent') + ' ✓';
                         setTimeout(() => hideEmailVerifyBanner(), 2500);
                     } else {
-                        btn.textContent = 'Błąd';
+                        btn.textContent = t('com.error');
                         btn.disabled = false;
                         console.warn('verify resend błąd:', data);
                     }
                 } catch (e) {
-                    btn.textContent = 'Błąd';
+                    btn.textContent = t('com.error');
                     btn.disabled = false;
                 }
             };
@@ -178,13 +178,13 @@
                     const yesterday = Math.round(metrics[metrics.length - 2].value);
                     const diff = today - yesterday;
                     if (diff > 0) {
-                        deltaEl.textContent = `+${diff}% vs wczoraj`;
+                        deltaEl.textContent = `+${diff}% ${t('home.vs.yesterday')}`;
                         deltaEl.style.color = '#6B8F71';
                     } else if (diff < 0) {
-                        deltaEl.textContent = `${diff}% vs wczoraj`;
+                        deltaEl.textContent = `${diff}% ${t('home.vs.yesterday')}`;
                         deltaEl.style.color = '#C07264';
                     } else {
-                        deltaEl.textContent = `0% vs wczoraj`;
+                        deltaEl.textContent = `0% ${t('home.vs.yesterday')}`;
                         deltaEl.style.color = '#8A8A8A';
                     }
                 }

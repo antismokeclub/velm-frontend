@@ -338,7 +338,7 @@
 
             const chartHTML = `
                 <div style="background:#FFFFFF;border:1px solid rgba(235,235,235,0.5);border-radius:14px;padding:14px 14px 10px;box-shadow:0 2px 12px rgba(0,0,0,0.03);">
-                    <div style="font-size:10px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:#8A8A8A;margin-bottom:10px;">${isSleep ? 'Czas snu' : 'Tętno spoczynkowe'}</div>
+                    <div style="font-size:10px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:#8A8A8A;margin-bottom:10px;">${isSleep ? t('home.sleeptime') : t('metric.hr.full')}</div>
                     <svg viewBox="0 0 ${W} ${H}" width="100%" style="overflow:visible;display:block;">
                         <defs>
                             <linearGradient id="chart-grad" x1="0" y1="0" x2="0" y2="1">
@@ -472,7 +472,7 @@
         }
 
         async function renderBigBattery(container) {
-            let days = ['Pon', 'Wt', 'Śr', 'Czw', 'Pt', 'Sob', 'Ndz'];
+            let days = _dayNamesShort();
             let values = [];
 
             // Fetch readiness data from API
@@ -483,7 +483,8 @@
 
                 if (result.metrics && result.metrics.length > 0) {
                     values = result.metrics.map(m => Math.round(m.value));
-                    const plDays = ['Ndz', 'Pon', 'Wt', 'Śr', 'Czw', 'Pt', 'Sob'];
+                    const _dn = _dayNamesShort();          // 0 = poniedziałek
+                    const plDays = [_dn[6], _dn[0], _dn[1], _dn[2], _dn[3], _dn[4], _dn[5]];   // getDay(): 0 = niedziela
                     days = result.metrics.map(m => {
                         const d = new Date(m.metric_date + 'T12:00:00');
                         return plDays[d.getDay()];
@@ -502,8 +503,8 @@
                 container.style.height = '320px';
                 container.innerHTML = `
                     <div style="font-size:36px;margin-bottom:12px;opacity:0.5;">🔋</div>
-                    <div style="color:#fff;font-weight:600;font-size:16px;margin-bottom:6px;">Brak danych gotowości</div>
-                    <div style="color:rgba(255,255,255,0.65);font-size:13px;text-align:center;max-width:260px;">Wykonaj poranny check-in, by zacząć budować historię gotowości organizmu.</div>
+                    <div style="color:#fff;font-weight:600;font-size:16px;margin-bottom:6px;">${t('home.readiness.empty.title')}</div>
+                    <div style="color:rgba(255,255,255,0.65);font-size:13px;text-align:center;max-width:260px;">${t('home.readiness.empty.desc')}</div>
                 `;
                 return;
             }
@@ -523,15 +524,15 @@
             // Calculate averages from data
             const weekAvg = Math.round(values.reduce((a, b) => a + b, 0) / values.length);
             const averages = [
-                { label: 'Tydzień', val: weekAvg, key: 'week' },
-                { label: 'Miesiąc', val: Math.round(weekAvg * 0.95), key: 'month' },
-                { label: 'Rok', val: Math.round(weekAvg * 1.04), key: 'year' }
+                { label: t('cal.week'), val: weekAvg, key: 'week' },
+                { label: t('cal.month'), val: Math.round(weekAvg * 0.95), key: 'month' },
+                { label: t('home.avg.year'), val: Math.round(weekAvg * 1.04), key: 'year' }
             ];
 
             let html = `
                 <div class="big-battery-layout">
                     <!-- 1. Selection Label -->
-                    <div class="selection-label">Wybierz dzień</div>
+                    <div class="selection-label">${t('home.pickday')}</div>
 
                     <!-- 2. Day Markers -->
                     <div class="day-markers">

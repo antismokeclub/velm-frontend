@@ -50,7 +50,7 @@
             if (mainCard) mainCard.onclick = () => switchView('calendar');
 
             if (!dni?.length) {
-                if (nameEl) nameEl.textContent = 'Brak planu — dotknij, aby zwołać naradę';
+                if (nameEl) nameEl.textContent = t('today.noplan');
                 if (mainCard) mainCard.onclick = (e) => { e.stopPropagation(); generateNewPlan(); };
                 return;
             }
@@ -65,7 +65,7 @@
                 const lastDay = dni[dni.length - 1]?.data;
                 if (lastDay && todayStr > lastDay) {
                     window._todayTyp = 'rest'; window._todayKm = 0; window._todayStruktura = null;
-                    if (nameEl)  nameEl.textContent = 'Plan wygasł — dotknij, aby zwołać naradę';
+                    if (nameEl)  nameEl.textContent = t('today.planexpired');
                     if (badgeEl) badgeEl.textContent = '🌙';
                     // Awaryjny ręczny spust narady (gdyby auto-narada nie ruszyła) — kafelek
                     // staje się przyciskiem generującym nowy plan (niezamykalne okno narady).
@@ -82,7 +82,7 @@
                 window._todayTyp = 'rest';
                 window._todayKm  = 0;
                 window._todayStruktura = null;
-                if (nameEl)  nameEl.textContent = 'Dzień Odpoczynku';
+                if (nameEl)  nameEl.textContent = t('wtype.rest');
                 if (badgeEl) badgeEl.textContent = '🌙';
                 updatePostCheckinBanner();
                 return;
@@ -148,7 +148,7 @@
                 updatePostCheckinBanner();
             } catch(e) {
                 const nameEl = document.getElementById('home-main-workout-name');
-                if (nameEl) nameEl.textContent = 'Brak połączenia z serwerem';
+                if (nameEl) nameEl.textContent = t('err.noserver');
             }
         }
 
@@ -175,13 +175,13 @@
 
                     return `<div style="background:var(--surface-color);border:1px solid rgba(235,235,235,0.5);border-left:3px solid var(--primary-color);border-radius:14px;box-shadow:0 2px 12px rgba(0,0,0,0.03);padding:12px 14px;animation:fadeInUp 0.25s ease both;">
                         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
-                            <span style="font-size:11px;font-weight:700;color:#8A8A8A;text-transform:uppercase;letter-spacing:0.08em;">Zmiana planu</span>
+                            <span style="font-size:11px;font-weight:700;color:#8A8A8A;text-transform:uppercase;letter-spacing:0.08em;">${t('today.planchange')}</span>
                             <span style="font-size:11px;color:#C8C2B8;">${new Date(c.created_at).toLocaleDateString(_appLang,{day:'numeric',month:'short'})}</span>
                         </div>
                         <div style="display:flex;align-items:center;gap:8px;font-size:14px;">
                             <span style="font-weight:600;color:#111;">${c.original_day}</span>
                             <span style="color:#8A8A8A;">${fromEmoji} ${fromLabel}</span>
-                            ${hasChange ? `<span style="color:#C8C2B8;">→</span><span style="font-weight:600;color:#111;">${c.new_day}</span><span style="color:#8A8A8A;">${toEmoji} ${toLabel}</span>` : `<span style="color:#C8C2B8;font-size:12px;">— pominięty</span>`}
+                            ${hasChange ? `<span style="color:#C8C2B8;">→</span><span style="font-weight:600;color:#111;">${c.new_day}</span><span style="color:#8A8A8A;">${toEmoji} ${toLabel}</span>` : `<span style="color:#C8C2B8;font-size:12px;">${t('today.skipped')}</span>`}
                         </div>
                         ${c.reason ? `<div style="font-size:12px;color:#8A8A8A;margin-top:4px;line-height:1.4;">${c.reason}</div>` : ''}
                     </div>`;
@@ -223,9 +223,9 @@
                     const pct = Math.min(100, Math.max(0, Math.round((180 - daysLeft) / 180 * 100)));
 
                     card.innerHTML = `
-                        <div style="font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:0.06em;color:#111111;margin-bottom:6px;">Do zawodów</div>
+                        <div style="font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:0.06em;color:#111111;margin-bottom:6px;">${t('race.title')}</div>
                         <div id="race-days-num" style="font-size:32px;font-weight:900;color:#111111;font-family:'Outfit',sans-serif;line-height:1;">0</div>
-                        <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.06em;color:#8A8A8A;margin-bottom:10px;">dni do startu</div>
+                        <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.06em;color:#8A8A8A;margin-bottom:10px;">${t('race.daysleft')}</div>
                         <div style="width:100%;background:#EBEBEB;border-radius:2px;height:4px;margin-bottom:6px;overflow:hidden;">
                             <div id="race-progress-bar" style="height:100%;border-radius:2px;background:var(--primary-color);width:0%;transition:width 0.8s cubic-bezier(0.4,0,0.2,1);"></div>
                         </div>
@@ -252,8 +252,8 @@
             // no date or past
             card.innerHTML = `
                 <div style="font-size:28px;margin-bottom:8px;">🏁</div>
-                <div style="font-size:14px;font-weight:700;color:#111;margin-bottom:4px;">Brak startu</div>
-                <div onclick="event.stopPropagation();switchView('settings')" style="font-size:11px;color:#8A8A8A;cursor:pointer;text-decoration:underline;">Dodaj datę zawodów</div>`;
+                <div style="font-size:14px;font-weight:700;color:#111;margin-bottom:4px;">${t('race.none')}</div>
+                <div onclick="event.stopPropagation();switchView('settings')" style="font-size:11px;color:#8A8A8A;cursor:pointer;text-decoration:underline;">${t('race.add')}</div>`;
         }
 
         async function loadStreak() {

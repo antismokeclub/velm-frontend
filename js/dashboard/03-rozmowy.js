@@ -163,7 +163,7 @@
                         <div class="conv-title"></div>
                         <div class="conv-date">${_formatConvDate(c.last_message_at)}</div>
                     </div>
-                    <button class="conv-delete" title="Usuń rozmowę" aria-label="Usuń rozmowę" data-i18n-aria="coach.delconv">
+                    <button class="conv-delete" title="${t('coach.delconv')}" aria-label="${t('coach.delconv')}" data-i18n-aria="coach.delconv">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
                     </button>
                     <div class="conv-confirm-overlay">

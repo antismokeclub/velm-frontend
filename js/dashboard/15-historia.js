@@ -7,7 +7,7 @@
             if (!currentUserId) return;
             const container = document.getElementById('history-list');
             if (!container) return;
-            container.innerHTML = '<div style="text-align:center;padding:40px;color:#8A8A8A;">Ładowanie…</div>';
+            container.innerHTML = '<div style="text-align:center;padding:40px;color:#8A8A8A;">' + t('com.loading') + '</div>';
             try {
                 const res = await fetch(`${API_BASE}/api/workouts/${currentUserId}?days=90`, { headers: authHeaders() });
                 const data = await res.json();
@@ -15,7 +15,7 @@
                 historyPage = 0;
                 renderHistoryPage();
             } catch(e) {
-                container.innerHTML = '<div style="text-align:center;padding:40px;color:#8A8A8A;">Błąd ładowania</div>';
+                container.innerHTML = '<div style="text-align:center;padding:40px;color:#8A8A8A;">' + t('hist.loaderr') + '</div>';
             }
         }
 
@@ -25,14 +25,14 @@
             const start = historyPage * HISTORY_PAGE_SIZE;
             const page = historyWorkouts.slice(start, start + HISTORY_PAGE_SIZE);
 
-            const fitBtnHtml = '<div style="display:flex;justify-content:flex-end;margin-bottom:12px;"><button onclick="document.getElementById(\'fit-file-input\').click()" style="padding:8px 14px;background:transparent;border:1.5px solid #EBEBEB;border-radius:10px;font-size:12px;font-weight:600;font-family:Inter,sans-serif;color:#1A1A1A;cursor:pointer;">+ Wgraj .fit</button></div>';
+            const fitBtnHtml = '<div style="display:flex;justify-content:flex-end;margin-bottom:12px;"><button onclick="document.getElementById(\'fit-file-input\').click()" style="padding:8px 14px;background:transparent;border:1.5px solid #EBEBEB;border-radius:10px;font-size:12px;font-weight:600;font-family:Inter,sans-serif;color:#1A1A1A;cursor:pointer;">' + t('hist.upload') + '</button></div>';
 
             if (historyWorkouts.length === 0) {
                 container.innerHTML = fitBtnHtml + `
                     <div style="text-align:center;padding:60px 20px;color:#8A8A8A;">
                         <div style="font-size:40px;margin-bottom:12px;">🏃</div>
-                        <div style="font-size:15px;font-weight:600;">Brak zarejestrowanych treningów</div>
-                        <div style="font-size:13px;margin-top:8px;">Użyj check-inu po treningu lub wgraj plik .fit</div>
+                        <div style="font-size:15px;font-weight:600;">${t('hist.empty.title')}</div>
+                        <div style="font-size:13px;margin-top:8px;">${t('hist.empty.desc')}</div>
                     </div>`;
                 return;
             }
@@ -44,11 +44,11 @@
                 <div style="display:flex;gap:12px;margin-bottom:20px;">
                     <div style="flex:1;background:#fff;border:1.5px solid #EBEBEB;border-radius:16px;padding:16px;text-align:center;">
                         <div style="font-size:24px;font-weight:800;color:#1A1A1A;">${totalCount}</div>
-                        <div style="font-size:11px;color:#8A8A8A;text-transform:uppercase;letter-spacing:0.06em;margin-top:4px;">Treningów</div>
+                        <div style="font-size:11px;color:#8A8A8A;text-transform:uppercase;letter-spacing:0.06em;margin-top:4px;">${t('hist.count')}</div>
                     </div>
                     <div style="flex:1;background:#fff;border:1.5px solid #EBEBEB;border-radius:16px;padding:16px;text-align:center;">
                         <div style="font-size:24px;font-weight:800;color:#1A1A1A;">${Math.round(totalKm)}</div>
-                        <div style="font-size:11px;color:#8A8A8A;text-transform:uppercase;letter-spacing:0.06em;margin-top:4px;">km łącznie</div>
+                        <div style="font-size:11px;color:#8A8A8A;text-transform:uppercase;letter-spacing:0.06em;margin-top:4px;">${t('hist.km')}</div>
                     </div>
                 </div>
                 ${page.map(w => renderWorkoutCard(w)).join('')}
@@ -73,12 +73,12 @@
             const extras = [];
             if (type === 'interval') {
                 if (w.completed_repeats != null && w.planned_repeats != null)
-                    extras.push(w.completed_repeats + '/' + w.planned_repeats + ' pow.');
+                    extras.push(w.completed_repeats + '/' + w.planned_repeats + ' ' + t('hist.reps'));
                 else if (w.completed_repeats != null)
-                    extras.push(w.completed_repeats + ' pow.');
+                    extras.push(w.completed_repeats + ' ' + t('hist.reps'));
                 if (w.interval_avg_pace) extras.push(w.interval_avg_pace + '/km');
             } else if (type === 'tempo') {
-                if (w.working_pace) extras.push('odcinek: ' + w.working_pace + '/km');
+                if (w.working_pace) extras.push(t('hist.segment') + ': ' + w.working_pace + '/km');
                 else if (w.avg_pace) extras.push(w.avg_pace + '/km');
             } else {
                 if (w.avg_pace) extras.push(w.avg_pace + '/km');
@@ -104,11 +104,11 @@
             const newerDisabled = historyPage === 0 ? 'disabled' : '';
             const olderColor = start + HISTORY_PAGE_SIZE >= historyWorkouts.length ? '#C4C4C4' : '#1A1A1A';
             const olderDisabled = start + HISTORY_PAGE_SIZE >= historyWorkouts.length ? 'disabled' : '';
-            const rangeText = (start + 1) + '–' + Math.min(start + HISTORY_PAGE_SIZE, historyWorkouts.length) + ' z ' + historyWorkouts.length;
+            const rangeText = (start + 1) + '–' + Math.min(start + HISTORY_PAGE_SIZE, historyWorkouts.length) + ' ' + t('com.of') + ' ' + historyWorkouts.length;
             return '<div style="display:flex;justify-content:center;gap:12px;margin-top:8px;margin-bottom:20px;">'
-                + '<button onclick="historyPrev()" style="padding:10px 20px;border:1.5px solid #EBEBEB;border-radius:12px;background:white;font-size:13px;font-weight:600;cursor:pointer;color:' + newerColor + ';" ' + newerDisabled + '>\u2190 Nowsze</button>'
+                + '<button onclick="historyPrev()" style="padding:10px 20px;border:1.5px solid #EBEBEB;border-radius:12px;background:white;font-size:13px;font-weight:600;cursor:pointer;color:' + newerColor + ';" ' + newerDisabled + '>\u2190 ' + t('hist.newer') + '</button>'
                 + '<span style="display:flex;align-items:center;font-size:12px;color:#8A8A8A;">' + rangeText + '</span>'
-                + '<button onclick="historyNext()" style="padding:10px 20px;border:1.5px solid #EBEBEB;border-radius:12px;background:white;font-size:13px;font-weight:600;cursor:pointer;color:' + olderColor + ';" ' + olderDisabled + '>Starsze \u2192</button>'
+                + '<button onclick="historyNext()" style="padding:10px 20px;border:1.5px solid #EBEBEB;border-radius:12px;background:white;font-size:13px;font-weight:600;cursor:pointer;color:' + olderColor + ';" ' + olderDisabled + '>' + t('hist.older') + ' \u2192</button>'
                 + '</div>';
         }
 

@@ -96,7 +96,7 @@
             try {
                 res = await fetch(url, init);
             } catch (e) {
-                const err = new Error('Brak połączenia z serwerem');
+                const err = new Error(t('err.noserver'));
                 err.cause = e;
                 throw err;
             }
@@ -123,13 +123,13 @@
                 localStorage.removeItem('velm_refresh_token');
                 const overlay = document.getElementById('login-overlay');
                 if (overlay) overlay.classList.remove('hidden');
-                const err = new Error((data && data.error) || 'Sesja wygasła');
+                const err = new Error((data && data.error) || t('err.session'));
                 err.status = 401;
                 err.data = data;
                 throw err;
             }
             if (!res.ok) {
-                const err = new Error((data && data.error) || `Błąd serwera (${res.status})`);
+                const err = new Error((data && data.error) || `${t('err.server')} (${res.status})`);
                 err.status = res.status;
                 err.data = data;
                 throw err;

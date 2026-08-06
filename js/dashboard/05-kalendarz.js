@@ -184,7 +184,7 @@
             const dayLbl = _dayNamesShort();
 
             // Short type names for compact cards
-            const TYPE_SHORT = { easy:'Easy', interval:'INT', tempo:'Tempo', long:'Long', rest:'Rest', cross:'Cross' };
+            const TYPE_SHORT = { easy:t('wshort.easy'), interval:t('wshort.interval'), tempo:t('wshort.tempo'), long:t('wshort.long'), rest:t('wshort.rest'), cross:t('wshort.cross'), walkrun:t('wshort.walkrun') };
 
             // Weekly stats
             let totalKm = 0, paceSum = 0, paceCount = 0;
@@ -230,11 +230,11 @@
             const statsRow = (totalKmStr || avgPaceStr) ? `
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px;">
                     ${totalKmStr ? `<div class="week-stat-anim cal-metric-btn" data-metric="km" onclick="switchCalMetric('km')" style="cursor:pointer;transition:border-color 0.2s,background 0.2s;background:${calMetric==='km'?'rgba(17,17,17,0.04)':'#FFFFFF'};border:${calMetric==='km'?'2px solid var(--primary-color)':'1px solid #EBEBEB'};border-radius:14px;padding:14px 16px;animation-delay:310ms;">
-                        <div style="font-size:10px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:#8A8A8A;margin-bottom:5px;">Km w tygodniu</div>
+                        <div style="font-size:10px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:#8A8A8A;margin-bottom:5px;">${t('cal.weekkm')}</div>
                         <div style="font-size:28px;font-weight:800;color:#111;line-height:1;">${totalKmStr}<span style="font-size:13px;font-weight:500;color:#8A8A8A;margin-left:3px;">km</span></div>
                     </div>` : ''}
                     ${avgPaceStr ? `<div class="week-stat-anim cal-metric-btn" data-metric="pace" onclick="switchCalMetric('pace')" style="cursor:pointer;transition:border-color 0.2s,background 0.2s;background:${calMetric==='pace'?'rgba(17,17,17,0.04)':'#FFFFFF'};border:${calMetric==='pace'?'2px solid var(--primary-color)':'1px solid #EBEBEB'};border-radius:14px;padding:14px 16px;animation-delay:370ms;">
-                        <div style="font-size:10px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:#8A8A8A;margin-bottom:5px;">Śr. tempo</div>
+                        <div style="font-size:10px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:#8A8A8A;margin-bottom:5px;">${t('cal.avgpace')}</div>
                         <div style="font-size:28px;font-weight:800;color:#111;line-height:1;">${avgPaceStr}<span style="font-size:13px;font-weight:500;color:#8A8A8A;margin-left:3px;">/km</span></div>
                     </div>` : ''}
                 </div>` : '';
@@ -244,7 +244,7 @@
                 const W = 300, H = 168;
                 const pL = 28, pR = 30, pT = 20, pB = 46;
                 const cW = W - pL - pR, cH = H - pT - pB;
-                const T_SHORT = { easy:'Easy', interval:'INT', tempo:'Tempo', long:'Long', rest:'Rest', cross:'Cross' };
+                const T_SHORT = { easy:t('wshort.easy'), interval:t('wshort.interval'), tempo:t('wshort.tempo'), long:t('wshort.long'), rest:t('wshort.rest'), cross:t('wshort.cross'), walkrun:t('wshort.walkrun') };
 
                 // All 7 days — km=0 for rest/empty so line always touches baseline
                 const cd = days.map(d => {
@@ -367,7 +367,7 @@
                 return `
                 <div class="week-stat-anim" style="margin-top:10px;background:#FFFFFF;border:1px solid rgba(235,235,235,0.5);border-radius:14px;padding:14px 14px 12px;box-shadow:0 2px 12px rgba(0,0,0,0.03);animation-delay:440ms;">
                     <div style="margin-bottom:10px;">
-                        <span style="font-size:10px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:#8A8A8A;">Rozkład tygodnia</span>
+                        <span style="font-size:10px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:#8A8A8A;">${t('cal.weekspread')}</span>
                     </div>
                     <svg viewBox="0 0 ${W} ${H}" width="100%" style="overflow:visible;display:block;">
                         <defs>
@@ -411,7 +411,7 @@
             // Cel tygodnia — pod wykresem
             const celBlock = celShort ? `
                 <div class="week-stat-anim" style="margin-top:10px;padding:14px 16px;background:#FFFFFF;border:1px solid rgba(235,235,235,0.5);border-radius:14px;box-shadow:0 2px 12px rgba(0,0,0,0.03);animation-delay:500ms;">
-                    <div style="font-size:10px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:#8A8A8A;margin-bottom:5px;">Cel tygodnia</div>
+                    <div style="font-size:10px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:#8A8A8A;margin-bottom:5px;">${t('cal.weekgoal')}</div>
                     <div style="font-size:13px;color:#111;line-height:1.55;">${celShort}</div>
                 </div>` : '';
 
@@ -481,7 +481,7 @@
             const val   = day.intensywnosc || iData.label;
             const pct   = iData.pct;
             return `<div style="${T}animation:calFadeIn 0.3s ease ${delay}ms both;">
-                <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#8A8A8A;margin-bottom:6px;font-family:'Inter',sans-serif;">Intensywność</div>
+                <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#8A8A8A;margin-bottom:6px;font-family:'Inter',sans-serif;">${t('home.intensity')}</div>
                 <div style="font-size:20px;font-weight:900;color:#111;font-family:'Outfit',sans-serif;line-height:1;">${val}</div>
                 <div style="margin-top:8px;height:3px;background:rgba(0,0,0,0.08);border-radius:2px;overflow:hidden;">
                     <div style="height:100%;border-radius:2px;background:var(--primary-color);width:${pct}%;"></div>
@@ -496,7 +496,7 @@
             const zone  = rawZone || (zData ? zData.zone : '—');
             const bpm   = zData ? `${Math.round(zData.lo * maxHR)}–${Math.round(zData.hi * maxHR)} BPM` : '';
             return `<div style="${T}animation:calFadeIn 0.3s ease ${delay}ms both;">
-                <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#8A8A8A;margin-bottom:6px;font-family:'Inter',sans-serif;">Strefa tętna</div>
+                <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#8A8A8A;margin-bottom:6px;font-family:'Inter',sans-serif;">${t('home.hrzone')}</div>
                 <div style="font-size:20px;font-weight:900;color:#111;font-family:'Outfit',sans-serif;line-height:1;">${zone}</div>
                 ${bpm ? `<div style="font-size:11px;color:#8A8A8A;margin-top:4px;font-weight:600;font-family:'Inter',sans-serif;">${bpm}</div>` : '<div></div>'}
             </div>`;
@@ -525,16 +525,16 @@
         }
 
         function _segBlock(seg, day, delay = 0) {
-            if (!seg) return `<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">${_tile('Dystans', null, delay)}${_tile('Tempo', null, delay+40)}</div>`;
+            if (!seg) return `<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">${_tile(t('home.dist'), null, delay)}${_tile(t('home.pace'), null, delay+40)}</div>`;
             const time = _calcTime(seg.dystans_km, seg.tempo);
             const zData = HR_ZONE_MAP[day.typ];
             const maxHR = userMaxHR;
             const bpm = zData ? `${Math.round(zData.lo*maxHR)}–${Math.round(zData.hi*maxHR)}` : null;
             const tiles = [
-                _tile('Dystans', seg.dystans_km ? `${seg.dystans_km} km` : null, delay),
-                _tile('Tempo', seg.tempo || null, delay+40),
-                time ? _tile('Czas', time, delay+80) : '',
-                bpm ? _tile('Tętno', bpm, delay+120, 'BPM') : '',
+                _tile(t('home.dist'), seg.dystans_km ? `${seg.dystans_km} km` : null, delay),
+                _tile(t('home.pace'), seg.tempo || null, delay+40),
+                time ? _tile(t('cal.time'), time, delay+80) : '',
+                bpm ? _tile(t('cal.hr'), bpm, delay+120, 'BPM') : '',
             ].filter(Boolean);
             return `<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">${tiles.join('')}</div>`;
         }
@@ -546,8 +546,8 @@
             const ref = (km && typ) ? `${km}km ${typ}` : (typ || '');
             const ctxJson = JSON.stringify({ source: 'calendar_day', date: dateStr, trainingRef: ref });
             return `<div style="margin-bottom:12px;animation:calFadeIn 0.3s ease 360ms both;">
-                <button onclick='enterCoachWithContext(${ctxJson.replace(/'/g,"\\'")})'  style="width:100%;padding:13px;background:var(--primary-color);border:none;border-radius:14px;color:white;font-weight:700;font-size:14px;font-family:'Inter',sans-serif;cursor:pointer;letter-spacing:0.01em;">Zapytaj o trening</button>
-                <div style="margin-top:8px;padding:12px 14px;background:var(--bg-color,#F5F3F0);border-radius:12px;font-size:12px;color:#8A8A8A;line-height:1.65;font-family:'Inter',sans-serif;">Masz kolizję z planami lub ważny powód? Możesz to zgłosić i trener dopasuje sesję. Jeśli jednak po prostu nie masz ochoty — plan zostaje.</div>
+                <button onclick='enterCoachWithContext(${ctxJson.replace(/'/g,"\\'")})'  style="width:100%;padding:13px;background:var(--primary-color);border:none;border-radius:14px;color:white;font-weight:700;font-size:14px;font-family:'Inter',sans-serif;cursor:pointer;letter-spacing:0.01em;">${t('home.askcoach')}</button>
+                <div style="margin-top:8px;padding:12px 14px;background:var(--bg-color,#F5F3F0);border-radius:12px;font-size:12px;color:#8A8A8A;line-height:1.65;font-family:'Inter',sans-serif;">${t('cal.ask.note')}</div>
             </div>`;
         }
 
@@ -556,7 +556,7 @@
             return `<div style="background:var(--surface-color,#fff);border-radius:16px;border:1px solid #EBEBEB;padding:18px;margin-bottom:12px;animation:calFadeIn 0.3s ease 300ms both;box-shadow:0 1px 4px rgba(0,0,0,0.04);">
                 <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
                     <div style="width:10px;height:10px;border-radius:50%;background:${color};flex-shrink:0;"></div>
-                    <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:0.12em;color:#111;font-family:'Inter',sans-serif;">Opis treningu</div>
+                    <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:0.12em;color:#111;font-family:'Inter',sans-serif;">${t('cal.desc')}</div>
                 </div>
                 ${day.opis ? `<div style="font-size:14px;color:#333;line-height:1.75;font-weight:400;font-family:'Inter',sans-serif;">${day.opis}</div>` : ''}
                 ${day.uwagi ? `<div style="margin-top:12px;padding-top:12px;border-top:1px solid #EBEBEB;font-size:13px;color:#8A8A8A;font-style:italic;line-height:1.6;font-family:'Inter',sans-serif;">💡 ${day.uwagi}</div>` : ''}
@@ -565,8 +565,8 @@
 
         function buildDayHTML(day) {
             if (!day) return `<div style="text-align:center;padding:48px 0;">
-                <div style="font-size:16px;font-weight:600;color:#111;margin-bottom:8px;">Brak zaplanowanego treningu</div>
-                <div style="font-size:14px;color:#8A8A8A;line-height:1.6;">Ten dzień nie jest ujęty w aktualnym planie</div>
+                <div style="font-size:16px;font-weight:600;color:#111;margin-bottom:8px;">${t('cal.noday.title')}</div>
+                <div style="font-size:14px;color:#8A8A8A;line-height:1.6;">${t('cal.noday.desc')}</div>
             </div>`;
 
             const color = TYPE_COLORS[day.typ] || '#ccc';
@@ -575,12 +575,12 @@
 
             const optionalBadge = day.optional === true
                 ? `<div style="display:inline-flex;align-items:center;gap:5px;background:#F5F5F5;border:1px solid #E0E0E0;border-radius:20px;padding:4px 12px;margin-bottom:10px;font-size:11px;font-weight:700;color:#8A8A8A;letter-spacing:0.08em;font-family:'Inter',sans-serif;text-transform:uppercase;">
-                    <span style="font-size:10px;">◦</span> OPCJONALNIE
+                    <span style="font-size:10px;">◦</span> ${t('cal.optional')}
                    </div>
-                   <div style="font-size:12px;color:#ABABAB;margin-bottom:8px;font-family:'Inter',sans-serif;">Możesz ten trening pominąć bez szkody dla planu</div>`
+                   <div style="font-size:12px;color:#ABABAB;margin-bottom:8px;font-family:'Inter',sans-serif;">${t('cal.optional.desc')}</div>`
                 : '';
             const header = `<div style="margin-bottom:22px;">
-                <div style="font-size:11px;font-weight:700;color:#8A8A8A;text-transform:uppercase;letter-spacing:0.14em;margin-bottom:10px;font-family:'Inter',sans-serif;text-align:center;">Twój trening</div>
+                <div style="font-size:11px;font-weight:700;color:#8A8A8A;text-transform:uppercase;letter-spacing:0.14em;margin-bottom:10px;font-family:'Inter',sans-serif;text-align:center;">${t('cal.yourworkout')}</div>
                 <div style="background:var(--surface-color,#fff);border-radius:18px;border:1px solid rgba(235,235,235,0.5);padding:20px 20px 18px;text-align:center;box-shadow:0 2px 16px rgba(0,0,0,0.05);">
                     ${optionalBadge}
                     <div style="font-size:30px;font-weight:900;color:#111;font-family:'Outfit',sans-serif;letter-spacing:-0.02em;line-height:1.1;">${label}</div>
@@ -592,7 +592,7 @@
             if (day.typ === 'rest') {
                 return `${header}<div style="text-align:center;padding:16px 0;">
                     <div style="font-size:52px;margin-bottom:14px;">⚪</div>
-                    <div style="font-size:15px;color:#8A8A8A;line-height:1.7;font-family:'Inter',sans-serif;">Stretching, rolowanie, spacer<br>zadbaj o regenerację</div>
+                    <div style="font-size:15px;color:#8A8A8A;line-height:1.7;font-family:'Inter',sans-serif;">${t('cal.rest.a')}<br>${t('cal.rest.b')}</div>
                     ${day.uwagi ? `<div style="margin-top:18px;padding:14px 16px;background:var(--surface-color,#fff);border-radius:12px;border:1px solid rgba(235,235,235,0.5);font-size:13px;color:#8A8A8A;font-style:italic;text-align:left;font-family:'Inter',sans-serif;">💡 ${day.uwagi}</div>` : ''}
                 </div>`;
             }
@@ -601,8 +601,8 @@
             if (day.typ === 'easy' || day.typ === 'long') {
                 return `${header}
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
-                    ${_tile('Dystans', day.dystans_km, 0, 'km')}
-                    ${_tile('Tempo', day.tempo_min_km ? day.tempo_min_km.split('/')[0].split('-')[0].trim() : null, 40, 'min/km')}
+                    ${_tile(t('home.dist'), day.dystans_km, 0, 'km')}
+                    ${_tile(t('home.pace'), day.tempo_min_km ? day.tempo_min_km.split('/')[0].split('-')[0].trim() : null, 40, 'min/km')}
                     ${_intensityTile(day, 80)}
                     ${_hrZoneTile(day, 120)}
                 </div>
@@ -622,16 +622,16 @@
                         <span style="font-size:30px;font-weight:900;color:#111;font-family:'Outfit',sans-serif;">${rep.dystans_m}m</span>
                       </div>
                       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-                          ${_tile('Dystans', rep.dystans_m ? `${rep.dystans_m} m` : null, 0)}
-                          ${_tile('Tempo', rep.tempo, 40)}
-                          ${_tile('Przerwa', rep.przerwa_sek ? `${rep.przerwa_sek}s` : null, 80)}
+                          ${_tile(t('home.dist'), rep.dystans_m ? `${rep.dystans_m} m` : null, 0)}
+                          ${_tile(t('home.pace'), rep.tempo, 40)}
+                          ${_tile(t('cal.break'), rep.przerwa_sek ? `${rep.przerwa_sek}s` : null, 80)}
                           ${_hrZoneTile(day, 120)}
                       </div>`
-                    : `<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">${_tile('Dystans', day.dystans_km, 0, 'km')}${_tile('Tempo', day.tempo_min_km, 40)}${_intensityTile(day, 80)}${_hrZoneTile(day, 120)}</div>`;
+                    : `<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">${_tile(t('home.dist'), day.dystans_km, 0, 'km')}${_tile(t('home.pace'), day.tempo_min_km, 40)}${_intensityTile(day, 80)}${_hrZoneTile(day, 120)}</div>`;
                 return `${header}
-                ${_section('#7B98B0', 'Rozgrzewka', _segBlock(roz, day, 0))}
-                ${_section('#C07264', 'Interwały', intBlock)}
-                ${_section('#6B8F71', 'Schłodzenie', _segBlock(sch, day, 0))}
+                ${_section('#7B98B0', t('cal.warmup'), _segBlock(roz, day, 0))}
+                ${_section('#C07264', t('wtype.interval'), intBlock)}
+                ${_section('#6B8F71', t('cal.cooldown'), _segBlock(sch, day, 0))}
                 ${_askCard(day)}
                 ${_descCard(day, color)}`;
             }
@@ -644,19 +644,19 @@
                 const odcBlock = odc
                     ? `<div style="text-align:center;padding:6px 0 14px;">
                         <span style="font-size:36px;font-weight:900;color:#111;font-family:'Outfit',sans-serif;">${odc.dystans_km} km</span>
-                        <div style="font-size:14px;font-weight:600;color:#8A8A8A;margin-top:4px;font-family:'Inter',sans-serif;">w tempie ${odc.tempo}</div>
+                        <div style="font-size:14px;font-weight:600;color:#8A8A8A;margin-top:4px;font-family:'Inter',sans-serif;">${t('cal.atpace')} ${odc.tempo}</div>
                       </div>
                       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-                          ${_tile('Dystans', odc.dystans_km ? `${odc.dystans_km} km` : null, 0)}
-                          ${_tile('Tempo', odc.tempo || null, 40)}
-                          ${_tile('Czas', _calcTime(odc.dystans_km, odc.tempo), 80)}
+                          ${_tile(t('home.dist'), odc.dystans_km ? `${odc.dystans_km} km` : null, 0)}
+                          ${_tile(t('home.pace'), odc.tempo || null, 40)}
+                          ${_tile(t('cal.time'), _calcTime(odc.dystans_km, odc.tempo), 80)}
                           ${_hrZoneTile(day, 120)}
                       </div>`
-                    : `<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">${_tile('Dystans', day.dystans_km, 0, 'km')}${_tile('Tempo', day.tempo_min_km, 40)}${_intensityTile(day, 80)}${_hrZoneTile(day, 120)}</div>`;
+                    : `<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">${_tile(t('home.dist'), day.dystans_km, 0, 'km')}${_tile(t('home.pace'), day.tempo_min_km, 40)}${_intensityTile(day, 80)}${_hrZoneTile(day, 120)}</div>`;
                 return `${header}
-                ${_section('#7B98B0', 'Rozgrzewka', _segBlock(roz, day, 0))}
-                ${_section('#C4A35A', 'Odcinek progowy', odcBlock)}
-                ${_section('#6B8F71', 'Schłodzenie', _segBlock(sch, day, 0))}
+                ${_section('#7B98B0', t('cal.warmup'), _segBlock(roz, day, 0))}
+                ${_section('#C4A35A', t('cal.threshold'), odcBlock)}
+                ${_section('#6B8F71', t('cal.cooldown'), _segBlock(sch, day, 0))}
                 ${_askCard(day)}
                 ${_descCard(day, color)}`;
             }
@@ -677,16 +677,16 @@
                 })() : '';
                 return `${header}
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
-                    ${_tile('Dystans', day.dystans_km, 0, 'km')}
-                    ${_tile('Łączny czas', totalMin ? `~${totalMin}` : null, 40, 'min')}
+                    ${_tile(t('home.dist'), day.dystans_km, 0, 'km')}
+                    ${_tile(t('cal.totaltime'), totalMin ? `~${totalMin}` : null, 40, 'min')}
                 </div>
-                ${s ? _section('#C4A35A', 'Struktura sesji', `
-                    <div style="font-size:10px;font-weight:700;color:#8A8A8A;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px;font-family:'Inter',sans-serif;">🚶 Rozgrzewka ${s.rozgrzewka_min} min</div>
+                ${s ? _section('#C4A35A', t('cal.session'), `
+                    <div style="font-size:10px;font-weight:700;color:#8A8A8A;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px;font-family:'Inter',sans-serif;">🚶 ${t('cal.warmup')} ${s.rozgrzewka_min} min</div>
                     <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:10px;">${blocksHTML}</div>
-                    <div style="font-size:10px;font-weight:700;color:#8A8A8A;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:10px;font-family:'Inter',sans-serif;">🚶 Schłodzenie ${s.schlodzenie_min} min</div>
+                    <div style="font-size:10px;font-weight:700;color:#8A8A8A;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:10px;font-family:'Inter',sans-serif;">🚶 ${t('cal.cooldown')} ${s.schlodzenie_min} min</div>
                     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-                        ${_tile('Powtórzenia', s.powtorzeenia, 80)}
-                        ${_tile('Tempo', day.tempo_min_km || null, 120, 'min/km')}
+                        ${_tile(t('cal.repeats'), s.powtorzeenia, 80)}
+                        ${_tile(t('home.pace'), day.tempo_min_km || null, 120, 'min/km')}
                     </div>`) : ''}
                 ${_askCard(day)}
                 ${_descCard(day, color)}`;
@@ -695,8 +695,8 @@
             // FALLBACK
             return `${header}
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
-                ${_tile('Dystans', day.dystans_km, 0, 'km')}
-                ${_tile('Tempo', day.tempo_min_km ? day.tempo_min_km.split('/')[0].split('-')[0].trim() : null, 40, 'min/km')}
+                ${_tile(t('home.dist'), day.dystans_km, 0, 'km')}
+                ${_tile(t('home.pace'), day.tempo_min_km ? day.tempo_min_km.split('/')[0].split('-')[0].trim() : null, 40, 'min/km')}
                 ${_intensityTile(day, 80)}
                 ${_hrZoneTile(day, 120)}
             </div>
@@ -736,7 +736,7 @@
                 </div>`;
 
             if (!currentUserId) {
-                calContent.innerHTML = `<div style="text-align:center;padding:48px 16px;font-size:14px;color:#8A8A8A;">Przejdź przez onboarding aby zobaczyć swój plan</div>`;
+                calContent.innerHTML = `<div style="text-align:center;padding:48px 16px;font-size:14px;color:#8A8A8A;">${t('cal.onboarding')}</div>`;
                 return;
             }
             try {
@@ -762,11 +762,11 @@
                     renderCalendar();
                     updateCalToggle(calView);
                 } else {
-                    calContent.innerHTML = `<div style="text-align:center;padding:48px 16px;font-size:14px;color:#8A8A8A;">Brak planu — wróć po naradzie</div>`;
+                    calContent.innerHTML = `<div style="text-align:center;padding:48px 16px;font-size:14px;color:#8A8A8A;">${t('cal.noplan')}</div>`;
                 }
             } catch (e) {
                 console.error('Calendar load error:', e);
-                calContent.innerHTML = `<div style="text-align:center;padding:48px 16px;font-size:14px;color:#8A8A8A;">Brak połączenia z serwerem</div>`;
+                calContent.innerHTML = `<div style="text-align:center;padding:48px 16px;font-size:14px;color:#8A8A8A;">${t('err.noserver')}</div>`;
             }
         }
 
