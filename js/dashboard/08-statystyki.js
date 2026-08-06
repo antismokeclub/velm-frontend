@@ -27,12 +27,14 @@
 
         function _weekDays(dni) {
             const today = toDateStr(new Date());
+            const abbrs = _dayNamesShort();
+            const fulls = _dayNamesFull();
             return Array.from({length: 7}, (_, i) => {
                 const pd  = dni[i] || null;
                 const dow = pd?.data ? (new Date(pd.data + 'T00:00:00').getDay() + 6) % 7 : i;
                 return {
-                    abbr:    DAYS_SHORT[dow],
-                    full:    pd?.data ? DAYS_FULL[(new Date(pd.data + 'T00:00:00').getDay() + 6) % 7] : DAYS_FULL[i],
+                    abbr:    abbrs[dow],
+                    full:    pd?.data ? fulls[(new Date(pd.data + 'T00:00:00').getDay() + 6) % 7] : fulls[i],
                     date:    pd?.data || null,
                     km:      pd?.dystans_km   ? parseFloat(pd.dystans_km)      : 0,
                     pace:    pd?.tempo_min_km ? _parseAvgPace(pd.tempo_min_km) : null,

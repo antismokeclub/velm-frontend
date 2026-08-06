@@ -1658,6 +1658,36 @@
             }
             return out;
         }
+        function _i18nMonthNames(style) {         // indeks 0 = styczeń
+            const out = [];
+            for (let m = 0; m < 12; m++) {
+                const d = new Date(Date.UTC(2024, m, 15));
+                out.push(new Intl.DateTimeFormat(_appLang, { month: style, timeZone: 'UTC' }).format(d));
+            }
+            return out;
+        }
+        // Data w języku UI. Polski wymaga dopełniacza ("9 sierpnia"), a Intl daje go
+        // sam, gdy formatujemy CAŁĄ datę — dlatego nie sklejamy nazwy miesiąca z
+        // liczbą ręcznie (stara tablica MONTHS_GEN istniała właśnie po to).
+        function _i18nDate(d, opts) {
+            const dt = (d instanceof Date) ? d : new Date(d);
+            if (isNaN(dt.getTime())) return '';
+            try { return new Intl.DateTimeFormat(_appLang, opts).format(dt); }
+            catch (e) { try { return dt.toLocaleDateString(_appLang, opts); } catch (e2) { return ''; } }
+        }
+        // Trzy tablice, których używa Kalendarz i statystyki. Jako FUNKCJE, nie
+        // stałe: pliki 05/08 ładują się przed tym, więc stała liczona w miejscu
+        // deklaracji trafiłaby w TDZ `const I18N`. Wołane są dopiero w renderze.
+        function _dayNamesShort() { return [0,1,2,3,4,5,6].map(i => t('day.short.' + i)); }
+        function _dayNamesFull()  { return _i18nDayNames('long').map(_capFirst); }
+        function _monthNames()    { return _i18nMonthNames('long').map(_capFirst); }
+        function _i18nDateRange(from, to, opts) {
+            try {
+                const f = new Intl.DateTimeFormat(_appLang, opts);
+                if (typeof f.formatRange === 'function') return f.formatRange(from, to);
+            } catch (e) {}
+            return _i18nDate(from, opts) + ' – ' + _i18nDate(to, opts);
+        }
         function _capFirst(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : s; }
         function applyI18n(root) {
             const scope = root || document;
@@ -1675,6 +1705,34 @@
                 if (i >= 0 && i < 7) el.textContent = t('day.short.' + i);
             });
         }
+        // Widoki budowane z JS-a (Kalendarz, Laboratorium, statystyki, historia,
+        // Dom) nie mają [data-i18n] — ich treść powstaje w template literalach,
+        // więc applyI18n() ich nie dotyka. Bez przerysowania user po zmianie
+        // języka siedzi na starych napisach aż przełączy zakładkę.
+        function _refreshActiveView() {
+            const call = (fn, ...args) => { try { if (typeof window[fn] === 'function') window[fn](...args); } catch(e) {} };
+            const active = document.querySelector('.view.active');
+            const view = active && active.id ? active.id.replace(/^view-/, '') : '';
+            if (view === 'home') {
+                call('loadTodayCard'); call('updateRaceCountdown'); call('loadPlanChanges');
+                call('updatePostCheckinBanner'); call('loadStreak');
+            } else if (view === 'calendar') {
+                call('loadCalendar');
+            } else if (view === 'charts') {
+                call('loadLab'); call('loadStats');
+            } else if (view === 'history') {
+                call('loadHistoryView');
+            } else if (view === 'coach') {
+                call('_renderSuggestions', (typeof selectedAgent !== 'undefined' && selectedAgent) || 'szef_sztabu');
+            } else if (view === 'settings') {
+                // NIE loadSettings() — ono woła backToSettingsMenu() (zamknęłoby
+                // otwarty panel) oraz selectSettingsLang(profil), co cofnęłoby
+                // właśnie wybrany język. Odświeżamy tylko to, co ma polskie napisy.
+                call('loadSubscriptionSection');
+                const a = window._settingsGoalArgs;
+                if (a) call('renderGoalPanes', a.user, a.planData);
+            }
+        }
         function setAppLanguage(lang) {
             _appLang = I18N[lang] ? lang : 'pl';
             try { localStorage.setItem('velm_lang', _appLang); } catch(e) {}
@@ -1683,6 +1741,7 @@
             try { _refreshProfilRows(); } catch(e) {}
             try { updateGreeting(); } catch(e) {}
             try { _refreshCoachUi(); } catch(e) {}
+            _refreshActiveView();
         }
 
         function selectSettingsLang(lang) {

@@ -122,9 +122,9 @@
             const d = new Date(iso);
             const now = new Date();
             const diffH = (now - d) / 36e5;
-            if (diffH < 24) return d.toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit' });
-            if (diffH < 24 * 7) return d.toLocaleDateString('pl-PL', { weekday: 'short' });
-            return d.toLocaleDateString('pl-PL', { day: 'numeric', month: 'short' });
+            if (diffH < 24) return d.toLocaleTimeString(_appLang, { hour: '2-digit', minute: '2-digit' });
+            if (diffH < 24 * 7) return d.toLocaleDateString(_appLang, { weekday: 'short' });
+            return d.toLocaleDateString(_appLang, { day: 'numeric', month: 'short' });
         }
 
         function renderConversationsList() {

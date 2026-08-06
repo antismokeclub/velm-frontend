@@ -61,7 +61,7 @@
             const label = TYPE_LABEL(type) || type;
             const date = w.date || (w.logged_at ? w.logged_at.split('T')[0] : '—');
             const dateFormatted = date !== '—'
-                ? new Date(date + 'T12:00:00').toLocaleDateString('pl-PL', { weekday:'short', day:'numeric', month:'short' })
+                ? new Date(date + 'T12:00:00').toLocaleDateString(_appLang, { weekday:'short', day:'numeric', month:'short' })
                 : '—';
 
             // Main stats (right column)

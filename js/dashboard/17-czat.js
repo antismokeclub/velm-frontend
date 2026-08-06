@@ -246,8 +246,8 @@
                 let label = '';
                 if (ctx.source === 'calendar_day') {
                     const d = new Date(ctx.date + 'T12:00:00');
-                    const dayName = d.toLocaleDateString('pl-PL', { weekday: 'long' });
-                    const dateShort = d.toLocaleDateString('pl-PL', { day: 'numeric', month: 'long' });
+                    const dayName = d.toLocaleDateString(_appLang, { weekday: 'long' });
+                    const dateShort = d.toLocaleDateString(_appLang, { day: 'numeric', month: 'long' });
                     label = `Pytasz o trening: ${dayName}, ${dateShort}${ctx.trainingRef ? ` (${ctx.trainingRef})` : ''}`;
                 } else if (ctx.source === 'home_today') {
                     label = 'Pytasz o dzisiejszy trening';
@@ -377,7 +377,7 @@
                 const now = new Date();
                 const options = { weekday: 'long', day: 'numeric', month: 'short' };
                 // Polish locale
-                let dateStr = now.toLocaleDateString('pl-PL', options);
+                let dateStr = now.toLocaleDateString(_appLang, options);
                 // Capitalize first letter
                 dateStr = dateStr.charAt(0).toUpperCase() + dateStr.slice(1);
                 dateEl.innerText = dateStr;

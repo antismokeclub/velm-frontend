@@ -176,7 +176,7 @@
                     return `<div style="background:var(--surface-color);border:1px solid rgba(235,235,235,0.5);border-left:3px solid var(--primary-color);border-radius:14px;box-shadow:0 2px 12px rgba(0,0,0,0.03);padding:12px 14px;animation:fadeInUp 0.25s ease both;">
                         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
                             <span style="font-size:11px;font-weight:700;color:#8A8A8A;text-transform:uppercase;letter-spacing:0.08em;">Zmiana planu</span>
-                            <span style="font-size:11px;color:#C8C2B8;">${new Date(c.created_at).toLocaleDateString('pl-PL',{day:'numeric',month:'short'})}</span>
+                            <span style="font-size:11px;color:#C8C2B8;">${new Date(c.created_at).toLocaleDateString(_appLang,{day:'numeric',month:'short'})}</span>
                         </div>
                         <div style="display:flex;align-items:center;gap:8px;font-size:14px;">
                             <span style="font-weight:600;color:#111;">${c.original_day}</span>
@@ -209,7 +209,7 @@
 
             const _fmt = d => {
                 const dt = new Date(d);
-                return dt.toLocaleDateString('pl-PL', { day:'numeric', month:'short', year:'numeric' });
+                return dt.toLocaleDateString(_appLang, { day:'numeric', month:'short', year:'numeric' });
             };
 
             if (raceDate) {

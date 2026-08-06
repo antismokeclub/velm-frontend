@@ -489,7 +489,7 @@
 
         function _labBasedOnText(basedOn) {
             if (!basedOn) return '';
-            const dateTxt = basedOn.date ? new Date(basedOn.date + 'T00:00:00').toLocaleDateString('pl-PL', { day: 'numeric', month: 'numeric' }) : '';
+            const dateTxt = basedOn.date ? new Date(basedOn.date + 'T00:00:00').toLocaleDateString(_appLang, { day: 'numeric', month: 'numeric' }) : '';
             const confNote = basedOn.confidence === 'low' ? ' (zwykły bieg, nie test tempa)' : '';
             return basedOn.type + ' ' + basedOn.distanceKm + 'km' + (dateTxt ? ', ' + dateTxt : '') + confNote;
         }

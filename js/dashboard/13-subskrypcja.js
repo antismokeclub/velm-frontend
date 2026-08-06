@@ -40,7 +40,7 @@
                     _benefit('Brak jakichkolwiek reklam') + _benefit('Automatyczny eksport do GPX &amp; Strava') + '</div>';
                 if (data.isPremium) {
                     const expiry = data.expiresAt
-                        ? new Date(data.expiresAt).toLocaleDateString('pl-PL', { day: 'numeric', month: 'long', year: 'numeric' })
+                        ? new Date(data.expiresAt).toLocaleDateString(_appLang, { day: 'numeric', month: 'long', year: 'numeric' })
                         : null;
                     const statusPill = { active: 'Aktywna', trialing: 'Trial (7 dni)', past_due: 'Płatność nieudana', cancelled: 'Anulowana' }[data.status] ?? data.status;
                     const pillOk = data.status === 'active' || data.status === 'trialing';

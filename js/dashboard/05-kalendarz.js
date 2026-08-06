@@ -14,10 +14,9 @@
         };
         function TYPE_LABEL(typ) { return typ ? t('wtype.' + typ) : ''; }
 
-        const MONTHS_PL   = ['Styczeń','Luty','Marzec','Kwiecień','Maj','Czerwiec','Lipiec','Sierpień','Wrzesień','Październik','Listopad','Grudzień'];
-        const MONTHS_GEN  = ['stycznia','lutego','marca','kwietnia','maja','czerwca','lipca','sierpnia','września','października','listopada','grudnia'];
-        const DAYS_SHORT  = ['Pn','Wt','Śr','Cz','Pt','So','Nd'];
-        const DAYS_FULL   = ['Poniedziałek','Wtorek','Środa','Czwartek','Piątek','Sobota','Niedziela'];
+        // Nazwy dni i miesięcy: patrz _dayNamesShort/_dayNamesFull/_monthNames
+        // oraz _i18nDate w 12-i18n.js. Tablicy dopełniaczowej ("9 sierpnia") już
+        // nie trzymamy — Intl odmienia sam, gdy formatuje się CAŁĄ datę.
 
         let calendarPlan  = null;
         let calView       = 'week';
@@ -138,15 +137,16 @@
                 }
             }
             const animClass = slideAnim === 'left' ? 'cal-slide-in-left' : slideAnim === 'right' ? 'cal-slide-in-right' : 'cal-animate';
+            const monthLabel = _capFirst(_i18nDate(new Date(calYear, calMonth, 1), { month: 'long', year: 'numeric' }));
             calContent.innerHTML = `
                 <div class="${animClass}">
                     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
                         <button onclick="prevCal()" style="background:none;border:none;font-size:24px;color:var(--primary-color);cursor:pointer;padding:4px 8px;line-height:1;">‹</button>
-                        <span style="font-weight:700;font-size:15px;color:#111;">${MONTHS_PL[calMonth]} ${calYear}</span>
+                        <span style="font-weight:700;font-size:15px;color:#111;">${monthLabel}</span>
                         <button onclick="nextCal()" style="background:none;border:none;font-size:24px;color:var(--primary-color);cursor:pointer;padding:4px 8px;line-height:1;">›</button>
                     </div>
                     <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:4px;">
-                        ${DAYS_SHORT.map(d=>`<div style="text-align:center;font-size:10px;font-weight:600;letter-spacing:0.06em;color:#8A8A8A;text-transform:uppercase;padding-bottom:4px;">${d}</div>`).join('')}
+                        ${_dayNamesShort().map(d=>`<div style="text-align:center;font-size:10px;font-weight:600;letter-spacing:0.06em;color:#8A8A8A;text-transform:uppercase;padding-bottom:4px;">${d}</div>`).join('')}
                     </div>
                     <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;">${cells}</div>
                 </div>`;
@@ -178,9 +178,10 @@
                 calSelectedDay = todayInWeek ? todayStr : toDateStr(days[0]);
             }
             const from = days[0], to = days[6];
-            const weekLabel = from.getMonth() === to.getMonth()
-                ? `${from.getDate()}–${to.getDate()} ${MONTHS_PL[from.getMonth()]} ${from.getFullYear()}`
-                : `${from.getDate()} ${MONTHS_PL[from.getMonth()]} – ${to.getDate()} ${MONTHS_PL[to.getMonth()]} ${to.getFullYear()}`;
+            // formatRange sam skraca powtórzony miesiąc ("1–7 sierpnia 2026")
+            // i odmienia go poprawnie w każdym języku.
+            const weekLabel = _i18nDateRange(from, to, { day: 'numeric', month: 'long', year: 'numeric' });
+            const dayLbl = _dayNamesShort();
 
             // Short type names for compact cards
             const TYPE_SHORT = { easy:'Easy', interval:'INT', tempo:'Tempo', long:'Long', rest:'Rest', cross:'Cross' };
@@ -218,7 +219,7 @@
                         padding:13px 3px 11px;border-radius:14px;cursor:pointer;
                         ${isSel ? activeSt : defSt}
                         animation-delay:${i * 38}ms;">
-                    <div style="font-size:9px;font-weight:600;letter-spacing:0.05em;text-transform:uppercase;opacity:0.55;">${DAYS_SHORT[i]}</div>
+                    <div style="font-size:9px;font-weight:600;letter-spacing:0.05em;text-transform:uppercase;opacity:0.55;">${dayLbl[i]}</div>
                     <div style="font-size:16px;font-weight:800;line-height:1;">${d.getDate()}</div>
                     <div style="width:7px;height:7px;border-radius:50%;background:${isSel ? 'rgba(255,255,255,0.6)' : color};margin:1px 0;"></div>
                     <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.03em;opacity:${isSel ? '0.9' : '0.7'};min-height:11px;">${typeShort}</div>
@@ -326,7 +327,8 @@
                 const rowY2 = pT + cH + 24;  // type label (colored)
                 const rowY3 = pT + cH + 35;  // pace (amber)
 
-                const xLabels   = cd.map((_,i) => `<text x="${xs[i].toFixed(1)}" y="${rowY1}" text-anchor="middle" font-size="8" fill="#8A8A8A" font-family="Inter,sans-serif">${DAYS_SHORT[i]}</text>`).join('');
+                const dayAbbr   = _dayNamesShort();
+                const xLabels   = cd.map((_,i) => `<text x="${xs[i].toFixed(1)}" y="${rowY1}" text-anchor="middle" font-size="8" fill="#8A8A8A" font-family="Inter,sans-serif">${dayAbbr[i]}</text>`).join('');
                 const typeLabels = cd.map((d,i) => {
                     const col = d.hasData && d.short !== 'Rest' ? d.color : '#C8C2B8';
                     const lbl = d.hasData ? d.short : '·';
@@ -708,8 +710,7 @@
             const day = getDayData(calSelectedDay);
             const [y, mo, dd] = calSelectedDay.split('-').map(Number);
             const dateObj = new Date(y, mo - 1, dd);
-            const dow = dateObj.getDay() === 0 ? 6 : dateObj.getDay() - 1;
-            const dateLabel = `${DAYS_FULL[dow]}, ${dd} ${MONTHS_GEN[mo - 1]} ${y}`;
+            const dateLabel = _capFirst(_i18nDate(dateObj, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }));
 
             calContent.innerHTML = `
                 <div>

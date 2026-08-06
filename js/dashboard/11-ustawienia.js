@@ -31,7 +31,7 @@
             return dist;
         }
         function _fmtPlDate(d) {
-            try { return new Date(d).toLocaleDateString('pl-PL', { day:'numeric', month:'long', year:'numeric' }); }
+            try { return new Date(d).toLocaleDateString(_appLang, { day:'numeric', month:'long', year:'numeric' }); }
             catch(e) { return '—'; }
         }
         function _setText(ids, txt) {
@@ -43,6 +43,9 @@
         async function renderGoalPanes(user, planData) {
             const onb = user?.onboarding_data ?? {};
             window._settingsOnb = onb;
+            // Zapamiętane argumenty — po zmianie języka _refreshActiveView()
+            // przerysowuje ten panel bez wołania loadSettings() (patrz 12-i18n.js).
+            window._settingsGoalArgs = { user, planData };
             const raceDate = onb.time_race_target || onb.time_race_date || onb.dist_goal_date || null;
             _setText(['cel-sum-dist','cel-d-dist'], _celGoalLabel(onb));
 
