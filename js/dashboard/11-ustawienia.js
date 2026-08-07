@@ -8,12 +8,12 @@
         }
 
         function _celDistLabel(onb) {
-            const map = { '5k':'5 km', '10k':'10 km', 'half':'Półmaraton', 'marathon':'Maraton', 'ultra':'Ultramaraton', 'other':'Cel własny' };
+            const map = { '5k':'5 km', '10k':'10 km', 'half':t('dist.half'), 'marathon':t('dist.marathon'), 'ultra':t('dist.ultra.full'), 'other':t('dist.own.full') };
             const d = onb.time_distance || onb.endurance_dist || onb.dist_goal || onb.distance || null;
             if (d && map[d]) return map[d];
             if (onb.time_custom_dist) return onb.time_custom_dist + ' km';
             if (onb.customDist) return onb.customDist + ' km';
-            return 'Plan biegowy';
+            return t('set.plan.running');
         }
         // Etykieta celu dopasowana do typu: cel czasowy → "10 km · 45:00", dystansowy → sam dystans.
         function _celGoalLabel(onb) {
@@ -49,7 +49,7 @@
             const raceDate = onb.time_race_target || onb.time_race_date || onb.dist_goal_date || null;
             _setText(['cel-sum-dist','cel-d-dist'], _celGoalLabel(onb));
 
-            let dateTxt = '—', leftTxt = 'Ustaw datę zawodów', pct = null;
+            let dateTxt = '—', leftTxt = t('set.setracedate'), pct = null;
             if (raceDate) {
                 dateTxt = _fmtPlDate(raceDate);
                 const now = new Date(); now.setHours(0,0,0,0);
@@ -57,15 +57,13 @@
                 const daysLeft = Math.ceil((target - now) / 86400000);
                 if (daysLeft > 0) {
                     const weeks = Math.round(daysLeft / 7);
-                    leftTxt = weeks >= 1
-                        ? weeks + (weeks === 1 ? ' tydzień' : (weeks < 5 ? ' tygodnie' : ' tygodni'))
-                        : daysLeft + (daysLeft === 1 ? ' dzień' : ' dni');
+                    leftTxt = weeks >= 1 ? tp('set.weeks', weeks) : tp('set.days', daysLeft);
                     let start = user?.created_at ? new Date(user.created_at) : null;
                     if (!start || isNaN(start.getTime()) || start >= target) start = new Date(target.getTime() - 180 * 86400000);
                     const total = target - start;
                     pct = total > 0 ? Math.min(100, Math.max(0, Math.round((now - start) / total * 100))) : null;
                 } else {
-                    leftTxt = daysLeft === 0 ? 'Dziś!' : 'Zawody minęły';
+                    leftTxt = daysLeft === 0 ? t('set.raceday') : t('set.racepast');
                     pct = 100;
                 }
             }
@@ -102,10 +100,10 @@
                 const plannedSet = new Set(_daysToIdx(onb.selectedDays));
                 const planned = plannedSet.size || onb.daysPerWeek || doneDays.size;
                 const countEl = document.getElementById('cel-d-week-count');
-                if (countEl) countEl.textContent = doneDays.size + ' z ' + planned + ' treningów';
+                if (countEl) countEl.textContent = t('set.weekdone').replace('{a}', doneDays.size).replace('{b}', planned);
                 const wk = document.getElementById('cel-d-week');
                 if (wk) {
-                    const labels = ['Pn','Wt','Śr','Cz','Pt','So','Nd'];
+                    const labels = _dayNamesShort();
                     wk.innerHTML = labels.map((lb, i) => {
                         const done = doneDays.has(i);
                         const isToday = i === dow;
@@ -184,7 +182,7 @@
                 const planGoalEl = document.getElementById('settings-plan-goal');
                 const plan = planData?.plan?.plan;
                 if (planGoalEl) {
-                    planGoalEl.textContent = plan?.cel_tygodnia || 'Brak aktywnego planu';
+                    planGoalEl.textContent = plan?.cel_tygodnia || t('set.noplan');
                 }
 
                 // Cel i plan / Twój cel — realne dane (ring, podsumowanie, ten tydzień)
@@ -227,10 +225,10 @@
                 });
                 const data = await res.json();
                 if (!data.success) throw new Error(data.error);
-                showVelmToast('Zapisano', false);   // toast — działa z każdego podekranu profilu
+                showVelmToast(t('com.saved'), false);   // toast — działa z każdego podekranu profilu
                 _refreshProfilRows();                // odśwież podglądy w menu profilu (bez resetu widoku)
             } catch(e) {
-                showVelmToast('Błąd zapisu: ' + e.message, true);
+                showVelmToast(t('set.saveerr') + ' ' + e.message, true);
             }
         }
 

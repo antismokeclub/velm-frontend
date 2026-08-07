@@ -73,7 +73,7 @@
                 if (entries.length > 0) {
                     list.innerHTML = entries.join('');
                 } else {
-                    list.innerHTML = '<div style="padding: 4px 0; font-style: italic; opacity: 0.6;">Brak zapisanych faktów... (Porozmawiaj z trenerem)</div>';
+                    list.innerHTML = '<div style="padding: 4px 0; font-style: italic; opacity: 0.6;">' + t('chat.nofacts') + '</div>';
                 }
             } catch (e) {
                 console.error("Failed to load memory", e);
@@ -146,7 +146,7 @@
 
                 // Premium paywall
                 if (response.status === 403 && data.error === 'premium_required') {
-                    showPaywall(data.message || 'Ten agent dostępny tylko w Premium');
+                    showPaywall(data.message || t('chat.premium'));
                     return;
                 }
 
@@ -154,23 +154,23 @@
                 if (response.status === 402) {
                     currentTrialMessagesLeft = 0;
                     updateTrialCounter();
-                    showPaywall(data.message || 'Darmowe wiadomości wykorzystane.', { surveyAvailable: data.surveyAvailable });
+                    showPaywall(data.message || t('chat.trialout'), { surveyAvailable: data.surveyAvailable });
                     return;
                 }
 
                 // Auth expired — trigger relogin
                 if (response.status === 401) {
-                    addMessage('ai', 'Sesja wygasła. Zaloguj się ponownie.');
+                    addMessage('ai', t('chat.session'));
                     return;
                 }
 
                 if (!response.ok) {
-                    addMessage('ai', data.error || `Błąd serwera (${response.status})`);
+                    addMessage('ai', data.error || `${t('err.server')} (${response.status})`);
                     return;
                 }
 
                 // 5. Add AI Message
-                addMessage('ai', data.reply || data.error || 'Błąd odpowiedzi');
+                addMessage('ai', data.reply || data.error || t('chat.replyerr'));
 
                 // Zaktualizuj licznik trialu (null = premium, bez limitu)
                 if (data.trialMessagesLeft !== null && data.trialMessagesLeft !== undefined) {
@@ -194,7 +194,7 @@
 
             } catch (e) {
                 removeMessage(loadingId);
-                addMessage('ai', 'Przepraszam, wystąpił błąd połączenia z trenerem. Spróbuj ponownie.');
+                addMessage('ai', t('chat.connerr'));
                 console.error(e);
             }
             scrollToBottom();
@@ -248,11 +248,11 @@
                     const d = new Date(ctx.date + 'T12:00:00');
                     const dayName = d.toLocaleDateString(_appLang, { weekday: 'long' });
                     const dateShort = d.toLocaleDateString(_appLang, { day: 'numeric', month: 'long' });
-                    label = `Pytasz o trening: ${dayName}, ${dateShort}${ctx.trainingRef ? ` (${ctx.trainingRef})` : ''}`;
+                    label = `${t('chat.ctx.day')} ${dayName}, ${dateShort}${ctx.trainingRef ? ` (${ctx.trainingRef})` : ''}`;
                 } else if (ctx.source === 'home_today') {
-                    label = 'Pytasz o dzisiejszy trening';
+                    label = t('chat.ctx.today');
                 } else if (ctx.source === 'home_week') {
-                    label = 'Pytasz o cały tydzień treningowy';
+                    label = t('chat.ctx.week');
                 }
 
                 div.innerHTML = `<span class="context-icon">\u2192</span><span class="context-label">${label}</span>`;
@@ -277,31 +277,31 @@
         function _guessAIStatus(msg, agent) {
             const m = (msg || '').toLowerCase();
             if (/trening|plan|dzi\u015b|jutro|dzisiaj|dzisiejsz/i.test(m)) {
-                return ['Sprawdzam tw\u00f3j plan treningowy', 'Analizuj\u0119 dzie\u0144 w kontek\u015bcie tygodnia', 'Przygotowuj\u0119 odpowied\u017a'];
+                return [t('chat.st.plan.0'), t('chat.st.plan.1'), t('chat.st.plan.2')];
             }
             if (/sen|spa\u0142|wyspa\u0142|zm\u0119czony|regeneracj/i.test(m)) {
-                return ['Sprawdzam dane ze snu z ostatniej nocy', 'Por\u00f3wnuj\u0119 HRV z ostatnich 7 dni', 'Oceniam gotowo\u015b\u0107 do treningu'];
+                return [t('chat.st.sleep.0'), t('chat.st.sleep.1'), t('chat.st.sleep.2')];
             }
             if (/t\u0119tno|puls|hr|bpm|serce/i.test(m)) {
-                return ['Wczytuję dane tętna z ostatnich treningów', 'Analizuję tętno spoczynkowe', 'Porównuję strefy HR'];
+                return [t('chat.st.hr.0'), t('chat.st.hr.1'), t('chat.st.hr.2')];
             }
             if (/tempo|szybciej|wolniej|pace|czas/i.test(m)) {
-                return ['Analizuję tempo z ostatnich treningów', 'Porównuję z miesiącem temu', 'Sprawdzam trend wydajności'];
+                return [t('chat.st.pace.0'), t('chat.st.pace.1'), t('chat.st.pace.2')];
             }
             if (/tydzie\u0144|tygodniowo|podsumow|w tym tyg/i.test(m)) {
-                return ['Zbieram treningi z tego tygodnia', 'Obliczam statystyki', 'Porównuję z poprzednim tygodniem'];
+                return [t('chat.st.week.0'), t('chat.st.week.1'), t('chat.st.week.2')];
             }
             if (agent === 'fizjo' || /boli|b\u00f3l|kontuzj|uraz/i.test(m)) {
-                return ['Przeglądam historię twoich dolegliwości', 'Sprawdzam obciążenie z ostatniego tygodnia', 'Przygotowuję rekomendację'];
+                return [t('chat.st.fizjo.0'), t('chat.st.fizjo.1'), t('chat.st.fizjo.2')];
             }
             if (agent === 'psycholog' || /motywacj|nie chce|boj\u0119|stres/i.test(m)) {
-                return ['Przeglądam naszą ostatnią rozmowę', 'Szukam wzorców w twoich reakcjach', 'Formułuję odpowiedź'];
+                return [t('chat.st.psy.0'), t('chat.st.psy.1'), t('chat.st.psy.2')];
             }
             const defaults = {
-                szef_sztabu: ['Konsultuję się ze sztabem', 'Analizuję twoje dane', 'Przygotowuję odpowiedź'],
-                analityk:    ['Wczytuję dane treningowe', 'Obliczam statystyki', 'Formuję wnioski'],
-                fizjo:       ['Sprawdzam historię obciążenia', 'Oceniam ryzyko', 'Przygotowuję poradę'],
-                psycholog:   ['Przeglądam kontekst rozmowy', 'Analizuję wzorce', 'Formułuję odpowiedź']
+                szef_sztabu: [t('chat.st.def.0'), t('chat.st.def.1'), t('chat.st.plan.2')],
+                analityk:    [t('chat.st.an.0'), t('chat.st.week.1'), t('chat.st.an.2')],
+                fizjo:       [t('chat.st.fz.0'), t('chat.st.fz.1'), t('chat.st.fz.2')],
+                psycholog:   [t('chat.st.ps.0'), t('chat.st.ps.1'), t('chat.st.psy.2')]
             };
             return defaults[agent] || defaults.szef_sztabu;
         }

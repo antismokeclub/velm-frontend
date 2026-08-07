@@ -53,12 +53,12 @@
         }
         function connectWatch() {
             if (!_isNativeApp()) {
-                showVelmToast('Podłączenie zegarka działa w aplikacji mobilnej velm. Tam jednym kliknięciem połączysz Garmina, Coros albo Samsunga przez Health Connect — HRV, tętno, sen i biegi wpadają automatycznie.', false);
+                showVelmToast(t('int.watch.pwa'), false);
                 return;
             }
             // TODO(native build): most do Health Connect —
             // window.HealthConnect.requestPermissions([...]) → odczyt → POST /api/health/sync
-            showVelmToast('Łączę z Health Connect…', false);
+            showVelmToast(t('int.watch.connecting'), false);
         }
         async function stravaConnect() {
             const userId = localStorage.getItem('velm_user_id');
@@ -70,17 +70,17 @@
                 });
                 const data = await res.json();
                 if (!res.ok || !data.redirectUrl) {
-                    alert(data.error || 'Nie udało się rozpocząć połączenia ze Stravą');
+                    alert(data.error || t('int.strava.err'));
                     return;
                 }
                 window.location.href = data.redirectUrl;
             } catch (e) {
-                alert('Błąd połączenia z serwerem');
+                alert(t('err.noserver'));
             }
         }
 
         async function stravaDisconnect() {
-            if (!confirm('Rozłączyć Stravę? Zaimportowane treningi zostaną.')) return;
+            if (!confirm(t('int.strava.disconnect'))) return;
             const userId = localStorage.getItem('velm_user_id');
             const token = localStorage.getItem('velm_token');
             try {
@@ -90,7 +90,7 @@
                 });
                 loadStravaStatus();
             } catch (e) {
-                alert('Błąd: ' + e.message);
+                alert(t('com.error') + ': ' + e.message);
             }
         }
 
@@ -100,15 +100,15 @@
             if (!file) return;
 
             if (!file.name.toLowerCase().endsWith('.fit')) {
-                showFitStatus('Tylko pliki .fit są obsługiwane', 'error');
+                showFitStatus(t('int.fit.onlyfit'), 'error');
                 return;
             }
             if (file.size > 10 * 1024 * 1024) {
-                showFitStatus('Plik za duży (max 10MB)', 'error');
+                showFitStatus(t('int.fit.toobig'), 'error');
                 return;
             }
 
-            showFitStatus('Wgrywam i parsuję plik...', 'loading');
+            showFitStatus(t('int.fit.uploading'), 'loading');
 
             const formData = new FormData();
             formData.append('file', file);
@@ -123,11 +123,11 @@
                 const data = await res.json();
 
                 if (res.status === 409) {
-                    showFitStatus('Trening z ' + (data.existing?.date || '?') + ' już istnieje (' + (data.existing?.distance_km || '?') + ' km)', 'warning');
+                    showFitStatus(t('int.fit.exists.a') + ' ' + (data.existing?.date || '?') + ' ' + t('int.fit.exists.b') + ' (' + (data.existing?.distance_km || '?') + ' km)', 'warning');
                     return;
                 }
                 if (!res.ok || !data.success) {
-                    showFitStatus((data.error || 'Błąd importu'), 'error');
+                    showFitStatus((data.error || t('int.fit.err')), 'error');
                     return;
                 }
 
@@ -135,11 +135,11 @@
                 const details = [
                     p.distance_km ? p.distance_km + ' km' : null,
                     p.duration_min ? p.duration_min + ' min' : null,
-                    p.avg_pace ? 'tempo ' + p.avg_pace + '/km' : null,
+                    p.avg_pace ? t('int.pace') + ' ' + p.avg_pace + '/km' : null,
                     p.avg_hr ? 'HR ' + p.avg_hr + ' bpm' : null
                 ].filter(Boolean).join(' · ');
 
-                showFitStatus('Zaimportowano ' + p.date + '\n' + details, 'success');
+                showFitStatus(t('int.fit.imported') + ' ' + p.date + '\n' + details, 'success');
 
                 if (document.getElementById('view-history')?.classList.contains('active')) {
                     loadHistoryView();
@@ -147,7 +147,7 @@
                 event.target.value = '';
 
             } catch (e) {
-                showFitStatus('Błąd połączenia: ' + e.message, 'error');
+                showFitStatus(t('com.err.conn') + ': ' + e.message, 'error');
             }
         }
 
@@ -169,9 +169,9 @@
             const current = document.getElementById('settings-pwd-current')?.value;
             const newPwd  = document.getElementById('settings-pwd-new')?.value;
             const confirmPwd = document.getElementById('settings-pwd-confirm')?.value;
-            if (!current || !newPwd) { showSettingsMsg('settings-pwd-msg', 'Wypełnij wszystkie pola', true); return; }
-            if (newPwd !== confirmPwd) { showSettingsMsg('settings-pwd-msg', 'Hasła nie są zgodne', true); return; }
-            if (newPwd.length < 8) { showSettingsMsg('settings-pwd-msg', 'Min. 8 znaków', true); return; }
+            if (!current || !newPwd) { showSettingsMsg('settings-pwd-msg', t('int.pwd.fillall'), true); return; }
+            if (newPwd !== confirmPwd) { showSettingsMsg('settings-pwd-msg', t('int.pwd.mismatch'), true); return; }
+            if (newPwd.length < 8) { showSettingsMsg('settings-pwd-msg', t('int.pwd.min'), true); return; }
             try {
                 const res = await fetch(`${API_BASE}/api/user/${currentUserId}/change-password`, {
                     method: 'POST', headers: authHeaders(),
@@ -185,7 +185,7 @@
                 ['settings-pwd-current','settings-pwd-new','settings-pwd-confirm'].forEach(id => {
                     const el = document.getElementById(id); if(el) el.value = '';
                 });
-                showSettingsMsg('settings-pwd-msg', 'Hasło zmienione');
+                showSettingsMsg('settings-pwd-msg', t('int.pwd.changed'));
             } catch(e) {
                 showSettingsMsg('settings-pwd-msg', e.message, true);
             }
@@ -194,8 +194,8 @@
         async function changeEmail() {
             const newEmail = document.getElementById('settings-new-email')?.value?.trim();
             const pwd = document.getElementById('settings-email-pwd')?.value;
-            if (!newEmail || !pwd) { showSettingsMsg('settings-email-msg', 'Wypełnij oba pola', true); return; }
-            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newEmail)) { showSettingsMsg('settings-email-msg', 'Nieprawidłowy email', true); return; }
+            if (!newEmail || !pwd) { showSettingsMsg('settings-email-msg', t('int.email.fillboth'), true); return; }
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newEmail)) { showSettingsMsg('settings-email-msg', t('int.email.invalid'), true); return; }
             try {
                 const res = await fetch(`${API_BASE}/api/user/${currentUserId}/change-email`, {
                     method: 'POST', headers: authHeaders(),

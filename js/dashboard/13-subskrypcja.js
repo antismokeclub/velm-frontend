@@ -164,8 +164,8 @@
                     '<input id="sv-pays-input" type="text" maxlength="100" placeholder="' + t('sv.which.ph') + '" ' +
                     'style="width:100%;padding:12px;border:1px solid #D9D9D9;border-radius:12px;font-size:14px;font-family:Inter,sans-serif;background:#FFFFFF;color:#1A1A1A;box-sizing:border-box;"></div>' +
                 q(t('sv.q.willing'),
-                    chip('willing','0','0 zł') + chip('willing','10-20','10–20 zł') +
-                    chip('willing','20-40','20–40 zł') + chip('willing','40+','40+ zł')) +
+                    chip('willing','0',t('sv.pay.0')) + chip('willing','10-20',t('sv.pay.1')) +
+                    chip('willing','20-40',t('sv.pay.2')) + chip('willing','40+',t('sv.pay.3'))) +
                 '<div style="margin-bottom:20px;">' +
                     '<div style="font-size:14px;font-weight:600;color:#1A1A1A;margin-bottom:8px;">' + t('sv.q.missing') + ' <span style="font-weight:400;color:#8A8A8A;">' + t('sv.optional') + '</span></div>' +
                     '<textarea id="sv-missing" maxlength="500" rows="2" placeholder="' + t('sv.missing.ph') + '" ' +

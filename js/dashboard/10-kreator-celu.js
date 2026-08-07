@@ -1,13 +1,16 @@
         // ── Kreator "Zmień cel" (kafelki typu → parametry → zapis do /goal) ──
-        const GOAL_WIZ_TYPES = {
-            time:     { t:'Cel czasowy',     d:'Pobij rekord na wybranym dystansie' },
-            distance: { t:'Cel dystansowy',  d:'Zdobądź nowy dystans — półmaraton, maraton…' },
-            health:   { t:'Zdrowie i forma', d:'Biegam dla zdrowia i samopoczucia' },
-            comeback: { t:'Powrót',          d:'Wracam po przerwie lub kontuzji' },
-            start:    { t:'Zaczynam od zera', d:'Chcę zacząć regularnie biegać' },
-            walkrun:  { t:'Marszobieg',       d:'Naprzemienny bieg i marsz' }
-        };
-        const GOAL_WIZ_DIST = [['5k','5 km'],['10k','10 km'],['half','Półmaraton'],['marathon','Maraton'],['ultra','Ultra 50+ km'],['other','Własny']];
+        // Funkcje, nie stale: jezyk moze sie zmienic w trakcie sesji, a stala
+        // policzona przy ladowaniu pliku zamrozilaby napisy z momentu startu.
+        function _gwTypes() {
+            const o = {};
+            ['time','distance','health','comeback','start','walkrun'].forEach(k => {
+                o[k] = { t: t('gw.type.' + k), d: t('gw.type.' + k + '.d') };
+            });
+            return o;
+        }
+        function _gwDist() {
+            return [['5k','5 km'],['10k','10 km'],['half',t('dist.half')],['marathon',t('dist.marathon')],['ultra',t('dist.ultra')],['other',t('dist.own')]];
+        }
         let _goalWiz = null;
 
         function resetGoalWiz() {
@@ -170,7 +173,7 @@ function _wizSteps() {
             const step = steps[i];
             const pct = Math.round((i / Math.max(steps.length - 1, 1)) * 100);
 
-            const head = (t, sub) => '<h1 class="ob-hl">' + t + '</h1>' +
+            const head = (title, sub) => '<h1 class="ob-hl">' + title + '</h1>' +
                 (sub ? '<div class="ob-sub">' + sub + '</div>' : '');
             const cards = (field, opts) => '<div class="ob-list">' + opts.map(([v, l, d]) =>
                 _obCard(l, d || '', _goalWiz[field] === v, "wizPickAdvance('" + field + "','" + v + "')")
@@ -179,80 +182,80 @@ function _wizSteps() {
             let body = '';
             switch (step.id) {
                 case 'type':
-                    body = head('Jaki masz teraz cel?', 'Obecny cel zostanie zakończony, a sztab przebuduje plan od najbliższej narady.') +
+                    body = head(t('gw.q.type'), t('gw.q.type.sub')) +
                         '<div class="ob-list">' + _wizGoalIds().map(id => {
-                            const g = GOAL_WIZ_TYPES[id];
+                            const g = _gwTypes()[id];
                             return _obCard(g.t, g.d, _goalWiz.goalId === id, "wizPickType('" + id + "')", _wizGoalIcon(id));
                         }).join('') + '</div>';
                     break;
                 case 'dist':
-                    body = head('Jaki dystans?') +
-                        '<div class="ob-grid">' + GOAL_WIZ_DIST.map(([v, l]) =>
+                    body = head(t('gw.q.dist')) +
+                        '<div class="ob-grid">' + _gwDist().map(([v, l]) =>
                             '<button class="ob-tile' + (_goalWiz.dist === v ? ' s' : '') + '" onclick="wizPickDist(\'' + v + '\')">' + l + '</button>'
                         ).join('') + '</div>' +
                         (_goalWiz.dist === 'other'
-                            ? '<div style="margin-top:16px;"><label class="ob-label">Ile kilometrów?</label>' +
+                            ? '<div style="margin-top:16px;"><label class="ob-label">' + t('gw.q.km') + '</label>' +
                               '<input type="number" min="1" max="200" class="ob-txt" value="' + _goalWiz.customDist + '" oninput="_goalWiz.customDist=this.value;_wizSyncCta()"></div>'
                             : '');
                     break;
                 case 'hasrace':
-                    body = head('Masz konkretny wyścig?') +
+                    body = head(t('gw.q.hasrace')) +
                         '<div class="ob-list">' +
-                        _obCard('Tak, mam datę', '', _goalWiz.hasRace === true, 'wizSetHasRace(true)') +
-                        _obCard('Jeszcze nie', 'Sam wyznaczę sobie termin', _goalWiz.hasRace === false, 'wizSetHasRace(false)') +
+                        _obCard(t('gw.hasrace.yes'), '', _goalWiz.hasRace === true, 'wizSetHasRace(true)') +
+                        _obCard(t('gw.hasrace.no'), t('gw.hasrace.no.sub'), _goalWiz.hasRace === false, 'wizSetHasRace(false)') +
                         '</div>';
                     break;
                 case 'racedate':
-                    body = head('Kiedy startujesz?', 'Od tej daty sztab liczy ostrzenie i tygodnie budowania.') +
+                    body = head(t('gw.q.racedate'), t('gw.q.racedate.sub')) +
                         '<input type="date" class="ob-txt" value="' + _goalWiz.raceDate + '" oninput="_goalWiz.raceDate=this.value;_wizSyncCta()" onchange="_goalWiz.raceDate=this.value;_wizSyncCta()">';
                     break;
                 case 'target':
-                    body = head('Masz cel czasowy?', 'Możesz zostawić puste — trener zaproponuje realny cel.') +
+                    body = head(t('gw.q.target'), t('gw.q.target.sub')) +
                         '<input type="text" class="ob-txt" placeholder="np. 45:00 lub 1:45:00" value="' + _goalWiz.timeGoal + '" oninput="_goalWiz.timeGoal=this.value">';
                     break;
                 case 'pb':
-                    body = head('Twój rekord na tym dystansie?', 'Pomaga ustawić tempa. Resztę — ile i jak trenujesz — sztab już wie z Twoich treningów.') +
+                    body = head(t('gw.q.pb'), t('gw.q.pb.sub')) +
                         '<input type="text" class="ob-txt" placeholder="np. 21:30 lub 1:45:00" value="' + (_goalWiz.pb || '') + '"' +
                         ' oninput="_goalWiz.pb=this.value" ' + (_goalWiz.pbNone ? 'disabled' : '') + '>' +
                         '<div class="ob-list" style="margin-top:12px;">' +
-                        _obCard('Nie mam / nie pamiętam', '', !!_goalWiz.pbNone, '_goalWiz.pbNone=!_goalWiz.pbNone;renderGoalWiz()') +
+                        _obCard(t('gw.pb.none'), '', !!_goalWiz.pbNone, '_goalWiz.pbNone=!_goalWiz.pbNone;renderGoalWiz()') +
                         '</div>';
                     break;
                 case 'health':
-                    body = head('Co jest dla Ciebie najważniejsze?') +
-                        cards('healthFocus', [['forma','Utrzymać formę'],['waga','Zrzucić wagę'],['kondycja','Ogólna kondycja'],['energia','Więcej energii']]);
+                    body = head(t('gw.q.health')) +
+                        cards('healthFocus', [['forma',t('gw.health.forma')],['waga',t('gw.health.waga')],['kondycja',t('gw.health.kondycja')],['energia',t('gw.health.energia')]]);
                     break;
                 case 'cbreason':
-                    body = head('Skąd wracasz?', 'Im więcej wiemy, tym ostrożniej sztab ułoży pierwsze tygodnie.') +
-                        cards('comebackReason', [['injury','Po kontuzji'],['break','Po dłuższej przerwie']]);
+                    body = head(t('gw.q.cbreason'), t('gw.q.cbreason.sub')) +
+                        cards('comebackReason', [['injury',t('gw.cb.injury')],['break',t('gw.cb.break')]]);
                     break;
                 case 'cbsince':
-                    body = head('Jak dawno ostatni bieg?') +
-                        cards('comebackSince', [['lt1','mniej niż miesiąc'],['1_3','1–3 miesiące'],['3_6','3–6 miesięcy'],['gt6','ponad pół roku']]);
+                    body = head(t('gw.q.cbsince')) +
+                        cards('comebackSince', [['lt1',t('gw.cbsince.lt1')],['1_3',t('gw.cbsince.1_3')],['3_6',t('gw.cbsince.3_6')],['gt6',t('gw.cbsince.gt6')]]);
                     break;
                 case 'injwhat':
-                    body = head('Co dokładnie się stało?') +
-                        '<label class="ob-label">Co boli / bolało</label>' +
-                        '<input type="text" class="ob-txt" style="margin-bottom:18px;" placeholder="np. kolano, ścięgno Achillesa"' +
+                    body = head(t('gw.q.injwhat')) +
+                        '<label class="ob-label">' + t('gw.inj.area') + '</label>' +
+                        '<input type="text" class="ob-txt" style="margin-bottom:18px;" placeholder="' + t('gw.inj.area.ph') + '"' +
                         ' value="' + (_goalWiz.injArea || '') + '" oninput="_goalWiz.injArea=this.value;_wizSyncCta()">' +
-                        '<label class="ob-label">Dodatkowe uwagi (opcjonalnie)</label>' +
-                        '<input type="text" class="ob-txt" placeholder="np. od biegania po asfalcie"' +
+                        '<label class="ob-label">' + t('gw.inj.notes') + '</label>' +
+                        '<input type="text" class="ob-txt" placeholder="' + t('gw.inj.notes.ph') + '"' +
                         ' value="' + (_goalWiz.injNotes || '') + '" oninput="_goalWiz.injNotes=this.value">';
                     break;
                 case 'injstate':
-                    body = head('Jak się teraz czujesz?') +
-                        cards('injState', [['healed','Nic już nie boli'],['mild','Lekko czuję przy większym wysiłku'],['pain','Wciąż boli']]);
+                    body = head(t('gw.q.injstate')) +
+                        cards('injState', [['healed',t('gw.injstate.healed')],['mild',t('gw.injstate.mild')],['pain',t('gw.injstate.pain')]]);
                     break;
                 case 'injdoc':
-                    body = head('Byłeś u specjalisty?') +
-                        cards('injDoctor', [['cleared','Tak, dostałem zielone światło'],['seen','Tak, ale bez wyraźnej zgody'],['no','Nie byłem']]);
+                    body = head(t('gw.q.injdoc')) +
+                        cards('injDoctor', [['cleared',t('gw.injdoc.cleared')],['seen',t('gw.injdoc.seen')],['no',t('gw.injdoc.no')]]);
                     break;
                 case 'start':
-                    body = head('Twój pierwszy cel?') +
-                        cards('startFocus', [['5k','Przebiec 5 km bez przerwy'],['30min','30 minut ciągłego biegu'],['fit','Ogólna sprawność']]);
+                    body = head(t('gw.q.start')) +
+                        cards('startFocus', [['5k',t('gw.start.5k')],['30min',t('gw.start.30min')],['fit',t('gw.start.fit')]]);
                     break;
                 case 'done':
-                    body = head('Gotowe', 'Sztab przebuduje plan przy najbliższej naradzie.') +
+                    body = head(t('gw.done'), t('gw.done.sub')) +
                         '<div class="ob-panel">' + _wizSummary() + '</div>';
                     break;
             }
@@ -261,11 +264,11 @@ function _wizSteps() {
             const blocked = _wizCant(step.id);
             host.innerHTML =
                 '<div class="ob-top">' +
-                    '<button class="ob-bk' + (i === 0 ? '' : '') + '" onclick="goalWizBack()" aria-label="Wróć">' +
+                    '<button class="ob-bk' + (i === 0 ? '' : '') + '" onclick="goalWizBack()" aria-label="' + t('com.back') + '">' +
                         '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>' +
                     '</button>' +
                     '<div class="ob-bar"><div class="ob-pf" style="width:' + pct + '%"></div></div>' +
-                    '<span class="ob-pill">' + i + ' z ' + (steps.length - 1) + '</span>' +
+                    '<span class="ob-pill">' + i + ' ' + t('com.of') + ' ' + (steps.length - 1) + '</span>' +
                 '</div>' +
                 '<div class="ob-screen">' + body +
                     (step.cta
@@ -276,7 +279,7 @@ function _wizSteps() {
                         ? '<button class="ob-cta" id="wiz-cta" style="margin-top:22px;"' +
                           ' onclick="' + (isLast ? 'saveGoalWiz()' : 'wizNext()') + '"' +
                           (blocked ? ' disabled' : '') + '>' +
-                          (isLast ? 'Zapisz nowy cel' : 'Dalej') + '</button>'
+                          (isLast ? t('gw.save') : t('gw.next')) + '</button>'
                         : '') +
                     '<div id="goal-wiz-msg" class="s-msg" style="color:#6B8F71;"></div>' +
                 '</div>';
@@ -293,18 +296,18 @@ function _wizSteps() {
 
         function _wizSummary() {
             const w = _goalWiz, L = [];
-            const T = (GOAL_WIZ_TYPES[w.goalId] || {}).t;
-            if (T) L.push(['Cel', T]);
-            if (w.dist) L.push(['Dystans', (GOAL_WIZ_DIST.find(d => d[0] === w.dist) || [])[1] || w.dist]);
-            if (w.raceDate) L.push(['Data startu', w.raceDate]);
-            if (w.timeGoal) L.push(['Cel czasowy', w.timeGoal]);
-            if (w.pb && !w.pbNone) L.push(['Rekord', w.pb]);
-            if (w.injArea) L.push(['Kontuzja', w.injArea]);
+            const T = (_gwTypes()[w.goalId] || {}).t;
+            if (T) L.push([t('gw.sum.goal'), T]);
+            if (w.dist) L.push([t('home.dist'), (_gwDist().find(d => d[0] === w.dist) || [])[1] || w.dist]);
+            if (w.raceDate) L.push([t('gw.sum.startdate'), w.raceDate]);
+            if (w.timeGoal) L.push([t('gw.type.time'), w.timeGoal]);
+            if (w.pb && !w.pbNone) L.push([t('gw.sum.pb'), w.pb]);
+            if (w.injArea) L.push([t('gw.sum.injury'), w.injArea]);
             return L.map(([k, v]) =>
                 '<div style="display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid #EDE8DC;">' +
                 '<span style="font-size:14px;color:#5C6B85;">' + k + '</span>' +
                 '<span style="font-size:14px;font-weight:600;color:#111;text-align:right;">' + v + '</span></div>'
-            ).join('') || '<div class="ob-note">Brak dodatkowych szczegółów.</div>';
+            ).join('') || '<div class="ob-note">' + t('gw.sum.empty') + '</div>';
         }
 
         async function saveGoalWiz() {
@@ -347,13 +350,13 @@ function _wizSteps() {
                 const res = await fetch(`${API_BASE}/api/user/${userId}/goal`, { method: 'PUT', headers: authHeaders(), body: JSON.stringify(u) });
                 const data = await res.json();
                 if (data.success) {
-                    showVelmToast('Nowy cel zapisany. Sztab przebuduje plan przy najbliższej naradzie.', false);
+                    showVelmToast(t('gw.saved'), false);
                     setTimeout(() => { loadSettings(); openSettingsPane('cel'); }, 900);
                 } else {
-                    showVelmToast(data.error || 'Nie udało się zapisać celu', true);
+                    showVelmToast(data.error || t('gw.saveerr'), true);
                 }
             } catch(e) {
-                showVelmToast('Błąd połączenia', true);
+                showVelmToast(t('com.err.conn'), true);
             }
         }
 

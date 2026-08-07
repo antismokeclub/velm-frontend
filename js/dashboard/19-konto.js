@@ -47,12 +47,12 @@
             errEl.textContent = '';
 
             if (!email || !email.includes('@')) {
-                errEl.textContent = 'Wpisz prawidłowy adres email';
+                errEl.textContent = t('acc.login.email.err');
                 emailEl.focus();
                 return;
             }
             if (!password) {
-                errEl.textContent = 'Wpisz hasło';
+                errEl.textContent = t('acc.login.pwd.err');
                 pwdEl.focus();
                 return;
             }
@@ -69,9 +69,9 @@
                 const data = await res.json();
 
                 if (!res.ok || !data.success) {
-                    errEl.textContent = data.error || 'Błąd logowania';
+                    errEl.textContent = data.error || t('acc.login.err');
                     btn.disabled = false;
-                    btn.textContent = 'Zaloguj się';
+                    btn.textContent = t('login.title');
                     return;
                 }
 
@@ -87,11 +87,11 @@
                 return;
             } catch (e) {
                 const msg = e?.name === 'AbortError'
-                    ? 'Serwer nie odpowiada — sprawdź czy backend działa'
-                    : `Błąd połączenia: ${e?.message || 'nie udało się połączyć z API'}`;
+                    ? t('acc.login.timeout')
+                    : `${t('com.err.conn')}: ${e?.message || 'API unreachable'}`;
                 errEl.textContent = msg;
                 btn.disabled = false;
-                btn.textContent = 'Zaloguj się';
+                btn.textContent = t('login.title');
             }
         }
 
@@ -104,10 +104,10 @@
             modal.style.cssText = 'position:fixed;top:0;right:0;bottom:0;left:0;background:rgba(0,0,0,0.55);z-index:99999;display:flex;align-items:center;justify-content:center;padding:24px;font-family:Inter,sans-serif;';
             modal.innerHTML = `
                 <div style="background:#fff;border-radius:20px;padding:32px 26px;max-width:380px;width:100%;box-shadow:0 8px 40px rgba(0,0,0,0.18);">
-                  <h2 style="margin:0 0 8px 0;font-size:20px;font-weight:700;color:#1A1A1A;">Ustaw nowe hasło</h2>
-                  <p style="margin:0 0 20px 0;font-size:13.5px;color:#5A5A5A;line-height:1.5;">Wpisz nowe hasło (min. 8 znaków). Po zapisie zaloguj się ponownie.</p>
-                  <input id="pwd-reset-new" type="password" placeholder="Nowe hasło" autocomplete="new-password" style="width:100%;height:48px;border:1.5px solid #EBEBEB;border-radius:12px;padding:0 16px;font-size:15px;margin-bottom:10px;box-sizing:border-box;font-family:inherit;"/>
-                  <input id="pwd-reset-new2" type="password" placeholder="Powtórz hasło" autocomplete="new-password" style="width:100%;height:48px;border:1.5px solid #EBEBEB;border-radius:12px;padding:0 16px;font-size:15px;margin-bottom:14px;box-sizing:border-box;font-family:inherit;"/>
+                  <h2 style="margin:0 0 8px 0;font-size:20px;font-weight:700;color:#1A1A1A;">${t('acc.reset.title')}</h2>
+                  <p style="margin:0 0 20px 0;font-size:13.5px;color:#5A5A5A;line-height:1.5;">${t('acc.reset.desc')}</p>
+                  <input id="pwd-reset-new" type="password" placeholder="${t('acc.reset.new.ph')}" autocomplete="new-password" style="width:100%;height:48px;border:1.5px solid #EBEBEB;border-radius:12px;padding:0 16px;font-size:15px;margin-bottom:10px;box-sizing:border-box;font-family:inherit;"/>
+                  <input id="pwd-reset-new2" type="password" placeholder="${t('acc.reset.rep.ph')}" autocomplete="new-password" style="width:100%;height:48px;border:1.5px solid #EBEBEB;border-radius:12px;padding:0 16px;font-size:15px;margin-bottom:14px;box-sizing:border-box;font-family:inherit;"/>
                   <div id="pwd-reset-err" style="color:#C07264;font-size:13px;min-height:16px;margin-bottom:10px;line-height:1.4;"></div>
                   <button id="pwd-reset-btn" style="width:100%;height:48px;background:#1A1A1A;color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;">Zapisz hasło</button>
                   <button id="pwd-reset-cancel" style="width:100%;height:40px;background:none;border:none;color:#8A8A8A;font-size:13px;margin-top:8px;cursor:pointer;font-family:inherit;">Anuluj</button>
@@ -120,8 +120,8 @@
             p1.focus();
             const submit = async () => {
                 err.textContent = '';
-                if (!p1.value || p1.value.length < 8) { err.textContent = 'Hasło musi mieć min. 8 znaków'; return; }
-                if (p1.value !== p2.value) { err.textContent = 'Hasła nie są zgodne'; return; }
+                if (!p1.value || p1.value.length < 8) { err.textContent = t('acc.reset.min'); return; }
+                if (p1.value !== p2.value) { err.textContent = t('int.pwd.mismatch'); return; }
                 btn.disabled = true; btn.textContent = '…';
                 try {
                     const res = await fetch(`${API_BASE}/api/password-reset/verify`, {
@@ -131,8 +131,8 @@
                     let data = {};
                     try { data = await res.json(); } catch(e) {}
                     if (!res.ok) {
-                        err.textContent = data.error || 'Błąd serwera';
-                        btn.disabled = false; btn.textContent = 'Zapisz hasło';
+                        err.textContent = data.error || t('err.server');
+                        btn.disabled = false; btn.textContent = t('acc.reset.save');
                         return;
                     }
                     // Wyczyść lokalną sesję i wyrzuć na index z toastem
@@ -140,11 +140,11 @@
                     localStorage.removeItem('velm_user_id');
                     localStorage.removeItem('velm_user_name');
                     modal.remove();
-                    alert('Hasło zostało zmienione. Zaloguj się ponownie.');
+                    alert(t('acc.reset.done'));
                     window.location.href = 'index.html';
                 } catch (e) {
-                    err.textContent = 'Błąd połączenia z serwerem';
-                    btn.disabled = false; btn.textContent = 'Zapisz hasło';
+                    err.textContent = t('err.noserver');
+                    btn.disabled = false; btn.textContent = t('acc.reset.save');
                 }
             };
             btn.onclick = submit;
@@ -153,7 +153,7 @@
         }
 
         async function doLogout() {
-            if (!confirm('Czy na pewno chcesz się wylogować?')) return;
+            if (!confirm(t('acc.logout.confirm'))) return;
             // Best-effort backend invalidation (bumps token_version) — never block logout on failure
             try {
                 await fetch(`${API_BASE}/api/logout`, { method: 'POST', headers: authHeaders() });
@@ -176,7 +176,7 @@
                 const res = await fetch(`${API_BASE}/api/user/${currentUserId}/export`, {
                     headers: authHeaders()
                 });
-                if (!res.ok) throw new Error('Błąd serwera');
+                if (!res.ok) throw new Error(t('err.server'));
                 const blob = await res.blob();
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
@@ -186,18 +186,18 @@
                 a.click();
                 a.remove();
                 URL.revokeObjectURL(url);
-                btn.textContent = 'Pobrano ✓';
+                btn.textContent = t('acc.export.done') + ' ✓';
                 setTimeout(() => { btn.textContent = orig; btn.disabled = false; }, 2000);
             } catch (e) {
-                btn.textContent = 'Błąd — spróbuj ponownie';
+                btn.textContent = t('acc.export.err');
                 setTimeout(() => { btn.textContent = orig; btn.disabled = false; }, 2500);
             }
         }
 
         async function deleteAccount() {
-            const ok = confirm('Czy na pewno chcesz USUNĄĆ swoje konto? Tej operacji nie można cofnąć.\n\nWszystkie Twoje treningi, plany, czaty i ustawienia zostaną trwale usunięte.');
+            const ok = confirm(t('acc.delete.confirm'));
             if (!ok) return;
-            const password = prompt('Potwierdź swoim hasłem, by usunąć konto:');
+            const password = prompt(t('acc.delete.pwd'));
             if (password === null) return;
             try {
                 const res = await fetch(`${API_BASE}/api/user/${currentUserId}`, {
@@ -208,14 +208,14 @@
                 let data = {};
                 try { data = await res.json(); } catch (e) {}
                 if (!res.ok) {
-                    alert(data.error || `Błąd serwera (${res.status})`);
+                    alert(data.error || `${t('err.server')} (${res.status})`);
                     return;
                 }
-                alert('Konto zostało usunięte.');
+                alert(t('acc.delete.done'));
                 localStorage.clear();
                 window.location.href = 'index.html';
             } catch (e) {
-                alert('Błąd połączenia z serwerem. Spróbuj ponownie.');
+                alert(t('acc.delete.err'));
                 console.error('deleteAccount:', e);
             }
         }
@@ -274,7 +274,7 @@
                 setTimeout(() => {
                     const msg = document.createElement('div');
                     msg.style.cssText = 'position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#1A1A1A;color:#fff;padding:12px 24px;border-radius:14px;font-size:14px;font-weight:600;z-index:9999;font-family:Inter,sans-serif;';
-                    msg.textContent = 'Strava połączona! Treningi są importowane.';
+                    msg.textContent = t('acc.strava.ok');
                     document.body.appendChild(msg);
                     setTimeout(() => msg.remove(), 4000);
                 }, 500);
@@ -286,7 +286,7 @@
                 setTimeout(() => {
                     const msg = document.createElement('div');
                     msg.style.cssText = 'position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#C07264;color:#fff;padding:12px 24px;border-radius:14px;font-size:14px;font-weight:600;z-index:9999;font-family:Inter,sans-serif;';
-                    msg.textContent = 'Błąd połączenia ze Stravą (' + reason + ')';
+                    msg.textContent = t('acc.strava.err') + ' (' + reason + ')';
                     document.body.appendChild(msg);
                     setTimeout(() => msg.remove(), 5000);
                 }, 500);
@@ -304,12 +304,12 @@
             const verifiedResult = urlParams.get('email_verified');
             if (verifiedResult) {
                 const map = {
-                    ok: { msg: 'Email potwierdzony — dziękujemy!', err: false },
-                    already: { msg: 'Email już potwierdzony.', err: false },
-                    expired: { msg: 'Link wygasł — wyślij nowy z ustawień konta.', err: true },
-                    invalid: { msg: 'Nieprawidłowy link — wyślij nowy z ustawień konta.', err: true },
-                    missing: { msg: 'Brakuje tokenu w linku.', err: true },
-                    error: { msg: 'Błąd weryfikacji — spróbuj ponownie.', err: true }
+                    ok: { msg: t('acc.verify.ok'), err: false },
+                    already: { msg: t('acc.verify.already'), err: false },
+                    expired: { msg: t('acc.verify.expired'), err: true },
+                    invalid: { msg: t('acc.verify.invalid'), err: true },
+                    missing: { msg: t('acc.verify.missing'), err: true },
+                    error: { msg: t('acc.verify.err'), err: true }
                 };
                 const r = map[verifiedResult] || map.error;
                 setTimeout(() => showVelmToast(r.msg, r.err), 800);
@@ -322,12 +322,12 @@
                 history.replaceState({}, '', window.location.pathname);
                 switchView('settings');
                 setTimeout(() => {
-                    showVelmToast('✦ Witaj w Premium! 7 dni próbnych zaczyna się teraz.');
+                    showVelmToast(t('acc.sub.welcome'));
                     loadSubscriptionStatus();
                 }, 1000);
             } else if (subResult === 'cancelled') {
                 history.replaceState({}, '', window.location.pathname);
-                showVelmToast('Płatność anulowana — plan darmowy aktywny', true);
+                showVelmToast(t('acc.sub.cancelled'), true);
             }
 
             // Show/hide login overlay
