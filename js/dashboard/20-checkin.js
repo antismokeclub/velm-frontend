@@ -108,7 +108,20 @@
             showVelmToast(t('ci.alreadydone'));
         }
 
+        function _ciSetText(id, txt) {
+            const el = document.getElementById(id);
+            if (el) el.textContent = txt;
+        }
         function openCheckin(mode, typ, km) {
+            // Trzy etykiety w markupie mają polskie wartości domyślne, bo ich
+            // treść zależy od typu treningu — dlatego NIE mogą mieć data-i18n
+            // (applyI18n nadpisałby wersję ustawioną przez _initMoreStep).
+            // Zamiast tego ustawiamy je tu na wariant ogólny; _initMoreStep
+            // i _syncFuKm doprecyzują je dla interwału/tempa.
+            _ciSetText('more-step-title', t('ci.q.total'));
+            _ciSetText('more-step-desc',  t('ci.q.total.desc'));
+            _ciSetText('fuKmLabel',       t('ci.q.km.total'));
+            _ciSetText('fuCountLabel',    t('ci.reps.actual'));
             // Reset state
             currentMode  = mode || 'morning';
             currentStep  = 0;
