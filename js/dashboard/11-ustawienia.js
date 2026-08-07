@@ -123,6 +123,10 @@
             const userId = localStorage.getItem('velm_user_id');
             if (!userId) return;
             backToSettingsMenu();   // wejście w ustawienia zawsze pokazuje menu
+            // PRZED fetchem: gdy zapytanie padnie, wiersze profilu zostawały na
+            // polskich wartościach domyślnych z markupu (te elementy wypełnia JS,
+            // więc nie mają data-i18n). _refreshProfilRows ma własny fallback z t().
+            _refreshProfilRows();
             loadSubscriptionSection();
             try {
                 const [userRes, planRes] = await Promise.all([
