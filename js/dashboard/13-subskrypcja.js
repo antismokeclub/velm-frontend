@@ -34,15 +34,15 @@
             try {
                 const res = await fetch(API_BASE + '/api/subscription/' + currentUserId, { headers: authHeaders() });
                 const data = await res.json();
-                const _benefit = t => '<div style="display:flex;align-items:center;gap:12px;padding:9px 0;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5F8368" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M20 6L9 17l-5-5"/></svg><span style="font-size:14px;color:#1A1A1A;font-family:Inter,sans-serif;">' + t + '</span></div>';
-                const _proBenefits = '<div class="sd-card"><div class="sd-seclabel">Twoje korzyści Pro</div>' +
-                    _benefit('Nielimitowane plany treningowe') + _benefit('Dokładna analiza tempa i tętna') +
-                    _benefit('Brak jakichkolwiek reklam') + _benefit('Automatyczny eksport do GPX &amp; Strava') + '</div>';
+                const _benefit = txt => '<div style="display:flex;align-items:center;gap:12px;padding:9px 0;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5F8368" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M20 6L9 17l-5-5"/></svg><span style="font-size:14px;color:#1A1A1A;font-family:Inter,sans-serif;">' + txt + '</span></div>';
+                const _proBenefits = '<div class="sd-card"><div class="sd-seclabel">' + t('sub.benefits') + '</div>' +
+                    _benefit(t('sub.benefit.0')) + _benefit(t('sub.benefit.1')) +
+                    _benefit(t('sub.benefit.2')) + _benefit(t('sub.benefit.3')) + '</div>';
                 if (data.isPremium) {
                     const expiry = data.expiresAt
                         ? new Date(data.expiresAt).toLocaleDateString(_appLang, { day: 'numeric', month: 'long', year: 'numeric' })
                         : null;
-                    const statusPill = { active: 'Aktywna', trialing: 'Trial (7 dni)', past_due: 'Płatność nieudana', cancelled: 'Anulowana' }[data.status] ?? data.status;
+                    const statusPill = { active: t('sub.status.active'), trialing: t('sub.status.trialing'), past_due: t('sub.status.pastdue'), cancelled: t('sub.status.cancelled') }[data.status] ?? data.status;
                     const pillOk = data.status === 'active' || data.status === 'trialing';
                     container.innerHTML =
                         '<div class="sd-hero">' +
@@ -50,26 +50,26 @@
                                 '<div style="font-family:Outfit,sans-serif;font-weight:800;font-size:24px;">VELM Pro</div>' +
                                 '<span style="background:' + (pillOk ? '#2E4636' : '#4A2E2A') + ';color:' + (pillOk ? '#9FC7A9' : '#D9A79F') + ';font-size:12px;font-weight:700;padding:5px 12px;border-radius:20px;white-space:nowrap;">' + statusPill + '</span>' +
                             '</div>' +
-                            (expiry ? '<div style="font-size:12px;color:#9A948C;">Następna płatność: ' + expiry + '</div>' : '') +
-                            '<div style="margin-top:6px;"><span style="font-size:26px;font-weight:800;font-family:Outfit,sans-serif;">29,99 zł</span><span style="font-size:14px;color:#9A948C;font-weight:500;"> / miesięcznie</span></div>' +
+                            (expiry ? '<div style="font-size:12px;color:#9A948C;">' + t('sub.nextpay') + ' ' + expiry + '</div>' : '') +
+                            '<div style="margin-top:6px;"><span style="font-size:26px;font-weight:800;font-family:Outfit,sans-serif;">29,99 zł</span><span style="font-size:14px;color:#9A948C;font-weight:500;"> ' + t('sub.permonth') + '</span></div>' +
                         '</div>' +
                         _proBenefits +
-                        '<button onclick="openBillingPortal()" class="s-btn-danger" style="min-height:52px;">Anuluj subskrypcję</button>';
+                        '<button onclick="openBillingPortal()" class="s-btn-danger" style="min-height:52px;">' + t('sub.cancel') + '</button>';
                 } else {
                     currentTrialMessagesLeft = data.trialMessagesLeft ?? 0;
                     currentSurveyCompleted = data.surveyCompleted ?? false;
                     const trialLine = currentTrialMessagesLeft > 0
-                        ? 'Plan z rejestracji · ' + currentTrialMessagesLeft + ' ' + _trialMsgWord(currentTrialMessagesLeft)
-                        : 'Plan z rejestracji · darmowe wiadomości wykorzystane';
+                        ? t('sub.signupplan') + ' · ' + tp('sub.msgs', currentTrialMessagesLeft)
+                        : t('sub.signupplan') + ' · ' + t('sub.trialused');
                     container.innerHTML =
                         '<div class="sd-hero">' +
-                            '<div style="font-family:Outfit,sans-serif;font-weight:800;font-size:22px;">Plan darmowy</div>' +
+                            '<div style="font-family:Outfit,sans-serif;font-weight:800;font-size:22px;">' + t('sub.free') + '</div>' +
                             '<div style="font-size:13px;color:#B9B4AC;margin-top:6px;line-height:1.5;">' + trialLine + '</div>' +
                         '</div>' +
                         _proBenefits +
-                        '<button onclick="showPaywall(\'Pełny sztab AI, narady tygodniowe i raporty — bez limitów.\', { surveyAvailable: !currentSurveyCompleted })" class="s-btn-primary" style="min-height:54px;font-size:15px;">Przejdź na Premium — 7 dni za darmo</button>' +
+                        '<button onclick="showPaywall(null, { surveyAvailable: !currentSurveyCompleted })" class="s-btn-primary" style="min-height:54px;font-size:15px;">' + t('sub.gopremium') + '</button>' +
                         (!currentSurveyCompleted
-                            ? '<button onclick="openTrialSurvey()" class="s-btn-secondary" style="margin-top:10px;">Ankieta → 5 darmowych wiadomości</button>'
+                            ? '<button onclick="openTrialSurvey()" class="s-btn-secondary" style="margin-top:10px;">' + t('sub.surveycta') + '</button>'
                             : '');
                 }
             } catch(e) {
@@ -82,9 +82,9 @@
                 const res = await fetch(API_BASE + '/api/subscription/portal', { method: 'POST', headers: authHeaders() });
                 const data = await res.json();
                 if (data.url) window.location.href = data.url;
-                else showVelmToast('Błąd otwarcia portalu', true);
+                else showVelmToast(t('sub.portal.err'), true);
             } catch(e) {
-                showVelmToast('Błąd połączenia', true);
+                showVelmToast(t('com.err.conn'), true);
             }
         }
 
@@ -92,11 +92,7 @@
             return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
         }
 
-        function _trialMsgWord(n) {
-            return n === 1 ? 'darmowa wiadomość' : (n >= 2 && n <= 4 ? 'darmowe wiadomości' : 'darmowych wiadomości');
-        }
-
-        function showPaywall(message, opts = {}) {
+                function showPaywall(message, opts = {}) {
             const existing = document.getElementById('paywall-modal');
             if (existing) existing.remove();
 
@@ -107,27 +103,27 @@
             modal.style.cssText = 'position:fixed;top:0;right:0;bottom:0;left:0;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:flex-end;justify-content:center;padding:16px;';
             modal.innerHTML = '<div style="background:#FFFFFF;border-radius:20px;padding:24px 20px calc(24px + env(safe-area-inset-bottom));width:100%;max-width:480px;">' +
                 '<div style="font-family:Outfit,sans-serif;font-size:22px;font-weight:800;color:#1A1A1A;letter-spacing:-0.02em;margin-bottom:6px;">velm Premium</div>' +
-                '<div style="font-size:14px;color:#8A8A8A;line-height:1.45;margin-bottom:20px;">' + (message ? _escHtml(message) : 'Pełny sztab AI, narady tygodniowe i raporty — bez limitów.') + '</div>' +
+                '<div style="font-size:14px;color:#8A8A8A;line-height:1.45;margin-bottom:20px;">' + (message ? _escHtml(message) : t('pw.default')) + '</div>' +
                 '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">' +
                     '<button onclick="startCheckout(\'monthly\')" style="border:1px solid #EBEBEB;background:#FFFFFF;border-radius:12px;padding:16px 12px;cursor:pointer;text-align:left;min-height:44px;touch-action:manipulation;font-family:Inter,sans-serif;">' +
-                        '<div style="font-size:13px;color:#8A8A8A;font-weight:500;margin-bottom:4px;">Miesięcznie</div>' +
+                        '<div style="font-size:13px;color:#8A8A8A;font-weight:500;margin-bottom:4px;">' + t('pw.monthly') + '</div>' +
                         '<div style="font-family:Outfit,sans-serif;font-size:22px;font-weight:800;color:#1A1A1A;font-variant-numeric:tabular-nums;">$29</div>' +
-                        '<div style="font-size:13px;color:#8A8A8A;">/ miesiąc</div>' +
+                        '<div style="font-size:13px;color:#8A8A8A;">' + t('pw.permonth') + '</div>' +
                     '</button>' +
                     '<button onclick="startCheckout(\'yearly\')" style="border:1px solid #1A1A1A;background:#1A1A1A;border-radius:12px;padding:16px 12px;cursor:pointer;text-align:left;min-height:44px;touch-action:manipulation;font-family:Inter,sans-serif;">' +
-                        '<div style="font-size:13px;color:rgba(255,255,255,0.7);font-weight:500;margin-bottom:4px;">Rocznie — taniej 43%</div>' +
+                        '<div style="font-size:13px;color:rgba(255,255,255,0.7);font-weight:500;margin-bottom:4px;">' + t('pw.yearly') + '</div>' +
                         '<div style="font-family:Outfit,sans-serif;font-size:22px;font-weight:800;color:#FFFFFF;font-variant-numeric:tabular-nums;">$199</div>' +
-                        '<div style="font-size:13px;color:rgba(255,255,255,0.7);">/ rok</div>' +
+                        '<div style="font-size:13px;color:rgba(255,255,255,0.7);">' + t('pw.peryear') + '</div>' +
                     '</button>' +
                 '</div>' +
-                '<div style="font-size:13px;color:#8A8A8A;text-align:center;margin-bottom:16px;">7 dni za darmo · Anuluj kiedy chcesz</div>' +
+                '<div style="font-size:13px;color:#8A8A8A;text-align:center;margin-bottom:16px;">' + t('pw.freetrial') + '</div>' +
                 (surveyAvailable ?
                 '<div style="border:1px solid #EBEBEB;border-radius:12px;padding:16px;margin-bottom:12px;">' +
-                    '<div style="font-size:14px;font-weight:600;color:#1A1A1A;margin-bottom:4px;">Jeszcze testujesz?</div>' +
-                    '<div style="font-size:13px;color:#8A8A8A;line-height:1.45;margin-bottom:12px;">Wypełnij ankietę (1 minuta) i odbierz 5 darmowych wiadomości do sztabu.</div>' +
-                    '<button onclick="openTrialSurvey()" style="width:100%;padding:12px;min-height:44px;background:transparent;border:1px solid #1A1A1A;border-radius:12px;font-size:14px;font-weight:600;color:#1A1A1A;cursor:pointer;font-family:Inter,sans-serif;touch-action:manipulation;">Wypełnij ankietę</button>' +
+                    '<div style="font-size:14px;font-weight:600;color:#1A1A1A;margin-bottom:4px;">' + t('pw.testing') + '</div>' +
+                    '<div style="font-size:13px;color:#8A8A8A;line-height:1.45;margin-bottom:12px;">' + t('pw.survey.desc') + '</div>' +
+                    '<button onclick="openTrialSurvey()" style="width:100%;padding:12px;min-height:44px;background:transparent;border:1px solid #1A1A1A;border-radius:12px;font-size:14px;font-weight:600;color:#1A1A1A;cursor:pointer;font-family:Inter,sans-serif;touch-action:manipulation;">' + t('pw.survey.cta') + '</button>' +
                 '</div>' : '') +
-                '<button onclick="document.getElementById(\'paywall-modal\').remove()" style="width:100%;padding:12px;min-height:44px;background:transparent;border:none;font-size:14px;font-weight:500;font-family:Inter,sans-serif;cursor:pointer;color:#8A8A8A;touch-action:manipulation;">Może później</button>' +
+                '<button onclick="document.getElementById(\'paywall-modal\').remove()" style="width:100%;padding:12px;min-height:44px;background:transparent;border:none;font-size:14px;font-weight:500;font-family:Inter,sans-serif;cursor:pointer;color:#8A8A8A;touch-action:manipulation;">' + t('pw.later') + '</button>' +
                 '</div>';
             modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
             document.body.appendChild(modal);
@@ -156,27 +152,27 @@
             modal.id = 'survey-modal';
             modal.style.cssText = 'position:fixed;top:0;right:0;bottom:0;left:0;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:flex-end;justify-content:center;padding:16px;';
             modal.innerHTML = '<div style="background:#FFFFFF;border-radius:20px;padding:24px 20px calc(24px + env(safe-area-inset-bottom));width:100%;max-width:480px;max-height:85vh;overflow-y:auto;">' +
-                '<div style="font-family:Outfit,sans-serif;font-size:22px;font-weight:800;color:#1A1A1A;letter-spacing:-0.02em;margin-bottom:4px;">Szybka ankieta</div>' +
-                '<div style="font-size:13px;color:#8A8A8A;margin-bottom:20px;">1 minuta · odblokowuje 5 darmowych wiadomości</div>' +
-                q('Skąd wiesz o velm?',
+                '<div style="font-family:Outfit,sans-serif;font-size:22px;font-weight:800;color:#1A1A1A;letter-spacing:-0.02em;margin-bottom:4px;">' + t('sv.title') + '</div>' +
+                '<div style="font-size:13px;color:#8A8A8A;margin-bottom:20px;">' + t('sv.sub') + '</div>' +
+                q(t('sv.q.source'),
                     chip('source','instagram','Instagram') + chip('source','tiktok','TikTok') +
-                    chip('source','google','Google') + chip('source','znajomi','Od znajomych') +
-                    chip('source','inne','Inne')) +
-                q('Płacisz za inną apkę do biegania lub treningu?',
-                    chip('pays','nie','Nie') + chip('pays','tak','Tak')) +
+                    chip('source','google','Google') + chip('source','znajomi',t('sv.src.friends')) +
+                    chip('source','inne',t('sv.src.other'))) +
+                q(t('sv.q.pays'),
+                    chip('pays','nie',t('sv.no')) + chip('pays','tak',t('sv.yes'))) +
                 '<div id="sv-pays-what" style="display:none;margin:-8px 0 20px;">' +
-                    '<input id="sv-pays-input" type="text" maxlength="100" placeholder="Która?" ' +
+                    '<input id="sv-pays-input" type="text" maxlength="100" placeholder="' + t('sv.which.ph') + '" ' +
                     'style="width:100%;padding:12px;border:1px solid #D9D9D9;border-radius:12px;font-size:14px;font-family:Inter,sans-serif;background:#FFFFFF;color:#1A1A1A;box-sizing:border-box;"></div>' +
-                q('Ile mógłbyś płacić miesięcznie za trenera AI?',
+                q(t('sv.q.willing'),
                     chip('willing','0','0 zł') + chip('willing','10-20','10–20 zł') +
                     chip('willing','20-40','20–40 zł') + chip('willing','40+','40+ zł')) +
                 '<div style="margin-bottom:20px;">' +
-                    '<div style="font-size:14px;font-weight:600;color:#1A1A1A;margin-bottom:8px;">Czego najbardziej brakuje ci w treningach? <span style="font-weight:400;color:#8A8A8A;">(opcjonalnie)</span></div>' +
-                    '<textarea id="sv-missing" maxlength="500" rows="2" placeholder="Napisz krótko…" ' +
+                    '<div style="font-size:14px;font-weight:600;color:#1A1A1A;margin-bottom:8px;">' + t('sv.q.missing') + ' <span style="font-weight:400;color:#8A8A8A;">' + t('sv.optional') + '</span></div>' +
+                    '<textarea id="sv-missing" maxlength="500" rows="2" placeholder="' + t('sv.missing.ph') + '" ' +
                     'style="width:100%;padding:12px;border:1px solid #D9D9D9;border-radius:12px;font-size:14px;font-family:Inter,sans-serif;background:#FFFFFF;color:#1A1A1A;resize:none;box-sizing:border-box;"></textarea></div>' +
                 '<button id="sv-submit" onclick="submitTrialSurvey()" disabled ' +
-                    'style="width:100%;padding:14px;min-height:48px;background:#1A1A1A;border:none;border-radius:12px;color:#FFFFFF;font-size:15px;font-weight:600;font-family:Inter,sans-serif;cursor:pointer;opacity:0.4;touch-action:manipulation;">Odbierz 5 wiadomości</button>' +
-                '<button onclick="document.getElementById(\'survey-modal\').remove()" style="width:100%;padding:12px;min-height:44px;background:transparent;border:none;font-size:14px;font-weight:500;font-family:Inter,sans-serif;cursor:pointer;color:#8A8A8A;margin-top:4px;touch-action:manipulation;">Wróć</button>' +
+                    'style="width:100%;padding:14px;min-height:48px;background:#1A1A1A;border:none;border-radius:12px;color:#FFFFFF;font-size:15px;font-weight:600;font-family:Inter,sans-serif;cursor:pointer;opacity:0.4;touch-action:manipulation;">' + t('sv.submit') + '</button>' +
+                '<button onclick="document.getElementById(\'survey-modal\').remove()" style="width:100%;padding:12px;min-height:44px;background:transparent;border:none;font-size:14px;font-weight:500;font-family:Inter,sans-serif;cursor:pointer;color:#8A8A8A;margin-top:4px;touch-action:manipulation;">' + t('com.back') + '</button>' +
                 '</div>';
             modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
             document.body.appendChild(modal);
@@ -209,7 +205,7 @@
             const submit = document.getElementById('sv-submit');
             if (!submit || submit.disabled) return;
             submit.disabled = true;
-            submit.textContent = 'Wysyłanie…';
+            submit.textContent = t('sv.sending');
             const paysInput = document.getElementById('sv-pays-input');
             const missing = document.getElementById('sv-missing');
             const answers = {
@@ -229,16 +225,16 @@
                 currentTrialMessagesLeft = data.trialMessagesLeft ?? 5;
                 currentSurveyCompleted = true;
                 updateTrialCounter();
-                showVelmToast('Odblokowane: 5 darmowych wiadomości');
+                showVelmToast(t('sv.unlocked'));
             } catch (e) {
                 if (e.status === 409) {
                     document.getElementById('survey-modal')?.remove();
                     currentSurveyCompleted = true;
-                    showVelmToast('Ankieta była już wypełniona', true);
+                    showVelmToast(t('sv.already'), true);
                 } else {
                     submit.disabled = false;
-                    submit.textContent = 'Odbierz 5 wiadomości';
-                    showVelmToast(e.message || 'Błąd wysyłania ankiety', true);
+                    submit.textContent = t('sv.submit');
+                    showVelmToast(e.message || t('sv.senderr'), true);
                 }
             }
         }
@@ -251,7 +247,7 @@
                 return;
             }
             const n = currentTrialMessagesLeft;
-            el.textContent = (n === 1 ? 'Została' : 'Zostało') + ' ' + n + ' ' + _trialMsgWord(n);
+            el.textContent = tp('sub.left', n);
             el.style.display = 'block';
         }
 
@@ -265,9 +261,9 @@
                 });
                 const data = await res.json();
                 if (data.url) window.location.href = data.url;
-                else showVelmToast('Błąd płatności: ' + (data.error || 'nieznany'), true);
+                else showVelmToast(t('sub.pay.err') + ' ' + (data.error || t('sub.pay.unknown')), true);
             } catch(e) {
-                showVelmToast('Błąd połączenia', true);
+                showVelmToast(t('com.err.conn'), true);
             }
         }
 

@@ -2,41 +2,22 @@
         // Analityk (5 parametrów) → Fizjo → Psycholog → Szef; po każdym
         // agencie zakreśla się jego segment w rzędzie dnia. Wszystkie
         // podpunkty to CZYNNOŚCI (uniwersalnie prawdziwe) — zero ocen.
-        const NRD_DAY_NAMES = ['Poniedziałek', 'Wtorek', 'Środa', 'Czwartek', 'Piątek', 'Sobota', 'Niedziela'];
-        const NRD_DAY_SHORT = ['Pn', 'Wt', 'Śr', 'Cz', 'Pt', 'So', 'Nd'];
-        const NRD_AGENTS = [
+        // Nazwy dni biora sie z jezyka UI — jako FUNKCJE, bo stala policzona przy
+        // ladowaniu pliku zamrozilaby polski, gdy user zmieni jezyk w trakcie sesji.
+        function _nrdAgents() { return [
             { key: 'analityk',  initial: 'A', name: 'Analityk' },
             { key: 'fizjo',     initial: 'F', name: 'Fizjo' },
             { key: 'psycholog', initial: 'P', name: 'Psycholog' },
-            { key: 'szef',      initial: 'T', name: 'Szef' }
-        ];
-        const NRD_AGENT_LABEL = { analityk: 'Analityk', fizjo: 'Fizjo', psycholog: 'Psycholog', szef: 'Szef Sztabu' };
+            { key: 'szef',      initial: 'T', name: t('nrd.agent.szef.short') }
+        ]; }
+        function _nrdAgentLabel(k) { return { analityk: t('agent.analityk.name'), fizjo: t('agent.fizjo.name'), psycholog: t('agent.psycholog.name'), szef: t('nrd.agent.szef') }[k]; }
         const NRD_AGENT_COLOR = { analityk: '#5B8DB8', fizjo: '#6B8F71', psycholog: '#C9924E', szef: '#1A1A1A' };
-        const NRD_POOLS = {
-            analityk: [
-                'Tętno średnie — odczytane', 'Tętno spoczynkowe — przekazane dalej',
-                'HRV — sprawdzone', 'Tempo — porównane z założeniami',
-                'Kadencja — przejrzana', 'Obciążenie treningowe — policzone',
-                'RPE — odnotowane', 'Sen i regeneracja — uwzględnione',
-                'Czas w strefach tętna — zmierzony', 'Przewyższenia — sprawdzone',
-                'Rytm tygodnia — przeanalizowany'
-            ],
-            fizjo: [
-                'Sygnały z ciała — ocenione', 'Ryzyko przeciążenia — sprawdzone',
-                'Limit intensywności — wyznaczony', 'Regeneracja po dniu — oceniona',
-                'Newralgiczne partie — sprawdzone', 'Zalecenia — przekazane'
-            ],
-            psycholog: [
-                'Check-in — przeczytany', 'Poziom energii — oceniony',
-                'Nastawienie — uwzględnione', 'Balans presji — sprawdzony',
-                'Uwagi — przekazane Szefowi'
-            ],
-            szef: [
-                'Typ treningu — wybrany', 'Intensywność — ustawiona',
-                'Tempo docelowe — dopasowane', 'Rozgrzewka — zaplanowana',
-                'Miejsce w tygodniu — potwierdzone'
-            ]
-        };
+        function _nrdPools() { return {
+            analityk: [0,1,2,3,4,5,6,7,8,9,10].map(i => t('nrd.a.' + i)),
+            fizjo:    [0,1,2,3,4,5].map(i => t('nrd.f.' + i)),
+            psycholog:[0,1,2,3,4].map(i => t('nrd.p.' + i)),
+            szef:     [0,1,2,3,4].map(i => t('nrd.s.' + i))
+        }; }
         const NRD_TICK_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
 
         // Dźwięk narady — subtelne tyknięcia (gra tylko po interakcji
@@ -78,16 +59,16 @@
             overlay.id = 'narada-overlay';
             overlay.setAttribute('role', 'dialog');
             overlay.setAttribute('aria-modal', 'true');
-            overlay.setAttribute('aria-label', 'Narada sztabu — generowanie planu');
+            overlay.setAttribute('aria-label', t('nrd.aria'));
             overlay.tabIndex = -1;
             overlay.innerHTML =
                 '<div class="nrd-wrap">' +
                     '<div class="nrd-head">' +
-                        '<div class="nrd-kicker">Narada sztabu</div>' +
-                        '<h1>Układamy Twój tydzień</h1>' +
+                        '<div class="nrd-kicker">' + t('nrd.kicker') + '</div>' +
+                        '<h1>' + t('nrd.title') + '</h1>' +
                     '</div>' +
                     '<div class="nrd-staff">' +
-                        NRD_AGENTS.map(a =>
+                        _nrdAgents().map(a =>
                             '<div class="nrd-chip" data-agent="' + a.key + '">' +
                                 '<div class="nrd-ava">' + a.initial + '<div class="nrd-badge">' + NRD_TICK_SVG + '</div></div>' +
                                 '<div class="nrd-nm">' + a.name + '</div>' +
@@ -101,14 +82,14 @@
                         '<div class="nrd-tasks"></div>' +
                     '</div>' +
                     '<div class="nrd-week">' +
-                        NRD_DAY_SHORT.map((s, d) =>
+                        _dayNamesShort().map((s, d) =>
                             '<div class="nrd-day-row" data-day="' + d + '">' +
                                 '<div class="nrd-dl">' + s + '</div>' +
                                 '<div class="nrd-fields">' +
                                     '<span class="nrd-f"><b>A</b></span><span class="nrd-f"><b>F</b></span>' +
                                     '<span class="nrd-f"><b>P</b></span><span class="nrd-f"><b>T</b></span>' +
                                 '</div>' +
-                                '<div class="nrd-status">Plan gotowy</div>' +
+                                '<div class="nrd-status">' + t('nrd.rowready') + '</div>' +
                                 '<div class="nrd-dcheck">' + NRD_TICK_SVG + '</div>' +
                             '</div>').join('') +
                     '</div>' +
@@ -184,7 +165,7 @@
                 setTimeout(() => {
                     q('.nrd-bench-day').innerHTML = title +
                         (dayNum ? '<span class="nrd-daynum">' + dayNum + '/7</span>' : '');
-                    q('.nrd-bench-agent').textContent = NRD_AGENT_LABEL[agent];
+                    q('.nrd-bench-agent').textContent = _nrdAgentLabel(agent);
                     head.classList.remove('swap');
                 }, 190);
             }
@@ -248,22 +229,22 @@
             function runDay(d) {
                 if (!running) return;
                 chipsReset();
-                const title = NRD_DAY_NAMES[d];
+                const title = _dayNamesFull()[d];
                 const n = d + 1;
                 setScan(d, 'analityk');
-                agentSegment('analityk', title, pickN2(NRD_POOLS.analityk, 5), 580, () => {
+                agentSegment('analityk', title, pickN2(_nrdPools().analityk, 5), 580, () => {
                     if (!running) return;
                     fillSegment(d, 0);
                     setScan(d, 'fizjo');
-                    agentSegment('fizjo', title, pickN2(NRD_POOLS.fizjo, 2), 640, () => {
+                    agentSegment('fizjo', title, pickN2(_nrdPools().fizjo, 2), 640, () => {
                         if (!running) return;
                         fillSegment(d, 1);
                         setScan(d, 'psycholog');
-                        agentSegment('psycholog', title, pickN2(NRD_POOLS.psycholog, 2), 640, () => {
+                        agentSegment('psycholog', title, pickN2(_nrdPools().psycholog, 2), 640, () => {
                             if (!running) return;
                             fillSegment(d, 2);
                             setScan(d, 'szef');
-                            agentSegment('szef', title, pickN2(NRD_POOLS.szef, 2), 640, () => {
+                            agentSegment('szef', title, pickN2(_nrdPools().szef, 2), 640, () => {
                                 if (!running) return;
                                 fillSegment(d, 3);
                                 buildRowN(d);
@@ -284,9 +265,9 @@
                 chipsReset();
                 chipWorking('szef');
                 setScan(null);
-                setBenchHead('Ostatnie szlify', 'szef');
+                setBenchHead(t('nrd.lastpolish'), 'szef');
                 clearTasks();
-                addTask('Składanie planu w całość — trwa…');
+                addTask(t('nrd.assembling'));
             }
 
             startPct();
@@ -312,11 +293,11 @@
                     const pctEl = q('.nrd-pct');
                     if (pctEl) pctEl.textContent = '100%';
                     chipsReset();
-                    NRD_AGENTS.forEach((a, i) => setTimeout(() => chipElN(a.key)?.classList.add('ok'), i * 120));
+                    _nrdAgents().forEach((a, i) => setTimeout(() => chipElN(a.key)?.classList.add('ok'), i * 120));
                     setScan(null);
-                    setBenchHead('Plan zatwierdzony', 'szef');
+                    setBenchHead(t('nrd.approved'), 'szef');
                     clearTasks();
-                    const row = addTask('Twój nowy tydzień — gotowy');
+                    const row = addTask(t('nrd.weekready'));
                     setTimeout(() => row.classList.add('done'), 500);
                     for (let d = 0; d < 7; d++) {
                         const r = dayRowEl(d);
@@ -373,10 +354,10 @@
             ov.style.cssText = 'position:fixed;inset:0;z-index:9999;background:#F7F4F0;display:flex;align-items:center;justify-content:center;padding:24px;';
             ov.innerHTML = '<div style="max-width:360px;width:100%;text-align:center;">'
                 + '<div style="width:56px;height:56px;background:#1A1A1A;border-radius:18px;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:20px;font-weight:800;color:white;">S</div>'
-                + '<div style="font-family:\'Outfit\',sans-serif;font-weight:800;font-size:24px;color:#1A1A1A;margin-bottom:10px;">Dobrze Cię widzieć</div>'
-                + '<div style="font-size:15px;color:#6B6B6B;line-height:1.6;margin-bottom:28px;">Minęło trochę czasu (' + days + ' dni). Zanim ułożę nowy plan — biegałeś coś w tym czasie na własną rękę?</div>'
-                + '<button id="rc-yes" style="width:100%;padding:16px;background:#1A1A1A;border:none;border-radius:16px;font-size:15px;font-weight:700;font-family:\'Inter\',sans-serif;cursor:pointer;color:white;margin-bottom:12px;">Tak, trochę biegałem</button>'
-                + '<button id="rc-no" style="width:100%;padding:16px;background:white;border:1.5px solid #EBEBEB;border-radius:16px;font-size:15px;font-weight:700;font-family:\'Inter\',sans-serif;cursor:pointer;color:#1A1A1A;">Nie, wracam od zera</button>'
+                + '<div style="font-family:\'Outfit\',sans-serif;font-weight:800;font-size:24px;color:#1A1A1A;margin-bottom:10px;">' + t('nrd.back.title') + '</div>'
+                + '<div style="font-size:15px;color:#6B6B6B;line-height:1.6;margin-bottom:28px;">' + t('nrd.back.desc').replace('{n}', days) + '</div>'
+                + '<button id="rc-yes" style="width:100%;padding:16px;background:#1A1A1A;border:none;border-radius:16px;font-size:15px;font-weight:700;font-family:\'Inter\',sans-serif;cursor:pointer;color:white;margin-bottom:12px;">' + t('nrd.back.yes') + '</button>'
+                + '<button id="rc-no" style="width:100%;padding:16px;background:white;border:1.5px solid #EBEBEB;border-radius:16px;font-size:15px;font-weight:700;font-family:\'Inter\',sans-serif;cursor:pointer;color:#1A1A1A;">' + t('nrd.back.no') + '</button>'
                 + '</div>';
             document.body.appendChild(ov);
             const finish = async (trained) => {
@@ -389,7 +370,7 @@
                     await narada.finish();
                 } catch(e) {
                     narada.abort();
-                    if (e.status !== 402) showVelmToast('Nie udało się ułożyć planu — spróbujemy przy następnym wejściu', true);
+                    if (e.status !== 402) showVelmToast(t('nrd.fail'), true);
                 }
             };
             document.getElementById('rc-yes').onclick = () => finish(true);
@@ -465,7 +446,7 @@
                         // Free tier: stary plan zostaje; nie ponawiaj dla tego przypadku
                         localStorage.setItem('velm_narada_402_week', naradaKey);
                     } else {
-                        showVelmToast('Nie udało się zwołać narady — spróbujemy przy następnym wejściu', true);
+                        showVelmToast(t('nrd.fail.call'), true);
                     }
                 } finally {
                     _weeklyNaradaRunning = false;
@@ -492,7 +473,7 @@
             // premium. Odświeżamy na żywo tuż przed decyzją zamiast ufać migawce.
             await loadSubscriptionStatus();
             if (!currentUserPremium) {
-                showPaywall('Nowa narada sztabu dostępna w Premium. Twój plan z rejestracji pozostaje aktywny.', { surveyAvailable: !currentSurveyCompleted });
+                showPaywall(t('nrd.premium'), { surveyAvailable: !currentSurveyCompleted });
                 return;
             }
             showNaradaConfirm();
@@ -504,7 +485,7 @@
             bd.id = 'nrd-confirm-backdrop';
             bd.setAttribute('role', 'dialog');
             bd.setAttribute('aria-modal', 'true');
-            bd.setAttribute('aria-label', 'Zwołaj naradę sztabu');
+            bd.setAttribute('aria-label', t('nrd.confirm.aria'));
             bd.innerHTML =
                 '<div id="nrd-confirm">' +
                     '<div class="nrdc-avas" aria-hidden="true">' +
@@ -513,10 +494,10 @@
                         '<div class="a" style="background:#C9924E">P</div>' +
                         '<div class="a" style="background:#1A1A1A">T</div>' +
                     '</div>' +
-                    '<h3>Zwołać naradę sztabu?</h3>' +
-                    '<p>Czterech trenerów przejrzy Twoje ostatnie treningi i&nbsp;ułoży nowy tydzień. Obecny plan zostanie zastąpiony. Potrwa to około minuty.</p>' +
-                    '<button class="nrdc-go">Zwołaj naradę</button>' +
-                    '<button class="nrdc-cancel">Nie teraz</button>' +
+                    '<h3>' + t('nrd.confirm.title') + '</h3>' +
+                    '<p>' + t('nrd.confirm.desc') + '</p>' +
+                    '<button class="nrdc-go">' + t('nrd.confirm.go') + '</button>' +
+                    '<button class="nrdc-cancel">' + t('nrd.confirm.no') + '</button>' +
                 '</div>';
             document.body.appendChild(bd);
             requestAnimationFrame(() => requestAnimationFrame(() => bd.classList.add('visible')));
@@ -541,7 +522,7 @@
             if (btn) { btn.disabled = true; btn.style.cursor = 'wait'; }
             const resetBtn = () => {
                 if (!btn) return;
-                btn.innerHTML = 'Wygeneruj nowy plan';
+                btn.innerHTML = t('nrd.genplan');
                 btn.style.color = '#1A1A1A';
                 btn.style.borderColor = '#EBEBEB';
                 btn.disabled = false;
@@ -565,10 +546,10 @@
                 narada.abort();
                 resetBtn();
                 if (e.status === 402) {
-                    showPaywall(e.data?.message || 'Nowa narada sztabu dostępna w Premium.', { surveyAvailable: e.data?.surveyAvailable });
+                    showPaywall(e.data?.message || t('nrd.premium.short'), { surveyAvailable: e.data?.surveyAvailable });
                     return;
                 }
-                showVelmToast(e?.message || 'Błąd generowania planu', true);
+                showVelmToast(e?.message || t('nrd.generr'), true);
             }
         }
 
