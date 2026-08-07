@@ -105,7 +105,7 @@
                 openCheckin('post', window._todayTyp, window._todayKm);
                 return;
             }
-            showVelmToast('Dzisiejszy check-in już zrobiony ✓');
+            showVelmToast(t('ci.alreadydone'));
         }
 
         function openCheckin(mode, typ, km) {
@@ -242,7 +242,7 @@
                 }
                 if (window._todayPace) parts.push(String(window._todayPace).replace(/\s*min\/km\s*$/i, '') + '/km');
                 previewSub.textContent = parts.length ? parts.join(' · ')
-                    : 'Szczegóły planu wczytają się za chwilę';
+                    : t('ci.planloading');
             }
             // Panel startu tylko w dniu celu i tylko w trybie potreningowym.
             _ciRaceTime = '';
@@ -259,7 +259,7 @@
                 if (det) det.style.display = _ciIsRace ? '' : 'none';
                 const hint = document.getElementById('ci-race-hint');
                 if (hint) hint.textContent = _ciIsRaceDay()
-                    ? 'Dziś jest dzień Twojego celu' : 'Zaznacz, żeby podać czas oficjalny';
+                    ? t('ci.raceday') : t('ci.racehint');
             }
 
             const m2desc = document.getElementById('step-morning-4-desc');
@@ -598,7 +598,7 @@
             // Wcześniej ciche `return` — flaga "check-in zrobiony" zostawała ustawiona,
             // więc wylogowany użytkownik tracił trening bez śladu. Rzucamy, żeby
             // zadziałało cofnięcie flagi i komunikat.
-            if (!userId) throw new Error('Brak zalogowanego użytkownika');
+            if (!userId) throw new Error(t('ci.nouser'));
             const msg = buildAiMessage();
             const completion = selectedCompletion || 'exact';
             // Faktyczny dystans: "krótszy dystans" (easy/long) lub "mniejszy dystans
@@ -783,7 +783,7 @@
             const pct = (val - 1) / 9 * 100;
             const c = val <= 3 ? '#C07264' : val <= 5 ? '#C4A35A' : val <= 7 ? '#6B8F71' : '#4A6B50';
             slider.style.background = `linear-gradient(to right, ${c} ${pct}%, #D8D2C4 ${pct}%)`;
-            const descs = {1:'Ledwo wstaję z łóżka',2:'Bardzo zmęczony, ciało ciężkie',3:'Wyraźnie zmęczony',4:'Trochę poniżej normy',5:'Przeciętnie — jako tako',6:'W porządku',7:'Dobrze, czuję się normalnie',8:'Pełen energii',9:'Bardzo dobrze, gotowy na wszystko',10:'Szczyt formy'};
+            const descs = {}; for (let _i = 1; _i <= 10; _i++) descs[_i] = t('ci.mood.' + _i);
             const sliderDesc = document.getElementById('sliderDesc');
             if (sliderDesc) sliderDesc.textContent = descs[val] || '';
         }
@@ -941,26 +941,26 @@
                 `<div class="cpc-item"><div class="cpc-val">${val}${unit ? `<small>${unit}</small>` : ''}</div><div class="cpc-lbl">${lbl}</div></div>`;
             const items = [];
             if (workoutType === 'interval') {
-                items.push(_it(workoutData.powtorzenia || 8, '×', 'powtórzenia'));
-                items.push(_it(intervalDistanceM || 400, 'm', 'odcinek'));
+                items.push(_it(workoutData.powtorzenia || 8, '×', t('ci.card.reps')));
+                items.push(_it(intervalDistanceM || 400, 'm', t('ci.card.segment')));
                 if (workSegH || workSegM || workSegS) {
                     // Godziny NIE mogą się pogubić — przy odcinkach >1h sam M:SS
                     // pokazywałby np. "5:00" zamiast prawdziwych "1:05:00"
                     const _wt = workSegH > 0
                         ? `${workSegH}:${String(workSegM).padStart(2, '0')}:${String(workSegS).padStart(2, '0')}`
                         : `${workSegM}:${String(workSegS).padStart(2, '0')}`;
-                    items.push(_it(`~${_wt}`, '', 'przew. czas'));
+                    items.push(_it(`~${_wt}`, '', t('ci.card.esttime')));
                 }
             } else if (workoutType === 'tempo') {
-                if (workoutData.odcinek_km) items.push(_it(workoutData.odcinek_km, 'km', 'odcinek'));
-                if (workSegH * 60 + workSegM) items.push(_it('~' + _fmtMin(workSegH * 60 + workSegM), '', 'przew. czas'));
+                if (workoutData.odcinek_km) items.push(_it(workoutData.odcinek_km, 'km', t('ci.card.segment')));
+                if (workSegH * 60 + workSegM) items.push(_it('~' + _fmtMin(workSegH * 60 + workSegM), '', t('ci.card.esttime')));
             } else if (workoutType === 'walkrun') {
-                if (workoutData.serie) items.push(_it(workoutData.serie, '×', 'serie'));
-                if (_dk) items.push(_it(_dk, 'km', 'dystans'));
-                if (durH * 60 + durM) items.push(_it('~' + _fmtMin(durH * 60 + durM), '', 'przew. czas'));
+                if (workoutData.serie) items.push(_it(workoutData.serie, '×', t('ci.card.sets')));
+                if (_dk) items.push(_it(_dk, 'km', t('ci.card.dist')));
+                if (durH * 60 + durM) items.push(_it('~' + _fmtMin(durH * 60 + durM), '', t('ci.card.esttime')));
             } else {
-                if (_dk) items.push(_it(_dk, 'km', 'dystans'));
-                if (durH * 60 + durM) items.push(_it('~' + _fmtMin(durH * 60 + durM), '', 'przew. czas'));
+                if (_dk) items.push(_it(_dk, 'km', t('ci.card.dist')));
+                if (durH * 60 + durM) items.push(_it('~' + _fmtMin(durH * 60 + durM), '', t('ci.card.esttime')));
             }
             const _itemsHtml = items.join('');
             document.querySelectorAll('#checkin-overlay .ci-plan-card').forEach(cardEl => {
@@ -1054,12 +1054,12 @@
                 if (descEl) descEl.textContent = t('ci.planassumed').replace('{v}', workoutData.serie || '—');
             } else if (workoutType === 'tempo') {
                 moreVal = Math.round(((workoutData.odcinek_km || 5) + 0.5) * 2) / 2;
-                if (titleEl) titleEl.textContent = 'Ile trwał odcinek tempo?';
-                if (descEl) descEl.textContent = 'Podaj faktyczny dystans odcinka roboczego.';
+                if (titleEl) titleEl.textContent = t('ci.q.tempo');
+                if (descEl) descEl.textContent = t('ci.q.tempo.desc');
             } else {
                 moreVal = Math.round(((workoutData.dystans_km || 5) + 1) * 2) / 2;
-                if (titleEl) titleEl.textContent = 'Ile w sumie przebiegłeś?';
-                if (descEl) descEl.textContent = 'Sztab policzy z tego Twoje realne tempo.';
+                if (titleEl) titleEl.textContent = t('ci.q.total');
+                if (descEl) descEl.textContent = t('ci.q.total.desc');
             }
             _renderMoreVal();
             // Zatwierdź OD RAZU, nie dopiero przy pierwszym dotknięciu +/- — inaczej
@@ -1119,29 +1119,30 @@
         // Opcje "Co poszło inaczej?" — dopasowane do typu treningu.
         // Zwykły/długi bieg: skrócenie ma sens głównie jako krótszy dystans.
         // Strukturalne (interwał/tempo/marszo-bieg): odcinki, tempo, serie — z porównaniem do planu.
-        const _FU_2B_OPTS = {
+        function _FU_2B_OPTS_() { return {
             // "Trening przerwany/niedokończony" usunięte — dla zwykłego/długiego biegu
             // to dokładnie to samo zjawisko co "krótszy dystans" (przerwanie ZAWSZE
             // skutkuje krótszym dystansem), więc było duplikatem tej samej opcji
-            easy:    [{key:'krotszy_dystans',label:'Krótszy dystans niż w planie',color:'#C4A35A'}],
-            long:    [{key:'krotszy_dystans',label:'Krótszy dystans niż w planie',color:'#C4A35A'}],
-            interval:[{key:'mniej_powtorzen',label:'Mniej powtórzeń niż w planie',color:'#C07264'},{key:'krotsze_odcinki',label:'Krótsze odcinki niż zakładano',color:'#C4A35A'},{key:'wolniejsze_tempo_szybkich',label:'Wolniejsze tempo szybkich odcinków',color:'#C07264'},{key:'dluzsze_przerwy',label:'Dłuższe przerwy między powtórzeniami',color:'#C4A35A'},{key:'przerwany',label:'Serie przerwane przed końcem',color:'#C07264'}],
-            tempo:   [{key:'krotszy_odcinek_tempo',label:'Krótszy odcinek tempo niż w planie',color:'#C07264'},{key:'wolniejsze_tempo',label:'Wolniejsze tempo niż zakładano',color:'#C07264'},{key:'przerwany',label:'Odcinek tempo nieukończony',color:'#C07264'},{key:'bez_rozgrzewki',label:'Pominięta rozgrzewka',color:'#C4A35A'}],
-            walkrun: [{key:'mniej_serii',label:'Mniej serii niż w planie',color:'#C07264'},{key:'krotszy_bieg',label:'Krótsze odcinki biegu',color:'#C4A35A'},{key:'wiecej_marszu',label:'Więcej marszu niż zakładano',color:'#C4A35A'},{key:'mniej_km',label:'Mniejszy dystans całkowity',color:'#C4A35A'}],
-        };
-        const _FU_2C_OPTS = [
-            {key:'zmeczenie',label:'Zmęczenie fizyczne',color:'#C07264'},
-            {key:'bol',label:'Ból / dyskomfort',color:'#C07264'},
-            {key:'brak_czasu',label:'Brak czasu',color:'#C4A35A'},
-            {key:'pogoda',label:'Pogoda / warunki zewnętrzne',color:'#C4A35A'},
-            {key:'motywacja',label:'Brak motywacji',color:'#6B8F71'},
-            {key:'inne',label:'Coś innego',color:'#6B8F71'},
-        ];
+            easy:    [{key:'krotszy_dystans',label:t('ci.fu.krotszy_dystans'),color:'#C4A35A'}],
+            long:    [{key:'krotszy_dystans',label:t('ci.fu.krotszy_dystans'),color:'#C4A35A'}],
+            interval:[{key:'mniej_powtorzen',label:t('ci.fu.mniej_powtorzen'),color:'#C07264'},{key:'krotsze_odcinki',label:t('ci.fu.krotsze_odcinki'),color:'#C4A35A'},{key:'wolniejsze_tempo_szybkich',label:t('ci.fu.wolniejsze_odcinki'),color:'#C07264'},{key:'dluzsze_przerwy',label:t('ci.fu.dluzsze_przerwy'),color:'#C4A35A'},{key:'przerwany',label:t('ci.fu.serie_przerwane'),color:'#C07264'}],
+            tempo:   [{key:'krotszy_odcinek_tempo',label:t('ci.fu.krotszy_odcinek_tempo'),color:'#C07264'},{key:'wolniejsze_tempo',label:t('ci.fu.wolniejsze_tempo'),color:'#C07264'},{key:'przerwany',label:t('ci.fu.tempo_nieukonczone'),color:'#C07264'},{key:'bez_rozgrzewki',label:t('ci.fu.pominieta_rozgrzewka'),color:'#C4A35A'}],
+            walkrun: [{key:'mniej_serii',label:t('ci.fu.mniej_serii'),color:'#C07264'},{key:'krotszy_bieg',label:t('ci.fu.krotszy_bieg'),color:'#C4A35A'},{key:'wiecej_marszu',label:t('ci.fu.wiecej_marszu'),color:'#C4A35A'},{key:'mniej_km',label:t('ci.fu.mniej_km'),color:'#C4A35A'}],
+        }; }
+        function _FU_2C_OPTS_() { return [
+            {key:'zmeczenie',label:t('ci.cause.zmeczenie'),color:'#C07264'},
+            {key:'bol',label:t('ci.cause.bol'),color:'#C07264'},
+            {key:'brak_czasu',label:t('ci.cause.brak_czasu'),color:'#C4A35A'},
+            {key:'pogoda',label:t('ci.cause.pogoda'),color:'#C4A35A'},
+            {key:'motywacja',label:t('ci.cause.motywacja'),color:'#6B8F71'},
+            {key:'inne',label:t('ci.cause.inne'),color:'#6B8F71'},
+        ]; }
 
         function _buildFollowUp2b() {
             const el = document.getElementById('fu-2b-options');
             if (!el) return;
-            const opts = _FU_2B_OPTS[workoutType] || _FU_2B_OPTS.easy;
+            const _fu2b = _FU_2B_OPTS_();
+            const opts = _fu2b[workoutType] || _fu2b.easy;
             el.innerHTML = opts.map(o =>
                 `<button class="morning-fu-btn fu-multi-btn" onclick="toggleFollowUp2b(this,'${o.key}')" data-key="${o.key}">` +
                 `<span class="fu-dot" style="background:${o.color};width:10px;height:10px;border-radius:50%;flex-shrink:0;display:inline-block;margin-right:12px;"></span>${o.label}</button>`
@@ -1153,7 +1154,7 @@
             const el = document.getElementById('fu-2c-options');
             if (!el) return;
             followUpCauses = new Set();
-            el.innerHTML = _FU_2C_OPTS.map(o =>
+            el.innerHTML = _FU_2C_OPTS_().map(o =>
                 `<button class="morning-fu-btn fu-multi-btn" onclick="toggleFollowUpCause(this,'${o.key}')" data-key="${o.key}">` +
                 `<span class="fu-dot" style="background:${o.color};width:10px;height:10px;border-radius:50%;flex-shrink:0;display:inline-block;margin-right:12px;"></span>${o.label}</button>`
             ).join('');
@@ -1191,7 +1192,7 @@
                     } else {
                         const base = needsKmTempo ? (workoutData.odcinek_km || 5) : (workoutData.dystans_km || 5);
                         fuKmVal = Math.max(0.5, Math.round((base - 1) * 2) / 2);
-                        if (lbl) lbl.textContent = needsKmTempo ? 'Ile km trwał odcinek tempo?' : 'Ile km faktycznie przebiegłeś?';
+                        if (lbl) lbl.textContent = needsKmTempo ? t('ci.q.km.tempo') : t('ci.q.km.total');
                         if (el) el.textContent = fuKmVal.toFixed(1) + ' km';
                         if (needsKmTempo) segmentWorkKm = fuKmVal;
                     }

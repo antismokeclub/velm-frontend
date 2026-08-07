@@ -101,7 +101,7 @@
                             '<span><i style="background:#C9924E"></i>Psycholog</span>' +
                             '<span><i style="background:#1A1A1A"></i>Szef</span>' +
                         '</div>' +
-                        '<div class="nrd-status sp">Plan gotowy</div>' +
+                        '<div class="nrd-status sp">' + t('nrd.rowready') + '</div>' +
                         '<div class="nrd-dcheck sp"></div>' +
                     '</div>' +
                     '<div class="nrd-progress-row">' +
@@ -336,7 +336,7 @@
             card.innerHTML = '<div style="background:#1A1A1A;border-radius:20px;padding:20px;">'
                 + '<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">'
                 + '<div style="width:36px;height:36px;background:white;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#1A1A1A;">S</div>'
-                + '<div style="font-size:14px;font-weight:700;color:white;">Szef Sztabu</div></div>'
+                + '<div style="font-size:14px;font-weight:700;color:white;">' + t('nrd.agent.szef') + '</div></div>'
                 + '<div style="font-size:15px;color:rgba(255,255,255,0.9);line-height:1.6;margin-bottom:16px;">' + sanitizeHTML(outreach.message) + '</div>'
                 + '<button onclick="switchView(\'coach\')" style="width:100%;padding:14px;background:white;border:none;border-radius:14px;font-size:14px;font-weight:700;font-family:\'Inter\',sans-serif;cursor:pointer;color:#1A1A1A;">Odpisz trenerowi →</button>'
                 + '</div>';

@@ -59,7 +59,7 @@
                 const response = await fetch(`${API_BASE}/api/memory/get?userId=${currentUserId}`, { headers: authHeaders() });
                 const data = await response.json();
 
-                const AGENT_DISPLAY = { analityk: 'Analityk', fizjo: 'Fizjo', psycholog: 'Psycholog', szef_sztabu: 'Trener' };
+                const AGENT_DISPLAY = { analityk: t('agent.analityk.name'), fizjo: t('agent.fizjo.name'), psycholog: t('agent.psycholog.name'), szef_sztabu: t('agent.szef_sztabu.name') };
                 const entries = Object.entries(data.memory || {})
                     .filter(([, notes]) => notes && notes.trim().length > 0)
                     .map(([agent, notes]) => {

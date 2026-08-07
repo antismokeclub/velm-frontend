@@ -169,8 +169,8 @@
                     <div class="conv-confirm-overlay">
                         <span class="conv-confirm-label"></span>
                         <div class="conv-confirm-btns">
-                            <button class="conv-confirm-yes" type="button">Usuń</button>
-                            <button class="conv-confirm-no" type="button">Anuluj</button>
+                            <button class="conv-confirm-yes" type="button">${t('com.delete')}</button>
+                            <button class="conv-confirm-no" type="button">${t('com.cancel')}</button>
                         </div>
                     </div>`;
                 item.querySelector('.conv-title').textContent = c.title || 'Rozmowa';
