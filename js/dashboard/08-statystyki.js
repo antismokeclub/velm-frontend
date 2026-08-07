@@ -19,8 +19,8 @@
                 el.innerHTML = `
                     <div style="text-align:center;padding:80px 20px;">
                         <div style="font-size:44px;margin-bottom:14px;">📊</div>
-                        <div style="font-size:16px;font-weight:700;color:#111;margin-bottom:8px;">Brak danych</div>
-                        <div style="font-size:13px;color:#8A8A8A;line-height:1.6;">Wróć po pierwszym tygodniu treningowym</div>
+                        <div style="font-size:16px;font-weight:700;color:#111;margin-bottom:8px;">${t('chart.nodata')}</div>
+                        <div style="font-size:13px;color:#8A8A8A;line-height:1.6;">${t('stats.nodata.desc')}</div>
                     </div>`;
             }
         }
@@ -136,7 +136,7 @@
             const cW = W - pL - pR, cH = H - pT - pB;
             const n = days.length;
             const validP = days.map(d => d.pace).filter(Boolean);
-            if (validP.length < 2) return { html: `<div style="text-align:center;padding:40px 0;color:#8A8A8A;font-size:13px;">Brak danych o tempie w tym tygodniu</div>`, avg: null };
+            if (validP.length < 2) return { html: `<div style="text-align:center;padding:40px 0;color:#8A8A8A;font-size:13px;">${t('stats.nopace')}</div>`, avg: null };
 
             const minP = Math.min(...validP), maxP = Math.max(...validP);
             const pad  = Math.max(20, Math.round((maxP - minP) * 0.3));
@@ -281,8 +281,8 @@
                 el.innerHTML = `
                     <div style="text-align:center;padding:80px 20px;">
                         <div style="font-size:44px;margin-bottom:14px;">📊</div>
-                        <div style="font-size:16px;font-weight:700;color:#111;margin-bottom:8px;">Brak danych treningowych</div>
-                        <div style="font-size:13px;color:#8A8A8A;line-height:1.6;">Wróć po pierwszym tygodniu treningowym</div>
+                        <div style="font-size:16px;font-weight:700;color:#111;margin-bottom:8px;">${t('stats.nodata2.title')}</div>
+                        <div style="font-size:13px;color:#8A8A8A;line-height:1.6;">${t('stats.nodata.desc')}</div>
                     </div>`;
                 return;
             }
@@ -309,19 +309,19 @@
                         style="cursor:pointer;transition:border-color 0.2s,background 0.2s;border:${statsMetric==='km'?'2px solid var(--primary-color)':'1px solid #EBEBEB'};background:${statsMetric==='km'?'rgba(17,17,17,0.04)':'#fff'}">
                         <div class="sh-icon"><svg width="26" height="26" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" fill="#7B98B0"/></svg></div>
                         <div class="sh-val" id="s-hero-km">0</div>
-                        <div class="sh-label">km łącznie</div>
+                        <div class="sh-label">${t('hist.km')}</div>
                     </div>
                     <div class="stats-hero-card" data-hi="1"
                         onclick="switchStatsMetric('pace')"
                         style="cursor:pointer;transition:border-color 0.2s,background 0.2s;border:${statsMetric==='pace'?'2px solid var(--primary-color)':'1px solid #EBEBEB'};background:${statsMetric==='pace'?'rgba(17,17,17,0.04)':'#fff'}">
                         <div class="sh-icon"><svg width="26" height="26" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#C4A35A"/><polyline points="12 7 12 12 15.5 14" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
                         <div class="sh-val" id="s-hero-pace">${avgSec ? _p2t(avgSec) : '—'}</div>
-                        <div class="sh-label">śr. tempo</div>
+                        <div class="sh-label">${t('stats.avgpace')}</div>
                     </div>
                     <div class="stats-hero-card" data-hi="2">
                         <div class="sh-icon"><svg width="26" height="26" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="17" rx="2" fill="#6B8F71"/><rect x="3" y="5" width="18" height="6" rx="2" fill="#6B8F71"/><line x1="16" y1="2" x2="16" y2="6" stroke="#fff" stroke-width="2" stroke-linecap="round"/><line x1="8" y1="2" x2="8" y2="6" stroke="#fff" stroke-width="2" stroke-linecap="round"/><line x1="8" y1="15" x2="16" y2="15" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg></div>
                         <div class="sh-val" id="s-hero-sess">0</div>
-                        <div class="sh-label">łącznie</div>
+                        <div class="sh-label">${t('stats.total')}</div>
                     </div>
                 </div>
 
@@ -330,25 +330,25 @@
                     <div id="s-chart-container">
                         ${statsMetric === 'km' ? `
                         <div class="sc-header">
-                            <span class="sc-title">Dystans</span>
+                            <span class="sc-title">${t('home.dist')}</span>
                             <span class="sc-value" id="s-km-total">${totalKm.toFixed(1)} km</span>
                         </div>
-                        <div class="sc-desc">${statsRange === 'week' ? 'Ile km przebiegłeś każdego dnia tego tygodnia' : 'Suma km w każdym z ostatnich 4 tygodni'}</div>
+                        <div class="sc-desc">${statsRange === 'week' ? t('stats.desc.week') : t('stats.desc.month')}</div>
                         ${distSVG}
                         ${legendHTML}
                         <div id="s-dist-tip" class="stats-tooltip"></div>
                         ` : `
                         <div class="sc-header">
-                            <span class="sc-title">Tempo</span>
-                            ${avgSec ? `<span class="sc-value" style="color:#111;">śr. ${_p2t(avgSec)} <span style="font-size:12px;font-weight:400;color:#8A8A8A;">min/km</span></span>` : `<span style="font-size:12px;color:#8A8A8A;">—</span>`}
+                            <span class="sc-title">${t('home.pace')}</span>
+                            ${avgSec ? `<span class="sc-value" style="color:#111;">${t('stats.avg')} ${_p2t(avgSec)} <span style="font-size:12px;font-weight:400;color:#8A8A8A;">min/km</span></span>` : `<span style="font-size:12px;color:#8A8A8A;">—</span>`}
                         </div>
-                        <div class="sc-desc">Tempo z kolejnych treningów — wyżej na wykresie znaczy szybciej</div>
+                        <div class="sc-desc">${t('stats.pace.desc')}</div>
                         ${paceSVG}
                         <div id="s-pace-tip" class="stats-tooltip"></div>
                         `}
                     </div>
                 </div>
-                ${!usingRealData ? `<div style="text-align:center;margin-top:8px;font-size:11px;color:#B0A898;letter-spacing:0.03em;">Dane planowane</div>` : ''}`;
+                ${!usingRealData ? `<div style="text-align:center;margin-top:8px;font-size:11px;color:#B0A898;letter-spacing:0.03em;">${t('stats.planned')}</div>` : ''}`;
 
             _statsCurrentDays = days;
 
@@ -491,20 +491,20 @@
                       ).join('')}</div>` : '';
                 newHTML = `
                     <div class="sc-header">
-                        <span class="sc-title">Dystans</span>
+                        <span class="sc-title">${t('home.dist')}</span>
                         <span class="sc-value" id="s-km-total">${totalKm.toFixed(1)} km</span>
                     </div>
-                    <div class="sc-desc">${statsRange === 'week' ? 'Ile km przebiegłeś każdego dnia tego tygodnia' : 'Suma km w każdym z ostatnich 4 tygodni'}</div>
+                    <div class="sc-desc">${statsRange === 'week' ? t('stats.desc.week') : t('stats.desc.month')}</div>
                     ${distSVG}${legendHTML}
                     <div id="s-dist-tip" class="stats-tooltip"></div>`;
             } else {
                 const { html: paceSVG, avg: avgSec } = _buildPaceSVG(days);
                 newHTML = `
                     <div class="sc-header">
-                        <span class="sc-title">Tempo</span>
-                        ${avgSec ? `<span class="sc-value" style="color:#111;">śr. ${_p2t(avgSec)} <span style="font-size:12px;font-weight:400;color:#8A8A8A;">min/km</span></span>` : `<span style="font-size:12px;color:#8A8A8A;">—</span>`}
+                        <span class="sc-title">${t('home.pace')}</span>
+                        ${avgSec ? `<span class="sc-value" style="color:#111;">${t('stats.avg')} ${_p2t(avgSec)} <span style="font-size:12px;font-weight:400;color:#8A8A8A;">min/km</span></span>` : `<span style="font-size:12px;color:#8A8A8A;">—</span>`}
                     </div>
-                    <div class="sc-desc">Tempo z kolejnych treningów — wyżej na wykresie znaczy szybciej</div>
+                    <div class="sc-desc">${t('stats.pace.desc')}</div>
                     ${paceSVG}
                     <div id="s-pace-tip" class="stats-tooltip"></div>`;
             }

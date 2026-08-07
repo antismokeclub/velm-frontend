@@ -43,7 +43,7 @@
         // load — bez tego 1-2 pierwsze biegi na świeżym koncie potrafiły podbić
         // ACWR do absurdalnych wartości (np. 4.0) i pokazać fałszywe "przeciążenie".
         function _labLoadGauge(load) {
-            const STATUS_PL  = { low: 'Niskie — możesz więcej', optimal: 'Optymalne', elevated: 'Podwyższone', high: 'Ryzyko przeciążenia' };
+            const STATUS_PL  = { low: t('lab.load.low'), optimal: t('lab.load.optimal'), elevated: t('lab.load.elevated'), high: t('lab.load.high') };
             const STATUS_COL = { low: '#8A8A8A', optimal: '#6B8F71', elevated: '#C4A35A', high: '#C07264' };
             const MAX = 2.0;
             const zones = [
@@ -56,14 +56,14 @@
             const has = load && load.acwr != null;
             const pos = has ? Math.max(2, Math.min(98, (load.acwr / MAX) * 100)) : null;
             const detail = has
-                ? 'Ten tydzień <b style="color:#1A1A1A;font-weight:700;">' + load.acuteKm + ' km</b> · śr. miesięczna <b style="color:#1A1A1A;font-weight:700;">' + load.chronicKm + ' km</b>'
+                ? t('lab.load.thisweek') + ' <b style="color:#1A1A1A;font-weight:700;">' + load.acuteKm + ' km</b> · ' + t('lab.load.monthavg') + ' <b style="color:#1A1A1A;font-weight:700;">' + load.chronicKm + ' km</b>'
                 : '';
             return '<div class="lab-card" style="background:#fff;border:1px solid #EBEBEB;border-radius:20px;padding:18px 16px;margin-top:12px;">' +
                 '<div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:2px;">' +
-                    '<div style="font-size:11px;font-weight:700;color:#8A8A8A;text-transform:uppercase;letter-spacing:0.08em;">Obciążenie</div>' +
+                    '<div style="font-size:11px;font-weight:700;color:#8A8A8A;text-transform:uppercase;letter-spacing:0.08em;">' + t('lab.load.title') + '</div>' +
                     '<div id="lab-load-val" style="font-family:Outfit,sans-serif;font-size:20px;font-weight:800;color:#1A1A1A;font-variant-numeric:tabular-nums;">' + (has ? '0.00' : '—') + '</div>' +
                 '</div>' +
-                '<div style="font-size:12px;font-weight:600;color:' + (has ? STATUS_COL[load.status] || '#8A8A8A' : '#8A8A8A') + ';margin-bottom:16px;">' + (has ? (STATUS_PL[load.status] || '') : 'Za mało treningów') + '</div>' +
+                '<div style="font-size:12px;font-weight:600;color:' + (has ? STATUS_COL[load.status] || '#8A8A8A' : '#8A8A8A') + ';margin-bottom:16px;">' + (has ? (STATUS_PL[load.status] || '') : t('lab.load.nodata')) + '</div>' +
                 '<div style="position:relative;">' +
                     (has ? '<div id="lab-load-marker" style="position:absolute;left:0%;top:-7px;transform:translateX(-50%);width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-top:6px solid #1A1A1A;opacity:0;"></div>' : '') +
                     '<div style="height:10px;border-radius:6px;overflow:hidden;display:flex;">' + segs + '</div>' +
@@ -278,16 +278,16 @@
         // zegarka) czeka na rework trenerów — to jest v1 algorytmu na danych,
         // które już mamy, do skalibrowania później.
         function _labFormaScore(d) {
-            const t = d.trends || {};
+            const tr = d.trends || {};
             const parts = [];
             // Tempo: najważniejszy, bezpośredni sygnał fitness. ±20s/km od zera
             // to pełen zakres skali — szybciej niż -20s = 100, wolniej niż +20s = 0.
-            if (t.paceDeltaSec != null) {
-                parts.push([clamp01(50 - t.paceDeltaSec * 2.5), 0.35]);
+            if (tr.paceDeltaSec != null) {
+                parts.push([clamp01(50 - tr.paceDeltaSec * 2.5), 0.35]);
             }
             // Tętno przy tym samym wysiłku: niższe = lepsza forma. Tylko z zegarka.
-            if (t.hrDelta != null) {
-                parts.push([clamp01(50 - t.hrDelta * 5), 0.20]);
+            if (tr.hrDelta != null) {
+                parts.push([clamp01(50 - tr.hrDelta * 5), 0.20]);
             }
             // Obciążenie: kara za oddalenie od optymalnego ACWR (~1.05) w OBIE
             // strony — zarówno za mało, jak i za dużo obciążenia szkodzi formie.
@@ -325,41 +325,41 @@
         }
 
         function _labFormaCard(d) {
-            const t = d.trends || {};
-            const hasPace = t.paceSec != null && t.paceDeltaSec != null;
+            const tr = d.trends || {};
+            const hasPace = tr.paceSec != null && tr.paceDeltaSec != null;
 
             const header = '<div style="margin-top:20px;">' +
                 '<div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:2px;">' +
-                    '<div style="font-family:Outfit,sans-serif;font-size:18px;font-weight:800;color:#1A1A1A;letter-spacing:-0.01em;">Forma</div>' +
+                    '<div style="font-family:Outfit,sans-serif;font-size:18px;font-weight:800;color:#1A1A1A;letter-spacing:-0.01em;">' + t('lab.forma.title') + '</div>' +
                     '<div style="font-size:10px;font-weight:700;color:#8A8A8A;text-transform:uppercase;letter-spacing:0.1em;">Analityk</div>' +
                 '</div>' +
-                '<div style="font-size:12px;color:#8A8A8A;margin-bottom:10px;line-height:1.4;">Tempo, tętno, obciążenie i regeneracja razem</div>';
+                '<div style="font-size:12px;color:#8A8A8A;margin-bottom:10px;line-height:1.4;">' + t('lab.forma.sub') + '</div>';
 
             if (!hasPace) {
                 return header +
                     '<div class="lab-card" style="background:#fff;border:1px solid #EBEBEB;border-radius:20px;padding:28px 20px;text-align:center;">' +
-                        '<div style="font-size:14px;font-weight:600;color:#1A1A1A;margin-bottom:4px;">Za mało danych na ocenę formy</div>' +
-                        '<div style="font-size:13px;color:#8A8A8A;line-height:1.5;">Wróć po kilku tygodniach regularnych treningów</div>' +
+                        '<div style="font-size:14px;font-weight:600;color:#1A1A1A;margin-bottom:4px;">' + t('lab.forma.nodata.title') + '</div>' +
+                        '<div style="font-size:13px;color:#8A8A8A;line-height:1.5;">' + t('lab.forma.nodata.desc') + '</div>' +
                     '</div></div>';
             }
 
             const score = _labFormaScore(d);
             const col = score >= 70 ? '#6B8F71' : (score >= 45 ? '#C4A35A' : '#C07264');
-            const verdict = score >= 70 ? 'Progres' : (score >= 45 ? 'Stabilnie' : 'Spadek');
+            const verdict = score >= 70 ? t('lab.verdict.up') : (score >= 45 ? t('lab.verdict.stable') : t('lab.verdict.down'));
 
-            const dl = t.paceDeltaSec;
-            const hasHr = t.avgHr != null && t.hrDelta != null;
-            const loadStatusPl = { low: 'Niskie', optimal: 'Optymalne', elevated: 'Podwyższone', high: 'Wysokie' };
+            const dl = tr.paceDeltaSec;
+            const hasHr = tr.avgHr != null && tr.hrDelta != null;
+            const loadStatusPl = { low: t('lab.load.low.short'), optimal: t('lab.load.optimal'), elevated: t('lab.load.elevated'), high: t('lab.load.high.short') };
             const loadCol = { low: '#8A8A8A', optimal: '#6B8F71', elevated: '#C4A35A', high: '#C07264' };
             const sleepT = d.sleep && d.sleep.trend != null ? d.sleep.trend : null;
 
             const tiles =
-                _labFormaTile('Tempo', (dl < 0 ? '▲' : dl > 0 ? '▼' : '=') + ' ' + Math.abs(dl) + 's', dl <= 0 ? '#6B8F71' : '#C07264', 'vs 2 tyg. temu') +
-                _labFormaTile('Tętno', hasHr ? (t.hrDelta < 0 ? '▼' : t.hrDelta > 0 ? '▲' : '=') + ' ' + Math.abs(t.hrDelta) : '—',
-                    hasHr ? (t.hrDelta <= 0 ? '#6B8F71' : '#C07264') : '#C8C2B8', hasHr ? 'przy tym wysiłku' : 'brak zegarka') +
-                _labFormaTile('Obciążenie', d.load ? (loadStatusPl[d.load.status] || '—') : '—', d.load ? (loadCol[d.load.status] || '#8A8A8A') : '#C8C2B8', 'ten tydzień') +
-                _labFormaTile('Sen', sleepT != null ? (sleepT > 0 ? '▲ +' + sleepT : sleepT < 0 ? '▼ ' + sleepT : '= 0') : '—',
-                    sleepT != null ? (sleepT >= 0 ? '#6B8F71' : '#C07264') : '#C8C2B8', 'vs zeszły tydzień');
+                _labFormaTile(t('home.pace'), (dl < 0 ? '▲' : dl > 0 ? '▼' : '=') + ' ' + Math.abs(dl) + 's', dl <= 0 ? '#6B8F71' : '#C07264', t('lab.sub.vs2w')) +
+                _labFormaTile(t('cal.hr'), hasHr ? (tr.hrDelta < 0 ? '▼' : tr.hrDelta > 0 ? '▲' : '=') + ' ' + Math.abs(tr.hrDelta) : '—',
+                    hasHr ? (tr.hrDelta <= 0 ? '#6B8F71' : '#C07264') : '#C8C2B8', hasHr ? t('lab.sub.sameeffort') : t('lab.sub.nowatch')) +
+                _labFormaTile(t('lab.load.title'), d.load ? (loadStatusPl[d.load.status] || '—') : '—', d.load ? (loadCol[d.load.status] || '#8A8A8A') : '#C8C2B8', t('lab.sub.thisweek')) +
+                _labFormaTile(t('metric.sleep'), sleepT != null ? (sleepT > 0 ? '▲ +' + sleepT : sleepT < 0 ? '▼ ' + sleepT : '= 0') : '—',
+                    sleepT != null ? (sleepT >= 0 ? '#6B8F71' : '#C07264') : '#C8C2B8', t('lab.sub.vslastweek'));
 
             // User odrzucił pojedynczy pierścień — chce widzieć TREND w czasie ("czy
             // idzie w górę"). Wymóg ≥3 ważnych punktów (spośród 8 tyg. historii + dziś)
@@ -383,13 +383,13 @@
                         '<span id="lab-forma-num" style="font-family:Outfit,sans-serif;font-size:38px;font-weight:800;color:' + col + ';font-variant-numeric:tabular-nums;line-height:1;">0</span>' +
                         _labPill(verdict, col) + deltaPill +
                     '</div>' +
-                    '<div style="font-size:12px;color:#8A8A8A;margin:8px 0 4px;">ostatnie 9 tygodni · dotknij punkt po szczegóły</div>' +
+                    '<div style="font-size:12px;color:#8A8A8A;margin:8px 0 4px;">' + t('lab.chart.hint') + '</div>' +
                     (chart ? chart.html : '') +
-                    '<div style="display:flex;justify-content:space-between;font-size:11px;color:#B0A89E;margin-top:4px;"><span>8 tyg. temu</span><span>dziś</span></div>';
+                    '<div style="display:flex;justify-content:space-between;font-size:11px;color:#B0A89E;margin-top:4px;"><span>' + t('lab.chart.from') + '</span><span>' + t('lab.chart.today') + '</span></div>';
             } else {
                 bodyHtml = _labRing(score, col, 'lab-ring-forma') +
                     '<div style="margin-top:10px;">' + _labPill(verdict, col) + '</div>' +
-                    '<div style="font-size:11.5px;color:#B0A89E;margin-top:10px;">Wykres pojawi się gdy zbierzemy więcej danych</div>';
+                    '<div style="font-size:11.5px;color:#B0A89E;margin-top:10px;">' + t('lab.chart.soon') + '</div>';
             }
 
             return header +
@@ -414,10 +414,10 @@
                     readiness: h.readiness != null ? { score: h.readiness } : null
                 });
                 const weeksAgo = hist.length - i;
-                return { y, label: weeksAgo === 1 ? '1 tydz. temu' : weeksAgo + ' tyg. temu', sub: y != null ? y + ' pkt' : 'za mało danych' };
+                return { y, label: weeksAgo === 1 ? t('lab.weekago1') : t('lab.weeksago').replace('{n}', weeksAgo), sub: y != null ? y + ' ' + t('lab.pts') : t('lab.nodata.short') };
             });
             const today = _labFormaScore(d);
-            pts.push({ y: today, label: 'Dziś', sub: today != null ? today + ' pkt' : '' });
+            pts.push({ y: today, label: t('lab.today'), sub: today != null ? today + ' ' + t('lab.pts') : '' });
             return pts;
         }
 
@@ -434,16 +434,16 @@
 
             const header = '<div style="margin-top:20px;">' +
                 '<div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:2px;">' +
-                    '<div style="font-family:Outfit,sans-serif;font-size:18px;font-weight:800;color:#1A1A1A;letter-spacing:-0.01em;">Przewidywany czas</div>' +
+                    '<div style="font-family:Outfit,sans-serif;font-size:18px;font-weight:800;color:#1A1A1A;letter-spacing:-0.01em;">' + t('lab.race.title') + '</div>' +
                     '<div style="font-size:10px;font-weight:700;color:#8A8A8A;text-transform:uppercase;letter-spacing:0.1em;">' + (rp.goalLabel || '') + '</div>' +
                 '</div>' +
-                '<div style="font-size:12px;color:#8A8A8A;margin-bottom:10px;line-height:1.4;">Na podstawie ostatnich treningów z odcinkami</div>';
+                '<div style="font-size:12px;color:#8A8A8A;margin-bottom:10px;line-height:1.4;">' + t('lab.race.sub') + '</div>';
 
             if (!rp.current) {
                 return header +
                     '<div class="lab-card" style="background:#fff;border:1px solid #EBEBEB;border-radius:20px;padding:28px 20px;text-align:center;">' +
-                        '<div style="font-size:14px;font-weight:600;color:#1A1A1A;margin-bottom:4px;">Za mało danych na przewidywanie</div>' +
-                        '<div style="font-size:13px;color:#8A8A8A;line-height:1.5;">Zrób trening z odcinkami (interwały/tempo), żeby zobaczyć przewidywany czas</div>' +
+                        '<div style="font-size:14px;font-weight:600;color:#1A1A1A;margin-bottom:4px;">' + t('lab.race.nodata.title') + '</div>' +
+                        '<div style="font-size:13px;color:#8A8A8A;line-height:1.5;">' + t('lab.race.nodata.desc') + '</div>' +
                     '</div></div>';
             }
 
@@ -452,32 +452,32 @@
                 const weeksAgo = histArr.length - i;
                 return {
                     y: h.predictedSec,
-                    label: weeksAgo === 1 ? '1 tydz. temu' : weeksAgo + ' tyg. temu',
-                    sub: h.predictedSec != null ? _labFmtRaceTime(h.predictedSec) + (h.basedOn ? ' · ' + h.basedOn.type : '') : 'za mało danych'
+                    label: weeksAgo === 1 ? t('lab.weekago1') : t('lab.weeksago').replace('{n}', weeksAgo),
+                    sub: h.predictedSec != null ? _labFmtRaceTime(h.predictedSec) + (h.basedOn ? ' · ' + h.basedOn.type : '') : t('lab.nodata.short')
                 };
             });
             points.push({
-                y: rp.current.predictedSec, label: 'Dziś',
+                y: rp.current.predictedSec, label: t('lab.today'),
                 sub: _labFmtRaceTime(rp.current.predictedSec) + (rp.current.basedOn ? ' · ' + rp.current.basedOn.type : '')
             });
             const validCount = points.filter(p => p.y != null).length;
 
             let bodyHtml =
                 '<div id="lab-race-num" style="font-family:Outfit,sans-serif;font-size:38px;font-weight:800;color:#1A1A1A;font-variant-numeric:tabular-nums;line-height:1;">' + _labFmtRaceTime(0) + '</div>' +
-                '<div style="margin-top:10px;">' + _labPill('na podstawie: ' + _labBasedOnText(rp.current.basedOn), '#8A8A8A') + '</div>';
+                '<div style="margin-top:10px;">' + _labPill(t('lab.race.basedon') + ' ' + _labBasedOnText(rp.current.basedOn), '#8A8A8A') + '</div>';
 
             if (validCount >= 3) {
                 const goalSec = rp.goalTimeSec;
-                const refLine = goalSec != null ? { value: goalSec, label: 'Cel ' + _labFmtRaceTime(goalSec) } : undefined;
+                const refLine = goalSec != null ? { value: goalSec, label: t('lab.race.goal') + ' ' + _labFmtRaceTime(goalSec) } : undefined;
                 const chart = _labTrendSVG(points, {
                     invert: false, color: '#1A1A1A', lineId: 'lab-race-line', tipId: 'lab-race', refLine,
                     yFmt: _labFmtRaceTime,
                     dotColorFor: goalSec != null ? (v => v <= goalSec ? '#6B8F71' : (v <= goalSec * 1.05 ? '#C4A35A' : '#C07264')) : undefined
                 });
                 if (chart) {
-                    bodyHtml += '<div style="font-size:12px;color:#8A8A8A;margin:10px 0 2px;">ostatnie 9 tygodni · dotknij punkt po szczegóły</div>' +
+                    bodyHtml += '<div style="font-size:12px;color:#8A8A8A;margin:10px 0 2px;">' + t('lab.chart.hint') + '</div>' +
                         chart.html +
-                        '<div style="display:flex;justify-content:space-between;font-size:11px;color:#B0A89E;margin-top:4px;"><span>8 tyg. temu</span><span>dziś</span></div>';
+                        '<div style="display:flex;justify-content:space-between;font-size:11px;color:#B0A89E;margin-top:4px;"><span>' + t('lab.chart.from') + '</span><span>' + t('lab.chart.today') + '</span></div>';
                 }
             }
 
@@ -490,7 +490,7 @@
         function _labBasedOnText(basedOn) {
             if (!basedOn) return '';
             const dateTxt = basedOn.date ? new Date(basedOn.date + 'T00:00:00').toLocaleDateString(_appLang, { day: 'numeric', month: 'numeric' }) : '';
-            const confNote = basedOn.confidence === 'low' ? ' (zwykły bieg, nie test tempa)' : '';
+            const confNote = basedOn.confidence === 'low' ? t('lab.basedon.lowconf') : '';
             return basedOn.type + ' ' + basedOn.distanceKm + 'km' + (dateTxt ? ', ' + dateTxt : '') + confNote;
         }
 
@@ -509,20 +509,20 @@
                 if (d.readiness) {
                     const r = d.readiness.score;
                     const col = r >= 70 ? '#6B8F71' : (r >= 45 ? '#C4A35A' : '#C07264');
-                    const lbl = r >= 70 ? 'Gotowy do treningu' : (r >= 45 ? 'Umiarkowana' : 'Odpocznij');
-                    ringCards.push(_labRingCard('Gotowość', r, lbl, col, 'lab-ring-readiness'));
+                    const lbl = r >= 70 ? t('lab.ready.good') : (r >= 45 ? t('lab.ready.mid') : t('lab.ready.low'));
+                    ringCards.push(_labRingCard(t('lab.ready.title'), r, lbl, col, 'lab-ring-readiness'));
                 } else {
-                    ringCards.push(_labRingCard('Gotowość', null, 'Zrób poranny check-in', null, 'lab-ring-readiness'));
+                    ringCards.push(_labRingCard(t('lab.ready.title'), null, t('lab.ready.nocheckin'), null, 'lab-ring-readiness'));
                 }
 
                 if (d.sleep && d.sleep.score != null) {
-                    const s = d.sleep.score, t = d.sleep.trend;
+                    const s = d.sleep.score, slTrend = d.sleep.trend;
                     const col = s >= 70 ? '#6B8F71' : (s >= 45 ? '#C4A35A' : '#C07264');
-                    const sub = t == null ? 'ostatnie 7 dni'
-                        : (t > 0 ? '▲ +' + t + ' vs zeszły tydzień' : (t < 0 ? '▼ ' + t + ' vs zeszły tydzień' : '= jak zeszły tydzień'));
+                    const sub = slTrend == null ? t('lab.sleep.last7')
+                        : (slTrend > 0 ? '▲ +' + slTrend + ' ' + t('lab.sub.vslastweek') : (slTrend < 0 ? '▼ ' + slTrend + ' ' + t('lab.sub.vslastweek') : t('lab.sleep.same')));
                     ringCards.push(_labRingCard('velm Sleep Score', s, sub, col, 'lab-ring-sleep'));
                 } else {
-                    ringCards.push(_labRingCard('velm Sleep Score', null, 'Za mało check-inów', null, 'lab-ring-sleep'));
+                    ringCards.push(_labRingCard('velm Sleep Score', null, t('lab.sleep.nodata'), null, 'lab-ring-sleep'));
                 }
 
                 // ── Obciążenie: skala na pełną szerokość ──
@@ -579,9 +579,9 @@
             } catch (e) {
                 if (gen !== _labLoadGen) return;
                 el.innerHTML = '<div style="background:#fff;border:1px solid #EBEBEB;border-radius:20px;padding:20px;text-align:center;">' +
-                    '<div style="font-size:14px;font-weight:600;color:#1A1A1A;margin-bottom:4px;">Nie udało się wczytać danych</div>' +
-                    '<div style="font-size:13px;color:#8A8A8A;margin-bottom:12px;">Sprawdź połączenie i spróbuj ponownie.</div>' +
-                    '<button onclick="loadLab()" style="padding:10px 20px;min-height:44px;background:transparent;border:1px solid #1A1A1A;border-radius:12px;font-size:14px;font-weight:600;color:#1A1A1A;cursor:pointer;font-family:Inter,sans-serif;touch-action:manipulation;">Spróbuj ponownie</button></div>';
+                    '<div style="font-size:14px;font-weight:600;color:#1A1A1A;margin-bottom:4px;">' + t('lab.err.title') + '</div>' +
+                    '<div style="font-size:13px;color:#8A8A8A;margin-bottom:12px;">' + t('lab.err.desc') + '</div>' +
+                    '<button onclick="loadLab()" style="padding:10px 20px;min-height:44px;background:transparent;border:1px solid #1A1A1A;border-radius:12px;font-size:14px;font-weight:600;color:#1A1A1A;cursor:pointer;font-family:Inter,sans-serif;touch-action:manipulation;">' + t('lab.err.retry') + '</button></div>';
                 console.error('loadLab błąd:', e.message);
             }
         }

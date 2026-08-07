@@ -54,6 +54,7 @@
                 id="login-email"
                 type="email"
                 placeholder="twoj@email.com"
+                data-i18n-ph="login.email.ph"
                 autocomplete="email"
                 onkeydown="if(event.key==='Enter')document.getElementById('login-password')?.focus()"
             />
@@ -62,6 +63,7 @@
                 id="login-password"
                 type="password"
                 placeholder="Hasło"
+                data-i18n-ph="login.pwd.ph"
                 autocomplete="current-password"
                 onkeydown="if(event.key==='Enter')doLogin()"
             />
@@ -411,8 +413,8 @@
                 <div style="position:sticky;top:0;z-index:10;background:rgba(245,243,240,0.88);backdrop-filter:blur(24px) saturate(1.4);-webkit-backdrop-filter:blur(24px) saturate(1.4);padding:12px 16px 12px;border-bottom:1px solid rgba(235,235,235,0.4);flex-shrink:0;">
                     <h1 style="margin:0 0 12px;font-family:'Outfit',sans-serif;font-weight:800;font-size:26px;color:#111;" data-i18n="charts.title">Laboratorium</h1>
                     <div id="stats-toggle-wrap" style="display:flex;background:rgba(237,232,220,0.6);border-radius:99px;padding:3px;position:relative;">
-                        <button onclick="switchStatsRange('week')" id="stats-btn-week" style="flex:1;border:none;background:transparent;font-size:13px;font-weight:600;color:#888;padding:7px 12px;border-radius:99px;cursor:pointer;position:relative;z-index:1;transition:color 0.2s;">Tydzień</button>
-                        <button onclick="switchStatsRange('month')" id="stats-btn-month" style="flex:1;border:none;background:transparent;font-size:13px;font-weight:600;color:#888;padding:7px 12px;border-radius:99px;cursor:pointer;position:relative;z-index:1;transition:color 0.2s;">Miesiąc</button>
+                        <button onclick="switchStatsRange('week')" id="stats-btn-week" data-i18n="cal.week" style="flex:1;border:none;background:transparent;font-size:13px;font-weight:600;color:#888;padding:7px 12px;border-radius:99px;cursor:pointer;position:relative;z-index:1;transition:color 0.2s;">Tydzień</button>
+                        <button onclick="switchStatsRange('month')" id="stats-btn-month" data-i18n="cal.month" style="flex:1;border:none;background:transparent;font-size:13px;font-weight:600;color:#888;padding:7px 12px;border-radius:99px;cursor:pointer;position:relative;z-index:1;transition:color 0.2s;">Miesiąc</button>
                         <div id="stats-toggle-slider" style="position:absolute;top:3px;bottom:3px;left:3px;border-radius:99px;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,0.08),0 1px 2px rgba(0,0,0,0.04);transition:left 0.28s cubic-bezier(0.22,1,0.36,1),width 0.28s cubic-bezier(0.22,1,0.36,1);pointer-events:none;"></div>
                     </div>
                 </div>
@@ -895,7 +897,7 @@
                     <button onclick="switchView('home')" style="background:none;border:1.5px solid #EBEBEB;width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;" onmouseenter="this.style.borderColor='#1A1A1A'" onmouseleave="this.style.borderColor='#EBEBEB'">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
                     </button>
-                    <div style="font-family:'Outfit',sans-serif;font-weight:800;font-size:24px;color:#1A1A1A;">Historia treningów</div>
+                    <div style="font-family:'Outfit',sans-serif;font-weight:800;font-size:24px;color:#1A1A1A;" data-i18n="hist.title">Historia treningów</div>
                 </div>
                 <div id="history-list"></div>
             </div>
@@ -1231,7 +1233,7 @@
                     <div id="ci-race-box" style="display:none;margin-bottom:18px;">
                         <div class="ob-list">
                             <button class="ob-cc" id="ci-race-toggle" onclick="_ciToggleRace()">
-                                <span class="ob-cv"><span class="ob-ct" style="display:block;">To był start / zawody</span>
+                                <span class="ob-cv"><span class="ob-ct" style="display:block;" data-i18n="ci.race.check">To był start / zawody</span>
                                 <span class="ob-cs" style="display:block;" id="ci-race-hint">Zaznacz, żeby podać czas oficjalny</span></span>
                                 <svg class="ob-ck" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
                             </button>
@@ -1355,7 +1357,7 @@
                     <div class="step-desc" data-i18n="ci.selectall">Zaznacz wszystko co pasuje.</div>
                     <div class="morning-followup-opts" id="fu-2c-options"></div>
                     <div class="fu-other-wrap" id="fuCauseOtherWrap">
-                        <textarea class="fu-other-input" id="fuCauseOtherInput" placeholder="Napisz, co się stało…" maxlength="200"></textarea>
+                        <textarea class="fu-other-input" id="fuCauseOtherInput" placeholder="Napisz, co się stało…" data-i18n-ph="ci.cause.other.ph" maxlength="200"></textarea>
                     </div>
                     <div class="ci-plan-card" style="display:none;">
                         <div class="cpc-head" data-i18n="ci.plantoday">Plan na dziś</div>
