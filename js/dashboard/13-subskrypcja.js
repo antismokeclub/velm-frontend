@@ -51,7 +51,7 @@
                                 '<span style="background:' + (pillOk ? '#2E4636' : '#4A2E2A') + ';color:' + (pillOk ? '#9FC7A9' : '#D9A79F') + ';font-size:12px;font-weight:700;padding:5px 12px;border-radius:20px;white-space:nowrap;">' + statusPill + '</span>' +
                             '</div>' +
                             (expiry ? '<div style="font-size:12px;color:#9A948C;">' + t('sub.nextpay') + ' ' + expiry + '</div>' : '') +
-                            '<div style="margin-top:6px;"><span style="font-size:26px;font-weight:800;font-family:Outfit,sans-serif;">29,99 zł</span><span style="font-size:14px;color:#9A948C;font-weight:500;"> ' + t('sub.permonth') + '</span></div>' +
+                            '<div style="margin-top:6px;"><span style="font-size:26px;font-weight:800;font-family:Outfit,sans-serif;">$29</span><span style="font-size:14px;color:#9A948C;font-weight:500;"> ' + t('sub.permonth') + '</span></div>' +
                         '</div>' +
                         _proBenefits +
                         '<button onclick="openBillingPortal()" class="s-btn-danger" style="min-height:52px;">' + t('sub.cancel') + '</button>';
@@ -165,7 +165,7 @@
                     'style="width:100%;padding:12px;border:1px solid #D9D9D9;border-radius:12px;font-size:14px;font-family:Inter,sans-serif;background:#FFFFFF;color:#1A1A1A;box-sizing:border-box;"></div>' +
                 q(t('sv.q.willing'),
                     chip('willing','0',t('sv.pay.0')) + chip('willing','10-20',t('sv.pay.1')) +
-                    chip('willing','20-40',t('sv.pay.2')) + chip('willing','40+',t('sv.pay.3'))) +
+                    chip('willing','20-35',t('sv.pay.2')) + chip('willing','35+',t('sv.pay.3'))) +
                 '<div style="margin-bottom:20px;">' +
                     '<div style="font-size:14px;font-weight:600;color:#1A1A1A;margin-bottom:8px;">' + t('sv.q.missing') + ' <span style="font-weight:400;color:#8A8A8A;">' + t('sv.optional') + '</span></div>' +
                     '<textarea id="sv-missing" maxlength="500" rows="2" placeholder="' + t('sv.missing.ph') + '" ' +

@@ -133,7 +133,9 @@
                     <!-- hidden for JS compat -->
                     <div id="home-main-workout-badge" style="display:none;"></div>
                     <div id="home-main-workout-desc" style="display:none;"></div>
-                    <div id="home-main-workout-name" style="font-size:24px;font-weight:800;color:#111;font-family:'Outfit',sans-serif;letter-spacing:-0.02em;margin-bottom:12px;">Ładowanie…</div>
+                    <!-- placeholder neutralny jezykowo: element wypelnia JS, wiec NIE moze miec
+                         data-i18n, a twardy polski napis migal kazdemu userowi do czasu renderu -->
+                    <div id="home-main-workout-name" style="font-size:24px;font-weight:800;color:#111;font-family:'Outfit',sans-serif;letter-spacing:-0.02em;margin-bottom:12px;">…</div>
                     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;">
                         <!-- Dystans -->
                         <div style="background:var(--bg-color);padding:12px 14px;border-radius:14px;">
@@ -808,7 +810,7 @@
                         <div class="s-pane-title" data-i18n="set.sub">Subskrypcja</div>
                     </div>
                 <!-- SEKCJA 5 — SUBSKRYPCJA (wg Figmy — hero + korzyści) -->
-                <div class="home-anim" id="subscription-section" style="animation-delay:0.05s;font-size:13px;color:#8A8A8A;">Ładowanie…</div>
+                <div class="home-anim" id="subscription-section" style="animation-delay:0.05s;font-size:13px;color:#8A8A8A;">…</div>
 
                 </div>
 

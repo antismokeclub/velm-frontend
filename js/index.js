@@ -30,6 +30,77 @@ const GI={start:I.gs,walkrun:I.gw,health:I.gh,comeback:I.gc,time:I.gt,distance:I
 const SPORTS=[['none','sport_none_lbl',I.sport_none],['football','sport_football_lbl',I.sport_football],['gym','sport_gym_lbl',I.sport_gym],['swimming','sport_swim_lbl',I.sport_swim],['cycling','sport_cycle_lbl',I.sport_cycle],['tennis','sport_tennis_lbl',I.sport_tennis],['other','sport_other_lbl',I.sport_other]];
 const WCOLORS={easy:'#4ade80',long:'#60a5fa',tempo:'#f59e0b',interval:'#f87171',rest:'rgba(15,31,61,.08)'};
 const WDAYS=['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+// Status pod siatka tygodnia. Kazdy jezyk odmienia sam — polski ma dwa
+// rozne przypadki: "brakuje Ci N treningow" (dopelniacz, zawsze tak samo)
+// ale "usun N treningi/treningow" (biernik, inny dla 2-4).
+const _plAcc=(n)=>{const a=n%10,b=n%100;return n===1?'trening':(a>=2&&a<=4&&!(b>=12&&b<=14))?'treningi':'treningów';};
+const MIXED_STATUS={
+  pl:{sel:n=>`Brakuje Ci jeszcze ${n} ${n===1?'treningu':'treningów'}`, rem:n=>`Musisz usunąć ${n} ${_plAcc(n)}`, ready:'✓ Gotowe!'},
+  en:{sel:n=>`Select ${n} more`,                     rem:n=>`Remove ${n}`,                                  ready:'✓ Ready!'},
+  fr:{sel:n=>`Sélectionnez ${n} séance${n===1?'':'s'} de plus`, rem:n=>`Retirez ${n} séance${n===1?'':'s'}`, ready:'✓ Prêt !'},
+  es:{sel:n=>`Elige ${n} ${n===1?'sesión':'sesiones'} más`,     rem:n=>`Quita ${n} ${n===1?'sesión':'sesiones'}`, ready:'✓ ¡Listo!'},
+  de:{sel:n=>`Wähle ${n} weitere Einheit${n===1?'':'en'}`,      rem:n=>`Entferne ${n} Einheit${n===1?'':'en'}`,   ready:'✓ Fertig!'}
+};
+// Etykiety wierszy w podsumowaniu profilu (bReady).
+const READY_LABELS={
+  pl:{goal:'Cel',dist:'Dystans',pb:'Obecny rekord',target:'Cel czasowy',raceDate:'Data startu',
+      longest:'Najdłuższy bieg',form:'Forma treningu',vol:'Tygodniowa objętość',perWeek:'/ tydzień',
+      intervals:'Interwały',run:'bieg',walk:'marsz',comeback:'Powrót',cbInjury:'Po kontuzji',
+      cbIllness:'Po chorobie',cbBreak:'Po dłuższej przerwie',run15:'15 min biegu bez przerwy',yes:'Tak, dam radę',
+      notYet:'Jeszcze nie',level:'Poziom',adv:'Zaawansowany',beg:'Początkujący',
+      days:'Dni treningowe',daysWk:'dni',mileage:'Obecny kilometraż',age:'Wiek',
+      years:'lat',weight:'Waga',height:'Wzrost',half:'Półmaraton',marathon:'Maraton',
+      twalkrun:'Marsz-bieg',teasy:'Spokojne bieganie',tmixed:'Mieszany tydzień'},
+  en:{goal:'Goal',dist:'Distance',pb:'Current PB',target:'Target time',raceDate:'Race date',
+      longest:'Longest run',form:'Training form',vol:'Weekly volume',perWeek:'/ week',
+      intervals:'Intervals',run:'run',walk:'walk',comeback:'Comeback',cbInjury:'After injury',
+      cbIllness:'After illness',cbBreak:'After a break',run15:'15 min non-stop run',yes:'Yes',
+      notYet:'Not yet',level:'Level',adv:'Advanced',beg:'Beginner',
+      days:'Training days',daysWk:'days',mileage:'Current mileage',age:'Age',
+      years:'y/o',weight:'Weight',height:'Height',half:'Half Marathon',marathon:'Marathon',
+      twalkrun:'Walk-run',teasy:'Easy running',tmixed:'Mixed week'},
+  fr:{goal:'Objectif',dist:'Distance',pb:'Record actuel',target:'Temps visé',raceDate:'Date de course',
+      longest:'Plus longue sortie',form:"Forme d'entraînement",vol:'Volume hebdomadaire',perWeek:'/ semaine',
+      intervals:'Fractionné',run:'course',walk:'marche',comeback:'Retour',cbInjury:'Après blessure',
+      cbIllness:'Après maladie',cbBreak:'Après une longue pause',run15:'15 min de course sans arrêt',yes:'Oui, je peux',
+      notYet:'Pas encore',level:'Niveau',adv:'Expérimenté',beg:'Débutant',
+      days:"Jours d'entraînement",daysWk:'jours',mileage:'Volume actuel',age:'Âge',
+      years:'ans',weight:'Poids',height:'Taille',half:'Semi-marathon',marathon:'Marathon',
+      twalkrun:'Marche-course',teasy:'Course facile',tmixed:'Semaine mixte'},
+  es:{goal:'Objetivo',dist:'Distancia',pb:'Marca actual',target:'Tiempo objetivo',raceDate:'Fecha de carrera',
+      longest:'Tirada más larga',form:'Tipo de entrenamiento',vol:'Volumen semanal',perWeek:'/ semana',
+      intervals:'Series',run:'carrera',walk:'caminata',comeback:'Regreso',cbInjury:'Tras lesión',
+      cbIllness:'Tras enfermedad',cbBreak:'Tras un parón largo',run15:'15 min corriendo sin parar',yes:'Sí, puedo',
+      notYet:'Todavía no',level:'Nivel',adv:'Experimentado',beg:'Principiante',
+      days:'Días de entrenamiento',daysWk:'días',mileage:'Volumen actual',age:'Edad',
+      years:'años',weight:'Peso',height:'Altura',half:'Media maratón',marathon:'Maratón',
+      twalkrun:'Caminar-correr',teasy:'Carrera suave',tmixed:'Semana mixta'},
+  de:{goal:'Ziel',dist:'Distanz',pb:'Aktuelle Bestzeit',target:'Zielzeit',raceDate:'Wettkampftag',
+      longest:'Längster Lauf',form:'Trainingsform',vol:'Wochenumfang',perWeek:'/ Woche',
+      intervals:'Intervalle',run:'Laufen',walk:'Gehen',comeback:'Comeback',cbInjury:'Nach Verletzung',
+      cbIllness:'Nach Krankheit',cbBreak:'Nach längerer Pause',run15:'15 Min ohne Pause laufen',yes:'Ja, schaffe ich',
+      notYet:'Noch nicht',level:'Niveau',adv:'Erfahren',beg:'Anfänger',
+      days:'Trainingstage',daysWk:'Tage',mileage:'Aktueller Umfang',age:'Alter',
+      years:'Jahre',weight:'Gewicht',height:'Größe',half:'Halbmarathon',marathon:'Marathon',
+      twalkrun:'Geh-Lauf',teasy:'Ruhiges Laufen',tmixed:'Gemischte Woche'}
+};
+// Naglowki kolumn w kalendarzu — 7 kolumn na szerokosc telefonu, wiec 2 znaki,
+// a nie 3-literowe c('wdays'), ktore sie nie miesci.
+const CAL_SHORT={
+  pl:['Pn','Wt','Śr','Cz','Pt','So','Nd'],
+  en:['Mo','Tu','We','Th','Fr','Sa','Su'],
+  fr:['Lu','Ma','Me','Je','Ve','Sa','Di'],
+  es:['Lu','Ma','Mi','Ju','Vi','Sá','Do'],
+  de:['Mo','Di','Mi','Do','Fr','Sa','So']
+};
+// Etykiety w kratkach tygodnia — komorka jest waska, wiec trzymamy je krotkie.
+const WTYPE_LABELS={
+  easy:    {en:'Easy', pl:'Spokojny',  fr:'Facile',  es:'Suave',    de:'Ruhig'},
+  long:    {en:'Long', pl:'Długi',     fr:'Longue',  es:'Larga',    de:'Lang'},
+  tempo:   {en:'Tempo',pl:'Progowy',   fr:'Seuil',   es:'Umbral',   de:'Tempo'},
+  interval:{en:'Int.', pl:'Interwały', fr:'Frac.',   es:'Series',   de:'Interv.'},
+  rest:    {en:'Rest', pl:'Wolne',     fr:'Repos',   es:'Descanso', de:'Frei'}
+};
 // ─── STATE ───────────────────────────────────────────────────
 const D={
   language:'en',unit:null,hasWatch:null,goal_category:null,level:null,goalId:null,name:'',
@@ -103,7 +174,7 @@ const C={
     qcbdoc:'Has a doctor or physio cleared you to run?',cbdocyes:'Yes, I have clearance',cbdocno:'No, I will monitor it myself',
     qcbrec:'How recovered are you right now?',cbrec:['Fully recovered (100%)','Still minor discomfort (75%)','Still noticeable (50%)'],
     qcblast:'When was your last regular training?',cblast:['Less than a month ago','1–3 months ago','3–6 months ago','More than a year ago'],
-    qcbtrtype:'What did your training look like before the break?',qcb_dynamic_tr:'What was your training like before the {type} ({area})?',
+    qcbtrtype:'What did your training look like before the break?',qcb_dynamic_tr:'What kind of training were you doing before the injury?',
     qcb_wrc1:'How did you structure your intervals?',
     qcb_wrc2:'How many cycles did you usually do?',
     qcb_rpe:'How hard were those workouts?',
@@ -191,6 +262,7 @@ const C={
     qcb_ekm:'Opisz więcej swoich dawnych treningów',
     qcb_mixweek:'Jak wyglądał Twój typowy tydzień treningowy?',
     qcb_mixvol:'Powiedz nam więcej o swoim tygodniu',
+    qadvvol:'Ile kilometrów biegasz tygodniowo?',qadvpace:'W jakim tempie biegasz w spokojne dni?',
     qedist:'Docelowy dystans startowy',
     dist5k:'5 km',dist10k:'10 km',disthalf:'Półmaraton',distmarathon:'Maraton',distultra:'Ultramaraton',distother:'Niestandardowy',
     qlongest:'Jaki był Twój najdłuższy bieg w ostatnim czasie?',qrace:'Czy masz już zaplanowane zawody?',
@@ -209,6 +281,246 @@ const C={
     sport_none_lbl:'Brak sportu w ostatnim czasie',sport_football_lbl:'Piłka nożna / sporty zespołowe',sport_gym_lbl:'Siłownia i fitness',sport_swim_lbl:'Pływanie',sport_cycle_lbl:'Kolarstwo',sport_tennis_lbl:'Tenis',sport_other_lbl:'Inne (wpisz)',whichsport:'Jakie konkretnie?',
     daysweek:'dni w tygodniu',selectdays:'Wybierz dni treningowe',perfectdist:'Wybrano odpowiednią ilość',
     select:'Wybierz:',remove:'Usuń:',day:'dzień',days:'dni',
+  },
+  fr:{
+    of:'sur',cont:'Continuer',back:'Retour',
+    wtag:'Votre coach IA',wh:'Entraînez-vous plus malin,\npas plus dur.',
+    ws:"velm vous associe à un staff de 4 experts IA — entraîneur, kiné, analyste et psychologue — qui collaborent chaque semaine pour bâtir votre plan idéal.",
+    wf1:'<strong>4 coachs IA</strong> — analyste, kiné, entraîneur principal et psychologue',
+    wf2:'<strong>Réunion hebdomadaire</strong> — tous les 4 analysent vos données et construisent la semaine suivante',
+    wf3:"<strong>Toujours joignables</strong> — le staff adapte le plan quand la vie s'en mêle",
+    wf4:'<strong>Conçu pour la performance</strong> — pas une appli générique. Chaque séance a un but.',
+    lh:'Choisissez votre\nlangue',ls:'Vous pourrez la changer à tout moment dans les réglages.',
+    uh:'Quelles unités\npréférez-vous ?',us:"Pour les distances, l'allure et les mesures corporelles.",
+    umet:'Métriques',umets:'km · kg · cm',uimp:'Impériales',uimps:'mi · lbs · ft',
+    wh2:'Utilisez-vous une\nmontre de sport ?',ws2:"Avec une montre, nous exploitons la fréquence cardiaque. Sans, nous nous basons sur l'effort ressenti.",
+    wyes:"Oui, j'ai une montre",wyess:"Suit la FC, l'allure et la distance en direct",
+    wno:'Non, je cours au ressenti',wnos:"Nous utilisons l'échelle d'effort — tout aussi efficace",
+    lvh:'Choisissez votre\nniveau',lvs:'Soyez honnête — votre plan ne vaut que ce que valent vos données de départ.',
+    lbeg:'Débutant',lbegs:'Nouveau dans la course, ou de retour après une pause',
+    ladv:'Expérimenté',ladvs:'Vous courez régulièrement et voulez progresser',
+    gh:'Quel est votre\nobjectif principal ?',gs:'Balayez pour parcourir, touchez pour choisir.',
+    goals:{
+      start:{title:'Commencer à courir',desc:"Passez de zéro à 30 minutes de course sans arrêt. Nous utilisons la méthode marche-course éprouvée — de courts intervalles de course qui s'allongent chaque semaine jusqu'à ce que vous n'ayez plus besoin de vous arrêter. Aucune expérience requise, aucune pression."},
+      walkrun:{title:'Marche/course → course',desc:"Vous alternez déjà marche et course et voulez passer à la course continue. Nous réduisons progressivement vos pauses de marche à mesure que votre forme progresse — à un rythme que votre corps peut réellement encaisser."},
+      health:{title:'Santé et forme',desc:"Courir pour votre santé, votre énergie et votre moral — pas pour une compétition. Votre plan vise à installer une habitude régulière, à vous protéger des blessures et à rendre chaque semaine de course agréable."},
+      comeback:{title:'Grand retour',desc:"De retour après une blessure, une maladie ou une longue pause. Votre plan est construit autour d'une reprise en sécurité — protéger les tissus en cours de guérison, éviter les rechutes et retrouver la forme plus vite qu'en repartant de zéro."},
+      distance:{title:'Objectif distance',desc:"Préparation d'un semi-marathon, d'un marathon ou d'un ultra. Votre plan développe votre sortie longue semaine après semaine avec la règle des 10 %, avec affûtage et semaines de pic calculés à rebours depuis la date de votre course."},
+      time:{title:'Améliorer votre temps',desc:"Vous courez déjà — maintenant vous voulez courir plus vite. Votre plan inclut des séances au seuil, du fractionné et du travail à allure de course, calibrés sur votre meilleur temps actuel et votre objectif. Chaque séance a un but précis en termes de vitesse."},
+    },
+    q15:'Pouvez-vous courir 15 min sans vous arrêter ?',yes15:'Oui, sans problème',no15:"Non, je dois m'arrêter ou marcher",
+    qstairs:'Les escaliers vous essoufflent-ils ?',qyes:'Oui, même quelques étages',qno:'Non, les escaliers sont faciles',
+    qsports:"Quels sports avez-vous pratiqués l'an dernier ?",
+    qage:'À propos de vous',qgender:'Genre',qweight:'Votre poids',qheight:'Votre taille',
+    qdays:"Combien de séances\npar semaine pouvez-vous faire ?",
+    qready:'Votre profil est prêt',qreadymsg:'Nous avons tout ce qu\'il faut. Votre staff IA va maintenant bâtir votre première semaine.',
+    qgenerate:'Générer mon plan',
+    wdays:['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'],
+    wdaysfull:['Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi','Dimanche'],
+    months:['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'],
+    qhtt:'Comment vous entraînez-vous en ce moment ?',
+    htwalkrun:'Intervalles marche/course',hteasy:'Sorties faciles',htmixed:'Entraînement mixte',htinterval:'Fractionné',htlong:'Sorties longues',httempo:'Séances au seuil',
+    qepace:'À quelle allure courez-vous confortablement ?',qekm:'Quelle distance parcourez-vous par séance ?',
+    qrpe:'À quel point une sortie type vous demande-t-elle ?',
+    rpe:['Très facile','Confortable','Modérément dur','Dur','Épuisant'],
+    rpesub:['Je pourrais tenir des heures','Respiration facile, je peux parler','Léger essoufflement','Respiration forte, je parle peu','Complètement à bout de souffle'],
+    qmixweek:'À quoi ressemble votre semaine type ?',qmixvol:'Combien de km par semaine et à quelle allure ?',
+    sessions:'Séances par semaine',weekly:'Total km par semaine',paceUnit_km:'min/km',paceUnit_mi:'min/mi',
+    qcbreason:'Quelle est la cause de votre pause ?',cbinj:'Blessure ou douleur',cbinjs:'Arrêt dû à une blessure physique',cblife:'Vie perso / manque de temps',cblifes:"Pas de blessure — la vie s'en est mêlée",
+    qcbdetails:'Détails de la blessure',qcbd_where:'Où se situait la blessure ?',qcbd_where_ph:'ex. genou gauche, tibia, tendon d\'Achille',qcbd_what:"Que s'est-il passé exactement ?",qcbd_what_ph:'ex. entorse, élongation, fracture de fatigue, douleur',qcbd_notes:'Notes complémentaires pour votre coach (facultatif)',qcbd_notes_ph:'Diagnostic du médecin, comment vous vous sentez maintenant...',
+    qcbsev:'Quelle était la gravité de la blessure ?',
+    cbsev:['Très légère','Légère','Modérée','Grave','Très grave'],
+    cbsevs:['Léger inconfort, marche normale possible','Douleur nette, activité limitée','Douleur franche, la plupart des mouvements restreints','Forte douleur, marche difficile','A nécessité chirurgie, plâtre ou béquilles'],
+    qcbdoc:'Un médecin ou un kiné vous a-t-il autorisé à courir ?',cbdocyes:"Oui, j'ai le feu vert",cbdocno:'Non, je surveille moi-même',
+    qcbrec:'Où en est votre récupération aujourd\'hui ?',cbrec:['Totalement rétabli (100 %)','Encore un léger inconfort (75 %)','Encore bien présent (50 %)'],
+    qcblast:'À quand remonte votre dernier entraînement régulier ?',cblast:["Il y a moins d'un mois",'Il y a 1 à 3 mois','Il y a 3 à 6 mois',"Il y a plus d'un an"],
+    qcbtrtype:'À quoi ressemblait votre entraînement avant la pause ?',qcb_dynamic_tr:'Quel type d\'entraînement faisiez-vous avant la blessure ?',
+    qcb_wrc1:'Comment structuriez-vous vos intervalles ?',
+    qcb_wrc2:'Combien de cycles faisiez-vous en général ?',
+    qcb_rpe:'À quel point ces séances étaient-elles dures ?',
+    qcb_epace:'Quelle était votre allure facile à l\'époque ?',
+    qcb_ekm:'Quelle était la durée de votre sortie type ?',
+    qcb_mixweek:'À quoi ressemblait votre semaine type ?',
+    qcb_mixvol:'Quels étaient votre volume et votre allure hebdomadaires ?',
+    qadvvol:'Combien de km courez-vous par semaine ?',qadvpace:'À quelle vitesse courez-vous les jours faciles ?',
+    qedist:'Quelle est votre distance cible ?',
+    dist5k:'5 km',dist10k:'10 km',disthalf:'Semi-marathon',distmarathon:'Marathon',distultra:'Ultra 50 km',distother:'Autre',
+    qlongest:'Quelle est la plus longue distance courue récemment ?',qrace:'Avez-vous une course prévue ?',
+    raceyes:'Oui, je connais la date de ma course',raceno:'Pas encore — je fixerai ma propre échéance',
+    qracedate:'Quand a lieu la course ?',qgoaldate:'Quand voulez-vous atteindre votre objectif ?',
+    qgoaldatehint:'Choisissez une date réaliste — vous pourrez toujours la modifier dans les réglages.',
+    seldate:'Date choisie',
+    qwrc1:'Comment structurez-vous vos intervalles ?',walk_time:'Temps de marche',run_time:'Temps de course',
+    qwrc2:'Combien de fois répétez-vous le cycle ?',qwrc2_sub:'Votre cycle : {run} min de course / {walk} min de marche',
+    cycle_count:'Cycles',sessions_per_week:'Séances actuelles par semaine',qwr_rpe:'À quel point êtes-vous fatigué après une séance type ?',
+    qtdist:'Sur quelle distance voulez-vous aller plus vite ?',
+    qcurpb:'Quel est votre meilleur temps sur cette distance ?',qtarget:'Quel temps voulez-vous battre ?',
+    hrs:'h',min:'min',sec:'sec',
+    errtarget:'Votre objectif doit être plus rapide que votre meilleur temps actuel',
+    male:'Homme',female:'Femme',gender_other:'Autre',
+    sport_none_lbl:'Aucun',sport_football_lbl:'Football',sport_gym_lbl:'Salle de sport',sport_swim_lbl:'Natation',sport_cycle_lbl:'Cyclisme',sport_tennis_lbl:'Tennis',sport_other_lbl:'Autre (à préciser)',whichsport:'Quel sport ?',
+    daysweek:'jours/semaine',selectdays:"Sélectionnez vos jours d'entraînement",perfectdist:'Jours sélectionnés',
+    select:'Sélectionnez',remove:'Retirez',day:'jour',days:'jours',
+  },
+  es:{
+    of:'de',cont:'Continuar',back:'Atrás',
+    wtag:'Tu entrenador con IA',wh:'Entrena con cabeza,\nno más duro.',
+    ws:'velm te conecta con un equipo de 4 expertos IA — entrenador, fisio, analista y psicólogo — que colaboran cada semana para crear tu plan perfecto.',
+    wf1:'<strong>4 entrenadores IA</strong> — analista, fisio, entrenador jefe y psicólogo',
+    wf2:'<strong>Reunión semanal</strong> — los 4 revisan tus datos y construyen juntos la semana siguiente',
+    wf3:'<strong>Siempre en contacto</strong> — el equipo adapta el plan cuando la vida se cruza',
+    wf4:'<strong>Hecho para rendir</strong> — no es una app genérica. Cada sesión tiene un propósito.',
+    lh:'Elige tu\nidioma',ls:'Puedes cambiarlo cuando quieras en ajustes.',
+    uh:'¿Qué unidades\nprefieres?',us:'Para distancias, ritmo y medidas corporales.',
+    umet:'Métricas',umets:'km · kg · cm',uimp:'Imperiales',uimps:'mi · lbs · ft',
+    wh2:'¿Usas un\nreloj deportivo?',ws2:'Con reloj usamos los datos de frecuencia cardíaca. Sin él, nos guiamos por el esfuerzo percibido.',
+    wyes:'Sí, tengo reloj',wyess:'Registra FC, ritmo y distancia en directo',
+    wno:'No, corro por sensaciones',wnos:'Usamos la escala de esfuerzo — igual de eficaz',
+    lvh:'Elige tu\nnivel',lvs:'Sé sincero — tu plan vale lo que valgan tus datos de partida.',
+    lbeg:'Principiante',lbegs:'Empiezas a correr o vuelves tras un parón',
+    ladv:'Experimentado',ladvs:'Corres con regularidad y quieres mejorar',
+    gh:'¿Cuál es tu\nobjetivo principal?',gs:'Desliza para explorar, toca para elegir.',
+    goals:{
+      start:{title:'Empezar a correr',desc:'De cero a correr 30 minutos sin parar. Usamos el método caminar-correr, de eficacia probada — intervalos cortos de carrera que crecen cada semana hasta que ya no necesites detenerte. Sin experiencia previa y sin presión.'},
+      walkrun:{title:'Caminar/correr → correr',desc:'Ya haces intervalos de caminar y correr y quieres dar el salto a la carrera continua. Reducimos poco a poco las pausas de caminata a medida que mejora tu forma — a un ritmo que tu cuerpo pueda asumir de verdad.'},
+      health:{title:'Salud y forma física',desc:'Correr por tu salud, tu energía y tu ánimo — no por una carrera. Tu plan se centra en construir un hábito constante, protegerte de lesiones y hacer que correr siente bien cada semana.'},
+      comeback:{title:'Gran regreso',desc:'Vuelves tras una lesión, una enfermedad o un parón largo. Tu plan se construye en torno a una reincorporación segura — proteger el tejido en recuperación, evitar recaídas y recuperar forma más rápido que empezando de cero.'},
+      distance:{title:'Objetivo de distancia',desc:'Preparación de media maratón, maratón o ultra. Tu plan hace crecer tu tirada larga semana a semana con la regla del 10 %, con descarga y semanas pico calculadas hacia atrás desde la fecha de tu carrera.'},
+      time:{title:'Mejorar tu marca',desc:'Ya corres — ahora quieres correr más rápido. Tu plan incluye series al umbral, intervalos y trabajo a ritmo de carrera, calibrados según tu mejor marca actual y tu objetivo. Cada sesión tiene un propósito concreto de velocidad.'},
+    },
+    q15:'¿Puedes correr 15 min sin parar?',yes15:'Sí, sin problema',no15:'No, necesito parar o caminar',
+    qstairs:'¿Te quedas sin aliento al subir escaleras?',qyes:'Sí, incluso unos pocos pisos',qno:'No, las escaleras me resultan fáciles',
+    qsports:'¿Qué deportes has practicado el último año?',
+    qage:'Sobre ti',qgender:'Género',qweight:'Tu peso',qheight:'Tu altura',
+    qdays:'¿Cuántos entrenamientos\npor semana puedes hacer?',
+    qready:'Tu perfil está listo',qreadymsg:'Ya tenemos todo lo necesario. Tu equipo de IA construirá ahora tu primera semana.',
+    qgenerate:'Generar mi plan',
+    wdays:['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'],
+    wdaysfull:['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'],
+    months:['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'],
+    qhtt:'¿Cómo entrenas ahora mismo?',
+    htwalkrun:'Intervalos caminar/correr',hteasy:'Carreras suaves',htmixed:'Entrenamiento mixto',htinterval:'Series',htlong:'Tiradas largas',httempo:'Series al umbral',
+    qepace:'¿A qué ritmo corres cómodo?',qekm:'¿Qué distancia haces en una sesión?',
+    qrpe:'¿Cuánto te exige una carrera típica?',
+    rpe:['Muy suave','Cómodo','Moderadamente duro','Duro','Agotador'],
+    rpesub:['Podría seguir horas','Respiro con calma, puedo hablar','Ligeramente sin aliento','Respiro fuerte, apenas puedo hablar','Completamente sin aliento'],
+    qmixweek:'¿Cómo es tu semana típica?',qmixvol:'¿Cuántos km por semana y a qué ritmo?',
+    sessions:'Sesiones por semana',weekly:'Total de km por semana',paceUnit_km:'min/km',paceUnit_mi:'min/mi',
+    qcbreason:'¿Qué causó tu parón?',cbinj:'Lesión o dolor',cbinjs:'Parón por una lesión física',cblife:'Vida personal / falta de tiempo',cblifes:'Sin lesión — la vida se cruzó',
+    qcbdetails:'Detalles de la lesión',qcbd_where:'¿Dónde fue la lesión?',qcbd_where_ph:'p. ej. rodilla izquierda, espinilla, Aquiles',qcbd_what:'¿Qué pasó exactamente?',qcbd_what_ph:'p. ej. esguince, distensión, fractura por estrés, dolor',qcbd_notes:'Notas adicionales para tu entrenador (opcional)',qcbd_notes_ph:'Diagnóstico médico, cómo te sientes ahora...',
+    qcbsev:'¿Cómo de grave fue la lesión?',
+    cbsev:['Muy leve','Leve','Moderada','Grave','Muy grave'],
+    cbsevs:['Molestia ligera, podía caminar con normalidad','Dolor notable, actividad limitada','Dolor claro, tuve que restringir casi todo movimiento','Dolor fuerte, caminar con normalidad era difícil','Requirió cirugía, escayola o muletas'],
+    qcbdoc:'¿Un médico o fisio te ha dado el alta para correr?',cbdocyes:'Sí, tengo el alta',cbdocno:'No, lo vigilo por mi cuenta',
+    qcbrec:'¿Cómo de recuperado estás ahora mismo?',cbrec:['Totalmente recuperado (100 %)','Aún con molestia leve (75 %)','Aún se nota bastante (50 %)'],
+    qcblast:'¿Cuándo entrenaste con regularidad por última vez?',cblast:['Hace menos de un mes','Hace 1–3 meses','Hace 3–6 meses','Hace más de un año'],
+    qcbtrtype:'¿Cómo era tu entrenamiento antes del parón?',qcb_dynamic_tr:'¿Qué tipo de entrenamiento hacías antes de la lesión?',
+    qcb_wrc1:'¿Cómo estructurabas tus intervalos?',
+    qcb_wrc2:'¿Cuántos ciclos solías hacer?',
+    qcb_rpe:'¿Cómo de duros eran esos entrenamientos?',
+    qcb_epace:'¿Cuál era tu ritmo suave entonces?',
+    qcb_ekm:'¿Cuánto duraba tu carrera típica?',
+    qcb_mixweek:'¿Cómo era tu semana típica?',
+    qcb_mixvol:'¿Cuál era tu volumen y ritmo semanal?',
+    qadvvol:'¿Cuántos km corres por semana?',qadvpace:'¿A qué ritmo corres los días suaves?',
+    qedist:'¿Cuál es tu distancia objetivo?',
+    dist5k:'5 km',dist10k:'10 km',disthalf:'Media maratón',distmarathon:'Maratón',distultra:'Ultra 50 km',distother:'Otra',
+    qlongest:'¿Cuál es la distancia más larga que has corrido últimamente?',qrace:'¿Tienes una carrera planeada?',
+    raceyes:'Sí, sé la fecha de mi carrera',raceno:'Todavía no — me pondré mi propia fecha',
+    qracedate:'¿Cuándo es la carrera?',qgoaldate:'¿Cuándo quieres alcanzar tu objetivo?',
+    qgoaldatehint:'Elige una fecha realista — siempre puedes cambiarla en ajustes.',
+    seldate:'Fecha elegida',
+    qwrc1:'¿Cómo estructuras tus intervalos?',walk_time:'Tiempo caminando',run_time:'Tiempo corriendo',
+    qwrc2:'¿Cuántas veces repites el ciclo?',qwrc2_sub:'Tu ciclo: {run} min corriendo / {walk} min caminando',
+    cycle_count:'Ciclos',sessions_per_week:'Sesiones actuales por semana',qwr_rpe:'¿Cómo de cansado acabas tras un entrenamiento típico?',
+    qtdist:'¿En qué distancia quieres correr más rápido?',
+    qcurpb:'¿Cuál es tu mejor marca en esta distancia?',qtarget:'¿Qué tiempo quieres batir?',
+    hrs:'h',min:'min',sec:'seg',
+    errtarget:'Tu objetivo debe ser más rápido que tu mejor marca actual',
+    male:'Hombre',female:'Mujer',gender_other:'Otro',
+    sport_none_lbl:'Ninguno',sport_football_lbl:'Fútbol',sport_gym_lbl:'Gimnasio',sport_swim_lbl:'Natación',sport_cycle_lbl:'Ciclismo',sport_tennis_lbl:'Tenis',sport_other_lbl:'Otro (escríbelo)',whichsport:'¿Qué deporte?',
+    daysweek:'días/semana',selectdays:'Elige tus días de entrenamiento',perfectdist:'Días elegidos',
+    select:'Elige',remove:'Quita',day:'día',days:'días',
+  },
+  de:{
+    of:'von',cont:'Weiter',back:'Zurück',
+    wtag:'Dein KI-Coach',wh:'Trainiere klüger,\nnicht härter.',
+    ws:'velm stellt dir einen Stab aus 4 KI-Experten zur Seite — Trainer, Physio, Analyst und Psychologe — die jede Woche zusammen deinen perfekten Plan bauen.',
+    wf1:'<strong>4 KI-Coaches</strong> — Analyst, Physio, Cheftrainer und Psychologe',
+    wf2:'<strong>Wöchentliche Besprechung</strong> — alle 4 werten deine Daten aus und bauen gemeinsam die nächste Woche',
+    wf3:'<strong>Immer erreichbar</strong> — der Stab passt den Plan an, wenn das Leben dazwischenkommt',
+    wf4:'<strong>Auf Leistung gebaut</strong> — keine Standard-App. Jede Einheit hat einen Zweck.',
+    lh:'Wähle deine\nSprache',ls:'Du kannst sie jederzeit in den Einstellungen ändern.',
+    uh:'Welche Einheiten\nbevorzugst du?',us:'Für Distanzen, Pace und Körperwerte.',
+    umet:'Metrisch',umets:'km · kg · cm',uimp:'Imperial',uimps:'mi · lbs · ft',
+    wh2:'Nutzt du eine\nSportuhr?',ws2:'Mit Uhr verwenden wir Herzfrequenzdaten. Ohne Uhr gehen wir nach dem gefühlten Anstrengungsgrad.',
+    wyes:'Ja, ich habe eine Uhr',wyess:'Erfasst HF, Pace und Distanz live',
+    wno:'Nein, ich laufe nach Gefühl',wnos:'Wir arbeiten mit der Anstrengungsskala — genauso wirksam',
+    lvh:'Wähle dein\nLaufniveau',lvs:'Sei ehrlich — dein Plan ist nur so gut wie deine Startdaten.',
+    lbeg:'Anfänger',lbegs:'Neu im Laufen oder zurück nach einer Pause',
+    ladv:'Erfahren',ladvs:'Du läufst regelmäßig und willst besser werden',
+    gh:'Was ist dein\nHauptziel?',gs:'Wischen zum Blättern, tippen zum Auswählen.',
+    goals:{
+      start:{title:'Mit dem Laufen anfangen',desc:'Von null bis 30 Minuten am Stück laufen. Wir nutzen die bewährte Geh-Lauf-Methode — kurze Laufintervalle, die jede Woche länger werden, bis du gar nicht mehr stehen bleiben musst. Keine Erfahrung nötig, kein Druck.'},
+      walkrun:{title:'Geh-Lauf → Laufen',desc:'Du machst schon Geh-Lauf-Intervalle und willst den Sprung zum durchgehenden Laufen schaffen. Wir kürzen deine Gehpausen Schritt für Schritt, während deine Form wächst — in einem Tempo, das dein Körper wirklich verkraftet.'},
+      health:{title:'Gesundheit und Fitness',desc:'Laufen für Gesundheit, Energie und gute Laune — nicht für einen Wettkampf. Dein Plan baut eine feste Gewohnheit auf, schützt dich vor Verletzungen und sorgt dafür, dass sich Laufen jede Woche gut anfühlt.'},
+      comeback:{title:'Das große Comeback',desc:'Zurück nach Verletzung, Krankheit oder langer Pause. Dein Plan ist auf einen sicheren Wiedereinstieg gebaut — heilendes Gewebe schützen, Rückschläge vermeiden und schneller wieder in Form kommen als beim Start bei null.'},
+      distance:{title:'Distanzziel',desc:'Vorbereitung auf Halbmarathon, Marathon oder Ultra. Dein Plan steigert deinen langen Lauf Woche für Woche nach der 10-%-Regel, mit Tapering und Spitzenwochen, rückwärts von deinem Wettkampftag gerechnet.'},
+      time:{title:'Deine Zeit verbessern',desc:'Du läufst bereits — jetzt willst du schneller laufen. Dein Plan enthält Tempoläufe, Intervalle und Arbeit im Wettkampftempo, abgestimmt auf deine aktuelle Bestzeit und dein Ziel. Jede Einheit hat einen klaren Tempozweck.'},
+    },
+    q15:'Kannst du 15 Min ohne Pause laufen?',yes15:'Ja, problemlos',no15:'Nein, ich muss stehen bleiben oder gehen',
+    qstairs:'Bringen dich Treppen aus der Puste?',qyes:'Ja, schon nach wenigen Stockwerken',qno:'Nein, Treppen sind leicht für mich',
+    qsports:'Welche Sportarten hast du im letzten Jahr gemacht?',
+    qage:'Über dich',qgender:'Geschlecht',qweight:'Dein Gewicht',qheight:'Deine Größe',
+    qdays:'Wie viele Einheiten\npro Woche schaffst du?',
+    qready:'Dein Profil ist fertig',qreadymsg:'Wir haben alles, was wir brauchen. Dein KI-Stab baut jetzt deine erste Woche.',
+    qgenerate:'Meinen Plan erstellen',
+    wdays:['Mo','Di','Mi','Do','Fr','Sa','So'],
+    wdaysfull:['Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag','Sonntag'],
+    months:['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'],
+    qhtt:'Wie trainierst du im Moment?',
+    htwalkrun:'Geh-Lauf-Intervalle',hteasy:'Ruhige Läufe',htmixed:'Gemischtes Training',htinterval:'Intervalle',htlong:'Lange Läufe',httempo:'Tempoläufe',
+    qepace:'In welcher Pace läufst du bequem?',qekm:'Wie weit läufst du in einer Einheit?',
+    qrpe:'Wie anstrengend ist ein typischer Lauf für dich?',
+    rpe:['Sehr leicht','Angenehm','Mittelschwer','Hart','Erschöpfend'],
+    rpesub:['Ich könnte stundenlang weiterlaufen','Atmung ruhig, ich kann reden','Leicht außer Atem','Schwere Atmung, kaum reden möglich','Völlig außer Atem'],
+    qmixweek:'Wie sieht deine typische Woche aus?',qmixvol:'Wie viele km pro Woche und in welcher Pace?',
+    sessions:'Einheiten pro Woche',weekly:'km gesamt pro Woche',paceUnit_km:'min/km',paceUnit_mi:'min/mi',
+    qcbreason:'Was war der Grund für deine Pause?',cbinj:'Verletzung oder Schmerzen',cbinjs:'Pause wegen einer körperlichen Verletzung',cblife:'Alltag / keine Zeit',cblifes:'Keine Verletzung — das Leben kam dazwischen',
+    qcbdetails:'Details zur Verletzung',qcbd_where:'Wo war die Verletzung?',qcbd_where_ph:'z. B. linkes Knie, Schienbein, Achillessehne',qcbd_what:'Was genau ist passiert?',qcbd_what_ph:'z. B. Verstauchung, Zerrung, Ermüdungsbruch, Schmerzen',qcbd_notes:'Zusätzliche Hinweise für deinen Coach (optional)',qcbd_notes_ph:'Ärztliche Diagnose, wie es dir jetzt geht...',
+    qcbsev:'Wie schwer war die Verletzung?',
+    cbsev:['Sehr leicht','Leicht','Mittel','Schwer','Sehr schwer'],
+    cbsevs:['Leichtes Unbehagen, normales Gehen möglich','Deutliche Schmerzen, Aktivität eingeschränkt','Klare Schmerzen, die meisten Bewegungen eingeschränkt','Starke Schmerzen, normales Gehen schwierig','Operation, Gips oder Krücken nötig'],
+    qcbdoc:'Hat ein Arzt oder Physio dir das Laufen freigegeben?',cbdocyes:'Ja, ich habe die Freigabe',cbdocno:'Nein, ich beobachte es selbst',
+    qcbrec:'Wie erholt fühlst du dich gerade?',cbrec:['Vollständig erholt (100 %)','Noch leichtes Unbehagen (75 %)','Noch deutlich spürbar (50 %)'],
+    qcblast:'Wann hast du zuletzt regelmäßig trainiert?',cblast:['Vor weniger als einem Monat','Vor 1–3 Monaten','Vor 3–6 Monaten','Vor über einem Jahr'],
+    qcbtrtype:'Wie sah dein Training vor der Pause aus?',qcb_dynamic_tr:'Welche Art von Training hast du vor der Verletzung gemacht?',
+    qcb_wrc1:'Wie hast du deine Intervalle aufgebaut?',
+    qcb_wrc2:'Wie viele Zyklen hast du meistens gemacht?',
+    qcb_rpe:'Wie hart waren diese Einheiten?',
+    qcb_epace:'Was war damals deine ruhige Pace?',
+    qcb_ekm:'Wie lang war dein typischer Lauf?',
+    qcb_mixweek:'Wie sah deine typische Woche aus?',
+    qcb_mixvol:'Wie waren dein Wochenumfang und deine Pace?',
+    qadvvol:'Wie viele km läufst du pro Woche?',qadvpace:'Wie schnell läufst du an ruhigen Tagen?',
+    qedist:'Was ist deine Zieldistanz?',
+    dist5k:'5 km',dist10k:'10 km',disthalf:'Halbmarathon',distmarathon:'Marathon',distultra:'Ultra 50 km',distother:'Andere',
+    qlongest:'Was ist die längste Strecke, die du zuletzt gelaufen bist?',qrace:'Hast du einen Wettkampf geplant?',
+    raceyes:'Ja, ich kenne mein Wettkampfdatum',raceno:'Noch nicht — ich setze mir selbst einen Termin',
+    qracedate:'Wann ist der Wettkampf?',qgoaldate:'Wann willst du dein Ziel erreichen?',
+    qgoaldatehint:'Wähle einen realistischen Termin — du kannst ihn jederzeit in den Einstellungen ändern.',
+    seldate:'Gewähltes Datum',
+    qwrc1:'Wie baust du deine Intervalle auf?',walk_time:'Gehzeit',run_time:'Laufzeit',
+    qwrc2:'Wie oft wiederholst du den Zyklus?',qwrc2_sub:'Dein Zyklus: {run} Min laufen / {walk} Min gehen',
+    cycle_count:'Zyklen',sessions_per_week:'Aktuelle Einheiten pro Woche',qwr_rpe:'Wie müde bist du nach einer typischen Einheit?',
+    qtdist:'Auf welcher Distanz willst du schneller werden?',
+    qcurpb:'Was ist deine Bestzeit auf dieser Distanz?',qtarget:'Welche Zeit willst du unterbieten?',
+    hrs:'Std.',min:'Min',sec:'Sek',
+    errtarget:'Dein Ziel muss schneller sein als deine aktuelle Bestzeit',
+    male:'Mann',female:'Frau',gender_other:'Divers',
+    sport_none_lbl:'Keine',sport_football_lbl:'Fußball',sport_gym_lbl:'Fitnessstudio',sport_swim_lbl:'Schwimmen',sport_cycle_lbl:'Radfahren',sport_tennis_lbl:'Tennis',sport_other_lbl:'Andere (eintragen)',whichsport:'Welche Sportart?',
+    daysweek:'Tage/Woche',selectdays:'Wähle deine Trainingstage',perfectdist:'Tage gewählt',
+    select:'Wähle',remove:'Entferne',day:'Tag',days:'Tage',
   }
 };
 function forceLight(){
@@ -333,30 +645,112 @@ function set(k,v){S.data[k]=v;render(false);}
 // POST /api/onboarding); velmFinale.success() — domyka i czeka na klik
 // "Zobacz plan"; velmFinale.fail() — chowa overlay (błąd → alert).
 const velmFinale = (() => {
-  const NRD_DAYS = ['Poniedziałek','Wtorek','Środa','Czwartek','Piątek','Sobota','Niedziela'];
-  const NRD_SHORT = ['Pn','Wt','Śr','Cz','Pt','So','Nd'];
-  const NRD_EN_DAYS = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
-  const NRD_EN_SHORT = ['Mo','Tu','We','Th','Fr','Sa','Su'];
   const AGENTS = [
-    { key:'analityk', initial:'A', name:'Analityk', nameEn:'Analyst' },
-    { key:'fizjo', initial:'F', name:'Fizjo', nameEn:'Physio' },
-    { key:'psycholog', initial:'P', name:'Psycholog', nameEn:'Psychologist' },
-    { key:'szef', initial:'T', name:'Szef', nameEn:'Head Coach' }
+    { key:'analityk', initial:'A' },
+    { key:'fizjo', initial:'F' },
+    { key:'psycholog', initial:'P' },
+    { key:'szef', initial:'T' }
   ];
   const COLORS = { analityk:'#5B8DB8', fizjo:'#6B8F71', psycholog:'#C9924E', szef:'#111111' };
   // Wariant "pierwszy plan": zero odwołań do historii treningów —
-  // tylko procesy na danych z onboardingu (uniwersalnie prawdziwe)
-  const POOLS_PL = {
-    analityk: ['Profil biegacza — utworzony','Tętno maksymalne — oszacowane z wieku','Strefy tętna — wyznaczone','Punkt startowy — ustalony','Kilometraż na start — obliczony','Tempo wyjściowe — oszacowane','Droga do celu — rozpisana','Rezerwy na progres — zaplanowane'],
-    fizjo: ['Bezpieczny próg obciążenia — ustawiony','Ochrona przed kontuzją — włączona','Progresja — ograniczona na start','Dni regeneracji — zarezerwowane','Rozgrzewki — dobrane do poziomu'],
-    psycholog: ['Twój cel — przyjęty przez sztab','Pierwszy tydzień — bez presji','Nawyk — zaplanowany małymi krokami','Motywacja startowa — zbudowana'],
-    szef: ['Typ treningu — wybrany','Intensywność — dobrana do poziomu','Rozkład — dopasowany do Twoich dni','Tempo — ustawione bezpiecznie','Miejsce w tygodniu — potwierdzone']
-  };
-  const POOLS_EN = {
-    analityk: ['Runner profile — created','Max heart rate — estimated from age','HR zones — calculated','Starting point — set','Starting mileage — computed','Base pace — estimated','Path to your goal — mapped','Progress reserves — planned'],
-    fizjo: ['Safe load threshold — set','Injury protection — enabled','Progression — capped for the start','Recovery days — reserved','Warm-ups — matched to level'],
-    psycholog: ['Your goal — accepted by the staff','First week — pressure-free','Habit — built in small steps','Starting motivation — set up'],
-    szef: ['Workout type — chosen','Intensity — matched to level','Layout — fitted to your days','Pace — set safely','Weekly slot — confirmed']
+  // tylko procesy na danych z onboardingu (uniwersalnie prawdziwe).
+  // `short` jest celowo 2-literowe (kolumna .nrd-dl jest wąska) — nie brać z c('wdays').
+  const FIN = {
+    pl:{
+      days:['Poniedziałek','Wtorek','Środa','Czwartek','Piątek','Sobota','Niedziela'],
+      short:['Pn','Wt','Śr','Cz','Pt','So','Nd'],
+      agents:{analityk:'Analityk',fizjo:'Fizjo',psycholog:'Psycholog',szef:'Szef'},
+      legend:{analityk:'Analityk',fizjo:'Fizjo',psycholog:'Psycholog',szef:'Szef'},
+      headCoach:'Szef Sztabu',
+      to:'Do',staffName:'Sztab velm',packing:'Pakowanie Twoich danych',kicker:'Narada sztabu',head:'Powstaje Twój pierwszy plan',
+      dayReady:'Plan gotowy',doneH:'Twój pierwszy plan gotowy!',
+      doneP:'Sztab przygotował tydzień skrojony pod Ciebie. Czas zacząć.',goBtn:'Zobacz plan',
+      finalTouches:'Ostatnie szlify',assembling:'Składanie planu w całość — trwa…',
+      sealing:'Zamykanie koperty',addressing:'Adresowanie',sending:'Przesyłanie do sztabu',delivered:'Dostarczono ✓',
+      approved:'Plan zatwierdzony',weekReady:'Twój pierwszy tydzień — gotowy',
+      pools:{
+        analityk:['Profil biegacza — utworzony','Tętno maksymalne — oszacowane z wieku','Strefy tętna — wyznaczone','Punkt startowy — ustalony','Kilometraż na start — obliczony','Tempo wyjściowe — oszacowane','Droga do celu — rozpisana','Rezerwy na progres — zaplanowane'],
+        fizjo:['Bezpieczny próg obciążenia — ustawiony','Ochrona przed kontuzją — włączona','Progresja — ograniczona na start','Dni regeneracji — zarezerwowane','Rozgrzewki — dobrane do poziomu'],
+        psycholog:['Twój cel — przyjęty przez sztab','Pierwszy tydzień — bez presji','Nawyk — zaplanowany małymi krokami','Motywacja startowa — zbudowana'],
+        szef:['Typ treningu — wybrany','Intensywność — dobrana do poziomu','Rozkład — dopasowany do Twoich dni','Tempo — ustawione bezpiecznie','Miejsce w tygodniu — potwierdzone']
+      }
+    },
+    en:{
+      days:['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'],
+      short:['Mo','Tu','We','Th','Fr','Sa','Su'],
+      agents:{analityk:'Analyst',fizjo:'Physio',psycholog:'Psychologist',szef:'Head Coach'},
+      legend:{analityk:'Analyst',fizjo:'Physio',psycholog:'Psych',szef:'Coach'},
+      headCoach:'Head Coach',
+      to:'To',staffName:'velm staff',packing:'Packing your data',kicker:'Staff meeting',head:'Building your first plan',
+      dayReady:'Day ready',doneH:'Your first plan is ready!',
+      doneP:'The staff built a week tailored to you. Time to start.',goBtn:'See my plan',
+      finalTouches:'Final touches',assembling:'Assembling the plan — in progress…',
+      sealing:'Sealing the envelope',addressing:'Addressing',sending:'Sending to the staff',delivered:'Delivered ✓',
+      approved:'Plan approved',weekReady:'Your first week — ready',
+      pools:{
+        analityk:['Runner profile — created','Max heart rate — estimated from age','HR zones — calculated','Starting point — set','Starting mileage — computed','Base pace — estimated','Path to your goal — mapped','Progress reserves — planned'],
+        fizjo:['Safe load threshold — set','Injury protection — enabled','Progression — capped for the start','Recovery days — reserved','Warm-ups — matched to level'],
+        psycholog:['Your goal — accepted by the staff','First week — pressure-free','Habit — built in small steps','Starting motivation — set up'],
+        szef:['Workout type — chosen','Intensity — matched to level','Layout — fitted to your days','Pace — set safely','Weekly slot — confirmed']
+      }
+    },
+    fr:{
+      days:['Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi','Dimanche'],
+      short:['Lu','Ma','Me','Je','Ve','Sa','Di'],
+      agents:{analityk:'Analyste',fizjo:'Kiné',psycholog:'Psychologue',szef:'Chef coach'},
+      legend:{analityk:'Analyste',fizjo:'Kiné',psycholog:'Psycho',szef:'Coach'},
+      headCoach:'Entraîneur principal',
+      to:'À',staffName:'Staff velm',packing:'Préparation de vos données',kicker:'Réunion du staff',head:'Votre premier plan se construit',
+      dayReady:'Jour prêt',doneH:'Votre premier plan est prêt !',
+      doneP:"Le staff a bâti une semaine taillée pour vous. C'est parti.",goBtn:'Voir mon plan',
+      finalTouches:'Dernières retouches',assembling:'Assemblage du plan — en cours…',
+      sealing:"Fermeture de l'enveloppe",addressing:'Adressage',sending:'Envoi au staff',delivered:'Livré ✓',
+      approved:'Plan validé',weekReady:'Votre première semaine — prête',
+      pools:{
+        analityk:["Profil du coureur — créé","Fréquence cardiaque max — estimée selon l'âge",'Zones de FC — calculées','Point de départ — défini','Volume de départ — calculé','Allure de base — estimée',"Chemin vers l'objectif — tracé",'Marges de progression — planifiées'],
+        fizjo:['Seuil de charge sûr — défini','Protection contre les blessures — activée','Progression — plafonnée au départ','Jours de récupération — réservés','Échauffements — adaptés au niveau'],
+        psycholog:['Votre objectif — validé par le staff','Première semaine — sans pression','Habitude — construite pas à pas','Motivation de départ — installée'],
+        szef:['Type de séance — choisi','Intensité — adaptée au niveau','Répartition — calée sur vos jours','Allure — réglée en sécurité','Place dans la semaine — confirmée']
+      }
+    },
+    es:{
+      days:['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'],
+      short:['Lu','Ma','Mi','Ju','Vi','Sá','Do'],
+      agents:{analityk:'Analista',fizjo:'Fisio',psycholog:'Psicólogo',szef:'Entrenador jefe'},
+      legend:{analityk:'Analista',fizjo:'Fisio',psycholog:'Psico',szef:'Jefe'},
+      headCoach:'Entrenador jefe',
+      to:'Para',staffName:'Equipo velm',packing:'Empaquetando tus datos',kicker:'Reunión del equipo',head:'Se está creando tu primer plan',
+      dayReady:'Día listo',doneH:'¡Tu primer plan está listo!',
+      doneP:'El equipo ha creado una semana hecha a tu medida. Es hora de empezar.',goBtn:'Ver mi plan',
+      finalTouches:'Últimos retoques',assembling:'Montando el plan — en curso…',
+      sealing:'Cerrando el sobre',addressing:'Poniendo la dirección',sending:'Enviando al equipo',delivered:'Entregado ✓',
+      approved:'Plan aprobado',weekReady:'Tu primera semana — lista',
+      pools:{
+        analityk:['Perfil del corredor — creado','Frecuencia cardíaca máxima — estimada por edad','Zonas de FC — calculadas','Punto de partida — fijado','Volumen inicial — calculado','Ritmo base — estimado','Camino hacia tu objetivo — trazado','Margen de progresión — planificado'],
+        fizjo:['Umbral de carga seguro — fijado','Protección frente a lesiones — activada','Progresión — limitada al inicio','Días de recuperación — reservados','Calentamientos — ajustados al nivel'],
+        psycholog:['Tu objetivo — aceptado por el equipo','Primera semana — sin presión','Hábito — construido paso a paso','Motivación inicial — preparada'],
+        szef:['Tipo de sesión — elegido','Intensidad — ajustada al nivel','Reparto — encajado en tus días','Ritmo — fijado con seguridad','Hueco semanal — confirmado']
+      }
+    },
+    de:{
+      days:['Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag','Sonntag'],
+      short:['Mo','Di','Mi','Do','Fr','Sa','So'],
+      agents:{analityk:'Analyst',fizjo:'Physio',psycholog:'Psychologe',szef:'Cheftrainer'},
+      legend:{analityk:'Analyst',fizjo:'Physio',psycholog:'Psycho',szef:'Chef'},
+      headCoach:'Cheftrainer',
+      to:'An',staffName:'velm Stab',packing:'Deine Daten werden gepackt',kicker:'Stabsbesprechung',head:'Dein erster Plan entsteht',
+      dayReady:'Tag fertig',doneH:'Dein erster Plan ist fertig!',
+      doneP:"Der Stab hat eine Woche gebaut, die auf dich zugeschnitten ist. Los geht's.",goBtn:'Plan ansehen',
+      finalTouches:'Letzter Schliff',assembling:'Plan wird zusammengesetzt — läuft…',
+      sealing:'Umschlag wird verschlossen',addressing:'Adressierung',sending:'Wird an den Stab geschickt',delivered:'Zugestellt ✓',
+      approved:'Plan freigegeben',weekReady:'Deine erste Woche — fertig',
+      pools:{
+        analityk:['Läuferprofil — erstellt','Maximale Herzfrequenz — aus dem Alter geschätzt','HF-Zonen — berechnet','Ausgangspunkt — festgelegt','Startumfang — berechnet','Grundpace — geschätzt','Weg zum Ziel — abgesteckt','Reserven für den Fortschritt — eingeplant'],
+        fizjo:['Sichere Belastungsgrenze — gesetzt','Verletzungsschutz — aktiviert','Steigerung — zum Start begrenzt','Regenerationstage — reserviert','Aufwärmen — an das Niveau angepasst'],
+        psycholog:['Dein Ziel — vom Stab übernommen','Erste Woche — ohne Druck','Gewohnheit — in kleinen Schritten geplant','Startmotivation — aufgebaut'],
+        szef:['Trainingsart — gewählt','Intensität — an das Niveau angepasst','Verteilung — auf deine Tage abgestimmt','Pace — sicher eingestellt','Platz in der Woche — bestätigt']
+      }
+    }
   };
   const TICK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
 
@@ -375,7 +769,7 @@ const velmFinale = (() => {
   };
 
   let ov = null, timers = [], pctTimer = null, running = false, dayIdx = 0, startedAt = 0, speed = 1;
-  let POOLS = POOLS_PL, DAYS = NRD_DAYS, SHORT = NRD_SHORT, isPL = true;
+  let FT = FIN.en, POOLS = FIN.en.pools, DAYS = FIN.en.days, SHORT = FIN.en.short;
   const later = (fn,ms)=>timers.push(setTimeout(fn,ms));
   const clearAll = ()=>{timers.forEach(clearTimeout);timers=[];clearInterval(pctTimer);};
   const q = (s)=>ov.querySelector(s);
@@ -395,25 +789,25 @@ const velmFinale = (() => {
           '<div id="letter"><div class="lh">velm</div></div>' +
           '<div class="env-front"></div><div id="seal-ring"></div><div id="seal">v</div>' +
           '<div id="stamp"><i style="background:#5B8DB8"></i><i style="background:#6B8F71"></i><i style="background:#C9924E"></i><i style="background:#111111"></i></div>' +
-          '<div id="addr"><div class="a1">' + (isPL?'Do':'To') + '</div><div class="a2">Sztab velm</div></div>' +
+          '<div id="addr"><div class="a1">' + FT.to + '</div><div class="a2">' + FT.staffName + '</div></div>' +
         '</div></div>' +
-        '<div id="send-label"><span class="t"><span class="txt">' + (isPL?'Pakowanie Twoich danych':'Packing your data') + '</span><span class="dots"></span></span></div>' +
+        '<div id="send-label"><span class="t"><span class="txt">' + FT.packing + '</span><span class="dots"></span></span></div>' +
       '</div>' +
       '<div id="fin-narada"><div class="nrd-wrap">' +
-        '<div class="nrd-head"><div class="nrd-kicker">' + (isPL?'Narada sztabu':'Staff meeting') + '</div><h1>' + (isPL?'Powstaje Twój pierwszy plan':'Building your first plan') + '</h1></div>' +
-        '<div class="nrd-staff">' + AGENTS.map(a=>'<div class="nrd-chip" data-agent="'+a.key+'"><div class="nrd-ava">'+a.initial+'<div class="nrd-badge">'+TICK+'</div></div><div class="nrd-nm">'+(isPL?a.name:a.nameEn)+'</div></div>').join('') + '</div>' +
+        '<div class="nrd-head"><div class="nrd-kicker">' + FT.kicker + '</div><h1>' + FT.head + '</h1></div>' +
+        '<div class="nrd-staff">' + AGENTS.map(a=>'<div class="nrd-chip" data-agent="'+a.key+'"><div class="nrd-ava">'+a.initial+'<div class="nrd-badge">'+TICK+'</div></div><div class="nrd-nm">'+FT.agents[a.key]+'</div></div>').join('') + '</div>' +
         '<div class="nrd-bench" aria-live="polite"><div class="nrd-bench-head"><span class="nrd-bench-day"></span><span class="nrd-bench-agent"></span></div><div class="nrd-tasks"></div></div>' +
-        '<div class="nrd-week">' + SHORT.map((s,d)=>'<div class="nrd-day-row" data-day="'+d+'"><div class="nrd-dl">'+s+'</div><div class="nrd-fields"><span class="nrd-f"><b>A</b></span><span class="nrd-f"><b>F</b></span><span class="nrd-f"><b>P</b></span><span class="nrd-f"><b>T</b></span></div><div class="nrd-status">'+(isPL?'Plan gotowy':'Day ready')+'</div><div class="nrd-dcheck">'+TICK+'</div></div>').join('') + '</div>' +
+        '<div class="nrd-week">' + SHORT.map((s,d)=>'<div class="nrd-day-row" data-day="'+d+'"><div class="nrd-dl">'+s+'</div><div class="nrd-fields"><span class="nrd-f"><b>A</b></span><span class="nrd-f"><b>F</b></span><span class="nrd-f"><b>P</b></span><span class="nrd-f"><b>T</b></span></div><div class="nrd-status">'+FT.dayReady+'</div><div class="nrd-dcheck">'+TICK+'</div></div>').join('') + '</div>' +
         '<div class="nrd-legend" aria-hidden="true"><div class="nrd-dl sp"></div><div class="nrd-fields">' +
-          '<span><i style="background:#5B8DB8"></i>' + (isPL?'Analityk':'Analyst') + '</span><span><i style="background:#6B8F71"></i>' + (isPL?'Fizjo':'Physio') + '</span>' +
-          '<span><i style="background:#C9924E"></i>' + (isPL?'Psycholog':'Psych') + '</span><span><i style="background:#111111"></i>' + (isPL?'Szef':'Coach') + '</span>' +
-        '</div><div class="nrd-status sp">' + (isPL?'Plan gotowy':'Day ready') + '</div><div class="nrd-dcheck sp"></div></div>' +
+          '<span><i style="background:#5B8DB8"></i>' + FT.legend.analityk + '</span><span><i style="background:#6B8F71"></i>' + FT.legend.fizjo + '</span>' +
+          '<span><i style="background:#C9924E"></i>' + FT.legend.psycholog + '</span><span><i style="background:#111111"></i>' + FT.legend.szef + '</span>' +
+        '</div><div class="nrd-status sp">' + FT.dayReady + '</div><div class="nrd-dcheck sp"></div></div>' +
         '<div class="nrd-progress-row"><div class="nrd-progress"><div class="nrd-progress-fill"></div></div><span class="nrd-pct">0%</span></div>' +
       '</div></div>' +
       '<div id="fin-done"><div class="check" aria-hidden="true">' + TICK + '</div>' +
-        '<h2>' + (isPL?'Twój pierwszy plan gotowy!':'Your first plan is ready!') + '</h2>' +
-        '<p>' + (isPL?'Sztab przygotował tydzień skrojony pod Ciebie. Czas zacząć.':'The staff built a week tailored to you. Time to start.') + '</p>' +
-        '<button id="fin-go">' + (isPL?'Zobacz plan':'See my plan') + '</button></div>';
+        '<h2>' + FT.doneH + '</h2>' +
+        '<p>' + FT.doneP + '</p>' +
+        '<button id="fin-go">' + FT.goBtn + '</button></div>';
     document.body.appendChild(ov);
     requestAnimationFrame(()=>requestAnimationFrame(()=>ov.classList.add('visible')));
   }
@@ -430,9 +824,8 @@ const velmFinale = (() => {
     q('.nrd-bench').style.setProperty('--nrd-agent-c',COLORS[agent]);
     head.classList.add('swap');
     setTimeout(()=>{
-      const ag=AGENTS.find(a=>a.key===agent);
       q('.nrd-bench-day').innerHTML=title+(n?'<span class="nrd-daynum">'+n+'/7</span>':'');
-      q('.nrd-bench-agent').textContent=agent==='szef'?(isPL?'Szef Sztabu':'Head Coach'):(isPL?ag.name:ag.nameEn);
+      q('.nrd-bench-agent').textContent=agent==='szef'?FT.headCoach:FT.agents[agent];
       head.classList.remove('swap');
     },190);
   }
@@ -474,9 +867,9 @@ const velmFinale = (() => {
   function waitState(){
     if(!running) return;
     chipsReset(); chipWorking('szef'); setScan(null);
-    setBench(isPL?'Ostatnie szlify':'Final touches','szef');
+    setBench(FT.finalTouches,'szef');
     clearTasks();
-    addTask(isPL?'Składanie planu w całość — trwa…':'Assembling the plan — in progress…');
+    addTask(FT.assembling);
   }
   function startNarada(estimateMs){
     startedAt=Date.now();
@@ -507,10 +900,10 @@ const velmFinale = (() => {
 
   return {
     start(){
-      isPL=(S.data.language||'en')==='pl';
-      POOLS=isPL?POOLS_PL:POOLS_EN;
-      DAYS=isPL?NRD_DAYS:NRD_EN_DAYS;
-      SHORT=isPL?NRD_SHORT:NRD_EN_SHORT;
+      FT=FIN[S.data.language||'en']||FIN.en;
+      POOLS=FT.pools;
+      DAYS=FT.days;
+      SHORT=FT.short;
       buildOverlay();
       const scene=q('#env-scene'), label=q('#send-label'), ltx=label.querySelector('.txt');
       let t=350;
@@ -518,15 +911,15 @@ const velmFinale = (() => {
       t+=850;
       later(()=>{ q('#letter').classList.add('in'); snd.fold(); },t);
       t+=920;
-      later(()=>{ const f=q('#flap'); f.classList.add('closed'); setTimeout(()=>f.classList.add('front'),430); snd.fold(); ltx.textContent=isPL?'Zamykanie koperty':'Sealing the envelope'; },t);
+      later(()=>{ const f=q('#flap'); f.classList.add('closed'); setTimeout(()=>f.classList.add('front'),430); snd.fold(); ltx.textContent=FT.sealing; },t);
       t+=1000;
       later(()=>{ q('#seal').classList.add('on'); q('#seal-ring').classList.add('go'); snd.thunk(); },t);
       t+=450;
-      later(()=>{ q('#stamp').classList.add('on'); snd.pack(); ltx.textContent=isPL?'Adresowanie':'Addressing'; },t);
+      later(()=>{ q('#stamp').classList.add('on'); snd.pack(); ltx.textContent=FT.addressing; },t);
       t+=400;
       later(()=>{ q('#addr').classList.add('on'); snd.tick(); },t);
       t+=750;
-      later(()=>{ scene.classList.remove('bob'); scene.classList.add('lift'); ltx.textContent=isPL?'Przesyłanie do sztabu':'Sending to the staff'; },t);
+      later(()=>{ scene.classList.remove('bob'); scene.classList.add('lift'); ltx.textContent=FT.sending; },t);
       t+=600;
       later(()=>{
         scene.classList.add('fly'); snd.whoosh();
@@ -539,7 +932,7 @@ const velmFinale = (() => {
           setTimeout(()=>tr.classList.add('go'),i*70);
           setTimeout(()=>tr.remove(),950);
         }
-        setTimeout(()=>{ label.classList.add('sent'); ltx.textContent=isPL?'Dostarczono ✓':'Delivered ✓'; label.querySelector('.dots').style.display='none'; },400);
+        setTimeout(()=>{ label.classList.add('sent'); ltx.textContent=FT.delivered; label.querySelector('.dots').style.display='none'; },400);
       },t);
       t+=950;
       later(()=>{ q('#fin-env-act').classList.add('away'); q('#fin-narada').classList.add('in'); startNarada(60000); },t);
@@ -558,9 +951,9 @@ const velmFinale = (() => {
           chipsReset();
           AGENTS.forEach((a,i)=>setTimeout(()=>chip(a.key)?.classList.add('ok'),i*120));
           setScan(null);
-          setBench(isPL?'Plan zatwierdzony':'Plan approved','szef');
+          setBench(FT.approved,'szef');
           clearTasks();
-          const r=addTask(isPL?'Twój pierwszy tydzień — gotowy':'Your first week — ready');
+          const r=addTask(FT.weekReady);
           setTimeout(()=>r.classList.add('done'),500);
           for(let d=0;d<7;d++){ const row=dayRow(d); if(row&&!row.classList.contains('built')) setTimeout(()=>buildRow(d),250+d*140); }
           snd.finish();
@@ -624,10 +1017,10 @@ async function done() {
       } else if (response.status === 409) {
         velmFinale.fail();
         if (btn) { btn.disabled = false; btn.textContent = c('qgenerate'); }
-        alert(data.error || 'Konto z tym emailem już istnieje. Zaloguj się, by kontynuować.');
+        alert(data.error || _authT().errDup);
       } else {
         // Server responded with an error — surface its real message instead of a generic one
-        const serverErr = new Error(data.error || `Błąd serwera (${response.status})`);
+        const serverErr = new Error(data.error || _authT().errServerCode.replace('{code}', response.status));
         serverErr.isServerError = true;
         throw serverErr;
       }
@@ -636,13 +1029,14 @@ async function done() {
       console.error('Onboarding error:', err);
       velmFinale.fail();
       if (btn) { btn.disabled = false; btn.textContent = c('qgenerate'); }
+      const at = _authT();
       let msg;
       if (err.name === 'AbortError') {
-        msg = 'Połączenie trwało zbyt długo. Sprawdź internet i spróbuj ponownie.';
+        msg = at.errTimeout;
       } else if (err.isServerError) {
         msg = err.message;
       } else {
-        msg = 'Brak połączenia z serwerem (' + (err.message || 'nieznany błąd') + '). Sprawdź internet i spróbuj ponownie.';
+        msg = at.errOffline.replace('{err}', err.message || at.errUnknown);
       }
       alert(msg);
     }
@@ -1247,9 +1641,14 @@ function setSportOther(v){S.data.sport_other=v;const ctab=document.getElementByI
 function bHealthTrainType(isComeback=false){
   const key=isComeback?'comeback_train_type':'health_train_type';
   const lang=S.data.language||'en';
-  const walkrunSub={en:'Walk/run intervals that alternate',pl:'Naprzemienne odcinki marszu i biegu'}[lang]||'';
-  const easySub   ={en:'Steady comfortable runs',         pl:'Spokojne, komfortowe biegi'}[lang]||'';
-  const mixedSub  ={en:'Easy, intervals, long runs & tempo',pl:'Easy, interwały, long runy i tempo'}[lang]||'';
+  const SUB={
+    walkrun:{en:'Walk/run intervals that alternate',pl:'Naprzemienne odcinki marszu i biegu',fr:'Alternance de marche et de course',es:'Intervalos alternos de caminata y carrera',de:'Abwechselnd Gehen und Laufen'},
+    easy:   {en:'Steady comfortable runs',pl:'Spokojne, komfortowe biegi',fr:'Sorties régulières et confortables',es:'Carreras suaves y constantes',de:'Ruhige, angenehme Läufe'},
+    mixed:  {en:'Easy, intervals, long runs & tempo',pl:'Easy, interwały, long runy i tempo',fr:'Endurance, fractionné, sorties longues et tempo',es:'Suaves, series, tiradas largas y tempo',de:'Ruhige Läufe, Intervalle, lange Läufe und Tempo'}
+  };
+  const walkrunSub=SUB.walkrun[lang]||SUB.walkrun.en;
+  const easySub   =SUB.easy[lang]   ||SUB.easy.en;
+  const mixedSub  =SUB.mixed[lang]  ||SUB.mixed.en;
   
   let dynamicTitle = c('qhtt');
   if(isComeback){
@@ -1399,7 +1798,7 @@ function bMixedWeek(planKey, isComeback=false){
   const plan=S.data[planKey]||{};const sh=c('wdays');
   const need=S.data.daysPerWeek;
   const lang=S.data.language||'en';
-  const typeLabels={easy:{en:'Easy',pl:'Spokojny'},long:{en:'Long',pl:'Długi'},tempo:{en:'Tempo',pl:'Progowy'},interval:{en:'Int.',pl:'Interwały'},rest:{en:'Rest',pl:'Wolne'}};
+  const typeLabels=WTYPE_LABELS;
   function dayBtn(d,i){
     const wt=plan[d];const bg=wt&&WCOLORS[wt]?WCOLORS[wt]:'';const isSel=!!wt&&wt!=='rest';
     const style=isSel?`border-color:${bg};background:${bg}18`:'';
@@ -1411,8 +1810,8 @@ function bMixedWeek(planKey, isComeback=false){
       </div></div>`;
   }
   
-  const numLbl = lang==='pl'?'Ilość treningów w tygodniu':'Sessions per week';
-  const typeLbl = lang==='pl'?'Typy treningów w tygodniu':'Training types per week';
+  const numLbl = ({pl:'Ilość treningów w tygodniu',en:'Sessions per week',fr:'Séances par semaine',es:'Sesiones por semana',de:'Einheiten pro Woche'})[lang]||'Sessions per week';
+  const typeLbl = ({pl:'Typy treningów w tygodniu',en:'Training types per week',fr:'Types de séances par semaine',es:'Tipos de sesión por semana',de:'Trainingsarten pro Woche'})[lang]||'Training types per week';
 
   // call once to build status text but don't inject
   const statusHtml = getMixedWeekStatusHtml(planKey, lang);
@@ -1439,9 +1838,11 @@ function getMixedWeekStatusHtml(planKey, lang) {
   const diff=need-filled;
   
   const m1 = c('selectdays');
-  const mSelect = lang==='pl'?`Brakuje Ci jeszcze ${diff} ${diff===1?'treningu':'treningów'}`:`${c('select')} ${diff} more`;
-  const mRemove = lang==='pl'?`Musisz usunąć ${Math.abs(diff)} ${Math.abs(diff)===1?'trening':'treningów'}`:`${c('remove')} ${Math.abs(diff)}`;
-  const mReady = lang==='pl'?'✓ Gotowe!':'✓ Ready!';
+  const n = Math.abs(diff);
+  const st = MIXED_STATUS[lang] || MIXED_STATUS.en;
+  const mSelect = st.sel(n);
+  const mRemove = st.rem(n);
+  const mReady = st.ready;
   
   return filled===0?m1:diff>0?mSelect:diff<0?mRemove:mReady;
 }
@@ -1471,7 +1872,7 @@ function cyclePlanDayDom(planKey,d,btnEl){
   const nx=types[(idx+1)%types.length];
   const p={...S.data[planKey]};p[d]=nx;S.data[planKey]=p;
   const lang=S.data.language||'en';
-  const typeLabels={easy:{en:'Easy',pl:'Spokojny'},long:{en:'Long',pl:'Długi'},tempo:{en:'Tempo',pl:'Progowy'},interval:{en:'Int.',pl:'Interwały'},rest:{en:'Rest',pl:'Wolne'}};
+  const typeLabels=WTYPE_LABELS;
   const bg=WCOLORS[nx]||'';const isSel=nx!=='rest';
   const lbl=typeLabels[nx]?.[lang]||typeLabels[nx]?.en||nx;
   if(btnEl){
@@ -1687,23 +2088,22 @@ function pickTimeDist(id){
   }
 }
 
+// Zwraca FRAGMENT wstawiany w zdanie ("...rekord na dystansie X?"), wiec musi
+// niesc przypadek wymagany przez ramke zdania w bTimePb / bTimeTarget.
+// pl: obie ramki uzywaja "na dystansie" -> dopelniacz.
+// de: obie ramki uzywaja "uber" -> biernik (dlatego bTimeTarget nie moze wrocic do "fur").
+const TIME_DIST_TITLE = {
+  pl:{'5k':'5 km','10k':'10 km',half:'półmaratonu',marathon:'maratonu',unit:u=>u==='mi'?'mil':'km'},
+  en:{'5k':'5k','10k':'10k',half:'the half marathon',marathon:'the marathon',unit:u=>u},
+  fr:{'5k':'5 km','10k':'10 km',half:'le semi-marathon',marathon:'le marathon',unit:u=>u==='mi'?'mi':'km'},
+  es:{'5k':'5 km','10k':'10 km',half:'la media maratón',marathon:'el maratón',unit:u=>u==='mi'?'mi':'km'},
+  de:{'5k':'5 km','10k':'10 km',half:'den Halbmarathon',marathon:'den Marathon',unit:u=>u==='mi'?'mi':'km'}
+};
 function formatTimeDistTitle(){
   const dst = S.data.time_distance;
-  const lang = S.data.language||'en';
-  if (lang === 'pl') {
-    if(dst==='5k') return '5 km';
-    if(dst==='10k') return '10 km';
-    if(dst==='half') return 'półmaratonu';
-    if(dst==='marathon') return 'maratonu';
-    if(dst==='other') return `${S.data.time_custom_dist} ${S.data.unit==='mi'?'mil':'km'}`;
-  } else {
-    if(dst==='5k') return '5k';
-    if(dst==='10k') return '10k';
-    if(dst==='half') return 'the half marathon';
-    if(dst==='marathon') return 'the marathon';
-    if(dst==='other') return `${S.data.time_custom_dist} ${S.data.unit}`;
-  }
-  return '';
+  const T = TIME_DIST_TITLE[S.data.language||'en'] || TIME_DIST_TITLE.en;
+  if(dst==='other') return `${S.data.time_custom_dist} ${T.unit(S.data.unit)}`;
+  return T[dst] || '';
 }
 
 function renderTimeAdjUI(pbt, title){
@@ -1818,8 +2218,8 @@ function bTimePb(){
   if(S.data.time_pb_mins===undefined||S.data.time_pb_mins===null)S.data.time_pb_mins=25;
   if(!S.data.time_pb_secs)S.data.time_pb_secs=0;
   const dStr = formatTimeDistTitle();
-  const h={en:`What is your best time for ${dStr}?`,pl:`Ile wynosi Twój rekord na dystansie ${dStr} (PB)?`,fr:`Quel est votre meilleur temps sur ${dStr} ?`,es:`¿Cuál es tu mejor tiempo en ${dStr}?`,de:`Was ist deine Bestzeit auf ${dStr}?`}[lang]||'Your best time';
-  const noLbl = lang==='pl'?'Nie mam rekordu / Pierwszy start':'I do not have a record yet';
+  const h={en:`What is your best time for ${dStr}?`,pl:`Ile wynosi Twój rekord na dystansie ${dStr} (PB)?`,fr:`Quel est votre meilleur temps sur ${dStr} ?`,es:`¿Cuál es tu mejor tiempo en ${dStr}?`,de:`Was ist deine Bestzeit über ${dStr}?`}[lang]||'Your best time';
+  const noLbl = ({pl:'Nie mam rekordu / Pierwszy start',en:'I do not have a record yet',fr:"Je n'ai pas encore de record",es:'Todavía no tengo marca',de:'Ich habe noch keine Bestzeit'})[lang]||'I do not have a record yet';
   const noBtnHtml = `<div style="margin-top:24px; text-align:center;">
     <button class="cta-btn" style="background:#f3f6fa;color:#8A97AD;border:1px solid #d4deea;width:100%;font-size:18px;font-weight:700;" onclick="noTimePb()">${e(noLbl)}</button>
   </div>`;
@@ -1839,7 +2239,7 @@ function bTimeTarget(){
   if(!S.data.time_target_mins)S.data.time_target_mins=23;
   if(!S.data.time_target_secs)S.data.time_target_secs=0;
   const dStr = formatTimeDistTitle();
-  const h={en:`What time do you want to achieve for ${dStr}?`,pl:`W jaki czas celujesz na dystansie ${dStr}?`,fr:`Quel temps voulez-vous atteindre pour ${dStr} ?`,es:`¿Qué tiempo quieres conseguir para ${dStr}?`,de:`Welche Zeit möchtest du für ${dStr} erreichen?`}[lang]||'Target time';
+  const h={en:`What time do you want to achieve for ${dStr}?`,pl:`W jaki czas celujesz na dystansie ${dStr}?`,fr:`Quel temps voulez-vous atteindre sur ${dStr} ?`,es:`¿Qué tiempo quieres conseguir en ${dStr}?`,de:`Welche Zeit möchtest du über ${dStr} erreichen?`}[lang]||'Target time';
   const pbOk=S.data.time_pb_hours*3600+S.data.time_pb_mins*60+S.data.time_pb_secs;
   const tgOk=S.data.time_target_hours*3600+S.data.time_target_mins*60+S.data.time_target_secs;
   const err=pbOk>0&&tgOk>pbOk?`<div id="td_err_target" style="color:#ef4444;font-size:13px;margin-top:20px;text-align:center;font-weight:600;">${e(c('errtarget'))}</div>`:`<div id="td_err_target" style="display:none;color:#ef4444;font-size:13px;margin-top:20px;text-align:center;font-weight:600;">${e(c('errtarget'))}</div>`;
@@ -1885,7 +2285,7 @@ ${subtitle?`<p class="sh">${e(subtitle)}</p>`:''}
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
     </button>
   </div>
-  <div class="cal-head">${(lang==='pl'?['Pn','Wt','Śr','Cz','Pt','So','Nd']:['Mo','Tu','We','Th','Fr','Sa','Su']).map(d=>`<div>${d}</div>`).join('')}</div>
+  <div class="cal-head">${(CAL_SHORT[lang]||CAL_SHORT.en).map(d=>`<div>${d}</div>`).join('')}</div>
   <div class="cal-grid">${cells}</div>
 </div>
 ${sel?`<div class="sel-date">${c('seldate')}: ${sel}</div>`:''}`;
@@ -2017,7 +2417,7 @@ function bDistancePb(){
   if(S.data.distance_pb_m===undefined||S.data.distance_pb_m===null)S.data.distance_pb_m=0;
   
   const h={en:`What is your longest run so far?`,pl:`Jaki jest Twój najdłuższy dotychczasowy bieg?`,fr:`Quelle est votre plus longue course à ce jour ?`,es:`¿Cuál es tu carrera más larga hasta ahora?`,de:`Was ist dein bisher längster Lauf?`}[lang]||'Your longest run';
-  const noLbl = lang==='pl'?'Jeszcze nie biegałem':'I have not run yet';
+  const noLbl = ({pl:'Jeszcze nie biegałem',en:'I have not run yet',fr:"Je n'ai pas encore couru",es:'Todavía no he corrido',de:'Ich bin noch nicht gelaufen'})[lang]||'I have not run yet';
   const noBtnHtml = `<div style="margin-top:24px; text-align:center;">
     <button class="cta-btn" style="background:#f3f6fa;color:#8A97AD;border:1px solid #d4deea;width:100%;font-size:18px;font-weight:700;" onclick="noDistPb()">${e(noLbl)}</button>
   </div>`;
@@ -2181,25 +2581,7 @@ function updateAvailStatus(){
 // inna ścieżka = inne pozycje (pokazujemy tylko to, co user wypełnił).
 function bReady(){
   const lang=S.data.language||'en';
-  const P = lang==='pl';
-  const L = {
-    goal:P?'Cel':'Goal', dist:P?'Dystans':'Distance', pb:P?'Obecny rekord':'Current PB',
-    target:P?'Cel czasowy':'Target time', raceDate:P?'Data startu':'Race date',
-    longest:P?'Najdłuższy bieg':'Longest run', form:P?'Forma treningu':'Training form',
-    vol:P?'Tygodniowa objętość':'Weekly volume', perWeek:P?'/ tydzień':'/ week',
-    intervals:P?'Interwały':'Intervals', run:P?'bieg':'run', walk:P?'marsz':'walk',
-    comeback:P?'Powrót':'Comeback', cbInjury:P?'Po kontuzji':'After injury',
-    cbIllness:P?'Po chorobie':'After illness', cbBreak:P?'Po dłuższej przerwie':'After a break',
-    run15:P?'15 min biegu bez przerwy':'15 min non-stop run', yes:P?'Tak, dam radę':'Yes',
-    notYet:P?'Jeszcze nie':'Not yet', level:P?'Poziom':'Level',
-    adv:P?'Zaawansowany':'Advanced', beg:P?'Początkujący':'Beginner',
-    days:P?'Dni treningowe':'Training days', daysWk:P?'dni':'days',
-    mileage:P?'Obecny kilometraż':'Current mileage', age:P?'Wiek':'Age',
-    years:P?'lat':'y/o', weight:P?'Waga':'Weight', height:P?'Wzrost':'Height',
-    half:P?'Półmaraton':'Half Marathon', marathon:P?'Maraton':'Marathon',
-    twalkrun:P?'Marsz-bieg':'Walk-run', teasy:P?'Spokojne bieganie':'Easy running',
-    tmixed:P?'Mieszany tydzień':'Mixed week'
-  };
+  const L = READY_LABELS[lang] || READY_LABELS.en;
   const d=S.data;
   const u=d.unit==='mi'?'mi':'km';
   const wd=c('wdays');
@@ -2346,28 +2728,56 @@ const AUTH_T = {
         namePh:'Imię i nazwisko', errName:'Wpisz swoje imię', emailPh:'Twój email', pwdPh:'Hasło (min. 8 znaków)', pwd2Ph:'Powtórz hasło', next:'Dalej →',
         loginTitle:'Zaloguj się', loginSubtitle:'Wpisz dane konta, którym się rejestrowałeś', loginPwdPh:'Hasło', loginBtn:'Zaloguj', back:'← Wróć',
         forgot:'Zapomniałeś hasła?', resetTitle:'Reset hasła', resetSubtitle:'Wyślemy link do resetu na podany adres email.', resetBtn:'Wyślij link', resetSent:'Jeśli konto istnieje, wysłaliśmy instrukcje na podany adres email.',
-        errEmail:'Wpisz prawidłowy adres email', errPwd:'Hasło musi mieć min. 8 znaków', errMatch:'Hasła nie są zgodne' },
+        errEmail:'Wpisz prawidłowy adres email', errPwd:'Hasło musi mieć min. 8 znaków', errMatch:'Hasła nie są zgodne',
+        errPwdEmpty:'Wpisz hasło', loginLoading:'Logowanie…', errBadCreds:'Nieprawidłowy email lub hasło',
+        errNoServer:'Serwer nie odpowiada — sprawdź połączenie', errConn:'Błąd połączenia: ', errServer:'Błąd serwera', errConnServer:'Błąd połączenia z serwerem',
+        pmTitle:'Utwórz hasło', pmSub:'Będziesz go używać przy następnym logowaniu', pmBtn:'Utwórz konto i wygeneruj plan', pmLoading:'Generuję plan…',
+        errDup:'Konto z tym emailem już istnieje. Zaloguj się, by kontynuować.', errTimeout:'Połączenie trwało zbyt długo. Sprawdź internet i spróbuj ponownie.',
+        errOffline:'Brak połączenia z serwerem ({err}). Sprawdź internet i spróbuj ponownie.', errUnknown:'nieznany błąd', errServerCode:'Błąd serwera ({code})' },
   en: { title:'Start training', subtitle:'Create an account or sign in to an existing one.', create:'Create account', haveAccount:'I have an account',
         regTitle:'Create account', regSubtitle:'Enter email and password — you\'ll use them to sign in.',
         namePh:'Full name', errName:'Enter your name', emailPh:'Your email', pwdPh:'Password (min. 8 chars)', pwd2Ph:'Repeat password', next:'Next →',
         loginTitle:'Sign in', loginSubtitle:'Enter the account details you registered with', loginPwdPh:'Password', loginBtn:'Sign in', back:'← Back',
         forgot:'Forgot password?', resetTitle:'Reset password', resetSubtitle:'We\'ll send a reset link to your email.', resetBtn:'Send link', resetSent:'If an account exists, we\'ve sent reset instructions to your email.',
-        errEmail:'Enter a valid email address', errPwd:'Password must be at least 8 characters', errMatch:'Passwords don\'t match' },
+        errEmail:'Enter a valid email address', errPwd:'Password must be at least 8 characters', errMatch:'Passwords don\'t match',
+        errPwdEmpty:'Enter your password', loginLoading:'Signing in…', errBadCreds:'Incorrect email or password',
+        errNoServer:'The server is not responding — check your connection', errConn:'Connection error: ', errServer:'Server error', errConnServer:'Could not reach the server',
+        pmTitle:'Create a password', pmSub:'You\'ll use it the next time you sign in', pmBtn:'Create account and build my plan', pmLoading:'Building your plan…',
+        errDup:'An account with this email already exists. Sign in to continue.', errTimeout:'The connection took too long. Check your internet and try again.',
+        errOffline:'Could not reach the server ({err}). Check your internet and try again.', errUnknown:'unknown error', errServerCode:'Server error ({code})' },
   fr: { title:'Commencer à courir', subtitle:'Créez un compte ou connectez-vous à un compte existant.', create:'Créer un compte', haveAccount:'J\'ai déjà un compte',
         regTitle:'Créer un compte', regSubtitle:'Saisissez votre email et mot de passe — vous les utiliserez pour vous connecter.',
-        namePh:'Nom et prénom', errName:'Saisissez votre nom', emailPh:'Votre email', pwdPh:'Mot de passe (min. 6 car.)', pwd2Ph:'Répéter le mot de passe', next:'Suivant →',
+        namePh:'Nom et prénom', errName:'Saisissez votre nom', emailPh:'Votre email', pwdPh:'Mot de passe (min. 8 car.)', pwd2Ph:'Répéter le mot de passe', next:'Suivant →',
         loginTitle:'Se connecter', loginSubtitle:'Saisissez les identifiants de votre compte', loginPwdPh:'Mot de passe', loginBtn:'Se connecter', back:'← Retour',
-        errEmail:'Saisissez une adresse email valide', errPwd:'Le mot de passe doit comporter au moins 8 caractères', errMatch:'Les mots de passe ne correspondent pas' },
+        forgot:'Mot de passe oublié ?', resetTitle:'Réinitialiser le mot de passe', resetSubtitle:'Nous enverrons un lien de réinitialisation à votre adresse email.', resetBtn:'Envoyer le lien', resetSent:'Si un compte existe, nous avons envoyé les instructions à cette adresse email.',
+        errEmail:'Saisissez une adresse email valide', errPwd:'Le mot de passe doit comporter au moins 8 caractères', errMatch:'Les mots de passe ne correspondent pas',
+        errPwdEmpty:'Saisissez votre mot de passe', loginLoading:'Connexion…', errBadCreds:'Email ou mot de passe incorrect',
+        errNoServer:'Le serveur ne répond pas — vérifiez votre connexion', errConn:'Erreur de connexion : ', errServer:'Erreur du serveur', errConnServer:'Impossible de joindre le serveur',
+        pmTitle:'Créez un mot de passe', pmSub:'Vous l\'utiliserez lors de votre prochaine connexion', pmBtn:'Créer le compte et générer mon plan', pmLoading:'Génération du plan…',
+        errDup:'Un compte avec cet email existe déjà. Connectez-vous pour continuer.', errTimeout:'La connexion a pris trop de temps. Vérifiez votre internet et réessayez.',
+        errOffline:'Impossible de joindre le serveur ({err}). Vérifiez votre internet et réessayez.', errUnknown:'erreur inconnue', errServerCode:'Erreur du serveur ({code})' },
   es: { title:'Empieza a entrenar', subtitle:'Crea una cuenta o inicia sesión en una existente.', create:'Crear cuenta', haveAccount:'Ya tengo cuenta',
         regTitle:'Crear cuenta', regSubtitle:'Introduce email y contraseña — los usarás para iniciar sesión.',
-        namePh:'Nombre y apellido', errName:'Introduce tu nombre', emailPh:'Tu email', pwdPh:'Contraseña (mín. 6 caracteres)', pwd2Ph:'Repite la contraseña', next:'Siguiente →',
+        namePh:'Nombre y apellido', errName:'Introduce tu nombre', emailPh:'Tu email', pwdPh:'Contraseña (mín. 8 caracteres)', pwd2Ph:'Repite la contraseña', next:'Siguiente →',
         loginTitle:'Iniciar sesión', loginSubtitle:'Introduce los datos con los que te registraste', loginPwdPh:'Contraseña', loginBtn:'Iniciar sesión', back:'← Atrás',
-        errEmail:'Introduce un email válido', errPwd:'La contraseña debe tener al menos 6 caracteres', errMatch:'Las contraseñas no coinciden' },
+        forgot:'¿Olvidaste tu contraseña?', resetTitle:'Restablecer contraseña', resetSubtitle:'Te enviaremos un enlace de restablecimiento a tu email.', resetBtn:'Enviar enlace', resetSent:'Si la cuenta existe, hemos enviado las instrucciones a ese email.',
+        errEmail:'Introduce un email válido', errPwd:'La contraseña debe tener al menos 8 caracteres', errMatch:'Las contraseñas no coinciden',
+        errPwdEmpty:'Introduce tu contraseña', loginLoading:'Iniciando sesión…', errBadCreds:'Email o contraseña incorrectos',
+        errNoServer:'El servidor no responde — comprueba tu conexión', errConn:'Error de conexión: ', errServer:'Error del servidor', errConnServer:'No se pudo conectar con el servidor',
+        pmTitle:'Crea una contraseña', pmSub:'La usarás la próxima vez que inicies sesión', pmBtn:'Crear cuenta y generar mi plan', pmLoading:'Generando tu plan…',
+        errDup:'Ya existe una cuenta con este email. Inicia sesión para continuar.', errTimeout:'La conexión tardó demasiado. Comprueba tu internet e inténtalo de nuevo.',
+        errOffline:'No se pudo conectar con el servidor ({err}). Comprueba tu internet e inténtalo de nuevo.', errUnknown:'error desconocido', errServerCode:'Error del servidor ({code})' },
   de: { title:'Mit dem Training beginnen', subtitle:'Erstelle ein Konto oder melde dich bei einem bestehenden an.', create:'Konto erstellen', haveAccount:'Ich habe bereits ein Konto',
         regTitle:'Konto erstellen', regSubtitle:'Gib E-Mail und Passwort ein — damit meldest du dich an.',
-        namePh:'Vor- und Nachname', errName:'Gib deinen Namen ein', emailPh:'Deine E-Mail', pwdPh:'Passwort (mind. 6 Zeichen)', pwd2Ph:'Passwort wiederholen', next:'Weiter →',
+        namePh:'Vor- und Nachname', errName:'Gib deinen Namen ein', emailPh:'Deine E-Mail', pwdPh:'Passwort (mind. 8 Zeichen)', pwd2Ph:'Passwort wiederholen', next:'Weiter →',
         loginTitle:'Anmelden', loginSubtitle:'Gib deine Anmeldedaten ein', loginPwdPh:'Passwort', loginBtn:'Anmelden', back:'← Zurück',
-        errEmail:'Gib eine gültige E-Mail-Adresse ein', errPwd:'Das Passwort muss mindestens 6 Zeichen lang sein', errMatch:'Passwörter stimmen nicht überein' }
+        forgot:'Passwort vergessen?', resetTitle:'Passwort zurücksetzen', resetSubtitle:'Wir senden dir einen Link zum Zurücksetzen an deine E-Mail.', resetBtn:'Link senden', resetSent:'Falls ein Konto existiert, haben wir die Anleitung an diese E-Mail geschickt.',
+        errEmail:'Gib eine gültige E-Mail-Adresse ein', errPwd:'Das Passwort muss mindestens 8 Zeichen lang sein', errMatch:'Passwörter stimmen nicht überein',
+        errPwdEmpty:'Gib dein Passwort ein', loginLoading:'Anmeldung…', errBadCreds:'E-Mail oder Passwort ist falsch',
+        errNoServer:'Der Server antwortet nicht — prüfe deine Verbindung', errConn:'Verbindungsfehler: ', errServer:'Serverfehler', errConnServer:'Server nicht erreichbar',
+        pmTitle:'Erstelle ein Passwort', pmSub:'Damit meldest du dich beim nächsten Mal an', pmBtn:'Konto erstellen und Plan generieren', pmLoading:'Dein Plan wird erstellt…',
+        errDup:'Ein Konto mit dieser E-Mail existiert bereits. Melde dich an, um fortzufahren.', errTimeout:'Die Verbindung hat zu lange gedauert. Prüfe dein Internet und versuche es erneut.',
+        errOffline:'Server nicht erreichbar ({err}). Prüfe dein Internet und versuche es erneut.', errUnknown:'unbekannter Fehler', errServerCode:'Serverfehler ({code})' }
 };
 function _authT() { return AUTH_T[S.data.language] || AUTH_T.en; }
 
@@ -2468,26 +2878,27 @@ async function handlePasswordResetRequest() {
       emailEl.disabled = true;
       btn.style.display = 'none';
     } else {
-      errEl.textContent = data.error || 'Błąd serwera';
+      errEl.textContent = data.error || t.errServer;
       btn.disabled = false; btn.textContent = t.resetBtn;
     }
   } catch (e) {
-    errEl.textContent = 'Błąd połączenia z serwerem';
+    errEl.textContent = t.errConnServer;
     btn.disabled = false; btn.textContent = t.resetBtn;
   }
 }
 
 async function handleLogin() {
+  const t     = _authT();
   const email = document.getElementById('li-email')?.value.trim();
   const pwd   = document.getElementById('li-pwd')?.value;
   const errEl = document.getElementById('li-err');
   const btn   = document.getElementById('li-btn');
   errEl.textContent = '';
 
-  if (!email || !email.includes('@')) { errEl.textContent = 'Wpisz prawidłowy adres email'; return; }
-  if (!pwd) { errEl.textContent = 'Wpisz hasło'; return; }
+  if (!email || !email.includes('@')) { errEl.textContent = t.errEmail; return; }
+  if (!pwd) { errEl.textContent = t.errPwdEmpty; return; }
 
-  btn.disabled = true; btn.textContent = 'Logowanie…';
+  btn.disabled = true; btn.textContent = t.loginLoading;
   try {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 8000);
@@ -2499,8 +2910,8 @@ async function handleLogin() {
     clearTimeout(timeout);
     const data = await res.json();
     if (!res.ok || !data.success) {
-      errEl.textContent = data.error || 'Nieprawidłowy email lub hasło';
-      btn.disabled = false; btn.textContent = 'Zaloguj';
+      errEl.textContent = data.error || t.errBadCreds;
+      btn.disabled = false; btn.textContent = t.loginBtn;
       return;
     }
     localStorage.setItem('velm_user_id', data.userId);
@@ -2512,8 +2923,8 @@ async function handleLogin() {
     setTimeout(() => { window.location.href = 'dashboard.html'; }, 380);
   } catch(e) {
     console.error('[LOGIN] Fetch error:', e);
-    errEl.textContent = e.name === 'AbortError' ? 'Serwer nie odpowiada — sprawdź czy backend działa' : 'Błąd połączenia: ' + e.message;
-    btn.disabled = false; btn.textContent = 'Zaloguj';
+    errEl.textContent = e.name === 'AbortError' ? t.errNoServer : t.errConn + e.message;
+    btn.disabled = false; btn.textContent = t.loginBtn;
   }
 }
 
@@ -2525,15 +2936,16 @@ function _startOnboarding() {
 
 // Password setup modal — shown before onboarding submit
 function showPasswordSetup(onConfirm) {
+  const t = _authT();
   const modal = document.createElement('div');
   modal.id = 'pwd-modal';
   modal.innerHTML = `
     <div class="pwd-card">
-      <h2>Utwórz hasło</h2>
-      <p>Będziesz go używać przy następnym logowaniu</p>
-      <input class="auth-inp" id="pm-pwd" type="password" placeholder="Hasło (min. 8 znaków)" autocomplete="new-password" onkeydown="if(event.key==='Enter')document.getElementById('pm-pwd2').focus()"/>
-      <input class="auth-inp" id="pm-pwd2" type="password" placeholder="Powtórz hasło" autocomplete="new-password" onkeydown="if(event.key==='Enter')_confirmPwd()"/>
-      <button class="btn-p" id="pm-btn" onclick="_confirmPwd()" style="margin-top:4px;">Utwórz konto i wygeneruj plan</button>
+      <h2>${e(t.pmTitle)}</h2>
+      <p>${e(t.pmSub)}</p>
+      <input class="auth-inp" id="pm-pwd" type="password" placeholder="${e(t.pwdPh)}" autocomplete="new-password" onkeydown="if(event.key==='Enter')document.getElementById('pm-pwd2').focus()"/>
+      <input class="auth-inp" id="pm-pwd2" type="password" placeholder="${e(t.pwd2Ph)}" autocomplete="new-password" onkeydown="if(event.key==='Enter')_confirmPwd()"/>
+      <button class="btn-p" id="pm-btn" onclick="_confirmPwd()" style="margin-top:4px;">${e(t.pmBtn)}</button>
       <div class="auth-err" id="pm-err"></div>
     </div>`;
   document.body.appendChild(modal);
@@ -2542,14 +2954,15 @@ function showPasswordSetup(onConfirm) {
 }
 
 function _confirmPwd() {
+  const t   = _authT();
   const p1  = document.getElementById('pm-pwd').value;
   const p2  = document.getElementById('pm-pwd2').value;
   const err = document.getElementById('pm-err');
   const btn = document.getElementById('pm-btn');
   err.textContent = '';
-  if (p1.length < 8) { err.textContent = 'Hasło musi mieć min. 8 znaków'; return; }
-  if (p1 !== p2)     { err.textContent = 'Hasła nie są zgodne'; return; }
-  btn.disabled = true; btn.textContent = 'Generuję plan…';
+  if (p1.length < 8) { err.textContent = t.errPwd; return; }
+  if (p1 !== p2)     { err.textContent = t.errMatch; return; }
+  btn.disabled = true; btn.textContent = t.pmLoading;
   document.getElementById('pwd-modal').remove();
   window._pwdOnConfirm(p1);
 }
