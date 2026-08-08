@@ -37,7 +37,7 @@ const _plAcc=(n)=>{const a=n%10,b=n%100;return n===1?'trening':(a>=2&&a<=4&&!(b>
 const MIXED_STATUS={
   pl:{sel:n=>`Brakuje Ci jeszcze ${n} ${n===1?'treningu':'treningów'}`, rem:n=>`Musisz usunąć ${n} ${_plAcc(n)}`, ready:'✓ Gotowe!'},
   en:{sel:n=>`Select ${n} more`,                     rem:n=>`Remove ${n}`,                                  ready:'✓ Ready!'},
-  fr:{sel:n=>`Sélectionnez ${n} séance${n===1?'':'s'} de plus`, rem:n=>`Retirez ${n} séance${n===1?'':'s'}`, ready:'✓ Prêt !'},
+  fr:{sel:n=>`Choisis ${n} séance${n===1?'':'s'} de plus`, rem:n=>`Retire ${n} séance${n===1?'':'s'}`, ready:'✓ Prêt !'},
   es:{sel:n=>`Elige ${n} ${n===1?'sesión':'sesiones'} más`,     rem:n=>`Quita ${n} ${n===1?'sesión':'sesiones'}`, ready:'✓ ¡Listo!'},
   de:{sel:n=>`Wähle ${n} weitere Einheit${n===1?'':'en'}`,      rem:n=>`Entferne ${n} Einheit${n===1?'':'en'}`,   ready:'✓ Fertig!'}
 };
@@ -60,7 +60,7 @@ const READY_LABELS={
       years:'y/o',weight:'Weight',height:'Height',half:'Half Marathon',marathon:'Marathon',
       twalkrun:'Walk-run',teasy:'Easy running',tmixed:'Mixed week'},
   fr:{goal:'Objectif',dist:'Distance',pb:'Record actuel',target:'Temps visé',raceDate:'Date de course',
-      longest:'Plus longue sortie',form:"Forme d'entraînement",vol:'Volume hebdomadaire',perWeek:'/ semaine',
+      longest:'Plus longue sortie',form:"Type d'entraînement",vol:'Volume hebdomadaire',perWeek:'/ semaine',
       intervals:'Fractionné',run:'course',walk:'marche',comeback:'Retour',cbInjury:'Après blessure',
       cbIllness:'Après maladie',cbBreak:'Après une longue pause',run15:'15 min de course sans arrêt',yes:'Oui, je peux',
       notYet:'Pas encore',level:'Niveau',adv:'Expérimenté',beg:'Débutant',
@@ -284,83 +284,83 @@ const C={
   },
   fr:{
     of:'sur',cont:'Continuer',back:'Retour',
-    wtag:'Votre coach IA',wh:'Entraînez-vous plus malin,\npas plus dur.',
-    ws:"velm vous associe à un staff de 4 experts IA — entraîneur, kiné, analyste et psychologue — qui collaborent chaque semaine pour bâtir votre plan idéal.",
+    wtag:'Ton coach IA',wh:'Entraîne-toi plus malin,\npas plus dur.',
+    ws:"velm t'associe à un staff de 4 experts IA — entraîneur, kiné, analyste et psychologue — qui collaborent chaque semaine pour bâtir ton plan idéal.",
     wf1:'<strong>4 coachs IA</strong> — analyste, kiné, entraîneur principal et psychologue',
-    wf2:'<strong>Réunion hebdomadaire</strong> — tous les 4 analysent vos données et construisent la semaine suivante',
+    wf2:'<strong>Réunion hebdomadaire</strong> — tous les 4 analysent tes données et construisent la semaine suivante',
     wf3:"<strong>Toujours joignables</strong> — le staff adapte le plan quand la vie s'en mêle",
     wf4:'<strong>Conçu pour la performance</strong> — pas une appli générique. Chaque séance a un but.',
-    lh:'Choisissez votre\nlangue',ls:'Vous pourrez la changer à tout moment dans les réglages.',
-    uh:'Quelles unités\npréférez-vous ?',us:"Pour les distances, l'allure et les mesures corporelles.",
+    lh:'Choisis ta\nlangue',ls:'Tu pourras la changer à tout moment dans les réglages.',
+    uh:'Quelles unités\npréfères-tu ?',us:"Pour les distances, l'allure et les mesures corporelles.",
     umet:'Métriques',umets:'km · kg · cm',uimp:'Impériales',uimps:'mi · lbs · ft',
-    wh2:'Utilisez-vous une\nmontre de sport ?',ws2:"Avec une montre, nous exploitons la fréquence cardiaque. Sans, nous nous basons sur l'effort ressenti.",
+    wh2:'Utilises-tu une\nmontre de sport ?',ws2:"Avec une montre, on exploite la fréquence cardiaque. Sans, on se base sur l'effort ressenti.",
     wyes:"Oui, j'ai une montre",wyess:"Suit la FC, l'allure et la distance en direct",
-    wno:'Non, je cours au ressenti',wnos:"Nous utilisons l'échelle d'effort — tout aussi efficace",
-    lvh:'Choisissez votre\nniveau',lvs:'Soyez honnête — votre plan ne vaut que ce que valent vos données de départ.',
+    wno:'Non, je cours au ressenti',wnos:"On utilise l'échelle d'effort — tout aussi efficace",
+    lvh:'Choisis ton\nniveau',lvs:'Sois honnête — ton plan ne vaut que ce que valent tes données de départ.',
     lbeg:'Débutant',lbegs:'Nouveau dans la course, ou de retour après une pause',
-    ladv:'Expérimenté',ladvs:'Vous courez régulièrement et voulez progresser',
-    gh:'Quel est votre\nobjectif principal ?',gs:'Balayez pour parcourir, touchez pour choisir.',
+    ladv:'Expérimenté',ladvs:'Tu cours régulièrement et tu veux progresser',
+    gh:'Quel est ton\nobjectif principal ?',gs:'Balaie pour parcourir, touche pour choisir.',
     goals:{
-      start:{title:'Commencer à courir',desc:"Passez de zéro à 30 minutes de course sans arrêt. Nous utilisons la méthode marche-course éprouvée — de courts intervalles de course qui s'allongent chaque semaine jusqu'à ce que vous n'ayez plus besoin de vous arrêter. Aucune expérience requise, aucune pression."},
-      walkrun:{title:'Marche/course → course',desc:"Vous alternez déjà marche et course et voulez passer à la course continue. Nous réduisons progressivement vos pauses de marche à mesure que votre forme progresse — à un rythme que votre corps peut réellement encaisser."},
-      health:{title:'Santé et forme',desc:"Courir pour votre santé, votre énergie et votre moral — pas pour une compétition. Votre plan vise à installer une habitude régulière, à vous protéger des blessures et à rendre chaque semaine de course agréable."},
-      comeback:{title:'Grand retour',desc:"De retour après une blessure, une maladie ou une longue pause. Votre plan est construit autour d'une reprise en sécurité — protéger les tissus en cours de guérison, éviter les rechutes et retrouver la forme plus vite qu'en repartant de zéro."},
-      distance:{title:'Objectif distance',desc:"Préparation d'un semi-marathon, d'un marathon ou d'un ultra. Votre plan développe votre sortie longue semaine après semaine avec la règle des 10 %, avec affûtage et semaines de pic calculés à rebours depuis la date de votre course."},
-      time:{title:'Améliorer votre temps',desc:"Vous courez déjà — maintenant vous voulez courir plus vite. Votre plan inclut des séances au seuil, du fractionné et du travail à allure de course, calibrés sur votre meilleur temps actuel et votre objectif. Chaque séance a un but précis en termes de vitesse."},
+      start:{title:'Commencer à courir',desc:"Passe de zéro à 30 minutes de course sans arrêt. On utilise la méthode marche-course éprouvée — de courts intervalles de course qui s'allongent chaque semaine jusqu'à ce que tu n'aies plus besoin de t'arrêter. Aucune expérience requise, aucune pression."},
+      walkrun:{title:'Marche/course → course',desc:"Tu alternes déjà marche et course et tu veux passer à la course continue. On réduit progressivement tes pauses de marche à mesure que ta forme progresse — à un rythme que ton corps peut réellement encaisser."},
+      health:{title:'Santé et forme',desc:"Courir pour ta santé, ton énergie et ton moral — pas pour une compétition. Ton plan vise à installer une habitude régulière, à te protéger des blessures et à rendre chaque semaine de course agréable."},
+      comeback:{title:'Grand retour',desc:"De retour après une blessure, une maladie ou une longue pause. Ton plan est construit autour d'une reprise en sécurité — protéger les tissus en cours de guérison, éviter les rechutes et retrouver la forme plus vite qu'en repartant de zéro."},
+      distance:{title:'Objectif distance',desc:"Préparation d'un semi-marathon, d'un marathon ou d'un ultra. Ton plan développe ta sortie longue semaine après semaine avec la règle des 10 %, avec affûtage et semaines de pic calculés à rebours depuis la date de ta course."},
+      time:{title:'Améliorer ton temps',desc:"Tu cours déjà — maintenant tu veux courir plus vite. Ton plan inclut des séances au seuil, du fractionné et du travail à allure de course, calibrés sur ton meilleur temps actuel et ton objectif. Chaque séance a un but précis en termes de vitesse."},
     },
-    q15:'Pouvez-vous courir 15 min sans vous arrêter ?',yes15:'Oui, sans problème',no15:"Non, je dois m'arrêter ou marcher",
-    qstairs:'Les escaliers vous essoufflent-ils ?',qyes:'Oui, même quelques étages',qno:'Non, les escaliers sont faciles',
-    qsports:"Quels sports avez-vous pratiqués l'an dernier ?",
-    qage:'À propos de vous',qgender:'Genre',qweight:'Votre poids',qheight:'Votre taille',
-    qdays:"Combien de séances\npar semaine pouvez-vous faire ?",
-    qready:'Votre profil est prêt',qreadymsg:'Nous avons tout ce qu\'il faut. Votre staff IA va maintenant bâtir votre première semaine.',
+    q15:"Peux-tu courir 15 min sans t'arrêter ?",yes15:'Oui, sans problème',no15:"Non, je dois m'arrêter ou marcher",
+    qstairs:'Les escaliers t\'essoufflent-ils ?',qyes:'Oui, même quelques étages',qno:'Non, les escaliers sont faciles',
+    qsports:"Quels sports as-tu pratiqués l'an dernier ?",
+    qage:'À propos de toi',qgender:'Genre',qweight:'Ton poids',qheight:'Ta taille',
+    qdays:"Combien de séances\npar semaine peux-tu faire ?",
+    qready:'Ton profil est prêt',qreadymsg:'On a tout ce qu\'il faut. Ton staff IA va maintenant bâtir ta première semaine.',
     qgenerate:'Générer mon plan',
     wdays:['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'],
     wdaysfull:['Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi','Dimanche'],
     months:['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'],
-    qhtt:'Comment vous entraînez-vous en ce moment ?',
+    qhtt:'Comment t\'entraînes-tu en ce moment ?',
     htwalkrun:'Intervalles marche/course',hteasy:'Sorties faciles',htmixed:'Entraînement mixte',htinterval:'Fractionné',htlong:'Sorties longues',httempo:'Séances au seuil',
-    qepace:'À quelle allure courez-vous confortablement ?',qekm:'Quelle distance parcourez-vous par séance ?',
-    qrpe:'À quel point une sortie type vous demande-t-elle ?',
+    qepace:'À quelle allure cours-tu confortablement ?',qekm:'Quelle distance parcours-tu par séance ?',
+    qrpe:'À quel point une sortie type te demande-t-elle ?',
     rpe:['Très facile','Confortable','Modérément dur','Dur','Épuisant'],
     rpesub:['Je pourrais tenir des heures','Respiration facile, je peux parler','Léger essoufflement','Respiration forte, je parle peu','Complètement à bout de souffle'],
-    qmixweek:'À quoi ressemble votre semaine type ?',qmixvol:'Combien de km par semaine et à quelle allure ?',
+    qmixweek:'À quoi ressemble ta semaine type ?',qmixvol:'Combien de km par semaine et à quelle allure ?',
     sessions:'Séances par semaine',weekly:'Total km par semaine',paceUnit_km:'min/km',paceUnit_mi:'min/mi',
-    qcbreason:'Quelle est la cause de votre pause ?',cbinj:'Blessure ou douleur',cbinjs:'Arrêt dû à une blessure physique',cblife:'Vie perso / manque de temps',cblifes:"Pas de blessure — la vie s'en est mêlée",
-    qcbdetails:'Détails de la blessure',qcbd_where:'Où se situait la blessure ?',qcbd_where_ph:'ex. genou gauche, tibia, tendon d\'Achille',qcbd_what:"Que s'est-il passé exactement ?",qcbd_what_ph:'ex. entorse, élongation, fracture de fatigue, douleur',qcbd_notes:'Notes complémentaires pour votre coach (facultatif)',qcbd_notes_ph:'Diagnostic du médecin, comment vous vous sentez maintenant...',
+    qcbreason:'Quelle est la cause de ta pause ?',cbinj:'Blessure ou douleur',cbinjs:'Arrêt dû à une blessure physique',cblife:'Vie perso / manque de temps',cblifes:"Pas de blessure — la vie s'en est mêlée",
+    qcbdetails:'Détails de la blessure',qcbd_where:'Où se situait la blessure ?',qcbd_where_ph:'ex. genou gauche, tibia, tendon d\'Achille',qcbd_what:"Que s'est-il passé exactement ?",qcbd_what_ph:'ex. entorse, élongation, fracture de fatigue, douleur',qcbd_notes:'Notes complémentaires pour ton coach (facultatif)',qcbd_notes_ph:'Diagnostic du médecin, comment tu te sens maintenant...',
     qcbsev:'Quelle était la gravité de la blessure ?',
     cbsev:['Très légère','Légère','Modérée','Grave','Très grave'],
     cbsevs:['Léger inconfort, marche normale possible','Douleur nette, activité limitée','Douleur franche, la plupart des mouvements restreints','Forte douleur, marche difficile','A nécessité chirurgie, plâtre ou béquilles'],
-    qcbdoc:'Un médecin ou un kiné vous a-t-il autorisé à courir ?',cbdocyes:"Oui, j'ai le feu vert",cbdocno:'Non, je surveille moi-même',
-    qcbrec:'Où en est votre récupération aujourd\'hui ?',cbrec:['Totalement rétabli (100 %)','Encore un léger inconfort (75 %)','Encore bien présent (50 %)'],
-    qcblast:'À quand remonte votre dernier entraînement régulier ?',cblast:["Il y a moins d'un mois",'Il y a 1 à 3 mois','Il y a 3 à 6 mois',"Il y a plus d'un an"],
-    qcbtrtype:'À quoi ressemblait votre entraînement avant la pause ?',qcb_dynamic_tr:'Quel type d\'entraînement faisiez-vous avant la blessure ?',
-    qcb_wrc1:'Comment structuriez-vous vos intervalles ?',
-    qcb_wrc2:'Combien de cycles faisiez-vous en général ?',
+    qcbdoc:'Un médecin ou un kiné t\'a-t-il autorisé à courir ?',cbdocyes:"Oui, j'ai le feu vert",cbdocno:'Non, je surveille moi-même',
+    qcbrec:'Où en est ta récupération aujourd\'hui ?',cbrec:['Totalement rétabli (100 %)','Encore un léger inconfort (75 %)','Encore bien présent (50 %)'],
+    qcblast:'À quand remonte ton dernier entraînement régulier ?',cblast:["Il y a moins d'un mois",'Il y a 1 à 3 mois','Il y a 3 à 6 mois',"Il y a plus d'un an"],
+    qcbtrtype:'À quoi ressemblait ton entraînement avant la pause ?',qcb_dynamic_tr:'Quel type d\'entraînement faisais-tu avant la blessure ?',
+    qcb_wrc1:'Comment structurais-tu tes intervalles ?',
+    qcb_wrc2:'Combien de cycles faisais-tu en général ?',
     qcb_rpe:'À quel point ces séances étaient-elles dures ?',
-    qcb_epace:'Quelle était votre allure facile à l\'époque ?',
-    qcb_ekm:'Quelle était la durée de votre sortie type ?',
-    qcb_mixweek:'À quoi ressemblait votre semaine type ?',
-    qcb_mixvol:'Quels étaient votre volume et votre allure hebdomadaires ?',
-    qadvvol:'Combien de km courez-vous par semaine ?',qadvpace:'À quelle vitesse courez-vous les jours faciles ?',
-    qedist:'Quelle est votre distance cible ?',
+    qcb_epace:'Quelle était ton allure facile à l\'époque ?',
+    qcb_ekm:'Quelle était la durée de ta sortie type ?',
+    qcb_mixweek:'À quoi ressemblait ta semaine type ?',
+    qcb_mixvol:'Quels étaient ton volume et ton allure hebdomadaires ?',
+    qadvvol:'Combien de km cours-tu par semaine ?',qadvpace:'À quelle vitesse cours-tu les jours faciles ?',
+    qedist:'Quelle est ta distance cible ?',
     dist5k:'5 km',dist10k:'10 km',disthalf:'Semi-marathon',distmarathon:'Marathon',distultra:'Ultra 50 km',distother:'Autre',
-    qlongest:'Quelle est la plus longue distance courue récemment ?',qrace:'Avez-vous une course prévue ?',
+    qlongest:'Quelle est la plus longue distance courue récemment ?',qrace:'As-tu une course prévue ?',
     raceyes:'Oui, je connais la date de ma course',raceno:'Pas encore — je fixerai ma propre échéance',
-    qracedate:'Quand a lieu la course ?',qgoaldate:'Quand voulez-vous atteindre votre objectif ?',
-    qgoaldatehint:'Choisissez une date réaliste — vous pourrez toujours la modifier dans les réglages.',
+    qracedate:'Quand a lieu la course ?',qgoaldate:'Quand veux-tu atteindre ton objectif ?',
+    qgoaldatehint:'Choisis une date réaliste — tu pourras toujours la modifier dans les réglages.',
     seldate:'Date choisie',
-    qwrc1:'Comment structurez-vous vos intervalles ?',walk_time:'Temps de marche',run_time:'Temps de course',
-    qwrc2:'Combien de fois répétez-vous le cycle ?',qwrc2_sub:'Votre cycle : {run} min de course / {walk} min de marche',
-    cycle_count:'Cycles',sessions_per_week:'Séances actuelles par semaine',qwr_rpe:'À quel point êtes-vous fatigué après une séance type ?',
-    qtdist:'Sur quelle distance voulez-vous aller plus vite ?',
-    qcurpb:'Quel est votre meilleur temps sur cette distance ?',qtarget:'Quel temps voulez-vous battre ?',
+    qwrc1:'Comment structures-tu tes intervalles ?',walk_time:'Temps de marche',run_time:'Temps de course',
+    qwrc2:'Combien de fois répètes-tu le cycle ?',qwrc2_sub:'Ton cycle : {run} min de course / {walk} min de marche',
+    cycle_count:'Cycles',sessions_per_week:'Séances actuelles par semaine',qwr_rpe:'À quel point es-tu fatigué après une séance type ?',
+    qtdist:'Sur quelle distance veux-tu aller plus vite ?',
+    qcurpb:'Quel est ton meilleur temps sur cette distance ?',qtarget:'Quel temps veux-tu battre ?',
     hrs:'h',min:'min',sec:'sec',
-    errtarget:'Votre objectif doit être plus rapide que votre meilleur temps actuel',
+    errtarget:'Ton objectif doit être plus rapide que ton meilleur temps actuel',
     male:'Homme',female:'Femme',gender_other:'Autre',
     sport_none_lbl:'Aucun',sport_football_lbl:'Football',sport_gym_lbl:'Salle de sport',sport_swim_lbl:'Natation',sport_cycle_lbl:'Cyclisme',sport_tennis_lbl:'Tennis',sport_other_lbl:'Autre (à préciser)',whichsport:'Quel sport ?',
-    daysweek:'jours/semaine',selectdays:"Sélectionnez vos jours d'entraînement",perfectdist:'Jours sélectionnés',
-    select:'Sélectionnez',remove:'Retirez',day:'jour',days:'jours',
+    daysweek:'jours/semaine',selectdays:"Choisis tes jours d'entraînement",perfectdist:'Jours sélectionnés',
+    select:'Choisis',remove:'Retire',day:'jour',days:'jours',
   },
   es:{
     of:'de',cont:'Continuar',back:'Atrás',
@@ -700,17 +700,17 @@ const velmFinale = (() => {
       agents:{analityk:'Analyste',fizjo:'Kiné',psycholog:'Psychologue',szef:'Chef coach'},
       legend:{analityk:'Analyste',fizjo:'Kiné',psycholog:'Psycho',szef:'Coach'},
       headCoach:'Entraîneur principal',
-      to:'À',staffName:'Staff velm',packing:'Préparation de vos données',kicker:'Réunion du staff',head:'Votre premier plan se construit',
-      dayReady:'Jour prêt',doneH:'Votre premier plan est prêt !',
-      doneP:"Le staff a bâti une semaine taillée pour vous. C'est parti.",goBtn:'Voir mon plan',
+      to:'À',staffName:'Staff velm',packing:'Préparation de tes données',kicker:'Réunion du staff',head:'Ton premier plan se construit',
+      dayReady:'Jour prêt',doneH:'Ton premier plan est prêt !',
+      doneP:"Le staff a bâti une semaine taillée pour toi. C'est parti.",goBtn:'Voir mon plan',
       finalTouches:'Dernières retouches',assembling:'Assemblage du plan — en cours…',
       sealing:"Fermeture de l'enveloppe",addressing:'Adressage',sending:'Envoi au staff',delivered:'Livré ✓',
-      approved:'Plan validé',weekReady:'Votre première semaine — prête',
+      approved:'Plan validé',weekReady:'Ta première semaine — prête',
       pools:{
-        analityk:["Profil du coureur — créé","Fréquence cardiaque max — estimée selon l'âge",'Zones de FC — calculées','Point de départ — défini','Volume de départ — calculé','Allure de base — estimée',"Chemin vers l'objectif — tracé",'Marges de progression — planifiées'],
+        analityk:["Profil du coureur — créé","Fréquence cardiaque max — estimée selon l'âge",'Zones de FC — calculées','Point de départ — défini','Volume de départ — calculé','Allure de base — estimée',"Chemin vers ton objectif — tracé",'Marges de progression — planifiées'],
         fizjo:['Seuil de charge sûr — défini','Protection contre les blessures — activée','Progression — plafonnée au départ','Jours de récupération — réservés','Échauffements — adaptés au niveau'],
-        psycholog:['Votre objectif — validé par le staff','Première semaine — sans pression','Habitude — construite pas à pas','Motivation de départ — installée'],
-        szef:['Type de séance — choisi','Intensité — adaptée au niveau','Répartition — calée sur vos jours','Allure — réglée en sécurité','Place dans la semaine — confirmée']
+        psycholog:['Ton objectif — validé par le staff','Première semaine — sans pression','Habitude — construite pas à pas','Motivation de départ — installée'],
+        szef:['Type de séance — choisi','Intensité — adaptée au niveau','Répartition — calée sur tes jours','Allure — réglée en sécurité','Place dans la semaine — confirmée']
       }
     },
     es:{
@@ -1338,42 +1338,42 @@ const AGENTS = {
 // Tab labels per language
 const MEET_TAB = {
   en:'Meet your training staff', pl:'Poznaj swoich trenerów',
-  fr:'Rencontrez votre équipe',  es:'Conoce a tu equipo', de:'Dein Trainerstab'
+  fr:'Rencontre ton équipe',  es:'Conoce a tu equipo', de:'Dein Trainerstab'
 };
 const INTRO_ORDER = ['headtrainer','physio','analyst','psychologist'];
 const AGENT_INTRO = {
   analyst:{
     en:"I'm your Analyst. Every week I read your watch data, pace, heart rate, and training load — then compare it against your targets. I spot the trends you'd miss and flag when you're approaching overload.",
     pl:"Jestem Twoim Analitykiem. Co tydzień czytam dane z zegarka, tempo, tętno i obciążenie treningowe — i porównuję z Twoimi celami. Wychwytam trendy, które byś przeoczył.",
-    fr:"Je suis votre Analyste. Chaque semaine je lis vos données de montre, allure et fréquence cardiaque — et je les compare à vos objectifs. Je détecte les tendances que vous manqueriez.",
+    fr:"Je suis ton Analyste. Chaque semaine je lis tes données de montre, allure et fréquence cardiaque — et je les compare à tes objectifs. Je repère les tendances qui t'échapperaient.",
     es:"Soy tu Analista. Cada semana leo tus datos del reloj, ritmo y frecuencia cardíaca — y los comparo con tus objetivos. Detecto las tendencias que pasarías por alto.",
     de:"Ich bin dein Analyst. Jede Woche lese ich Uhrdaten, Pace und Herzfrequenz — und vergleiche mit deinen Zielen. Ich erkenne Trends, die du übersehen würdest."
   },
   coach:{
     en:"I'm your Coach. I design each training session, manage your weekly progression, and adjust when life gets in the way. Nothing is wasted — every run has a purpose.",
     pl:"Jestem Twoim Trenerem. Projektuję każdą sesję treningową, zarządzam tygodniową progresją i dostosuję gdy życie wchodzi w grę. Nic nie jest zmarnowane — każdy bieg ma cel.",
-    fr:"Je suis votre Coach. Je conçois chaque séance, gère la progression hebdomadaire et m'adapte quand la vie s'invite. Chaque course a un objectif.",
+    fr:"Je suis ton Coach. Je conçois chaque séance, gère la progression hebdomadaire et m'adapte quand la vie s'invite. Chaque course a un objectif.",
     es:"Soy tu Entrenador. Diseño cada sesión, gestiono la progresión semanal y me adapto cuando la vida interfiere. Nada se desperdicia — cada carrera tiene un propósito.",
     de:"Ich bin dein Trainer. Ich gestalte jede Einheit, manage die wöchentliche Progression und passe mich an wenn das Leben dazwischenkommt."
   },
   physio:{
     en:"I'm your Physio. I monitor injury signals, recovery time, and fatigue every single week. My job is to catch problems before they become injuries — and keep you training consistently.",
     pl:"Jestem Twoim Fizjoterapeutą. Co tydzień monitoruję sygnały kontuzji, czas regeneracji i zmęczenie. Moim zadaniem jest wykryć problemy zanim staną się kontuzjami.",
-    fr:"Je suis votre Kiné. Je surveille les signaux de blessure, la récupération et la fatigue chaque semaine. Mon rôle est d'anticiper les problèmes avant qu'ils ne deviennent des blessures.",
+    fr:"Je suis ton Kiné. Je surveille les signaux de blessure, la récupération et la fatigue chaque semaine. Mon rôle est d'anticiper les problèmes avant qu'ils ne deviennent des blessures.",
     es:"Soy tu Fisio. Monitoreo señales de lesión, recuperación y fatiga cada semana. Mi trabajo es detectar problemas antes de que se conviertan en lesiones.",
     de:"Ich bin dein Physio. Jede Woche überwache ich Verletzungssignale, Erholung und Ermüdung — und greife ein bevor Probleme zu Verletzungen werden."
   },
   headtrainer:{
     en:"I'm your Head Trainer. I run the weekly staff meeting — I take input from everyone, make the final call on your plan, and take responsibility for every session. The buck stops with me.",
     pl:"Jestem Twoim Szefem Sztabu. Prowadzę cotygodniową naradę — zbieram input od wszystkich, podejmuję finalną decyzję o Twoim planie i biorę odpowiedzialność za każdą sesję.",
-    fr:"Je suis votre Chef Coach. Je dirige la réunion hebdomadaire — je reçois tous les inputs, prends la décision finale et suis responsable de chaque séance.",
+    fr:"Je suis ton Chef Coach. Je dirige la réunion hebdomadaire — je reçois tous les inputs, prends la décision finale et suis responsable de chaque séance.",
     es:"Soy tu Jefe Técnico. Dirijo la reunión semanal del equipo — recibo todos los aportes, tomo la decisión final y soy responsable de cada sesión.",
     de:"Ich bin dein Cheftrainer. Ich leite das wöchentliche Teammeeting — sammle alle Inputs, treffe die finale Entscheidung und trage Verantwortung für jede Einheit."
   },
   psychologist:{
     en:"I'm your Psychologist. I read your mood, motivation, and mental state each week — and adjust how the team communicates with you. Hard week? I soften the plan. Peak week? I push harder.",
     pl:"Jestem Twoim Psychologiem. Co tydzień czytam Twój nastrój, motywację i stan psychiczny — i dostosowuję sposób, w jaki sztab się z Tobą komunikuje. Ciężki tydzień? Łagodzę plan. Szczytowy tydzień? Dociskam mocniej.",
-    fr:"Je suis votre Psychologue. Je lis votre humeur et motivation chaque semaine — et j'ajuste la façon dont l'équipe communique avec vous. Semaine difficile ? J'adoucis le plan. Semaine de pointe ? Je pousse plus fort.",
+    fr:"Je suis ton Psychologue. Je lis ton humeur et ta motivation chaque semaine — et j'ajuste la façon dont l'équipe communique avec toi. Semaine difficile ? J'adoucis le plan. Semaine de pointe ? Je pousse plus fort.",
     es:"Soy tu Psicólogo. Leo tu estado de ánimo y motivación cada semana — y ajusto cómo el equipo se comunica contigo. ¿Semana difícil? Suavizo el plan. ¿Semana pico? Aprieto más.",
     de:"Ich bin dein Psychologe. Jede Woche lese ich deine Stimmung und Motivation — und passe an, wie das Team mit dir kommuniziert. Schwere Woche? Ich mildere den Plan. Spitzenwoche? Ich drücke härter."
   }
@@ -1406,7 +1406,7 @@ function meetOneAgent(idx){
   const tabSub = {
     en:'Your personal AI training staff',
     pl:'Twój osobisty sztab treningowy AI',
-    fr:'Votre équipe d\'entraînement IA personnelle',
+    fr:'Ton équipe d\'entraînement IA personnelle',
     es:'Tu equipo personal de entrenamiento IA',
     de:'Dein persönliches KI-Trainerstab'
   }[lang] || 'Your personal AI training staff';
@@ -1466,7 +1466,7 @@ function bBodyUnits(){
   }
 
   const h  ={en:'Height & Weight',pl:'Wzrost i waga',fr:'Taille & poids',es:'Altura y peso',de:'Größe & Gewicht'}[lang]||'Height & Weight';
-  const sub={en:'Used to calculate your training load and pace zones.',pl:'Służy do obliczania obciążenia treningowego i stref tempa.',fr:'Pour calculer votre charge et vos zones de rythme.',es:'Para calcular tu carga de entrenamiento y zonas de ritmo.',de:'Zur Berechnung deiner Trainingsbelastung und Tempozonen.'}[lang]||'';
+  const sub={en:'Used to calculate your training load and pace zones.',pl:'Służy do obliczania obciążenia treningowego i stref tempa.',fr:'Pour calculer ta charge et tes zones de rythme.',es:'Para calcular tu carga de entrenamiento y zonas de ritmo.',de:'Zur Berechnung deiner Trainingsbelastung und Tempozonen.'}[lang]||'';
   const impLbl={en:'Imperial',pl:'Imperialne',fr:'Impérial',es:'Imperial',de:'Imperial'}[lang]||'Imperial';
   const metLbl={en:'Metric',  pl:'Metryczne', fr:'Métrique', es:'Métrico', de:'Metrisch'}[lang]||'Metric';
   const htLbl ={en:'Height',  pl:'Wzrost',    fr:'Taille',   es:'Altura',  de:'Größe'}[lang]||'Height';
@@ -1512,7 +1512,7 @@ function bLevel(){
   const begSub = {
     en:"You're new to running, coming back after a long break, or starting completely from scratch. We build your base carefully — no shortcuts, no injury risk.",
     pl:"Dopiero zaczynasz biegać, wracasz po długiej przerwie lub zaczynasz całkowicie od nowa. Budujemy Twoją bazę ostrożnie — bez skrótów, bez ryzyka kontuzji.",
-    fr:"Vous débutez en course, revenez après une longue pause ou recommencez de zéro. Nous construisons votre base avec soin — sans raccourcis, sans risque de blessure.",
+    fr:"Tu débutes en course, tu reviens après une longue pause ou tu recommences de zéro. On construit ta base avec soin — sans raccourcis, sans risque de blessure.",
     es:"Eres nuevo en el running, vuelves tras un largo descanso o empiezas desde cero. Construimos tu base con cuidado — sin atajos, sin riesgo de lesión.",
     de:"Du bist neu beim Laufen, kommst nach langer Pause zurück oder fängst von vorn an. Wir bauen deine Basis sorgfältig auf — keine Abkürzungen, kein Verletzungsrisiko."
   }[lang]||'';
@@ -1520,7 +1520,7 @@ function bLevel(){
   const advSub = {
     en:"You run regularly — at least once a week — and you're ready to take performance seriously. Whether it's a faster race time or a longer distance, we build a structured plan that pushes you forward without breaking you down.",
     pl:"Biegasz regularnie — przynajmniej raz w tygodniu — i jesteś gotowy traktować swoje wyniki poważnie. Niezależnie czy to szybszy czas czy dłuższy dystans, budujemy plan który pcha Cię do przodu bez przeciążeń.",
-    fr:"Vous courez régulièrement — au moins une fois par semaine — et vous êtes prêt à prendre la performance au sérieux. Que ce soit un temps plus rapide ou une distance plus longue, nous construisons un plan structuré qui vous fait progresser sans vous épuiser.",
+    fr:"Tu cours régulièrement — au moins une fois par semaine — et tu es prêt à prendre la performance au sérieux. Que ce soit un temps plus rapide ou une distance plus longue, on construit un plan structuré qui te fait progresser sans t'épuiser.",
     es:"Corres regularmente — al menos una vez a la semana — y estás listo para tomarte en serio el rendimiento. Ya sea un tiempo más rápido o una distancia más larga, construimos un plan estructurado que te impulsa sin agotarte.",
     de:"Du läufst regelmäßig — mindestens einmal pro Woche — und bist bereit, Leistung ernst zu nehmen. Ob schnellere Rennzeit oder längere Distanz, wir bauen einen strukturierten Plan der dich vorwärtsbringt ohne dich auszubrennen."
   }[lang]||'';
@@ -1542,7 +1542,7 @@ function bLevel(){
   const advGoals = {
     en:  ['Beat your personal best time','Train for a specific race distance','Health & maintenance running','Return to peak form after injury'],
     pl:  ['Pobij swój rekord życiowy','Trening do konkretnego dystansu','Zdrowie i biegi podtrzymujące','Powrót do formy szczytowej po kontuzji'],
-    fr:  ['Battre votre record personnel','S\'entraîner pour une distance de course','Course santé & entretien','Retour à la forme après blessure'],
+    fr:  ['Battre ton record personnel','S\'entraîner pour une distance de course','Course santé & entretien','Retour à la forme après blessure'],
     es:  ['Batir tu mejor marca personal','Entrenar para una distancia de carrera','Carreras de salud y mantenimiento','Volver a la mejor forma tras lesión'],
     de:  ['Persönliche Bestzeit brechen','Für eine Renndistanz trainieren','Gesundheit & Erhaltungsläufe','Nach Verletzung zur Höchstform zurück'],
   }[lang]||[];
@@ -1673,7 +1673,7 @@ function bEasyPace(mKey,sKey,isComeback=false){
   const unknown=S.data.easy_pace_unknown===true;
   const lang=S.data.language||'en';
   const unknownLbl={en:"I don't know",pl:'Nie wiem',fr:'Je ne sais pas',es:'No sé',de:'Weiß ich nicht'}[lang]||"I don't know";
-  const unknownSub={en:'We will estimate it from your diagnostics',pl:'Oszacujemy je z Twoich danych diagnostycznych',fr:'Nous allons estimer depuis vos donnees',es:'Lo estimaremos desde tus datos',de:'Wir schätzen es aus deinen Daten'}[lang]||'';
+  const unknownSub={en:'We will estimate it from your diagnostics',pl:'Oszacujemy je z Twoich danych diagnostycznych',fr:'On l\'estimera à partir de tes données',es:'Lo estimaremos desde tus datos',de:'Wir schätzen es aus deinen Daten'}[lang]||'';
   const minLbl={en:'MIN',pl:'MIN',fr:'MIN',es:'MIN',de:'MIN'}[lang]||'MIN';
   const secLbl={en:'SEC',pl:'SEK',fr:'SEC',es:'SEG',de:'SEK'}[lang]||'SEC';
   return`<h1 class="hl">${e(isComeback?c('qcb_epace'):c('qepace'))}</h1>
@@ -1733,7 +1733,7 @@ function bEasySession(isComeback=false){
   if(!S.data.easy_session_distance)  S.data.easy_session_distance=5;
   const ses=S.data.easy_sessions_per_week, dur=S.data.easy_session_duration, dist=S.data.easy_session_distance;
   const u=S.data.unit==='mi'?'mi':'km';
-  let h = {en:'How do your easy runs look?',pl:'Jak wyglądają Twoje spokojne biegi?',fr:'À quoi ressemblent vos sorties faciles ?',es:'¿Cómo son tus carreras tranquilas?',de:'Wie sehen deine lockeren Läufe aus?'}[lang]||'How do your easy runs look?';
+  let h = {en:'How do your easy runs look?',pl:'Jak wyglądają Twoje spokojne biegi?',fr:'À quoi ressemblent tes sorties faciles ?',es:'¿Cómo son tus carreras tranquilas?',de:'Wie sehen deine lockeren Läufe aus?'}[lang]||'How do your easy runs look?';
   if (isComeback) h = c('qcb_ekm');
   const sesLbl={en:'Sessions / week',pl:isComeback?'Opisz ile było treningów (treningi / tydzień)':'Treningi / tydzień',fr:'Séances / sem.',es:'Sesiones / sem.',de:'Einheiten / Woche'}[lang]||'Sessions / week';
   const durLbl={en:'Avg. duration (min)',pl:isComeback?'Ile trwał typowy trening (min)':'Śr. czas trwania (min)',fr:'Durée moy. (min)',es:'Duración media (min)',de:'Ø Dauer (Min)'}[lang]||'Duration (min)';
@@ -2043,14 +2043,14 @@ function bLongestRun(){
   const u=S.data.unit==='mi'?'mi':'km';
   const lang=S.data.language||'en';
   if(!S.data.dist_longest_run)S.data.dist_longest_run=S.data.unit==='mi'?6:10;
-  const h={en:"What's the longest you've run recently?",pl:'Jaki jest najdłuższy bieg który ostatnio ukończyłeś?',fr:'Quelle est votre plus longue course recente ?',es:'¿Cuál es tu carrera más larga reciente?',de:'Was ist dein längster Lauf zuletzt?'}[lang]||'Longest run';
+  const h={en:"What's the longest you've run recently?",pl:'Jaki jest najdłuższy bieg który ostatnio ukończyłeś?',fr:'Quelle est ta plus longue course récente ?',es:'¿Cuál es tu carrera más larga reciente?',de:'Was ist dein längster Lauf zuletzt?'}[lang]||'Longest run';
   return`<h1 class="hl">${e(h)}</h1>
 <div style="max-width:260px;margin:16px auto 0">${picker(S.data.dist_longest_run,1,S.data.unit==='mi'?100:160,1,'dist_longest_run',u)}</div>`;
 }
 
 function bDistRace(){
   const lang=S.data.language||'en';
-  const h={en:'Do you have a race planned?',pl:'Masz już zaplanowane konkretne zawody?',fr:'Avez-vous une course prevue ?',es:'¿Tienes una carrera planeada?',de:'Hast du ein Rennen geplant?'}[lang]||'Race planned?';
+  const h={en:'Do you have a race planned?',pl:'Masz już zaplanowane konkretne zawody?',fr:'As-tu une course prévue ?',es:'¿Tienes una carrera planeada?',de:'Hast du ein Rennen geplant?'}[lang]||'Race planned?';
   return`<h1 class="hl">${e(h)}</h1>
 <div class="clist">
   ${card(I.flag,c('raceyes'),'',S.data.dist_has_race===true,"pickDistRace(true)")}
@@ -2218,7 +2218,7 @@ function bTimePb(){
   if(S.data.time_pb_mins===undefined||S.data.time_pb_mins===null)S.data.time_pb_mins=25;
   if(!S.data.time_pb_secs)S.data.time_pb_secs=0;
   const dStr = formatTimeDistTitle();
-  const h={en:`What is your best time for ${dStr}?`,pl:`Ile wynosi Twój rekord na dystansie ${dStr} (PB)?`,fr:`Quel est votre meilleur temps sur ${dStr} ?`,es:`¿Cuál es tu mejor tiempo en ${dStr}?`,de:`Was ist deine Bestzeit über ${dStr}?`}[lang]||'Your best time';
+  const h={en:`What is your best time for ${dStr}?`,pl:`Ile wynosi Twój rekord na dystansie ${dStr} (PB)?`,fr:`Quel est ton meilleur temps sur ${dStr} ?`,es:`¿Cuál es tu mejor tiempo en ${dStr}?`,de:`Was ist deine Bestzeit über ${dStr}?`}[lang]||'Your best time';
   const noLbl = ({pl:'Nie mam rekordu / Pierwszy start',en:'I do not have a record yet',fr:"Je n'ai pas encore de record",es:'Todavía no tengo marca',de:'Ich habe noch keine Bestzeit'})[lang]||'I do not have a record yet';
   const noBtnHtml = `<div style="margin-top:24px; text-align:center;">
     <button class="cta-btn" style="background:#f3f6fa;color:#8A97AD;border:1px solid #d4deea;width:100%;font-size:18px;font-weight:700;" onclick="noTimePb()">${e(noLbl)}</button>
@@ -2239,7 +2239,7 @@ function bTimeTarget(){
   if(!S.data.time_target_mins)S.data.time_target_mins=23;
   if(!S.data.time_target_secs)S.data.time_target_secs=0;
   const dStr = formatTimeDistTitle();
-  const h={en:`What time do you want to achieve for ${dStr}?`,pl:`W jaki czas celujesz na dystansie ${dStr}?`,fr:`Quel temps voulez-vous atteindre sur ${dStr} ?`,es:`¿Qué tiempo quieres conseguir en ${dStr}?`,de:`Welche Zeit möchtest du über ${dStr} erreichen?`}[lang]||'Target time';
+  const h={en:`What time do you want to achieve for ${dStr}?`,pl:`W jaki czas celujesz na dystansie ${dStr}?`,fr:`Quel temps veux-tu atteindre sur ${dStr} ?`,es:`¿Qué tiempo quieres conseguir en ${dStr}?`,de:`Welche Zeit möchtest du über ${dStr} erreichen?`}[lang]||'Target time';
   const pbOk=S.data.time_pb_hours*3600+S.data.time_pb_mins*60+S.data.time_pb_secs;
   const tgOk=S.data.time_target_hours*3600+S.data.time_target_mins*60+S.data.time_target_secs;
   const err=pbOk>0&&tgOk>pbOk?`<div id="td_err_target" style="color:#ef4444;font-size:13px;margin-top:20px;text-align:center;font-weight:600;">${e(c('errtarget'))}</div>`:`<div id="td_err_target" style="display:none;color:#ef4444;font-size:13px;margin-top:20px;text-align:center;font-weight:600;">${e(c('errtarget'))}</div>`;
@@ -2248,7 +2248,7 @@ function bTimeTarget(){
 
 function bTimeRace(){
   const lang=S.data.language||'en';
-  const h={en:'Do you have a race planned?',pl:'Masz już zaplanowane zawody?',fr:'Avez-vous une course prevue ?',es:'¿Tienes una carrera planeada?',de:'Hast du ein Rennen geplant?'}[lang]||'Race planned?';
+  const h={en:'Do you have a race planned?',pl:'Masz już zaplanowane zawody?',fr:'As-tu une course prévue ?',es:'¿Tienes una carrera planeada?',de:'Hast du ein Rennen geplant?'}[lang]||'Race planned?';
   return`<h1 class="hl">${e(h)}</h1>
 <div class="clist">
   ${card(I.flag,c('raceyes'),'',S.data.time_has_race===true,"pickTimeRace(true)")}
@@ -2302,7 +2302,7 @@ function shiftCal(mk,yk,d){let m=S.data[mk]+d,y=S.data[yk];while(m<0){m+=12;y--;
 // ── DISTANCE GOAL ──
 function bDistanceDist(){
   const lang=S.data.language||'en';
-  const qh={en:'What distance do you want to achieve?',pl:'Jaki docelowy dystans chcesz osiągnąć?',fr:'Quelle distance voulez-vous atteindre ?',es:'¿Qué distancia quieres lograr?',de:'Welche Distanz möchtest du erreichen?'}[lang]||'What distance do you want to achieve?';
+  const qh={en:'What distance do you want to achieve?',pl:'Jaki docelowy dystans chcesz osiągnąć?',fr:'Quelle distance veux-tu atteindre ?',es:'¿Qué distancia quieres lograr?',de:'Welche Distanz möchtest du erreichen?'}[lang]||'What distance do you want to achieve?';
   const opts=[['10k',c('dist10k')||'10k'],['half',c('disthalf')||'Half Marathon'],['marathon',c('distmarathon')||'Marathon'],['ultra','Ultramaraton 50km'],['other',c('distother')||'Other']];
   const cards=opts.map(([id,title])=>`<div class="cc ${S.data.distance_distance===id?'s':''}" onclick="pickDistanceDist('${id}')">
     <div class="ci">${I.gt}</div>
@@ -2416,7 +2416,7 @@ function bDistancePb(){
   if(S.data.distance_pb_km===undefined||S.data.distance_pb_km===null)S.data.distance_pb_km=5;
   if(S.data.distance_pb_m===undefined||S.data.distance_pb_m===null)S.data.distance_pb_m=0;
   
-  const h={en:`What is your longest run so far?`,pl:`Jaki jest Twój najdłuższy dotychczasowy bieg?`,fr:`Quelle est votre plus longue course à ce jour ?`,es:`¿Cuál es tu carrera más larga hasta ahora?`,de:`Was ist dein bisher längster Lauf?`}[lang]||'Your longest run';
+  const h={en:`What is your longest run so far?`,pl:`Jaki jest Twój najdłuższy dotychczasowy bieg?`,fr:`Quelle est ta plus longue course à ce jour ?`,es:`¿Cuál es tu carrera más larga hasta ahora?`,de:`Was ist dein bisher längster Lauf?`}[lang]||'Your longest run';
   const noLbl = ({pl:'Jeszcze nie biegałem',en:'I have not run yet',fr:"Je n'ai pas encore couru",es:'Todavía no he corrido',de:'Ich bin noch nicht gelaufen'})[lang]||'I have not run yet';
   const noBtnHtml = `<div style="margin-top:24px; text-align:center;">
     <button class="cta-btn" style="background:#f3f6fa;color:#8A97AD;border:1px solid #d4deea;width:100%;font-size:18px;font-weight:700;" onclick="noDistPb()">${e(noLbl)}</button>
@@ -2432,7 +2432,7 @@ function noDistPb() {
 
 function bDistanceRace(){
   const lang=S.data.language||'en';
-  const h={en:'Do you have a race planned?',pl:'Masz już zaplanowane zawody?',fr:'Avez-vous une course prevue ?',es:'¿Tienes una carrera planeada?',de:'Hast du ein Rennen geplant?'}[lang]||'Race planned?';
+  const h={en:'Do you have a race planned?',pl:'Masz już zaplanowane zawody?',fr:'As-tu une course prévue ?',es:'¿Tienes una carrera planeada?',de:'Hast du ein Rennen geplant?'}[lang]||'Race planned?';
   return`<h1 class="hl">${e(h)}</h1>
 <div class="clist">
   ${card(I.flag,c('raceyes'),'',S.data.distance_has_race===true,"pickDistanceRace(true)")}
@@ -2506,8 +2506,8 @@ function pickLastTrain(v){S.data.comeback_last_train=v;setTimeout(next,190);}
 // ── PROFILE ──
 function bProfileGender(){
   const lang=S.data.language||'en';
-  const h={en:'What is your gender?',pl:'Jaka jest Twoja płeć?',fr:'Quel est votre genre ?',es:'¿Cuál es tu género?',de:'Was ist dein Geschlecht?'}[lang]||"What is your gender?";
-  const sub={en:'Used to calibrate your recovery time and training load.',pl:'Służy do kalibracji czasu regeneracji i obciążenia treningowego.',fr:'Pour calibrer votre récupération et votre charge.',es:'Para calibrar tu recuperación y carga.',de:'Zur Kalibrierung von Erholung und Trainingsbelastung.'}[lang]||'';
+  const h={en:'What is your gender?',pl:'Jaka jest Twoja płeć?',fr:'Quel est ton genre ?',es:'¿Cuál es tu género?',de:'Was ist dein Geschlecht?'}[lang]||"What is your gender?";
+  const sub={en:'Used to calibrate your recovery time and training load.',pl:'Służy do kalibracji czasu regeneracji i obciążenia treningowego.',fr:'Pour calibrer ta récupération et ta charge.',es:'Para calibrar tu recuperación y carga.',de:'Zur Kalibrierung von Erholung und Trainingsbelastung.'}[lang]||'';
   return`<h1 class="hl">${e(h)}</h1><p class="sh">${e(sub)}</p>
 <div class="clist" style="margin-top:32px;">
   ${card(I.male,c('male'),'',S.data.gender==='male',"pickGender('male')")}
@@ -2519,7 +2519,7 @@ function pickGender(v){S.data.gender=v;setTimeout(next,190);}
 
 function bDob(){
   const lang=S.data.language||'en';
-  const h={en:'When is your birthday?',pl:'Kiedy masz urodziny?',fr:'Quelle est votre date de naissance ?',es:'¿Cuándo es tu cumpleaños?',de:'Wann hast du Geburtstag?'}[lang]||"When is your birthday?";
+  const h={en:'When is your birthday?',pl:'Kiedy masz urodziny?',fr:'Quelle est ta date de naissance ?',es:'¿Cuándo es tu cumpleaños?',de:'Wann hast du Geburtstag?'}[lang]||"When is your birthday?";
   if(!S.data.dob_d)S.data.dob_d=15;
   if(!S.data.dob_m)S.data.dob_m=c('months')[6];
   if(!S.data.dob_y)S.data.dob_y=2000;
@@ -2745,17 +2745,17 @@ const AUTH_T = {
         pmTitle:'Create a password', pmSub:'You\'ll use it the next time you sign in', pmBtn:'Create account and build my plan', pmLoading:'Building your plan…',
         errDup:'An account with this email already exists. Sign in to continue.', errTimeout:'The connection took too long. Check your internet and try again.',
         errOffline:'Could not reach the server ({err}). Check your internet and try again.', errUnknown:'unknown error', errServerCode:'Server error ({code})' },
-  fr: { title:'Commencer à courir', subtitle:'Créez un compte ou connectez-vous à un compte existant.', create:'Créer un compte', haveAccount:'J\'ai déjà un compte',
-        regTitle:'Créer un compte', regSubtitle:'Saisissez votre email et mot de passe — vous les utiliserez pour vous connecter.',
-        namePh:'Nom et prénom', errName:'Saisissez votre nom', emailPh:'Votre email', pwdPh:'Mot de passe (min. 8 car.)', pwd2Ph:'Répéter le mot de passe', next:'Suivant →',
-        loginTitle:'Se connecter', loginSubtitle:'Saisissez les identifiants de votre compte', loginPwdPh:'Mot de passe', loginBtn:'Se connecter', back:'← Retour',
-        forgot:'Mot de passe oublié ?', resetTitle:'Réinitialiser le mot de passe', resetSubtitle:'Nous enverrons un lien de réinitialisation à votre adresse email.', resetBtn:'Envoyer le lien', resetSent:'Si un compte existe, nous avons envoyé les instructions à cette adresse email.',
-        errEmail:'Saisissez une adresse email valide', errPwd:'Le mot de passe doit comporter au moins 8 caractères', errMatch:'Les mots de passe ne correspondent pas',
-        errPwdEmpty:'Saisissez votre mot de passe', loginLoading:'Connexion…', errBadCreds:'Email ou mot de passe incorrect',
-        errNoServer:'Le serveur ne répond pas — vérifiez votre connexion', errConn:'Erreur de connexion : ', errServer:'Erreur du serveur', errConnServer:'Impossible de joindre le serveur',
-        pmTitle:'Créez un mot de passe', pmSub:'Vous l\'utiliserez lors de votre prochaine connexion', pmBtn:'Créer le compte et générer mon plan', pmLoading:'Génération du plan…',
-        errDup:'Un compte avec cet email existe déjà. Connectez-vous pour continuer.', errTimeout:'La connexion a pris trop de temps. Vérifiez votre internet et réessayez.',
-        errOffline:'Impossible de joindre le serveur ({err}). Vérifiez votre internet et réessayez.', errUnknown:'erreur inconnue', errServerCode:'Erreur du serveur ({code})' },
+  fr: { title:'Commencer à courir', subtitle:'Crée un compte ou connecte-toi à un compte existant.', create:'Créer un compte', haveAccount:'J\'ai déjà un compte',
+        regTitle:'Créer un compte', regSubtitle:'Saisis ton email et ton mot de passe — tu les utiliseras pour te connecter.',
+        namePh:'Nom et prénom', errName:'Saisis ton nom', emailPh:'Ton email', pwdPh:'Mot de passe (min. 8 car.)', pwd2Ph:'Répéter le mot de passe', next:'Suivant →',
+        loginTitle:'Se connecter', loginSubtitle:'Saisis les identifiants de ton compte', loginPwdPh:'Mot de passe', loginBtn:'Se connecter', back:'← Retour',
+        forgot:'Mot de passe oublié ?', resetTitle:'Réinitialiser le mot de passe', resetSubtitle:'On envoie un lien de réinitialisation à ton adresse email.', resetBtn:'Envoyer le lien', resetSent:'Si un compte existe, on a envoyé les instructions à cette adresse email.',
+        errEmail:'Saisis une adresse email valide', errPwd:'Le mot de passe doit comporter au moins 8 caractères', errMatch:'Les mots de passe ne correspondent pas',
+        errPwdEmpty:'Saisis ton mot de passe', loginLoading:'Connexion…', errBadCreds:'Email ou mot de passe incorrect',
+        errNoServer:'Le serveur ne répond pas — vérifie ta connexion', errConn:'Erreur de connexion : ', errServer:'Erreur du serveur', errConnServer:'Impossible de joindre le serveur',
+        pmTitle:'Crée un mot de passe', pmSub:'Tu l\'utiliseras lors de ta prochaine connexion', pmBtn:'Créer le compte et générer mon plan', pmLoading:'Génération du plan…',
+        errDup:'Un compte avec cet email existe déjà. Connecte-toi pour continuer.', errTimeout:'La connexion a pris trop de temps. Vérifie ton internet et réessaie.',
+        errOffline:'Impossible de joindre le serveur ({err}). Vérifie ton internet et réessaie.', errUnknown:'erreur inconnue', errServerCode:'Erreur du serveur ({code})' },
   es: { title:'Empieza a entrenar', subtitle:'Crea una cuenta o inicia sesión en una existente.', create:'Crear cuenta', haveAccount:'Ya tengo cuenta',
         regTitle:'Crear cuenta', regSubtitle:'Introduce email y contraseña — los usarás para iniciar sesión.',
         namePh:'Nombre y apellido', errName:'Introduce tu nombre', emailPh:'Tu email', pwdPh:'Contraseña (mín. 8 caracteres)', pwd2Ph:'Repite la contraseña', next:'Siguiente →',
