@@ -353,7 +353,7 @@ function _wizSteps() {
                     showVelmToast(t('gw.saved'), false);
                     setTimeout(() => { loadSettings(); openSettingsPane('cel'); }, 900);
                 } else {
-                    showVelmToast(data.error || t('gw.saveerr'), true);
+                    showVelmToast(apiErr(data, 'gw.saveerr'), true);
                 }
             } catch(e) {
                 showVelmToast(t('com.err.conn'), true);

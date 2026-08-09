@@ -1,4 +1,4 @@
-        // Init
+﻿        // Init
         // --- Login logic ---
         function isLocalHostLike(hostname) {
             if (!hostname) return true;
@@ -13,9 +13,9 @@
             : 'https://velm-backend-production.up.railway.app';
         window.API_BASE = API_BASE;
 
-        // Stempel buildu — dowód na urządzeniu, że działa świeży kod (trzymać
-        // w zgodzie z CACHE_VERSION w sw.js; bump przy każdym deployu frontendu)
-        const VELM_BUILD = 'v84';
+        // Stempel buildu â€” dowĂłd na urzÄ…dzeniu, ĹĽe dziaĹ‚a Ĺ›wieĹĽy kod (trzymaÄ‡
+        // w zgodzie z CACHE_VERSION w sw.js; bump przy kaĹĽdym deployu frontendu)
+        const VELM_BUILD = 'v85';
         console.log('velm build', VELM_BUILD, navigator.userAgent);
 
         async function hardReloadApp() {
@@ -69,7 +69,7 @@
                 const data = await res.json();
 
                 if (!res.ok || !data.success) {
-                    errEl.textContent = data.error || t('acc.login.err');
+                    errEl.textContent = apiErr(data, 'acc.login.err');
                     btn.disabled = false;
                     btn.textContent = t('login.title');
                     return;
@@ -95,7 +95,7 @@
             }
         }
 
-        // ── PASSWORD RESET MODAL (gdy user przyszedł z linku w mailu) ─────
+        // â”€â”€ PASSWORD RESET MODAL (gdy user przyszedĹ‚ z linku w mailu) â”€â”€â”€â”€â”€
         function openPasswordResetModal(token) {
             const existing = document.getElementById('pwd-reset-modal');
             if (existing) existing.remove();
@@ -109,8 +109,8 @@
                   <input id="pwd-reset-new" type="password" placeholder="${t('acc.reset.new.ph')}" autocomplete="new-password" style="width:100%;height:48px;border:1.5px solid #EBEBEB;border-radius:12px;padding:0 16px;font-size:15px;margin-bottom:10px;box-sizing:border-box;font-family:inherit;"/>
                   <input id="pwd-reset-new2" type="password" placeholder="${t('acc.reset.rep.ph')}" autocomplete="new-password" style="width:100%;height:48px;border:1.5px solid #EBEBEB;border-radius:12px;padding:0 16px;font-size:15px;margin-bottom:14px;box-sizing:border-box;font-family:inherit;"/>
                   <div id="pwd-reset-err" style="color:#C07264;font-size:13px;min-height:16px;margin-bottom:10px;line-height:1.4;"></div>
-                  <button id="pwd-reset-btn" style="width:100%;height:48px;background:#1A1A1A;color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;">Zapisz hasło</button>
-                  <button id="pwd-reset-cancel" style="width:100%;height:40px;background:none;border:none;color:#8A8A8A;font-size:13px;margin-top:8px;cursor:pointer;font-family:inherit;">Anuluj</button>
+                  <button id="pwd-reset-btn" style="width:100%;height:48px;background:#1A1A1A;color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;">${t('acc.reset.save')}</button>
+                  <button id="pwd-reset-cancel" style="width:100%;height:40px;background:none;border:none;color:#8A8A8A;font-size:13px;margin-top:8px;cursor:pointer;font-family:inherit;">${t('com.cancel')}</button>
                 </div>`;
             document.body.appendChild(modal);
             const btn = document.getElementById('pwd-reset-btn');
@@ -122,7 +122,7 @@
                 err.textContent = '';
                 if (!p1.value || p1.value.length < 8) { err.textContent = t('acc.reset.min'); return; }
                 if (p1.value !== p2.value) { err.textContent = t('int.pwd.mismatch'); return; }
-                btn.disabled = true; btn.textContent = '…';
+                btn.disabled = true; btn.textContent = 'â€¦';
                 try {
                     const res = await fetch(`${API_BASE}/api/password-reset/verify`, {
                         method: 'POST', headers: {'Content-Type':'application/json'},
@@ -131,11 +131,11 @@
                     let data = {};
                     try { data = await res.json(); } catch(e) {}
                     if (!res.ok) {
-                        err.textContent = data.error || t('err.server');
+                        err.textContent = apiErr(data, 'err.server');
                         btn.disabled = false; btn.textContent = t('acc.reset.save');
                         return;
                     }
-                    // Wyczyść lokalną sesję i wyrzuć na index z toastem
+                    // WyczyĹ›Ä‡ lokalnÄ… sesjÄ™ i wyrzuÄ‡ na index z toastem
                     localStorage.removeItem('velm_token');
                     localStorage.removeItem('velm_user_id');
                     localStorage.removeItem('velm_user_name');
@@ -154,10 +154,10 @@
 
         async function doLogout() {
             if (!confirm(t('acc.logout.confirm'))) return;
-            // Best-effort backend invalidation (bumps token_version) — never block logout on failure
+            // Best-effort backend invalidation (bumps token_version) â€” never block logout on failure
             try {
                 await fetch(`${API_BASE}/api/logout`, { method: 'POST', headers: authHeaders() });
-            } catch (e) { /* network down — local cleanup still happens */ }
+            } catch (e) { /* network down â€” local cleanup still happens */ }
             localStorage.removeItem('velm_user_id');
             localStorage.removeItem('velm_user_name');
             localStorage.removeItem('velm_token');
@@ -186,7 +186,7 @@
                 a.click();
                 a.remove();
                 URL.revokeObjectURL(url);
-                btn.textContent = t('acc.export.done') + ' ✓';
+                btn.textContent = t('acc.export.done') + ' âś“';
                 setTimeout(() => { btn.textContent = orig; btn.disabled = false; }, 2000);
             } catch (e) {
                 btn.textContent = t('acc.export.err');
@@ -208,7 +208,7 @@
                 let data = {};
                 try { data = await res.json(); } catch (e) {}
                 if (!res.ok) {
-                    alert(data.error || `${t('err.server')} (${res.status})`);
+                    alert(apiErr(data, 'err.server') + ` (${res.status})`);
                     return;
                 }
                 alert(t('acc.delete.done'));
@@ -220,11 +220,11 @@
             }
         }
 
-        // ── CHECK-IN REDIRECT ─────────────────────────────────
-        /** Dzisiejsza data w strefie UŻYTKOWNIKA. Jedyne źródło prawdy dla "dziś".
-            NIE toISOString() — to UTC: w Los Angeles bieg o 18:00 dostawał datę
-            jutrzejszą, nie pasował do dnia planu, a flaga check-inu ustawiona na
-            jutro blokowała check-in nazajutrz. */
+        // â”€â”€ CHECK-IN REDIRECT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        /** Dzisiejsza data w strefie UĹ»YTKOWNIKA. Jedyne ĹşrĂłdĹ‚o prawdy dla "dziĹ›".
+            NIE toISOString() â€” to UTC: w Los Angeles bieg o 18:00 dostawaĹ‚ datÄ™
+            jutrzejszÄ…, nie pasowaĹ‚ do dnia planu, a flaga check-inu ustawiona na
+            jutro blokowaĹ‚a check-in nazajutrz. */
         function todayStr() {
             return toDateStr(new Date());
         }
@@ -267,7 +267,7 @@
             // Strava OAuth callback
             const stravaResult = urlParams.get('strava');
             if (stravaResult === 'connected') {
-                // User connected — clear skip counter and remember connected state
+                // User connected â€” clear skip counter and remember connected state
                 localStorage.setItem('velm_strava_connected', '1');
                 localStorage.removeItem('velm_strava_skip_count');
                 switchView('settings');
@@ -333,17 +333,17 @@
             // Show/hide login overlay
             const overlay = document.getElementById('login-overlay');
             if (currentUserId && overlay) {
-                overlay.remove(); // already logged in — skip overlay
+                overlay.remove(); // already logged in â€” skip overlay
             } else if (!currentUserId) {
                 // Focus email field
                 setTimeout(() => document.getElementById('login-email')?.focus(), 100);
             }
 
-            applyI18n();   // natychmiast podmień statyczny UI (nawigacja, nagłówki) na zapamiętany język
+            applyI18n();   // natychmiast podmieĹ„ statyczny UI (nawigacja, nagĹ‚Ăłwki) na zapamiÄ™tany jÄ™zyk
             document.documentElement.setAttribute('lang', _appLang);
             updateGreeting();
-            // Nagłówek czatu i karty propozycji buduje JS (per agent), więc nie mają
-            // data-i18n — trzeba je przerysować, inaczej do 1. wyboru agenta zostaje polski.
+            // NagĹ‚Ăłwek czatu i karty propozycji buduje JS (per agent), wiÄ™c nie majÄ…
+            // data-i18n â€” trzeba je przerysowaÄ‡, inaczej do 1. wyboru agenta zostaje polski.
             try { _refreshCoachUi(); } catch(e) {}
             updateDate();
             loadUserMemory();
@@ -361,8 +361,8 @@
             // Force Home View on Load
             switchView('home');
             loadTodayCard();
-            // Narada (brak planu / plan wygasł) lub okno powrotne ma priorytet nad porannym
-            // check-inem — poranny otwieramy dopiero gdy narada niczego nie przejęła.
+            // Narada (brak planu / plan wygasĹ‚) lub okno powrotne ma priorytet nad porannym
+            // check-inem â€” poranny otwieramy dopiero gdy narada niczego nie przejÄ™Ĺ‚a.
             checkWeeklyNarada()
                 .then((tookOver) => { if (!tookOver) checkAndRedirectCheckin(); })
                 .catch(() => checkAndRedirectCheckin());
@@ -415,7 +415,7 @@
         // --- Page Init ---
         (function () {
             startHeartAnimation();
-            // readiness populated from real data via loadReadinessDelta() — no placeholder fill
+            // readiness populated from real data via loadReadinessDelta() â€” no placeholder fill
             // Init rolling counters
             document.querySelectorAll('.ticker').forEach(el => initPremiumCounter(el));
             // Ensure we start at home

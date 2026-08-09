@@ -742,6 +742,24 @@
             "sv.pay.1": "$10–20",
             "sv.pay.2": "$20–35",
             "sv.pay.3": "$35+",
+            "api.bad_email": "Nieprawidłowy email",
+            "api.bad_credentials": "Nieprawidłowy email lub hasło",
+            "api.email_taken": "Konto z tym emailem już istnieje",
+            "api.reset_token_missing": "Brak tokenu resetu",
+            "api.password_too_short": "Hasło musi mieć min. 8 znaków",
+            "api.reset_token_invalid": "Link jest nieprawidłowy lub został już użyty",
+            "api.reset_token_expired": "Link wygasł — poproś o nowy reset",
+            "api.account_not_found": "Konto nie istnieje",
+            "api.password_required": "Potwierdź hasłem",
+            "api.password_reset_required": "Konto wymaga resetu hasła — sprawdź email",
+            "api.bad_password": "Nieprawidłowe hasło",
+            "api.no_data": "Brak danych do zapisania",
+            "api.payments_unavailable": "Płatności są chwilowo niedostępne",
+            "api.bad_plan": "Nieprawidłowy plan subskrypcji",
+            "api.price_not_configured": "Cennik nie jest skonfigurowany",
+            "api.no_subscription": "Brak aktywnej subskrypcji",
+            "api.strava_not_configured": "Integracja ze Stravą nie jest skonfigurowana",
+            "api.server_error": "Błąd serwera — spróbuj ponownie",
             "ci.alreadydone": "Dzisiejszy check-in już zrobiony ✓",
             "ci.planloading": "Szczegóły planu wczytają się za chwilę",
             "ci.raceday": "Dziś jest dzień Twojego celu",
@@ -1534,6 +1552,24 @@
             "sv.pay.1": "$10–20",
             "sv.pay.2": "$20–35",
             "sv.pay.3": "$35+",
+            "api.bad_email": "Invalid email address",
+            "api.bad_credentials": "Incorrect email or password",
+            "api.email_taken": "An account with this email already exists",
+            "api.reset_token_missing": "Reset token missing",
+            "api.password_too_short": "Password must be at least 8 characters",
+            "api.reset_token_invalid": "This link is invalid or has already been used",
+            "api.reset_token_expired": "This link has expired — request a new reset",
+            "api.account_not_found": "Account not found",
+            "api.password_required": "Password confirmation required",
+            "api.password_reset_required": "This account needs a password reset — check your email",
+            "api.bad_password": "Incorrect password",
+            "api.no_data": "Nothing to save",
+            "api.payments_unavailable": "Payments are temporarily unavailable",
+            "api.bad_plan": "Invalid subscription plan",
+            "api.price_not_configured": "Pricing is not configured",
+            "api.no_subscription": "No active subscription",
+            "api.strava_not_configured": "The Strava integration is not configured",
+            "api.server_error": "Server error — please try again",
             "ci.alreadydone": "Today's check-in is already done ✓",
             "ci.planloading": "Plan details will load in a moment",
             "ci.raceday": "Today is your goal race day",
@@ -2326,6 +2362,25 @@
             "sv.pay.1": "$10–20",
             "sv.pay.2": "$20–35",
             "sv.pay.3": "$35+",
+            "api.bad_email": "Adresse email invalide",
+            "api.bad_credentials": "Email ou mot de passe incorrect",
+            "api.email_taken": "Un compte avec cet email existe déjà",
+            "api.reset_token_missing": "Jeton de réinitialisation manquant",
+            "api.password_too_short": "Le mot de passe doit comporter au moins 8 caractères",
+            "api.reset_token_invalid": "Ce lien est invalide ou a déjà été utilisé",
+            "api.reset_token_expired": "Ce lien a expiré — demande une nouvelle réinitialisation",
+            "api.account_not_found": "Compte introuvable",
+            
+            "api.password_required": "Confirmation par mot de passe requise",
+            "api.password_reset_required": "Ce compte nécessite une réinitialisation — vérifie tes emails",
+            "api.bad_password": "Mot de passe incorrect",
+            "api.no_data": "Rien à enregistrer",
+            "api.payments_unavailable": "Les paiements sont temporairement indisponibles",
+            "api.bad_plan": "Formule d'abonnement invalide",
+            "api.price_not_configured": "La tarification n'est pas configurée",
+            "api.no_subscription": "Aucun abonnement actif",
+            "api.strava_not_configured": "L'intégration Strava n'est pas configurée",
+            "api.server_error": "Erreur du serveur — réessaie",
             "ci.alreadydone": "Le check-in du jour est déjà fait ✓",
             "ci.planloading": "Les détails du plan arrivent",
             "ci.raceday": "C'est aujourd'hui, ton objectif",
@@ -3118,6 +3173,24 @@
             "sv.pay.1": "$10–20",
             "sv.pay.2": "$20–35",
             "sv.pay.3": "$35+",
+            "api.bad_email": "Email no válido",
+            "api.bad_credentials": "Email o contraseña incorrectos",
+            "api.email_taken": "Ya existe una cuenta con este email",
+            "api.reset_token_missing": "Falta el token de restablecimiento",
+            "api.password_too_short": "La contraseña debe tener al menos 8 caracteres",
+            "api.reset_token_invalid": "Este enlace no es válido o ya se ha usado",
+            "api.reset_token_expired": "Este enlace ha caducado: pide un nuevo restablecimiento",
+            "api.account_not_found": "La cuenta no existe",
+            "api.password_required": "Se requiere confirmar con la contraseña",
+            "api.password_reset_required": "Esta cuenta necesita restablecer la contraseña: revisa tu email",
+            "api.bad_password": "Contraseña incorrecta",
+            "api.no_data": "No hay nada que guardar",
+            "api.payments_unavailable": "Los pagos no están disponibles temporalmente",
+            "api.bad_plan": "Plan de suscripción no válido",
+            "api.price_not_configured": "Los precios no están configurados",
+            "api.no_subscription": "No hay suscripción activa",
+            "api.strava_not_configured": "La integración con Strava no está configurada",
+            "api.server_error": "Error del servidor: inténtalo de nuevo",
             "ci.alreadydone": "El check-in de hoy ya está hecho ✓",
             "ci.planloading": "Los detalles del plan cargarán en un momento",
             "ci.raceday": "Hoy es el día de tu objetivo",
@@ -3910,6 +3983,24 @@
             "sv.pay.1": "$10–20",
             "sv.pay.2": "$20–35",
             "sv.pay.3": "$35+",
+            "api.bad_email": "Ungültige E-Mail-Adresse",
+            "api.bad_credentials": "E-Mail oder Passwort ist falsch",
+            "api.email_taken": "Ein Konto mit dieser E-Mail existiert bereits",
+            "api.reset_token_missing": "Zurücksetz-Token fehlt",
+            "api.password_too_short": "Das Passwort muss mindestens 8 Zeichen lang sein",
+            "api.reset_token_invalid": "Dieser Link ist ungültig oder wurde bereits verwendet",
+            "api.reset_token_expired": "Dieser Link ist abgelaufen — fordere einen neuen an",
+            "api.account_not_found": "Konto nicht gefunden",
+            "api.password_required": "Bestätigung mit Passwort erforderlich",
+            "api.password_reset_required": "Dieses Konto braucht ein neues Passwort — prüfe deine E-Mails",
+            "api.bad_password": "Falsches Passwort",
+            "api.no_data": "Nichts zu speichern",
+            "api.payments_unavailable": "Zahlungen sind vorübergehend nicht verfügbar",
+            "api.bad_plan": "Ungültiger Abo-Tarif",
+            "api.price_not_configured": "Die Preise sind nicht konfiguriert",
+            "api.no_subscription": "Kein aktives Abo",
+            "api.strava_not_configured": "Die Strava-Integration ist nicht eingerichtet",
+            "api.server_error": "Serverfehler — versuche es erneut",
             "ci.alreadydone": "Der heutige Check-in ist schon erledigt ✓",
             "ci.planloading": "Die Plandetails laden gleich",
             "ci.raceday": "Heute ist dein Zieltag",
@@ -3966,6 +4057,25 @@
         function t(key) {
             const L = I18N[_appLang] || I18N.pl;
             return (L && L[key] != null) ? L[key] : (I18N.pl[key] != null ? I18N.pl[key] : key);
+        }
+        // Backend odpowiada PO POLSKU. Bez tego `data.error || t(...)` pokazywał
+        // obcojęzycznemu userowi polski komunikat, bo tekst z API wygrywał
+        // z przetłumaczonym fallbackiem. Teraz API dokłada stabilne `code`,
+        // a my tłumaczymy po nim.
+        // apiCode() zwraca null przy nieznanym kodzie — dzięki temu miejsce
+        // wywołania może wybrać własny kształt zdania (np. karta subskrypcji
+        // dokleja prefiks „Błąd płatności:" tylko wtedy, gdy nie zna kodu).
+        function apiCode(data) {
+            const c = data && data.code;
+            if (!c) return null;
+            const k = 'api.' + c;
+            const v = t(k);
+            return v === k ? null : v;   // t() oddaje sam klucz, gdy go nie zna
+        }
+        // Tekst z API zostaje jako druga szansa: część komunikatów niesie
+        // informację, której front sam nie odtworzy.
+        function apiErr(data, fallbackKey) {
+            return apiCode(data) || (data && data.error) || t(fallbackKey || 'api.server_error');
         }
         // Liczebniki. Polski ma 3 formy (1 / 2–4 / 5+ z wyjątkiem nastek), reszta 2.
         // Zamiast pisać warunki per język bierzemy Intl.PluralRules i klucze

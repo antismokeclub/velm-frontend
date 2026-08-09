@@ -261,7 +261,7 @@
                 });
                 const data = await res.json();
                 if (data.url) window.location.href = data.url;
-                else showVelmToast(t('sub.pay.err') + ' ' + (data.error || t('sub.pay.unknown')), true);
+                else showVelmToast(apiCode(data) || (t('sub.pay.err') + ' ' + (data.error || t('sub.pay.unknown'))), true);
             } catch(e) {
                 showVelmToast(t('com.err.conn'), true);
             }

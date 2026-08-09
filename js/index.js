@@ -1017,7 +1017,7 @@ async function done() {
       } else if (response.status === 409) {
         velmFinale.fail();
         if (btn) { btn.disabled = false; btn.textContent = c('qgenerate'); }
-        alert(data.error || _authT().errDup);
+        alert(_apiErr(data, 'errDup'));
       } else {
         // Server responded with an error — surface its real message instead of a generic one
         const serverErr = new Error(data.error || _authT().errServerCode.replace('{code}', response.status));
@@ -2781,6 +2781,25 @@ const AUTH_T = {
 };
 function _authT() { return AUTH_T[S.data.language] || AUTH_T.en; }
 
+// Backend odpowiada PO POLSKU — bez tego `data.error || t.errX` pokazywał
+// obcojęzycznemu userowi polski komunikat, bo tekst z API wygrywał
+// z przetłumaczonym fallbackiem. API dokłada teraz stabilne `code`,
+// a tu mapujemy je na istniejące klucze AUTH_T (bez dublowania tłumaczeń).
+// Uwzględnione są tylko kody, które realnie mogą tu trafić: onboarding 409,
+// reset hasła i logowanie.
+const API_CODE_KEY = {
+  bad_email:       'errEmail',
+  bad_credentials: 'errBadCreds',
+  email_taken:     'errDup',
+  server_error:    'errServer'
+};
+function _apiErr(data, fallbackKey) {
+  const tr = _authT();
+  const k = data && data.code && API_CODE_KEY[data.code];
+  if (k && tr[k]) return tr[k];
+  return (data && data.error) || tr[fallbackKey];
+}
+
 function _renderAuthChoice() {
   const t = _authT();
   document.getElementById('auth-card').innerHTML = `
@@ -2878,7 +2897,7 @@ async function handlePasswordResetRequest() {
       emailEl.disabled = true;
       btn.style.display = 'none';
     } else {
-      errEl.textContent = data.error || t.errServer;
+      errEl.textContent = _apiErr(data, 'errServer');
       btn.disabled = false; btn.textContent = t.resetBtn;
     }
   } catch (e) {
@@ -2910,7 +2929,7 @@ async function handleLogin() {
     clearTimeout(timeout);
     const data = await res.json();
     if (!res.ok || !data.success) {
-      errEl.textContent = data.error || t.errBadCreds;
+      errEl.textContent = _apiErr(data, 'errBadCreds');
       btn.disabled = false; btn.textContent = t.loginBtn;
       return;
     }

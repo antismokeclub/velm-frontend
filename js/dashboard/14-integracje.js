@@ -70,7 +70,7 @@
                 });
                 const data = await res.json();
                 if (!res.ok || !data.redirectUrl) {
-                    alert(data.error || t('int.strava.err'));
+                    alert(apiErr(data, 'int.strava.err'));
                     return;
                 }
                 window.location.href = data.redirectUrl;
