@@ -347,7 +347,7 @@ function _wizSteps() {
                 u.start_focus = w.startFocus;
             }
             try {
-                const res = await fetch(`${API_BASE}/api/user/${userId}/goal`, { method: 'PUT', headers: authHeaders(), body: JSON.stringify(u) });
+                const res = await authFetch(`${API_BASE}/api/user/${userId}/goal`, { method: 'PUT', headers: authHeaders(), body: JSON.stringify(u) });
                 const data = await res.json();
                 if (data.success) {
                     showVelmToast(t('gw.saved'), false);

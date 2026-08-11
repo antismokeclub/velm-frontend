@@ -6,7 +6,7 @@
         async function loadSubscriptionStatus() {
             if (!currentUserId) return;
             try {
-                const res = await fetch(API_BASE + '/api/subscription/' + currentUserId, { headers: authHeaders() });
+                const res = await authFetch(API_BASE + '/api/subscription/' + currentUserId, { headers: authHeaders() });
                 if (!res.ok) {
                     console.error('loadSubscriptionStatus: HTTP ' + res.status);
                     return; // zachowaj poprzedni stan zamiast degradować do nie-premium
@@ -32,7 +32,7 @@
             const container = document.getElementById('subscription-section');
             if (!container || !currentUserId) return;
             try {
-                const res = await fetch(API_BASE + '/api/subscription/' + currentUserId, { headers: authHeaders() });
+                const res = await authFetch(API_BASE + '/api/subscription/' + currentUserId, { headers: authHeaders() });
                 const data = await res.json();
                 const _benefit = txt => '<div style="display:flex;align-items:center;gap:12px;padding:9px 0;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5F8368" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M20 6L9 17l-5-5"/></svg><span style="font-size:14px;color:#1A1A1A;font-family:Inter,sans-serif;">' + txt + '</span></div>';
                 const _proBenefits = '<div class="sd-card"><div class="sd-seclabel">' + t('sub.benefits') + '</div>' +
@@ -79,7 +79,7 @@
 
         async function openBillingPortal() {
             try {
-                const res = await fetch(API_BASE + '/api/subscription/portal', { method: 'POST', headers: authHeaders() });
+                const res = await authFetch(API_BASE + '/api/subscription/portal', { method: 'POST', headers: authHeaders() });
                 const data = await res.json();
                 if (data.url) window.location.href = data.url;
                 else showVelmToast(t('sub.portal.err'), true);
@@ -254,7 +254,7 @@
         async function startCheckout(plan) {
             document.getElementById('paywall-modal')?.remove();
             try {
-                const res = await fetch(API_BASE + '/api/subscription/checkout', {
+                const res = await authFetch(API_BASE + '/api/subscription/checkout', {
                     method: 'POST',
                     headers: authHeaders(),
                     body: JSON.stringify({ plan })

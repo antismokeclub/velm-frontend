@@ -217,7 +217,7 @@
             try {
                 const apiType = isSleep ? 'sleep' : 'hr';
                 const uid = localStorage.getItem('velm_user_id') || currentUserId;
-                const response = await fetch(`${API_BASE}/api/health/${uid}?type=${apiType}&days=7`, { headers: authHeaders() });
+                const response = await authFetch(`${API_BASE}/api/health/${uid}?type=${apiType}&days=7`, { headers: authHeaders() });
                 if (!response.ok) throw new Error('HTTP ' + response.status);
                 const result = await response.json();
                 if (result.metrics && result.metrics.length > 0) {
@@ -477,7 +477,7 @@
 
             // Fetch readiness data from API
             try {
-                const response = await fetch(`${API_BASE}/api/health/${currentUserId}?type=readiness&days=7`, { headers: authHeaders() });
+                const response = await authFetch(`${API_BASE}/api/health/${currentUserId}?type=readiness&days=7`, { headers: authHeaders() });
                 if (!response.ok) throw new Error('HTTP ' + response.status);
                 const result = await response.json();
 

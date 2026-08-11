@@ -9,7 +9,7 @@
             if (!container) return;
             container.innerHTML = '<div style="text-align:center;padding:40px;color:#8A8A8A;">' + t('com.loading') + '</div>';
             try {
-                const res = await fetch(`${API_BASE}/api/workouts/${currentUserId}?days=90`, { headers: authHeaders() });
+                const res = await authFetch(`${API_BASE}/api/workouts/${currentUserId}?days=90`, { headers: authHeaders() });
                 const data = await res.json();
                 historyWorkouts = data.workouts ?? [];
                 historyPage = 0;

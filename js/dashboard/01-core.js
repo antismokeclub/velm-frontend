@@ -171,3 +171,49 @@
             return data;
         }
 
+        // --- authFetch: goły fetch + odzyskiwanie po 401 ---------------------
+        // 39 wywołań w js/dashboard robi `fetch(url, { headers: authHeaders() })`.
+        // Gdy access token wygaśnie W TRAKCIE sesji (TTL 1h), każde z nich dostaje
+        // 401 i nikt ich nie ponawia — apka po cichu pustoszeje: karty bez danych,
+        // subskrypcja spada do nie-premium, zero komunikatu.
+        //
+        // apiFetch to potrafi, ale ma INNY KONTRAKT (rzuca na !ok, zwraca sparsowane
+        // dane), więc przepisanie 39 miejsc byłoby zmianą semantyki w całej warstwie
+        // danych. authFetch zwraca ZWYKŁY Response, więc `res.ok`, `res.json()`
+        // i istniejące catche zostają nietknięte — podmiana jest mechaniczna.
+        //
+        // Świadomie NIE jest to opakowanie globalnego window.fetch: sondy renderu
+        // podmieniają `w.fetch` po załadowaniu strony, więc globalny wrapper byłby
+        // przez nie kasowany i testowałyby apkę z WYŁĄCZONYM odzyskiwaniem po 401,
+        // nie wiedząc o tym.
+        function _withFreshToken(headers) {
+            const h = Object.assign({}, headers || {});
+            // Klucz mógł przyjść w dowolnej wielkości liter — usuwamy każdy wariant,
+            // żeby nie zostawić starego obok nowego.
+            Object.keys(h).forEach(k => { if (k.toLowerCase() === 'authorization') delete h[k]; });
+            const tok = localStorage.getItem('velm_token');
+            if (tok) h['Authorization'] = 'Bearer ' + tok;
+            return h;   // Content-Type NIE jest dotykany — inaczej FormData (.fit) traci boundary
+        }
+        async function authFetch(path, opts = {}) {
+            const url = String(path).startsWith('http') ? path : `${window.API_BASE || ''}${path}`;
+            // Nagłówek budujemy PRZY KAŻDEJ próbie, nie raz. authHeaders() czyta token
+            // z localStorage w chwili wywołania, więc ponowienie ze starym `init`
+            // poleciałoby z tym samym wygasłym tokenem i znowu dostało 401.
+            const attempt = () => fetch(url, Object.assign({}, opts, { headers: _withFreshToken(opts.headers) }));
+
+            const res = await attempt();
+            if (res.status !== 401) return res;
+
+            // refreshAccessToken() ma jedną obietnicę w locie, więc 39 równoległych
+            // 401 dzieli JEDNO odświeżenie — nie dokładamy drugiego mechanizmu.
+            const fresh = await refreshAccessToken();
+            if (!fresh) {
+                // Refresh token też padł — ekran logowania zamiast cicho pustej apki.
+                // Działa dopiero odkąd nakładka nie jest usuwana z DOM.
+                forceReauth(t('err.session'));
+                return res;
+            }
+            return attempt();
+        }
+

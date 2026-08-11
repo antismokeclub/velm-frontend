@@ -15,7 +15,7 @@
 
         // Stempel buildu â€” dowĂłd na urzÄ…dzeniu, ĹĽe dziaĹ‚a Ĺ›wieĹĽy kod (trzymaÄ‡
         // w zgodzie z CACHE_VERSION w sw.js; bump przy kaĹĽdym deployu frontendu)
-        const VELM_BUILD = 'v86';
+        const VELM_BUILD = 'v87';
         console.log('velm build', VELM_BUILD, navigator.userAgent);
 
         async function hardReloadApp() {
@@ -156,7 +156,7 @@
             if (!confirm(t('acc.logout.confirm'))) return;
             // Best-effort backend invalidation (bumps token_version) â€” never block logout on failure
             try {
-                await fetch(`${API_BASE}/api/logout`, { method: 'POST', headers: authHeaders() });
+                await authFetch(`${API_BASE}/api/logout`, { method: 'POST', headers: authHeaders() });
             } catch (e) { /* network down â€” local cleanup still happens */ }
             localStorage.removeItem('velm_user_id');
             localStorage.removeItem('velm_user_name');
@@ -173,7 +173,7 @@
             btn.disabled = true;
             btn.textContent = t('com.downloading');
             try {
-                const res = await fetch(`${API_BASE}/api/user/${currentUserId}/export`, {
+                const res = await authFetch(`${API_BASE}/api/user/${currentUserId}/export`, {
                     headers: authHeaders()
                 });
                 if (!res.ok) throw new Error(t('err.server'));
@@ -200,7 +200,7 @@
             const password = prompt(t('acc.delete.pwd'));
             if (password === null) return;
             try {
-                const res = await fetch(`${API_BASE}/api/user/${currentUserId}`, {
+                const res = await authFetch(`${API_BASE}/api/user/${currentUserId}`, {
                     method: 'DELETE',
                     headers: authHeaders(),
                     body: JSON.stringify({ password })

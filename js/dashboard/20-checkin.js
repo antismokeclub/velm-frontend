@@ -582,7 +582,7 @@
             const hoursStr = (sleepH > 0 || sleepM > 0) ? `${sleepH}h${sleepM > 0 ? ' ' + sleepM + 'min' : ''}` : '?';
             const recoveryStr = muscleRecovery || '?';
             const msg = `CHECK-IN PORANNY: sen=${sleep}/5, godziny_snu=${hoursStr}, energia=${energy}/10, regeneracja_miesni=${recoveryStr}, gotowosc=${readiness}`;
-            fetch(`${API_BASE}/api/chat`, {
+            authFetch(`${API_BASE}/api/chat`, {
                 method:'POST', headers: authHeaders(),
                 body: JSON.stringify({ userId, message: msg, agent: 'analityk' })
             }).catch(() => {});
@@ -591,7 +591,7 @@
             const sleepVal = sleepIdx >= 0 ? sleepIdx + 1 : null;
             const energyVal = parseInt(document.getElementById('energySlider')?.value) || null;
             const readinessVal = readinessEl?.textContent?.trim() ?? null;
-            fetch(`${API_BASE}/api/checkin`, {
+            authFetch(`${API_BASE}/api/checkin`, {
                 method: 'POST', headers: authHeaders(),
                 body: JSON.stringify({
                     userId,
@@ -1013,7 +1013,7 @@
                 });
                 if (userId) {
                     const dur = durH * 60 + durM + durS / 60;
-                    fetch(`${API_BASE}/api/checkin`, {
+                    authFetch(`${API_BASE}/api/checkin`, {
                         method:'POST', headers: authHeaders(),
                         body: JSON.stringify({ userId, type:'post', data:{ duration:dur, rpe:rpeVal, completion:selectedCompletion }})
                     }).catch(e => console.error('checkin save:', e));

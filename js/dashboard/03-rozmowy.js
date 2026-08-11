@@ -108,7 +108,7 @@
         async function loadConversationsForAgent(agent) {
             if (!currentUserId || !agent) return [];
             try {
-                const res = await fetch(`${API_BASE}/api/conversations/${currentUserId}/${agent}?limit=10`, { headers: authHeaders() });
+                const res = await authFetch(`${API_BASE}/api/conversations/${currentUserId}/${agent}?limit=10`, { headers: authHeaders() });
                 if (!res.ok) return [];
                 const data = await res.json();
                 _conversationsCache[agent] = data.conversations || [];
@@ -190,7 +190,7 @@
                 item.querySelector('.conv-confirm-yes').addEventListener('click', async (e) => {
                     e.stopPropagation();
                     try {
-                        const res = await fetch(`${API_BASE}/api/conversation/${c.id}`, { method: 'DELETE', headers: authHeaders() });
+                        const res = await authFetch(`${API_BASE}/api/conversation/${c.id}`, { method: 'DELETE', headers: authHeaders() });
                         if (!res.ok) { item.classList.remove('conv-confirming'); return; }
                         if (c.id === currentConversationId) startNewConversation();
                         _conversationsCache[selectedAgent] = (_conversationsCache[selectedAgent] || []).filter(x => x.id !== c.id);
@@ -224,7 +224,7 @@
                 if (quick) quick.style.display = 'none';
             }
             try {
-                const res = await fetch(`${API_BASE}/api/conversation/${convId}/messages?limit=50`, { headers: authHeaders() });
+                const res = await authFetch(`${API_BASE}/api/conversation/${convId}/messages?limit=50`, { headers: authHeaders() });
                 if (!res.ok) {
                     if (container) { container.classList.remove('conv-switching'); container.classList.add('conv-ready'); }
                     return;

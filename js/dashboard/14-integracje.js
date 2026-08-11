@@ -117,10 +117,11 @@
             formData.append('file', file);
 
             try {
-                const token = localStorage.getItem('velm_token');
-                const res = await fetch(API_BASE + '/api/import/fit/' + currentUserId, {
+                // authFetch podmienia WYŁĄCZNIE nagłówek Authorization i nie dotyka
+                // Content-Type, więc FormData samo ustawia swój boundary. Dzięki temu
+                // import .fit też odzyskuje po wygasłym tokenie zamiast padać na 401.
+                const res = await authFetch(API_BASE + '/api/import/fit/' + currentUserId, {
                     method: 'POST',
-                    headers: { 'Authorization': 'Bearer ' + token },
                     body: formData
                 });
                 const data = await res.json();
@@ -176,7 +177,7 @@
             if (newPwd !== confirmPwd) { showSettingsMsg('settings-pwd-msg', t('int.pwd.mismatch'), true); return; }
             if (newPwd.length < 8) { showSettingsMsg('settings-pwd-msg', t('int.pwd.min'), true); return; }
             try {
-                const res = await fetch(`${API_BASE}/api/user/${currentUserId}/change-password`, {
+                const res = await authFetch(`${API_BASE}/api/user/${currentUserId}/change-password`, {
                     method: 'POST', headers: authHeaders(),
                     body: JSON.stringify({ currentPassword: current, newPassword: newPwd })
                 });
@@ -200,7 +201,7 @@
             if (!newEmail || !pwd) { showSettingsMsg('settings-email-msg', t('int.email.fillboth'), true); return; }
             if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newEmail)) { showSettingsMsg('settings-email-msg', t('int.email.invalid'), true); return; }
             try {
-                const res = await fetch(`${API_BASE}/api/user/${currentUserId}/change-email`, {
+                const res = await authFetch(`${API_BASE}/api/user/${currentUserId}/change-email`, {
                     method: 'POST', headers: authHeaders(),
                     body: JSON.stringify({ currentPassword: pwd, newEmail })
                 });

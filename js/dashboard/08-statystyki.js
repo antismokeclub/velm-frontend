@@ -7,7 +7,7 @@
                     statsData = calendarPlan;
                 } else {
                     if (!currentUserId) throw new Error('no user');
-                    const r = await fetch(`${API_BASE}/api/plan/${currentUserId}`, { headers: authHeaders() });
+                    const r = await authFetch(`${API_BASE}/api/plan/${currentUserId}`, { headers: authHeaders() });
                     if (!r.ok) throw new Error('http');
                     const d = await r.json();
                     if (!d.success || !d.plan) throw new Error('no plan');
@@ -232,7 +232,7 @@
         async function loadRealWorkouts() {
             if (!currentUserId) return null;
             try {
-                const res = await fetch(`${API_BASE}/api/health/${currentUserId}?type=workouts&days=7`, { headers: authHeaders() });
+                const res = await authFetch(`${API_BASE}/api/health/${currentUserId}?type=workouts&days=7`, { headers: authHeaders() });
                 const data = await res.json();
                 return data.workouts || null;
             } catch(e) { return null; }

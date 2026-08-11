@@ -48,12 +48,12 @@
         async function loadUserProfile() {
             if (!currentUserId) return;
             try {
-                let res = await fetch(`${API_BASE}/api/user/${currentUserId}`, { headers: authHeaders() });
+                let res = await authFetch(`${API_BASE}/api/user/${currentUserId}`, { headers: authHeaders() });
                 // Wartownik sesji: 401 → spróbuj odświeżyć token i powtórz; jak dalej 401,
                 // sesja jest martwa → pokaż logowanie (inaczej cała apka po cichu nie działa)
                 if (res.status === 401) {
                     const nt = await refreshAccessToken();
-                    if (nt) res = await fetch(`${API_BASE}/api/user/${currentUserId}`, { headers: authHeaders() });
+                    if (nt) res = await authFetch(`${API_BASE}/api/user/${currentUserId}`, { headers: authHeaders() });
                 }
                 if (res.status === 401) { forceReauth(t('err.session.relogin')); return; }
                 const data = await res.json();
@@ -105,7 +105,7 @@
                 const btn = document.getElementById('email-verify-resend-btn');
                 btn.disabled = true; btn.textContent = '…';
                 try {
-                    const res = await fetch(`${API_BASE}/api/email/send-verification`, { method: 'POST', headers: authHeaders() });
+                    const res = await authFetch(`${API_BASE}/api/email/send-verification`, { method: 'POST', headers: authHeaders() });
                     const data = await res.json().catch(() => ({}));
                     if (res.ok) {
                         btn.textContent = t('verify.sent') + ' ✓';
@@ -134,7 +134,7 @@
         async function loadSleepFromAPI() {
             if (!currentUserId) return;
             try {
-                const res = await fetch(`${API_BASE}/api/health/${currentUserId}?type=sleep&days=1`, { headers: authHeaders() });
+                const res = await authFetch(`${API_BASE}/api/health/${currentUserId}?type=sleep&days=1`, { headers: authHeaders() });
                 const data = await res.json();
                 const metrics = data?.metrics;
                 if (!metrics?.length) return;
@@ -151,7 +151,7 @@
         async function loadRestingHRFromAPI() {
             if (!currentUserId) return;
             try {
-                const res = await fetch(`${API_BASE}/api/health/${currentUserId}?type=hr&days=7`, { headers: authHeaders() });
+                const res = await authFetch(`${API_BASE}/api/health/${currentUserId}?type=hr&days=7`, { headers: authHeaders() });
                 const data = await res.json();
                 const metrics = data?.metrics;
                 if (!metrics?.length) return;
@@ -166,7 +166,7 @@
         async function loadReadinessDelta() {
             if (!currentUserId) return;
             try {
-                const res = await fetch(`${API_BASE}/api/health/${currentUserId}?type=readiness&days=2`, { headers: authHeaders() });
+                const res = await authFetch(`${API_BASE}/api/health/${currentUserId}?type=readiness&days=2`, { headers: authHeaders() });
                 const data = await res.json();
                 const metrics = data?.metrics;
                 if (!metrics || metrics.length === 0) return;

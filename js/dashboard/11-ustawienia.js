@@ -83,7 +83,7 @@
             // Ten tydzień — realne treningi (Pn–Nd zawierający dziś)
             try {
                 const uid = localStorage.getItem('velm_user_id');
-                const res = await fetch(`${API_BASE}/api/workouts/${uid}?days=14`, { headers: authHeaders() });
+                const res = await authFetch(`${API_BASE}/api/workouts/${uid}?days=14`, { headers: authHeaders() });
                 const data = res.ok ? await res.json() : {};
                 const workouts = data.workouts ?? [];
                 const today = new Date(); today.setHours(0,0,0,0);
@@ -130,8 +130,8 @@
             loadSubscriptionSection();
             try {
                 const [userRes, planRes] = await Promise.all([
-                    fetch(`${API_BASE}/api/user/${userId}`, { headers: authHeaders() }),
-                    fetch(`${API_BASE}/api/plan/${userId}`, { headers: authHeaders() })
+                    authFetch(`${API_BASE}/api/user/${userId}`, { headers: authHeaders() }),
+                    authFetch(`${API_BASE}/api/plan/${userId}`, { headers: authHeaders() })
                 ]);
                 const { user } = userRes.ok ? await userRes.json() : {};
                 const planData = planRes.ok ? await planRes.json() : {};
@@ -223,7 +223,7 @@
             if (_settingsUnit) updates.unit = _settingsUnit;
             if (Object.keys(updates).length === 0) return;
             try {
-                const res = await fetch(`${API_BASE}/api/user/${userId}`, {
+                const res = await authFetch(`${API_BASE}/api/user/${userId}`, {
                     method: 'PUT', headers: authHeaders(),
                     body: JSON.stringify(updates)
                 });

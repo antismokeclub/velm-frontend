@@ -740,7 +740,7 @@
                 return;
             }
             try {
-                const res  = await fetch(`${API_BASE}/api/plan/${currentUserId}`, { headers: authHeaders() });
+                const res  = await authFetch(`${API_BASE}/api/plan/${currentUserId}`, { headers: authHeaders() });
                 const data = await res.json();
                 // BUG: bez sprawdzenia res.ok, błąd auth (401 z poprawnym JSON-em
                 // { error: '...' }) parsował się bez wyjątku — calendarPlan dostawał

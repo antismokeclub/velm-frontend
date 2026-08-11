@@ -174,7 +174,7 @@
         async function loadPlanChanges() {
             if (!currentUserId) return;
             try {
-                const res = await fetch(`${API_BASE}/api/plan-changes/${currentUserId}`, { headers: authHeaders() });
+                const res = await authFetch(`${API_BASE}/api/plan-changes/${currentUserId}`, { headers: authHeaders() });
                 const data = await res.json();
                 const changes = data.changes || [];
                 const section = document.getElementById('plan-changes-section');
@@ -216,7 +216,7 @@
 
             try {
                 if (currentUserId) {
-                    const res  = await fetch(`${API_BASE}/api/user/${currentUserId}`, { headers: authHeaders() });
+                    const res  = await authFetch(`${API_BASE}/api/user/${currentUserId}`, { headers: authHeaders() });
                     const data = await res.json();
                     raceDate = data.user?.onboarding_data?.time_race_target
                              || data.user?.onboarding_data?.time_race_date
@@ -277,7 +277,7 @@
         async function loadStreak() {
             if (!currentUserId) return;
             try {
-                const res = await fetch(`${API_BASE}/api/streak/${currentUserId}`, { headers: authHeaders() });
+                const res = await authFetch(`${API_BASE}/api/streak/${currentUserId}`, { headers: authHeaders() });
                 const data = await res.json();
                 const streak = data.streak || 0;
                 const card = document.getElementById('streak-card');

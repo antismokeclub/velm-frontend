@@ -34,7 +34,7 @@
             if (Object.keys(updates).length === 0) return;
 
             try {
-                const res = await fetch(`${API_BASE}/api/user/${userId}/goal`, {
+                const res = await authFetch(`${API_BASE}/api/user/${userId}/goal`, {
                     method: 'PUT',
                     headers: authHeaders(),
                     body: JSON.stringify(updates)
@@ -56,7 +56,7 @@
             const list = document.getElementById('memory-list') || document.getElementById('memory-content') || document.getElementById('coach-memory') || null;
             if (!list) return;
             try {
-                const response = await fetch(`${API_BASE}/api/memory/get?userId=${currentUserId}`, { headers: authHeaders() });
+                const response = await authFetch(`${API_BASE}/api/memory/get?userId=${currentUserId}`, { headers: authHeaders() });
                 const data = await response.json();
 
                 const AGENT_DISPLAY = { analityk: t('agent.analityk.name'), fizjo: t('agent.fizjo.name'), psycholog: t('agent.psycholog.name'), szef_sztabu: t('agent.szef_sztabu.name') };
@@ -126,7 +126,7 @@
 
             try {
                 // 3. Call API
-                const response = await fetch(`${API_BASE}/api/chat`, {
+                const response = await authFetch(`${API_BASE}/api/chat`, {
                     method: 'POST',
                     headers: authHeaders(),
                     body: JSON.stringify({
