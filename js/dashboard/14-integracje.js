@@ -1,12 +1,15 @@
+        // `el`, a nie `t` — lokalne `t` przesłaniałoby globalną funkcję tłumaczącą
+        // t(), więc dopisanie tu kiedykolwiek t('klucz') wysypałoby się po cichu.
+        // Ta sama klasa błędu co `const todayStr = todayStr()` w 18-dzis.js.
         function showVelmToast(msg, isError) {
-            const t = document.createElement('div');
-            t.style.cssText = 'position:fixed;top:20px;left:50%;transform:translateX(-50%);' +
+            const el = document.createElement('div');
+            el.style.cssText = 'position:fixed;top:20px;left:50%;transform:translateX(-50%);' +
                 'background:' + (isError ? '#C07264' : '#1A1A1A') + ';color:#fff;' +
                 'padding:12px 24px;border-radius:14px;font-size:14px;font-weight:600;' +
                 'z-index:9999;font-family:Inter,sans-serif;box-shadow:0 4px 20px rgba(0,0,0,0.2);';
-            t.textContent = msg;
-            document.body.appendChild(t);
-            setTimeout(() => t.remove(), 4000);
+            el.textContent = msg;
+            document.body.appendChild(el);
+            setTimeout(() => el.remove(), 4000);
         }
 
         // ── STRAVA ───────────────────────────────────────────────

@@ -55,15 +55,21 @@
                 return;
             }
 
-            const todayStr = todayStr();
-            let day = dni.find(d => d.data === todayStr);
+            // NIE `const todayStr = todayStr()` — taka deklaracja tworzy LOKALNE
+            // wiązanie przesłaniające globalną funkcję todayStr() (19-konto.js),
+            // a inicjalizator woła już to lokalne, będące w martwej strefie (TDZ).
+            // Efekt: ReferenceException przy KAŻDYM wywołaniu _fillTodayCard, który
+            // wspólny catch w loadTodayCard pokazywał jako „Brak połączenia
+            // z serwerem" — mimo w pełni sprawnego serwera.
+            const todayIso = todayStr();
+            let day = dni.find(d => d.data === todayIso);
             if (!day) {
                 // Plan, którego tydzień już się skończył (dziś jest PO ostatnim
                 // dniu planu) — NIE zgadujemy losowego dnia z przeszłości jako
                 // "dzisiejszego" (to właśnie pokazywało np. "10 km" sprzed
                 // tygodnia). Mówimy wprost, że czekamy na naradę.
                 const lastDay = dni[dni.length - 1]?.data;
-                if (lastDay && todayStr > lastDay) {
+                if (lastDay && todayIso > lastDay) {
                     window._todayTyp = 'rest'; window._todayKm = 0; window._todayStruktura = null;
                     if (nameEl)  nameEl.textContent = t('today.planexpired');
                     if (badgeEl) badgeEl.textContent = '🌙';
@@ -128,27 +134,39 @@
         async function loadTodayCard() {
             if (!currentUserId) return;
 
-            try {
-                let dni = calendarPlan?.dni;
+            let dni = calendarPlan?.dni;
 
-                if (!dni?.length) {
-                    const res  = await fetch(`${API_BASE}/api/plan/${currentUserId}`, { headers: authHeaders() });
-                    const data = await res.json();
-                    // Bez res.ok, błąd auth (401 z poprawnym JSON-em { error: '...' })
-                    // parsował się bez wyjątku i ten obiekt błędu (bez .dni) lądował
-                    // we WSPÓLNYM calendarPlan — Dom miał wtedy własny fallback więc
-                    // pokazywał coś (mylące "działa"), ale Kalendarz dziedziczył
-                    // "plan" bez dni i renderował pustą siatkę bez żadnego błędu.
-                    const plan = res.ok ? (data?.plan?.plan ?? data?.plan ?? null) : null;
+            if (!dni?.length) {
+                try {
+                    // apiFetch zamiast gołego fetch: daje darmowe odświeżenie tokenu
+                    // po 401 i ROZRÓŻNIA awarię sieci (brak .status) od odpowiedzi
+                    // serwera z kodem (.status). Wcześniej `await res.json()` rzucało
+                    // na każdej odpowiedzi nie-JSON (np. stronie błędu Railway przy
+                    // zimnym starcie), a catch pokazywał „Brak połączenia z serwerem".
+                    const data = await apiFetch(`/api/plan/${currentUserId}`);
+                    // Obiekt błędu (bez .dni) nie może trafić do WSPÓLNEGO calendarPlan —
+                    // Dom ma własny fallback więc pokazywał coś (mylące „działa"),
+                    // ale Kalendarz dziedziczył „plan" bez dni i renderował pustą siatkę.
+                    const plan = data?.plan?.plan ?? data?.plan ?? null;
                     dni = plan?.dni;
                     if (plan?.dni && !calendarPlan) calendarPlan = plan;
+                } catch (e) {
+                    console.error('loadTodayCard: pobranie planu —', e?.status || '(sieć)', e?.message || e);
+                    const nameEl = document.getElementById('home-main-workout-name');
+                    if (nameEl) nameEl.textContent = e?.status ? t('err.server') : t('err.noserver');
+                    return;
                 }
+            }
 
+            // Render trzymamy POZA catchem sieciowym: błąd rysowania to nie jest
+            // awaria połączenia i nie wolno go tak podpisywać. Wcześniej wspólny
+            // catch zamieniał każdy wyjątek w „Brak połączenia z serwerem" i przy
+            // okazji połykał go bez logu, więc nie dało się tego zdiagnozować.
+            try {
                 _fillTodayCard(dni);
                 updatePostCheckinBanner();
-            } catch(e) {
-                const nameEl = document.getElementById('home-main-workout-name');
-                if (nameEl) nameEl.textContent = t('err.noserver');
+            } catch (e) {
+                console.error('loadTodayCard: render —', e?.message || e, e);
             }
         }
 
