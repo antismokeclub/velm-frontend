@@ -66,6 +66,40 @@
             return _refreshPromise;
         }
 
+        // Access token żyje 1h, a odświeżyć go potrafi WYŁĄCZNIE apiFetch().
+        // Większość loaderów startowych używa gołego fetch(), więc po godzinie
+        // przerwy cały ekran startowy dostawał 401 (zmierzone: 15 żądań zanim
+        // cokolwiek odświeżyło token) i pokazywał „Brak połączenia z serwerem"
+        // mimo w pełni działającego serwera. Dlatego odświeżamy PRZED loaderami.
+        //
+        // Czytamy `exp` z tokenu bez weryfikacji podpisu — to tylko decyzja
+        // „czy warto odświeżyć". Autentyczność i tak sprawdza serwer.
+        function _accessTokenExpiresWithin(seconds) {
+            const tok = localStorage.getItem('velm_token');
+            if (!tok) return true;
+            const parts = tok.split('.');
+            if (parts.length !== 3) return true;   // nie-JWT (np. token testowy) — odśwież
+            try {
+                const json = atob(parts[1].replace(/-/g, '+').replace(/_/g, '/'));
+                const exp = JSON.parse(json).exp;
+                if (!exp) return true;
+                return (exp * 1000) - Date.now() < seconds * 1000;
+            } catch (e) {
+                return true;
+            }
+        }
+        // Zwraca zawsze — brak refresh tokenu albo nieudane odświeżenie nie może
+        // zablokować startu apki (loadery i tak mają własne 401 → forceReauth).
+        async function ensureFreshToken() {
+            try {
+                if (!_accessTokenExpiresWithin(120)) return;
+                if (!localStorage.getItem('velm_refresh_token')) return;
+                await refreshAccessToken();
+            } catch (e) {
+                console.warn('ensureFreshToken:', e?.message || e);
+            }
+        }
+
         // Wygasła/nieważna sesja — wyczyść tokeny i pokaż ekran logowania,
         // zamiast zostawiać apkę „martwą" (dane po cichu nie ładują się).
         let _reauthShown = false;

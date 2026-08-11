@@ -330,13 +330,19 @@
                 showVelmToast(t('acc.sub.cancelled'), true);
             }
 
-            // Show/hide login overlay
+            // Nakładka logowania startuje UKRYTA (class="hidden" w markupie) i tylko
+            // ją odsłaniamy, gdy logowanie jest naprawdę potrzebne.
+            // Wcześniej było overlay.remove(), co miało dwie wady: (1) usuwało element
+            // z DOM, więc forceReauth() i ścieżka 401 w 01-core.js robiły
+            // classList.remove('hidden') na czymś, czego już nie ma — po wygaśnięciu
+            // sesji apka cicho umierała zamiast poprosić o zalogowanie;
+            // (2) nie dało się tego odwrócić bez przeładowania strony.
             const overlay = document.getElementById('login-overlay');
-            if (currentUserId && overlay) {
-                overlay.remove(); // already logged in â€” skip overlay
-            } else if (!currentUserId) {
-                // Focus email field
+            if (!currentUserId) {
+                if (overlay) overlay.classList.remove('hidden');
                 setTimeout(() => document.getElementById('login-email')?.focus(), 100);
+            } else if (overlay) {
+                overlay.classList.add('hidden');   // idempotentne — markup już to ma
             }
 
             applyI18n();   // natychmiast podmieĹ„ statyczny UI (nawigacja, nagĹ‚Ăłwki) na zapamiÄ™tany jÄ™zyk
@@ -346,26 +352,34 @@
             // data-i18n â€” trzeba je przerysowaÄ‡, inaczej do 1. wyboru agenta zostaje polski.
             try { _refreshCoachUi(); } catch(e) {}
             updateDate();
-            loadUserMemory();
-            loadUserProfile();
-            loadSubscriptionStatus();
-            updateRaceCountdown();
-            loadPlanChanges();
-            loadStreak();
             startHeartAnimation();
 
             // Initial Rolling Counters
             const tickers = document.querySelectorAll('.ticker');
             tickers.forEach(t => initPremiumCounter(t));
 
-            // Force Home View on Load
-            switchView('home');
-            loadTodayCard();
-            // Narada (brak planu / plan wygasĹ‚) lub okno powrotne ma priorytet nad porannym
-            // check-inem â€” poranny otwieramy dopiero gdy narada niczego nie przejÄ™Ĺ‚a.
-            checkWeeklyNarada()
-                .then((tookOver) => { if (!tookOver) checkAndRedirectCheckin(); })
-                .catch(() => checkAndRedirectCheckin());
+            // Dane ładujemy DOPIERO po upewnieniu się, że access token jest świeży.
+            // Wcześniej wszystkie żądania startowe leciały równolegle ze starym
+            // tokenem, dostawały 401 i — poza nielicznymi na apiFetch — nikt ich
+            // nie ponawiał: karta „dziś" pokazywała „Brak połączenia z serwerem",
+            // a subskrypcja spadała do nie-premium, więc płacący user widział paywall.
+            //
+            // switchView('home') jest TUTAJ, nie wyżej, bo samo woła loadTodayCard,
+            // updateRaceCountdown, loadPlanChanges i loadStreak (09-nawigacja.js:47-55).
+            // Wywołane przed odświeżeniem tokenu było źródłem czterech pewnych 401.
+            // Widok domowy i tak jest aktywny z markupu (`class="view active"`),
+            // więc przesunięcie nie powoduje pustego ekranu.
+            ensureFreshToken().then(() => {
+                switchView('home');
+                loadUserMemory();
+                loadUserProfile();
+                loadSubscriptionStatus();
+                // Narada (brak planu / plan wygasł) lub okno powrotne ma priorytet nad
+                // porannym check-inem — poranny otwieramy dopiero gdy narada niczego nie przejęła.
+                return checkWeeklyNarada()
+                    .then((tookOver) => { if (!tookOver) checkAndRedirectCheckin(); })
+                    .catch(() => checkAndRedirectCheckin());
+            });
 
 
             // Header Scroll Effect
@@ -412,13 +426,15 @@
         }
 
         // --- The Grinder Runner (Pro Jointed Edition) ---
-        // --- Page Init ---
-        (function () {
-            startHeartAnimation();
-            // readiness populated from real data via loadReadinessDelta() â€” no placeholder fill
-            // Init rolling counters
-            document.querySelectorAll('.ticker').forEach(el => initPremiumCounter(el));
-            // Ensure we start at home
-            switchView('home');
-        })();
+        // USUNIĘTE (2026-08-11): IIFE „Page Init", które robiło startHeartAnimation(),
+        // liczniki i switchView('home') — czyli DOKŁADNIE to samo, co handler
+        // DOMContentLoaded kilkaset linii wyżej. Skutek był dotkliwszy niż podwójna
+        // animacja: switchView('home') sam woła loadTodayCard/loadPlanChanges/
+        // loadStreak/updateRaceCountdown (09-nawigacja.js:47-55), więc CAŁY start
+        // wykonywał się dwa razy — zmierzone w sondzie jako dwie identyczne serie
+        // żądań. Przy wygasłym tokenie dawało to podwójny szturm 401 i widoczne
+        // „przeskakiwanie" ekranu, bo dane renderowały się dwukrotnie.
+        // Ten plik jest wstawiany przez parser na końcu <body>, więc w chwili jego
+        // wykonania document.readyState === 'loading' i DOMContentLoaded na pewno
+        // jeszcze się nie odpalił — nie potrzeba tu żadnej siatki bezpieczeństwa.
 
