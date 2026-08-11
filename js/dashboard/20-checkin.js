@@ -597,6 +597,11 @@
                     userId,
                     type: 'morning',
                     data: {
+                        // Ta sama data, którą ustawiamy flagę velm_checkin_morning_done.
+                        // Backend liczył dzień w UTC, więc rekord potrafił wylądować pod
+                        // innym dniem niż flaga — apka uważała check-in za zrobiony,
+                        // a Laboratorium i agenci widzieli dziurę.
+                        date: todayStr(),
                         sleep: sleepVal, energy: energyVal, readiness: readinessVal,
                         readiness_followup: readinessFollowup || null,
                         soreness_location: sorenessLocation || null, soreness_duration: sorenessDuration || null,
