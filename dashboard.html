@@ -16,12 +16,14 @@
                     .catch(err => console.warn('[velm] SW register failed:', err.message));
             });
 
-            navigator.serviceWorker.addEventListener('controllerchange', () => {
-                if (!window.__velmSwReloaded) {
-                    window.__velmSwReloaded = true;
-                    window.location.reload();
-                }
-            });
+            // USUNIĘTE (2026-08-11): przeładowanie strony przy 'controllerchange'.
+            // sw.js robi skipWaiting() + clients.claim(), więc nowy worker przejmuje
+            // OTWARTĄ kartę — a ten handler natychmiast ją przeładowywał. Po każdym
+            // deployu użytkownik dostawał wymuszony reload w środku startu apki:
+            // nakładka zdążyła się pokazać, znikała razem ze stroną, a po ponownym
+            // starcie wchodziła inna. Stąd wrażenie chaotycznych, „skaczących" okien.
+            // Reload i tak nic nie dawał: skrypty i style idą network-first
+            // (sw.js), więc następna nawigacja ma świeży kod bez żadnej pomocy.
         }
     </script>
     <!-- PWA -->
@@ -42,8 +44,10 @@
 
 <body>
 
-    <!-- Login overlay — shown when no userId in localStorage -->
-    <div id="login-overlay">
+    <!-- Login overlay — startuje UKRYTY; JS zdejmuje `hidden` tylko gdy brakuje
+         userId albo gdy sesja wygasła (forceReauth / 401 w 01-core.js).
+         Bez `hidden` w markupie ta nakładka jest pełnoekranowa i z z-index 99999. -->
+    <div id="login-overlay" class="hidden">
         <div class="login-logo">VELM</div>
         <div class="login-tagline" data-i18n="login.tagline">Twój AI trener biegowy</div>
         <div class="login-card">

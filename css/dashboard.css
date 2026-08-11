@@ -379,6 +379,10 @@
         }
         #login-overlay.hidden {
             opacity:0; transform:scale(0.97); pointer-events:none;
+            /* visibility, nie tylko opacity: bez tego ukryty formularz logowania
+               nadal łapie fokus tabulatorem i siedzi w drzewie dostępności,
+               a leży na całym ekranie z z-index 99999. */
+            visibility:hidden;
         }
         .login-logo {
             font-family:'Outfit',sans-serif; font-weight:900;
