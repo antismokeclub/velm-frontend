@@ -1,0 +1,13 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">velm</string>
+    <string name="title_activity_main">velm</string>
+    <string name="package_name">app.velm</string>
+    <string name="custom_url_scheme">app.velm</string>
+    <!-- Health Connect pokazuje ten adres, gdy user tapnie "Polityka prywatnosci"
+         w oknie zgody na dane zdrowotne. BEZ TEGO okno zgody nie przechodzi recenzji
+         Google Play. Wskazuje na ten sam URL co PWA, wiec poprawka polityki idzie
+         zwyklym deployem na Vercela, bez nowego wydania w sklepie.
+         Polityka ma osobna sekcje o danych zdrowotnych — wymog deklaracji Play. -->
+    <string name="health_connect_privacy_policy_url">https://velm-frontend.vercel.app/privacy.html</string>
+</resources>

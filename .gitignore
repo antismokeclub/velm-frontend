@@ -65,3 +65,16 @@ _i18nprobe.html
 _onbprobe.html
 
 _authprobe.html
+
+# Capacitor / apka natywna
+# node_modules — zaleznosci Capacitora, odtwarzalne z package-lock.json (ten JEST w repo)
+node_modules/
+# dist/ — kopia webowych plikow pod `npx cap sync`, generowana przez `npm run build`
+dist/
+# android/ JEST wersjonowane (trzyma recznie ustawione minSdk, privacy policy URL,
+# uprawnienia Health Connect) — Capacitor dopisuje wlasny android/.gitignore na wytwory buildu.
+# Tu tylko to, czego jego .gitignore nie lapie:
+android/app/src/main/assets/public/
+android/app/release/
+*.keystore
+*.jks

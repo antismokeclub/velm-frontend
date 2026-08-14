@@ -16,3 +16,10 @@ _onbprobe.html
 serve-frontend.js
 tools/
 _authprobe.html
+
+# Apka natywna — nie ma czego szukac na Vercelu (android/ to setki plikow,
+# dist/ to kopia tych samych plikow co w korzeniu)
+android/
+ios/
+dist/
+scripts/

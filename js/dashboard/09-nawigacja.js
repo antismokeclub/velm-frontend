@@ -57,6 +57,7 @@
                 if (viewName === 'settings') {
                     loadSettings();
                     loadStravaStatus();
+                    loadWatchStatus();
                 }
 
                 if (viewName === 'history') {
