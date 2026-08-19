@@ -114,7 +114,7 @@ const D={
   current_weekly_mileage:null,workouts_per_week:null,easy_pace_min:null,easy_pace_sec:null,is_structured:null,
   endurance_dist:null,customDist:10,dist_longest_run:null,dist_has_race:null,dist_goal_date:null,dist_cal_month:null,dist_cal_year:null,
   time_distance:null,time_custom_dist:null,time_pb_hours:null,time_pb_mins:null,time_pb_secs:null,
-  time_target_hours:null,time_target_mins:null,time_target_secs:null,time_has_race:null,time_goal_date:null,time_cal_month:null,time_cal_year:null
+  time_target_hours:null,time_target_mins:null,time_target_secs:null,distance_time_none:null,time_has_race:null,time_goal_date:null,time_cal_month:null,time_cal_year:null
 };
 const S={step:0,history:[],data:D};
 
@@ -594,6 +594,7 @@ const STEPS=[
   {id:'time_mixed_volume',back:true,cta:true,skip:d=>d.goalId!=='time'},
   {id:'distance_dist',back:true,cta:d=>d.distance_distance==='other',skip:d=>d.goalId!=='distance'},
   {id:'distance_pb',back:true,cta:true,skip:d=>d.goalId!=='distance'||!d.distance_distance},
+  {id:'distance_time',back:true,cta:true,skip:d=>d.goalId!=='distance'||!d.distance_distance},
   {id:'distance_race',back:true,cta:false,skip:d=>d.goalId!=='distance'||!d.distance_distance},
   {id:'distance_race_date',back:true,cta:true,skip:d=>d.goalId!=='distance'||!d.distance_distance||d.distance_has_race==null},
   {id:'distance_mixed_week',back:true,cta:true,skip:d=>d.goalId!=='distance'},
@@ -1103,6 +1104,13 @@ function cant(id){
     const cur=(S.data.time_pb_hours||0)*3600+(S.data.time_pb_mins||0)*60+(S.data.time_pb_secs||0);
     return !t||!cur||t>cur;
   }
+  if(id==='distance_time'){
+    // Krok CELOWO opcjonalny. "Nie wiem" jest pelnoprawna odpowiedzia i samo
+    // w sobie niesie informacje: kto nie zna swojego czasu docelowego, ten nie
+    // planuje pod wynik — sztab ma wtedy budowac baze, a nie tempo startowe.
+    if (S.data.distance_time_none) return false;
+    return !((S.data.time_target_hours||0)*3600+(S.data.time_target_mins||0)*60+(S.data.time_target_secs||0));
+  }
   if(id==='distance_target'){
     const t=(S.data.distance_target_km||0)*1000+(S.data.distance_target_m||0);
     if (S.data.distance_pb_none) return !t;
@@ -1164,6 +1172,7 @@ function bld(id){
     case 'time_mixed_volume':return bMixedVolume(false, 'time');
     case 'distance_dist':      return bDistanceDist();
     case 'distance_pb':        return bDistancePb();
+    case 'distance_time':      return bDistanceTime();
     case 'distance_race':      return bDistanceRace();
     case 'distance_race_date': return bCalendar('distance_race_target','dr_m','dr_y',S.data.distance_has_race?c('qracedate'):c('qgoaldate'),S.data.distance_has_race?null:c('qgoaldatehint'));
     case 'distance_mixed_week':return bMixedWeek('distance_week_plan');
@@ -2409,6 +2418,69 @@ function distAdj(pbt, component, dir, mn, mx) {
   
   const ctab=document.getElementById('ctab');
   if(ctab) ctab.disabled = cant(S.step === STEPS.findIndex(st=>st.id==='distance_target') ? 'distance_target' : '');
+}
+
+// Czas docelowy na wybranym dystansie — CELOWO opcjonalny.
+//
+// PO CO: bez tego pola backend nie ma z czego policzyc "FORMY DOCELOWEJ".
+// _buildPaceBlock (headtrainer.js) czyta time_target_hours/mins/secs, ale kreator
+// pytal o nie WYLACZNIE w galezi "poprawa rekordu". Kto wybieral cel dystansowy —
+// czyli kazdy polmaratonczyk i maratonczyk — zostawial to pole puste, wiec prompt
+// dostawal "brak celu czasowego" i model wymyslal tempa z powietrza.
+//
+// UZYWAMY TYCH SAMYCH POL time_target_*, nie nowych: resolveGoalDistanceKm juz
+// obsluguje galaz dystansowa (racePrediction.js:32), wiec backend zaczyna liczyc
+// VDOT celu bez ANI JEDNEJ zmiany po swojej stronie.
+//
+// DLACZEGO OPCJONALNY: "nie wiem" to pelnoprawna odpowiedz i sama w sobie jest
+// informacja. Kto nie zna swojego czasu docelowego, ten nie biega pod wynik —
+// sztab ma mu budowac baze i uczyc regularnosci, a nie ustawiac tempo startowe.
+// Wymuszanie liczby dawaloby wartosc zmyslona, gorsza niz jej brak.
+function bDistanceTime(){
+  const lang=S.data.language||'en';
+  if(!S.data.time_target_hours)S.data.time_target_hours=1;
+  if(!S.data.time_target_mins)S.data.time_target_mins=45;
+  if(!S.data.time_target_secs)S.data.time_target_secs=0;
+  // Etykieta dystansu: TIME_DIST_TITLE trzyma nazwy dla obu galezi (te same
+  // dystanse), wiec czytamy ja kluczem z galezi dystansowej zamiast dublowac slownik.
+  const T = TIME_DIST_TITLE[lang] || TIME_DIST_TITLE.en;
+  const dst = S.data.distance_distance;
+  const dStr = dst === 'other'
+    ? `${S.data.distance_custom_dist} ${T.unit(S.data.unit)}`
+    : (T[dst] || '');
+  const h={
+    en:`In what time do you want to run ${dStr}?`,
+    pl:`W jakim czasie chcesz przebiec ${dStr}?`,
+    fr:`En combien de temps veux-tu courir ${dStr} ?`,
+    es:`¿En qué tiempo quieres correr ${dStr}?`,
+    de:`In welcher Zeit möchtest du ${dStr} laufen?`
+  }[lang]||'Your target time';
+  const sub={
+    en:'Optional — it only helps us set your paces.',
+    pl:'To nie jest obowiązkowe — pomaga nam tylko dobrać Twoje tempa.',
+    fr:"Facultatif — cela nous aide seulement à calibrer tes allures.",
+    es:'Opcional: solo nos ayuda a ajustar tus ritmos.',
+    de:'Optional — es hilft uns nur, deine Tempos festzulegen.'
+  }[lang]||'';
+  const noLbl={
+    en:'I do not know yet — I just want to finish',
+    pl:'Nie wiem — chcę po prostu ukończyć',
+    fr:"Je ne sais pas encore — je veux juste finir",
+    es:'No lo sé todavía: solo quiero terminarlo',
+    de:'Weiß ich noch nicht — ich will einfach ankommen'
+  }[lang]||'I do not know yet';
+  const subHtml = sub ? `<p class="sub" style="text-align:center;margin-top:-6px;">${e(sub)}</p>` : '';
+  const noBtnHtml = `<div style="margin-top:24px; text-align:center;">
+    <button class="cta-btn" style="background:#f3f6fa;color:#8A97AD;border:1px solid #d4deea;width:100%;font-size:18px;font-weight:700;" onclick="noDistanceTime()">${e(noLbl)}</button>
+  </div>`;
+  return renderTimeAdjUI('target', h) + subHtml + noBtnHtml;
+}
+function noDistanceTime() {
+  S.data.distance_time_none = true;
+  S.data.time_target_hours = 0;
+  S.data.time_target_mins = 0;
+  S.data.time_target_secs = 0;
+  next();
 }
 
 function bDistancePb(){

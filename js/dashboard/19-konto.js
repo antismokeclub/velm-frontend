@@ -15,7 +15,7 @@
 
         // Stempel buildu â€” dowĂłd na urzÄ…dzeniu, ĹĽe dziaĹ‚a Ĺ›wieĹĽy kod (trzymaÄ‡
         // w zgodzie z CACHE_VERSION w sw.js; bump przy kaĹĽdym deployu frontendu)
-        const VELM_BUILD = 'v89';
+        const VELM_BUILD = 'v90';
         console.log('velm build', VELM_BUILD, navigator.userAgent);
 
         async function hardReloadApp() {
