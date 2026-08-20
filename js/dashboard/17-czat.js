@@ -200,6 +200,55 @@
             scrollToBottom();
         }
 
+        // ── FORMATOWANIE ODPOWIEDZI AGENTA ────────────────────────────────────
+        //
+        // PO CO: odpowiedź szła przez textContent, więc lądowała jako JEDEN blok
+        // surowego tekstu. Agent pisze 4-6 zdań gęstych od liczb — tempa 5:30-5:40,
+        // dystanse, RPE, strefy Z2 — czyli dokładnie to, czego biegacz szuka wzrokiem,
+        // a co ginęło w ścianie tekstu.
+        //
+        // NIE PARSUJEMY MARKDOWNU. Agenci mają go ZAKAZANEGO (reguła z CLAUDE.md),
+        // a pomiar to potwierdził: 0 z 191 odpowiedzi w czacie zawierało markdown.
+        // Parser byłby więc martwym kodem czekającym, żeby źle zinterpretować
+        // gwiazdkę w zwykłym zdaniu.
+        //
+        // BEZPIECZEŃSTWO: najpierw sanitizeHTML na CAŁOŚCI, dopiero potem wstawiamy
+        // własne znaczniki. Odwrotna kolejność oznaczałaby, że treść od modelu trafia
+        // do innerHTML przed ucieczką znaków.
+        const _WZORCE_LICZB = [
+            // Tempo: 5:30 albo zakres 5:30-5:40, opcjonalnie z /km
+            /\b\d{1,2}:\d{2}(?:\s*[-–]\s*\d{1,2}:\d{2})?(?:\s*\/\s*km|\s*min\/km)?\b/g,
+            // Dystans: 12 km, 8,5 km, 800 m
+            /\b\d+(?:[.,]\d+)?\s*(?:km|m)\b/g,
+            // RPE i strefy tętna
+            /\bRPE\s*\d{1,2}(?:\s*\/\s*10)?\b/gi,
+            /\bZ[1-5]\b/g,
+            // Tętno. Jedna cyfra też — „tętno spadło o 5 bpm" to najczęstsze zdanie
+            // o adaptacji, jakie agent pisze, a przy \d{2,3} wypadało z wyróżnienia.
+            /\b\d{1,3}\s*(?:bpm|ud\/min)\b/gi
+        ];
+
+        function _formatAgentText(text) {
+            const bezpieczny = sanitizeHTML(String(text || '').trim());
+            if (!bezpieczny) return '';
+
+            // Akapity: pusta linia albo pojedyncze złamanie od modelu. Gdy model nie
+            // złamał nic, zostaje jeden akapit — i to jest w porządku, bo 4-6 zdań
+            // bez podziału dalej czyta się dobrze.
+            const akapity = bezpieczny.split(/\n\s*\n|\n/).map(a => a.trim()).filter(Boolean);
+
+            return akapity.map((ak, i) => {
+                let tresc = ak;
+                for (const wz of _WZORCE_LICZB) {
+                    tresc = tresc.replace(wz, (m) => '<b class="liczba">' + m + '</b>');
+                }
+                // Opóźnienie rośnie z indeksem, ale ma SUFIT — przy dłuższej odpowiedzi
+                // ostatni akapit nie może kazać czekać pół sekundy.
+                const op = Math.min(i * 60, 240);
+                return '<span class="ak" style="animation-delay:' + op + 'ms">' + tresc + '</span>';
+            }).join('');
+        }
+
         function addMessage(role, text) {
             const container = document.getElementById('coach-messages');
             // Hide quick suggestions on first message
@@ -210,7 +259,13 @@
 
             const div = document.createElement('div');
             div.className = role === 'user' ? 'msg msg-user' : 'msg msg-ai';
-            div.textContent = text;
+            if (role === 'user') {
+                // Wiadomość użytkownika zostaje na textContent — jego własny tekst nie
+                // wymaga wyróżniania liczb, a to najprostsza droga do bezpieczeństwa.
+                div.textContent = text;
+            } else {
+                div.innerHTML = _formatAgentText(text);
+            }
             container.appendChild(div);
             return div;
         }

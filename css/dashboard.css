@@ -698,6 +698,41 @@
             box-shadow: 0 2px 10px rgba(0,0,0,0.04);
         }
 
+        /* --- Odpowiedź agenta: akapity i liczby --- */
+        /* Akapit jako blok, żeby dwa zdania od agenta nie sklejały się w ścianę.
+           Ostatni bez marginesu — inaczej bańka ma pustą szparę na dole. */
+        .msg-ai .ak {
+            display: block;
+            animation: akWejscie 260ms cubic-bezier(0.23, 1, 0.32, 1) both;
+        }
+        .msg-ai .ak + .ak { margin-top: 0.7em; }
+
+        /* Tempa, dystanse, RPE i strefy — to jest to, czego biegacz szuka wzrokiem.
+           Wyróżnienie samą wagą i lekkim tłem, BEZ koloru akcentowego: tych liczb
+           bywa pięć w jednym zdaniu i kolor zamieniłby wiadomość w choinkę. */
+        .msg-ai .liczba {
+            font-weight: 620;
+            font-variant-numeric: tabular-nums;
+            background: rgba(26,26,26,0.05);
+            border-radius: 5px;
+            padding: 0.05em 0.28em;
+            margin: 0 -0.04em;
+            white-space: nowrap;
+        }
+
+        /* Tylko transform i opacity — reguła 60fps na średnim Androidzie.
+           Start ze scale(0.98), nigdy ze scale(0): nic w świecie rzeczywistym
+           nie pojawia się z niczego. */
+        @keyframes akWejscie {
+            from { opacity: 0; transform: translateY(4px) scale(0.985); }
+            to   { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            /* Zostaje samo pojawienie się, znika ruch — treść ma dotrzeć tak samo. */
+            .msg-ai .ak { animation: akWejscieBezRuchu 160ms ease both; }
+            @keyframes akWejscieBezRuchu { from { opacity: 0; } to { opacity: 1; } }
+        }
+
         /* Suggestions */
         #coach-suggestions {
             display: flex;
