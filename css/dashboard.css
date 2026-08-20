@@ -733,6 +733,85 @@
             @keyframes akWejscieBezRuchu { from { opacity: 0; } to { opacity: 1; } }
         }
 
+        /* --- Wykaz „co sprawdziłem": stopka pod odpowiedzią agenta --- */
+        /* Cichy do granic: to dowód, nie treść. Ma być pod ręką, kiedy zawodnik
+           zapyta „skąd to wiesz", i niewidoczny przez resztę czasu. */
+        .msg-ai .ai-read {
+            margin-top: 10px;
+            padding-top: 9px;
+            border-top: 1px solid rgba(26,26,26,0.07);
+        }
+        .msg-ai .air-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            width: 100%;
+            padding: 2px 0;
+            min-height: 28px;
+            background: none;
+            border: 0;
+            font-family: 'Inter', sans-serif;
+            font-size: 12px;
+            font-weight: 600;
+            color: #8A8A8A;
+            letter-spacing: -0.005em;
+            cursor: pointer;
+            text-align: left;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+            transition: color 160ms var(--ease-out, cubic-bezier(0.23,1,0.32,1));
+        }
+        .msg-ai .air-btn:active { color: #1A1A1A; }
+        @media (hover: hover) and (pointer: fine) {
+            .msg-ai .air-btn:hover { color: #1A1A1A; }
+        }
+        /* Ptaszek dostaje kolor zgody — jedyny akcent w całym pasku. */
+        .msg-ai .air-btn > svg:first-child { color: #6B8F71; flex-shrink: 0; }
+        .msg-ai .air-n {
+            font-variant-numeric: tabular-nums;
+            font-size: 11px;
+            font-weight: 700;
+            color: #6B6B6B;
+            background: rgba(26,26,26,0.06);
+            border-radius: 999px;
+            padding: 1px 6px;
+            line-height: 1.5;
+        }
+        .msg-ai .air-chev {
+            margin-left: auto;
+            flex-shrink: 0;
+            transition: transform 220ms var(--ease-out, cubic-bezier(0.23,1,0.32,1));
+        }
+        .msg-ai .air-open .air-chev { transform: rotate(180deg); }
+        .msg-ai .air-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-top: 8px;
+        }
+        .msg-ai .air-list[hidden] { display: none; }
+        .msg-ai .air-item {
+            font-size: 11.5px;
+            font-weight: 500;
+            color: #6B6B6B;
+            background: rgba(26,26,26,0.04);
+            border: 1px solid rgba(26,26,26,0.05);
+            border-radius: 8px;
+            padding: 3px 8px;
+            line-height: 1.45;
+            /* Tylko transform i opacity — reguła 60fps na średnim Androidzie. */
+            animation: airWejscie 240ms cubic-bezier(0.23, 1, 0.32, 1) both;
+        }
+        @keyframes airWejscie {
+            from { opacity: 0; transform: translateY(3px) scale(0.985); }
+            to   { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .msg-ai .air-item { animation: airWejscieBezRuchu 140ms ease both; }
+            .msg-ai .air-chev { transition: none; }
+            @keyframes airWejscieBezRuchu { from { opacity: 0; } to { opacity: 1; } }
+        }
+
         /* Suggestions */
         #coach-suggestions {
             display: flex;

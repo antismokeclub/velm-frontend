@@ -170,7 +170,10 @@
                 }
 
                 // 5. Add AI Message
-                addMessage('ai', data.reply || data.error || t('chat.replyerr'));
+                // meta idzie TYLKO tędy — ścieżki 402/403/401 i !response.ok
+                // kończą się wcześniej, więc wykaz nie pojawi się przy paywallu
+                // ani przy wygasłej sesji, gdzie agent niczego nie przeczytał.
+                addMessage('ai', data.reply || data.error || t('chat.replyerr'), data.meta);
 
                 // Zaktualizuj licznik trialu (null = premium, bez limitu)
                 if (data.trialMessagesLeft !== null && data.trialMessagesLeft !== undefined) {
@@ -199,6 +202,10 @@
             }
             scrollToBottom();
         }
+
+        // Czterech agentów sztabu. Lista w jednym miejscu, bo nazwa agenta wraca
+        // z backendu i nie wolno jej wkleić do klucza i18n bez sprawdzenia.
+        const _AGENCI = ['szef_sztabu', 'analityk', 'fizjo', 'psycholog'];
 
         // ── FORMATOWANIE ODPOWIEDZI AGENTA ────────────────────────────────────
         //
@@ -249,7 +256,81 @@
             }).join('');
         }
 
-        function addMessage(role, text) {
+        // ── WYKAZ „CO SPRAWDZIŁEM" ────────────────────────────────────────────
+        //
+        // Zawodnik dostawał akapit tekstu i zero powodów, żeby wierzyć, że stoi
+        // za nim cokolwiek poza ładnie brzmiącym modelem. Backend liczy teraz,
+        // ile rzeczy agent NAPRAWDĘ wczytał przed napisaniem odpowiedzi
+        // (velm-backend/lib/chatMeta.js) i przysyła same liczby — zdania
+        // składamy tutaj, bo apka chodzi w pięciu językach, a backend odpowiada
+        // po polsku.
+        //
+        // Wykaz jest pod odpowiedzią, nie nad nią: najpierw ma być odpowiedź.
+        // Zwinięty do jednej linijki, bo osiem pozycji nad klawiaturą telefonu
+        // zasłoniłoby to, po co zawodnik tu przyszedł.
+        //
+        // Kolejność jak w chatMeta.POLA — od rzeczy najbardziej konkretnych.
+        const _WYKAZ_POZYCJE = [
+            ['plan',     'chat.read.plan'],
+            ['treningi', 'chat.read.workouts'],
+            ['checkiny', 'chat.read.checkins'],
+            ['kontuzje', 'chat.read.injuries'],
+            ['notatki',  'chat.read.notes'],
+            ['wzorce',   'chat.read.habits'],
+            ['pamiec',   'chat.read.memory'],
+            ['historia', 'chat.read.history']
+        ];
+
+        function _wykazHtml(meta) {
+            const l = meta && meta.loaded;
+            if (!l) return '';
+
+            const pozycje = [];
+            for (const [pole, klucz] of _WYKAZ_POZYCJE) {
+                if (typeof l[pole] === 'number' && l[pole] > 0) pozycje.push(tp(klucz, l[pole]));
+            }
+            // Zawody to flaga, nie liczba — własny klucz bez odmiany przez liczbę.
+            if (l.zawody) pozycje.push(t('chat.read.race'));
+            if (!pozycje.length) return '';
+
+            const lista = pozycje
+                .map((p, i) => '<span class="air-item" style="animation-delay:' + Math.min(i * 35, 210) + 'ms">'
+                             + sanitizeHTML(p) + '</span>')
+                .join('');
+
+            return '<div class="ai-read">' +
+                '<button class="air-btn" type="button" aria-expanded="false" onclick="toggleWykaz(this)">' +
+                    '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">' +
+                        '<polyline points="20 6 9 17 4 12"></polyline></svg>' +
+                    '<span>' + sanitizeHTML(t('chat.read.title')) + '</span>' +
+                    '<span class="air-n">' + pozycje.length + '</span>' +
+                    '<svg class="air-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">' +
+                        '<polyline points="6 9 12 15 18 9"></polyline></svg>' +
+                '</button>' +
+                '<div class="air-list" hidden>' + lista + '</div>' +
+            '</div>';
+        }
+
+        function toggleWykaz(btn) {
+            const box = btn.parentElement;
+            const list = box.querySelector('.air-list');
+            if (!list) return;
+            const otwarte = !list.hasAttribute('hidden');
+            if (otwarte) {
+                list.setAttribute('hidden', '');
+            } else {
+                list.removeAttribute('hidden');
+                // Pozycje wjeżdżają za każdym razem — restart animacji przez reflow,
+                // inaczej drugie otwarcie pokazałoby je bez ruchu.
+                list.querySelectorAll('.air-item').forEach(el => {
+                    el.style.animation = 'none'; void el.offsetWidth; el.style.animation = '';
+                });
+            }
+            box.classList.toggle('air-open', !otwarte);
+            btn.setAttribute('aria-expanded', String(!otwarte));
+        }
+
+        function addMessage(role, text, meta) {
             const container = document.getElementById('coach-messages');
             // Hide quick suggestions on first message
             const quick = document.getElementById('coach-quick-suggestions');
@@ -264,7 +345,9 @@
                 // wymaga wyróżniania liczb, a to najprostsza droga do bezpieczeństwa.
                 div.textContent = text;
             } else {
-                div.innerHTML = _formatAgentText(text);
+                // Historia rozmowy i komunikaty błędów przychodzą bez meta —
+                // wtedy wykazu po prostu nie ma. Pusty pasek byłby gorszy niż jego brak.
+                div.innerHTML = _formatAgentText(text) + _wykazHtml(meta);
             }
             container.appendChild(div);
             return div;
@@ -329,38 +412,24 @@
             return '';
         }
 
-        function _guessAIStatus(msg, agent) {
-            const m = (msg || '').toLowerCase();
-            if (/trening|plan|dzi\u015b|jutro|dzisiaj|dzisiejsz/i.test(m)) {
-                return [t('chat.st.plan.0'), t('chat.st.plan.1'), t('chat.st.plan.2')];
-            }
-            if (/sen|spa\u0142|wyspa\u0142|zm\u0119czony|regeneracj/i.test(m)) {
-                return [t('chat.st.sleep.0'), t('chat.st.sleep.1'), t('chat.st.sleep.2')];
-            }
-            if (/t\u0119tno|puls|hr|bpm|serce/i.test(m)) {
-                return [t('chat.st.hr.0'), t('chat.st.hr.1'), t('chat.st.hr.2')];
-            }
-            if (/tempo|szybciej|wolniej|pace|czas/i.test(m)) {
-                return [t('chat.st.pace.0'), t('chat.st.pace.1'), t('chat.st.pace.2')];
-            }
-            if (/tydzie\u0144|tygodniowo|podsumow|w tym tyg/i.test(m)) {
-                return [t('chat.st.week.0'), t('chat.st.week.1'), t('chat.st.week.2')];
-            }
-            if (agent === 'fizjo' || /boli|b\u00f3l|kontuzj|uraz/i.test(m)) {
-                return [t('chat.st.fizjo.0'), t('chat.st.fizjo.1'), t('chat.st.fizjo.2')];
-            }
-            if (agent === 'psycholog' || /motywacj|nie chce|boj\u0119|stres/i.test(m)) {
-                return [t('chat.st.psy.0'), t('chat.st.psy.1'), t('chat.st.psy.2')];
-            }
-            const defaults = {
-                szef_sztabu: [t('chat.st.def.0'), t('chat.st.def.1'), t('chat.st.plan.2')],
-                analityk:    [t('chat.st.an.0'), t('chat.st.week.1'), t('chat.st.an.2')],
-                fizjo:       [t('chat.st.fz.0'), t('chat.st.fz.1'), t('chat.st.fz.2')],
-                psycholog:   [t('chat.st.ps.0'), t('chat.st.ps.1'), t('chat.st.psy.2')]
-            };
-            return defaults[agent] || defaults.szef_sztabu;
-        }
-
+        // \u2500\u2500 CO SZTAB ROBI, KIEDY CZEKASZ \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+        //
+        // Poprzednia wersja ZGADYWA\u0141A: regex po s\u0142owach z pytania wybiera\u0142 trzy
+        // zdania i pokazywa\u0142 je jako fakty. \u201ePor\u00f3wnuj\u0119 HRV z ostatnich 7 dni"
+        // lecia\u0142o do zawodnika bez zegarka, \u201ePrzegl\u0105dam histori\u0119 twoich
+        // dolegliwo\u015bci" \u2014 do zdrowego, \u201eKonsultuj\u0119 si\u0119 ze sztabem" opisywa\u0142o
+        // co\u015b, co w czacie w og\u00f3le si\u0119 nie dzieje. To nie by\u0142o t\u0142umaczenie
+        // procesu, tylko jego udawanie, i psu\u0142o dok\u0142adnie t\u0119 wiarygodno\u015b\u0107,
+        // kt\u00f3r\u0105 mia\u0142o budowa\u0107.
+        //
+        // Zostaj\u0105 zdania prawdziwe ZAWSZE, bo opisuj\u0105 realne fazy \u017c\u0105dania:
+        // najpierw jedno du\u017ce zapytanie po dane zawodnika, potem pisanie
+        // odpowiedzi. Konkrety \u2014 ILE i CZEGO \u2014 pokazujemy PO odpowiedzi,
+        // kiedy backend przy\u015ble policzony wykaz (meta.loaded).
+        //
+        // Progi czasowe wzi\u0119te z pomiaru: kontekst schodzi w u\u0142amku sekundy,
+        // model pisze 3-8 s, a powy\u017cej ~14 s zawodnik zaczyna si\u0119 zastanawia\u0107,
+        // czy apka nie zawis\u0142a \u2014 i wtedy dostaje trzecie zdanie zamiast ciszy.
         function addLoadingIndicator(userMessage, agent) {
             const container = document.getElementById('coach-messages');
             const div = document.createElement('div');
@@ -368,36 +437,39 @@
             div.id = id;
             div.className = 'typing-bubble-status';
 
-            const status = _guessAIStatus(userMessage, agent);
+            const kto = t('agent.' + (_AGENCI.includes(agent) ? agent : 'szef_sztabu') + '.name');
+            const fazy = [
+                { po: 0,     txt: t('chat.work.read').split('{kto}').join(kto) },
+                { po: 1400,  txt: t('chat.work.write') },
+                { po: 14000, txt: t('chat.work.long') }
+            ];
 
-            div.innerHTML = `
-                <div class="status-dots">
-                    <span></span><span></span><span></span>
-                </div>
-                <div class="status-text">${status[0]}</div>
-            `;
+            div.innerHTML =
+                '<div class="status-dots"><span></span><span></span><span></span></div>' +
+                '<div class="status-text"></div>';
+            const txtEl = div.querySelector('.status-text');
+            txtEl.textContent = fazy[0].txt;
             container.appendChild(div);
 
-            let idx = 1;
-            const interval = setInterval(() => {
-                if (idx >= status.length) { clearInterval(interval); return; }
-                const el = div.querySelector('.status-text');
-                if (el) {
-                    el.style.animation = 'none';
-                    void el.offsetWidth; // reflow
-                    el.style.animation = 'statusFade 0.3s ease';
-                    setTimeout(() => { if (el) { el.textContent = status[idx]; idx++; } }, 150);
-                }
-            }, 1800);
+            // Osobne timery zamiast jednego setInterval \u2014 fazy nie s\u0105 r\u00f3wno
+            // roz\u0142o\u017cone w czasie, a interval nie umia\u0142by tego odda\u0107.
+            div._statusTimers = fazy.slice(1).map(f => setTimeout(() => {
+                if (!txtEl.isConnected) return;
+                txtEl.style.animation = 'none';
+                void txtEl.offsetWidth;              // reflow, \u017ceby animacja ruszy\u0142a od nowa
+                txtEl.style.animation = 'statusFade 0.3s ease';
+                setTimeout(() => { if (txtEl.isConnected) txtEl.textContent = f.txt; }, 150);
+            }, f.po));
 
-            div._statusInterval = interval;
             return id;
         }
 
         function removeMessage(id) {
             const el = document.getElementById(id);
             if (el) {
-                if (el._statusInterval) clearInterval(el._statusInterval);
+                // Bez tego timer trzeciej fazy potrafiłby odpalić się 14 s po tym,
+                // jak odpowiedź już przyszła i bańka zniknęła.
+                (el._statusTimers || []).forEach(clearTimeout);
                 el.remove();
             }
         }
