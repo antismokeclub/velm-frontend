@@ -324,6 +324,45 @@
                 '</div>';
         }
 
+        // ── EFEKTYWNOŚĆ BIEGU: ile uderzeń serca kosztuje kilometr ──────────
+        //
+        // Najczystszy sygnał, że trening działa — i jedyny, którego zawodnik nie
+        // złoży sam. Dostawał osobno „tempo −8 s" i „tętno +3" i miał z tego
+        // wywnioskować, że poprawa tempa została kupiona wyższym kosztem, więc
+        // forma stoi. Nie wywnioskuje. Stosunek tych dwóch liczb mówi to wprost.
+        //
+        // Karta pojawia się TYLKO z zegarkiem — bez tętna nie ma czego liczyć,
+        // a pusty kafelek z myślnikiem to gorsze niż jego brak.
+        function _labEfficiencyCard(eff) {
+            if (!eff || eff.beatsPerKm == null) return '';
+
+            const KIER = {
+                poprawa:     { col: '#6B8F71', txt: t('lab.eff.better'),  ikona: '▼' },
+                pogorszenie: { col: '#C07264', txt: t('lab.eff.worse'),   ikona: '▲' },
+                stabilnie:   { col: '#8A8A8A', txt: t('lab.eff.stable'),  ikona: '—' }
+            };
+            const k = KIER[eff.kierunek] || KIER.stabilnie;
+            // Delta ujemna = mniej uderzeń na kilometr = lepiej. Pokazujemy wartość
+            // bezwzględną razem ze strzałką, żeby minus nie mylił się z „gorzej".
+            const delta = eff.delta != null && eff.delta !== 0
+                ? k.ikona + ' ' + Math.abs(eff.delta) + ' ' + t('lab.eff.unit')
+                : t('lab.eff.nodelta');
+
+            return '<div class="lab-card" style="background:#fff;border:1px solid #EBEBEB;border-radius:20px;padding:16px 18px;margin-top:12px;">' +
+                '<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">' +
+                    '<div style="min-width:0;">' +
+                        '<div style="font-size:11px;font-weight:700;color:#8A8A8A;text-transform:uppercase;letter-spacing:0.08em;">' + t('lab.eff.title') + '</div>' +
+                        '<div style="font-size:12.5px;color:#8A8A8A;margin-top:3px;line-height:1.45;">' + t('lab.eff.sub') + '</div>' +
+                    '</div>' +
+                    '<div style="text-align:right;flex-shrink:0;">' +
+                        '<div style="font-family:Outfit,sans-serif;font-size:26px;font-weight:800;color:#1A1A1A;line-height:1;letter-spacing:-0.02em;">' + eff.beatsPerKm + '</div>' +
+                        '<div style="font-size:11px;font-weight:600;color:' + k.col + ';margin-top:4px;white-space:nowrap;">' + delta + '</div>' +
+                    '</div>' +
+                '</div>' +
+                (eff.kierunek ? '<div style="font-size:12px;color:' + k.col + ';margin-top:10px;padding-top:10px;border-top:1px solid #F0EDE8;line-height:1.45;">' + k.txt + '</div>' : '') +
+            '</div>';
+        }
+
         function _labFormaCard(d) {
             const tr = d.trends || {};
             const hasPace = tr.paceSec != null && tr.paceDeltaSec != null;
@@ -509,7 +548,12 @@
                 if (d.readiness) {
                     const r = d.readiness.score;
                     const col = r >= 70 ? '#6B8F71' : (r >= 45 ? '#C4A35A' : '#C07264');
-                    const lbl = r >= 70 ? t('lab.ready.good') : (r >= 45 ? t('lab.ready.mid') : t('lab.ready.low'));
+                    // Kara za wczorajszy trening jest WYJASNIANA. Bez tego zawodnik
+                    // widzi nizsza gotowosc po dobrze przespanej nocy i nie wie dlaczego —
+                    // a to najszybszy sposob, zeby przestal ufac liczbie.
+                    const kara = d.readiness.karaObciazenie;
+                    const lbl = kara ? t('lab.ready.afterhard')
+                        : (r >= 70 ? t('lab.ready.good') : (r >= 45 ? t('lab.ready.mid') : t('lab.ready.low')));
                     ringCards.push(_labRingCard(t('lab.ready.title'), r, lbl, col, 'lab-ring-readiness'));
                 } else {
                     ringCards.push(_labRingCard(t('lab.ready.title'), null, t('lab.ready.nocheckin'), null, 'lab-ring-readiness'));
@@ -518,8 +562,16 @@
                 if (d.sleep && d.sleep.score != null) {
                     const s = d.sleep.score, slTrend = d.sleep.trend;
                     const col = s >= 70 ? '#6B8F71' : (s >= 45 ? '#C4A35A' : '#C07264');
-                    const sub = slTrend == null ? t('lab.sleep.last7')
-                        : (slTrend > 0 ? '▲ +' + slTrend + ' ' + t('lab.sub.vslastweek') : (slTrend < 0 ? '▼ ' + slTrend + ' ' + t('lab.sub.vslastweek') : t('lab.sleep.same')));
+                    // Godziny i regularnosc zamiast samego trendu: "82" nic nie mowi,
+                    // "7,4 h, wahania +/-0,4 h" mowi wszystko. Trend schodzi na drugi plan,
+                    // bo to liczba wzgledna, a zawodnik chce najpierw wiedziec ILE spal.
+                    const slH = d.sleep.srednioGodzin, slReg = d.sleep.regularnoscH;
+                    const trendTxt = slTrend == null ? t('lab.sleep.last7')
+                        : (slTrend > 0 ? '▲ +' + slTrend : (slTrend < 0 ? '▼ ' + slTrend : t('lab.sleep.same')));
+                    const sub = slH != null
+                        ? slH.toString().replace('.', ',') + ' h'
+                          + (slReg != null ? ' · ' + t('lab.sleep.reg') + ' ±' + slReg.toString().replace('.', ',') + ' h' : '')
+                        : trendTxt;
                     ringCards.push(_labRingCard('velm Sleep Score', s, sub, col, 'lab-ring-sleep'));
                 } else {
                     ringCards.push(_labRingCard('velm Sleep Score', null, t('lab.sleep.nodata'), null, 'lab-ring-sleep'));
@@ -534,8 +586,11 @@
                 // ── Przewidywany czas wyścigu: wykres trendu pod Formą ──
                 const raceHtml = _labRacePredictionCard(d.racePrediction);
 
+                const effHtml = _labEfficiencyCard(d.trends && d.trends.efficiency);
+
                 el.innerHTML =
-                    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">' + ringCards.join('') + '</div>' + loadHtml + formaHtml + raceHtml;
+                    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">' + ringCards.join('') + '</div>'
+                    + loadHtml + effHtml + formaHtml + raceHtml;
 
                 // Wypełnienie pierścieni i wjazd wskaźnika na skali — osobno od
                 // fade-in kart poniżej, żeby liczby/kreska ożywały PO tym jak karta
