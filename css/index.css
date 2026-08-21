@@ -156,7 +156,7 @@
     /* CALENDAR */
     .cal{width:100%;background:#ffffff;border-radius:24px;padding:24px 20px;display:flex;flex-direction:column;gap:16px;box-shadow:0 4px 20px rgba(0,0,0,0.04);border:1px solid #f0f0f0}
     .cal-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
-    .cal-nav-btn{background:transparent;border:none;width:40px;height:40px;display:flex;align-items:center;justify-content:center;color:#8A97AD;cursor:pointer;outline:none;-webkit-tap-highlight-color:transparent;transition:color 0.2s}
+    .cal-nav-btn{background:transparent;border:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;color:#8A97AD;cursor:pointer;outline:none;-webkit-tap-highlight-color:transparent;transition:color 0.2s}
     .cal-nav-btn:active{color:var(--navy)}
     .cal-month-yr{font-size:18px;font-weight:800;color:var(--navy)}
     .cal-head{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}
@@ -461,7 +461,7 @@ body[data-theme="default"] .level-card.s { background:#111111!important; border-
     .wr-total{font-size:12px;font-weight:600;color:#8A97AD;margin-top:4px;display:block}
     .wr-block .days-sel{gap:12px;width:auto;margin:0}
     .wr-block .days-big{font-size:32px;min-width:36px;text-align:center}
-    .wr-block .round-btn{width:40px;height:40px;font-size:20px}
+    .wr-block .round-btn{width:44px;height:44px;font-size:20px}
 
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after {

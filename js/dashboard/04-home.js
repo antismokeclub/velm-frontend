@@ -179,23 +179,19 @@
                 await renderSimpleChart(contentEl, 'sleep');
             } else if (metric === 'hr') {
                 await renderSimpleChart(contentEl, 'hr');
-            } else if (metric === 'xp') {
-                // Default WIP for others
-                contentEl.style.display = 'flex';
-                contentEl.style.height = '300px';
-                contentEl.innerHTML = `
-                    <div style="font-size: 48px; margin-bottom: 16px;">🚧</div>
-                    <h2 style="color: white; margin-bottom: 8px;">WIP</h2>
-                    <p>${t('metric.xp.soon')}</p>
-                `;
             } else {
-                // Default WIP for others
+                // EKRAN „JESZCZE NIE MA TEJ METRYKI".
+                // Stał tu znak drogowy „roboty drogowe" w 48 px, nagłówek „WIP"
+                // i — w gałęzi domyślnej — napis „Work in Progress" NA TWARDO PO
+                // ANGIELSKU, więc francuski użytkownik też go widział.
+                // Zawodnikowi nic nie mówi, że my mamy coś w budowie; mówi mu
+                // tylko tyle, że tu nic nie ma i kiedy będzie.
                 contentEl.style.display = 'flex';
                 contentEl.style.height = '300px';
                 contentEl.innerHTML = `
-                    <div style="font-size: 48px; margin-bottom: 16px;">🚧</div>
-                    <h2 style="color: white; margin-bottom: 8px;">WIP</h2>
-                    <p>Work in Progress</p>
+                    <div style="opacity:0.55;margin-bottom:14px;color:#fff;">${velmIkona('wkrotce', 30)}</div>
+                    <div style="color:#fff;font-weight:600;font-size:16px;margin-bottom:6px;">${t('empty.soon.title')}</div>
+                    <div style="color:rgba(255,255,255,0.65);font-size:13px;text-align:center;max-width:260px;line-height:1.5;">${metric === 'xp' ? t('metric.xp.soon') : t('empty.soon.desc')}</div>
                 `;
             }
 
@@ -512,7 +508,7 @@
                 container.style.justifyContent = 'center';
                 container.style.height = '320px';
                 container.innerHTML = `
-                    <div style="font-size:36px;margin-bottom:12px;opacity:0.5;">🔋</div>
+                    <div style="opacity:0.55;margin-bottom:12px;color:#fff;">${velmIkona('checkin', 28)}</div>
                     <div style="color:#fff;font-weight:600;font-size:16px;margin-bottom:6px;">${t('home.readiness.empty.title')}</div>
                     <div style="color:rgba(255,255,255,0.65);font-size:13px;text-align:center;max-width:260px;">${t('home.readiness.empty.desc')}</div>
                 `;

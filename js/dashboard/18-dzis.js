@@ -72,7 +72,7 @@
                 if (lastDay && todayIso > lastDay) {
                     window._todayTyp = 'rest'; window._todayKm = 0; window._todayStruktura = null;
                     if (nameEl)  nameEl.textContent = t('today.planexpired');
-                    if (badgeEl) badgeEl.textContent = '🌙';
+                    if (badgeEl) badgeEl.innerHTML = velmIkona('odpoczynek', 15);
                     // Awaryjny ręczny spust narady (gdyby auto-narada nie ruszyła) — kafelek
                     // staje się przyciskiem generującym nowy plan (niezamykalne okno narady).
                     if (mainCard) mainCard.onclick = (e) => { e.stopPropagation(); generateNewPlan(); };
@@ -89,7 +89,7 @@
                 window._todayKm  = 0;
                 window._todayStruktura = null;
                 if (nameEl)  nameEl.textContent = t('wtype.rest');
-                if (badgeEl) badgeEl.textContent = '🌙';
+                if (badgeEl) badgeEl.innerHTML = velmIkona('odpoczynek', 15);
                 updatePostCheckinBanner();
                 return;
             }
@@ -104,7 +104,7 @@
 
             // (usunięto kolorowy lewy pasek kafelka — mylił; kafelek zostaje neutralny)
             if (nameEl)  nameEl.textContent = TYPE_LABEL(day.typ) ?? day.typ;
-            if (badgeEl) badgeEl.innerHTML = TYPE_EMOJI[day.typ] ?? '⚫';
+            if (badgeEl) badgeEl.innerHTML = TYPE_EMOJI[day.typ] ?? velmIkona('nieznane', 11);
 
 
             // Dystans
@@ -185,8 +185,8 @@
 
                 section.style.display = 'block';
                 list.innerHTML = changes.map(c => {
-                    const fromEmoji = TYPE_EMOJI[c.original_typ] || '⚫';
-                    const toEmoji = TYPE_EMOJI[c.new_typ] || '⚫';
+                    const fromEmoji = TYPE_EMOJI[c.original_typ] || velmIkona('nieznane', 11);
+                    const toEmoji = TYPE_EMOJI[c.new_typ] || velmIkona('nieznane', 11);
                     const fromLabel = TYPE_LABEL(c.original_typ) || c.original_typ || '—';
                     const toLabel = TYPE_LABEL(c.new_typ) || c.new_typ || '—';
                     const hasChange = c.new_day && c.new_day !== c.original_day;
@@ -269,7 +269,7 @@
 
             // no date or past
             card.innerHTML = `
-                <div style="font-size:28px;margin-bottom:8px;">🏁</div>
+                <div style="margin-bottom:8px;color:#C4BFB4;">${velmIkona('zawody', 24)}</div>
                 <div style="font-size:14px;font-weight:700;color:#111;margin-bottom:4px;">${t('race.none')}</div>
                 <div onclick="event.stopPropagation();switchView('settings')" style="font-size:11px;color:#8A8A8A;cursor:pointer;text-decoration:underline;">${t('race.add')}</div>`;
         }

@@ -18,7 +18,7 @@
             } catch(e) {
                 el.innerHTML = `
                     <div style="text-align:center;padding:80px 20px;">
-                        <div style="font-size:44px;margin-bottom:14px;">📊</div>
+                        <div style="margin-bottom:14px;color:#C4BFB4;">${velmIkona('statystyki', 30)}</div>
                         <div style="font-size:16px;font-weight:700;color:#111;margin-bottom:8px;">${t('chart.nodata')}</div>
                         <div style="font-size:13px;color:#8A8A8A;line-height:1.6;">${t('stats.nodata.desc')}</div>
                     </div>`;
@@ -280,7 +280,7 @@
             if (!dni.length) {
                 el.innerHTML = `
                     <div style="text-align:center;padding:80px 20px;">
-                        <div style="font-size:44px;margin-bottom:14px;">📊</div>
+                        <div style="margin-bottom:14px;color:#C4BFB4;">${velmIkona('statystyki', 30)}</div>
                         <div style="font-size:16px;font-weight:700;color:#111;margin-bottom:8px;">${t('stats.nodata2.title')}</div>
                         <div style="font-size:13px;color:#8A8A8A;line-height:1.6;">${t('stats.nodata.desc')}</div>
                     </div>`;

@@ -559,7 +559,7 @@
                     <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:0.12em;color:#111;font-family:'Inter',sans-serif;">${t('cal.desc')}</div>
                 </div>
                 ${day.opis ? `<div style="font-size:14px;color:#333;line-height:1.75;font-weight:400;font-family:'Inter',sans-serif;">${day.opis}</div>` : ''}
-                ${day.uwagi ? `<div style="margin-top:12px;padding-top:12px;border-top:1px solid #EBEBEB;font-size:13px;color:#8A8A8A;font-style:italic;line-height:1.6;font-family:'Inter',sans-serif;">💡 ${day.uwagi}</div>` : ''}
+                ${day.uwagi ? `<div style="margin-top:12px;padding-top:12px;border-top:1px solid #EBEBEB;font-size:13px;color:#8A8A8A;font-style:italic;line-height:1.6;font-family:'Inter',sans-serif;">${velmIkona('wskazowka', 14)} ${day.uwagi}</div>` : ''}
             </div>`;
         }
 
@@ -591,9 +591,9 @@
             // REST
             if (day.typ === 'rest') {
                 return `${header}<div style="text-align:center;padding:16px 0;">
-                    <div style="font-size:52px;margin-bottom:14px;">⚪</div>
+                    <div style="margin-bottom:14px;color:#C4BFB4;">${velmIkona('odpoczynek', 34)}</div>
                     <div style="font-size:15px;color:#8A8A8A;line-height:1.7;font-family:'Inter',sans-serif;">${t('cal.rest.a')}<br>${t('cal.rest.b')}</div>
-                    ${day.uwagi ? `<div style="margin-top:18px;padding:14px 16px;background:var(--surface-color,#fff);border-radius:12px;border:1px solid rgba(235,235,235,0.5);font-size:13px;color:#8A8A8A;font-style:italic;text-align:left;font-family:'Inter',sans-serif;">💡 ${day.uwagi}</div>` : ''}
+                    ${day.uwagi ? `<div style="margin-top:18px;padding:14px 16px;background:var(--surface-color,#fff);border-radius:12px;border:1px solid rgba(235,235,235,0.5);font-size:13px;color:#8A8A8A;font-style:italic;text-align:left;font-family:'Inter',sans-serif;">${velmIkona('wskazowka', 14)} ${day.uwagi}</div>` : ''}
                 </div>`;
             }
 
@@ -669,8 +669,8 @@
                 const blocksHTML = s ? (() => {
                     let b = '';
                     for (let i = 0; i < Math.min(s.powtorzeenia || 0, 10); i++) {
-                        b += `<div style="background:#C4A35A;border-radius:8px;padding:5px 10px;font-size:10px;font-weight:700;color:#fff;font-family:'Inter',sans-serif;">🏃 ${s.bieg_min}m</div>`;
-                        b += `<div style="background:#94a3b8;border-radius:8px;padding:5px 10px;font-size:10px;font-weight:700;color:#fff;font-family:'Inter',sans-serif;">🚶 ${s.marsz_min}m</div>`;
+                        b += `<div style="background:#C4A35A;border-radius:8px;padding:5px 10px;font-size:10px;font-weight:700;color:#fff;font-family:'Inter',sans-serif;">${t('cal.wr.run')} ${s.bieg_min}m</div>`;
+                        b += `<div style="background:#94a3b8;border-radius:8px;padding:5px 10px;font-size:10px;font-weight:700;color:#fff;font-family:'Inter',sans-serif;">${t('cal.wr.walk')} ${s.marsz_min}m</div>`;
                     }
                     if (s.powtorzeenia > 10) b += `<span style="color:#8A8A8A;font-size:11px;font-weight:600;align-self:center;"> ×${s.powtorzeenia}</span>`;
                     return b;
@@ -681,9 +681,9 @@
                     ${_tile(t('cal.totaltime'), totalMin ? `~${totalMin}` : null, 40, 'min')}
                 </div>
                 ${s ? _section('#C4A35A', t('cal.session'), `
-                    <div style="font-size:10px;font-weight:700;color:#8A8A8A;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px;font-family:'Inter',sans-serif;">🚶 ${t('cal.warmup')} ${s.rozgrzewka_min} min</div>
+                    <div style="font-size:10px;font-weight:700;color:#8A8A8A;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px;font-family:'Inter',sans-serif;">${t('cal.warmup')} ${s.rozgrzewka_min} min</div>
                     <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:10px;">${blocksHTML}</div>
-                    <div style="font-size:10px;font-weight:700;color:#8A8A8A;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:10px;font-family:'Inter',sans-serif;">🚶 ${t('cal.cooldown')} ${s.schlodzenie_min} min</div>
+                    <div style="font-size:10px;font-weight:700;color:#8A8A8A;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:10px;font-family:'Inter',sans-serif;">${t('cal.cooldown')} ${s.schlodzenie_min} min</div>
                     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
                         ${_tile(t('cal.repeats'), s.powtorzeenia, 80)}
                         ${_tile(t('home.pace'), day.tempo_min_km || null, 120, 'min/km')}

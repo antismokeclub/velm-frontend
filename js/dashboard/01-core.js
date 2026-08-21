@@ -217,3 +217,51 @@
             return attempt();
         }
 
+
+        // ── IKONY PUSTYCH EKRANÓW ─────────────────────────────────────────────
+        //
+        // Ekrany „nie ma jeszcze danych" miały do tej pory systemowe emotki, część
+        // w rozmiarze 36–52 px: znak drogowy „roboty drogowe" przy brakującej
+        // metryce, bateria przy braku check-inu, wykres przy pustych statystykach.
+        // Emotka wygląda inaczej na każdym telefonie i na każdej wersji systemu —
+        // czyli jedyny element, nad którym nie mamy kontroli, stał na środku
+        // największego pustego miejsca w aplikacji.
+        //
+        // Rodzina jak ikony sztabu: siatka 24×24, sam obrys, zaokrąglone końce.
+        // `velmIkona(nazwa, px, kolor)` zwraca gotowy SVG; kolor domyślnie
+        // dziedziczony po rodzicu, żeby ta sama ikona działała na jasnym kafelku
+        // i na ciemnej karcie.
+        const VELM_IKONY = {
+            // Klepsydra — „jeszcze nie ma", nie „coś się zepsuło"
+            wkrotce:  '<path d="M7 3h10"/><path d="M7 21h10"/>' +
+                      '<path d="M8 3v3.6c0 1.1.5 2.1 1.3 2.8L12 12l-2.7 2.6A3.7 3.7 0 0 0 8 17.4V21"/>' +
+                      '<path d="M16 3v3.6c0 1.1-.5 2.1-1.3 2.8L12 12l2.7 2.6a3.7 3.7 0 0 1 1.3 2.8V21"/>',
+            // Poranne słońce — brak check-inu to brak porannego zgłoszenia
+            checkin:  '<circle cx="12" cy="12" r="4.2"/><path d="M12 2.6v2.4"/><path d="M12 19v2.4"/>' +
+                      '<path d="M4.4 4.4l1.7 1.7"/><path d="M17.9 17.9l1.7 1.7"/>' +
+                      '<path d="M2.6 12H5"/><path d="M19 12h2.4"/>' +
+                      '<path d="M4.4 19.6l1.7-1.7"/><path d="M17.9 6.1l1.7-1.7"/>',
+            // Słupki — puste statystyki
+            statystyki: '<path d="M4 3.6v14.9a1.9 1.9 0 0 0 1.9 1.9H20.4"/>' +
+                      '<path d="M8.6 16.6v-4.2"/><path d="M12.6 16.6V8.4"/><path d="M16.6 16.6v-6.4"/>',
+            // But biegowy w uproszczeniu — brak historii treningów
+            historia: '<path d="M3.2 16.4h13.4a4.2 4.2 0 0 0 4.2-4.2c0-.8-.6-1.5-1.4-1.6l-4.2-.7a3 3 0 0 1-1.7-1L11 6.2a1.6 1.6 0 0 0-1.2-.6H6.4a1.6 1.6 0 0 0-1.6 1.6v2.4"/>' +
+                      '<path d="M3.2 16.4v1.4a1.6 1.6 0 0 0 1.6 1.6h14.6"/><path d="M7.4 12.4l1.8 1.6"/><path d="M10.8 11.2l1.8 1.6"/>',
+            // Księżyc — dzień bez treningu / plan wygasł
+            odpoczynek: '<path d="M20.4 14.6A8.6 8.6 0 1 1 9.4 3.6a6.7 6.7 0 0 0 11 11z"/>',
+            // Flaga mety — brak zaplanowanych zawodów
+            zawody:   '<path d="M5.4 21V4"/><path d="M5.4 5.2h12.4l-2.4 3.8 2.4 3.8H5.4"/>',
+            // Żarówka — podpowiedź od sztabu
+            wskazowka:'<path d="M9.4 17.6h5.2"/><path d="M10.2 20.6h3.6"/>' +
+                      '<path d="M12 2.8a6 6 0 0 0-3.5 10.9c.5.4.8 1 .9 1.6h5.2c.1-.6.4-1.2.9-1.6A6 6 0 0 0 12 2.8z"/>',
+            // Kropka — awaryjna, gdy typ sesji jest nieznany
+            nieznane: '<circle cx="12" cy="12" r="3.4"/>'
+        };
+        function velmIkona(nazwa, px, kolor) {
+            const d = VELM_IKONY[nazwa];
+            if (!d) return '';
+            const r = px || 24;
+            return '<svg width="' + r + '" height="' + r + '" viewBox="0 0 24 24" fill="none" '
+                 + 'stroke="' + (kolor || 'currentColor') + '" stroke-width="1.7" '
+                 + 'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + d + '</svg>';
+        }

@@ -30,7 +30,7 @@
             if (historyWorkouts.length === 0) {
                 container.innerHTML = fitBtnHtml + `
                     <div style="text-align:center;padding:60px 20px;color:#8A8A8A;">
-                        <div style="font-size:40px;margin-bottom:12px;">🏃</div>
+                        <div style="margin-bottom:12px;color:#C4BFB4;">${velmIkona('historia', 30)}</div>
                         <div style="font-size:15px;font-weight:600;">${t('hist.empty.title')}</div>
                         <div style="font-size:13px;margin-top:8px;">${t('hist.empty.desc')}</div>
                     </div>`;
