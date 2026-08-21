@@ -87,6 +87,11 @@
         async function loadUserMemory() {
             const box = document.getElementById('coach-memory');
             if (!box || !currentUserId) return;
+            // sendMessage() odświeża pamięć 2 s po każdej odpowiedzi. Bez tego
+            // warunku karta wracałaby nad rozmowę w trakcie czytania, przy każdej
+            // wymianie zdań — należy do pustego ekranu, nie do trwającego czatu.
+            const msgs = document.getElementById('coach-messages');
+            if (msgs && msgs.querySelector('.msg')) { box.hidden = true; return; }
             try {
                 const response = await authFetch(`${API_BASE}/api/memory/get?userId=${currentUserId}`, { headers: authHeaders() });
                 if (!response.ok) { box.hidden = true; return; }
@@ -435,20 +440,38 @@
             catch (e) { return ''; }
         }
 
+        // Klucz dnia z CZĘŚCI LOKALNYCH, nie z toISOString().
+        // toISOString() oddaje dobę UTC. Zawodnik w strefie UTC+2 pisze o 00:30
+        // (klucz UTC = wczoraj), potem o 10:00 (klucz UTC = dziś) — dwa różne
+        // klucze tego samego lokalnego dnia, czyli DWA separatory, oba podpisane
+        // „Dzisiaj", bo etykietę liczy już zegar lokalny. To ta sama rodzina
+        // błędu co daty check-inu w v88 i cała notatka o datach w UTC z audytu.
+        function _kluczDnia(d) {
+            const dwa = (n) => String(n).padStart(2, '0');
+            return d.getFullYear() + '-' + dwa(d.getMonth() + 1) + '-' + dwa(d.getDate());
+        }
+
+        // Karta „co sztab o Tobie wie" należy do ekranu powitalnego — znika
+        // razem z intro, kiedy w rozmowie pojawia się pierwsza wiadomość.
+        function _hideIntro() {
+            for (const id of ['coach-intro', 'coach-quick-suggestions']) {
+                const el = document.getElementById(id);
+                if (el) el.style.display = 'none';
+            }
+            const mem = document.getElementById('coach-memory');
+            if (mem) mem.hidden = true;
+        }
+
         function addMessage(role, text, meta, opts) {
             const container = document.getElementById('coach-messages');
             if (!container) return null;
-            // Hide quick suggestions on first message
-            const quick = document.getElementById('coach-quick-suggestions');
-            if (quick) quick.style.display = 'none';
-            const intro = document.getElementById('coach-intro');
-            if (intro) intro.style.display = 'none';
+            _hideIntro();
 
             const o = opts || {};
             // Czas z bazy (`created_at` w historii) albo teraz — nigdy zmyślony.
             const kiedy = o.time ? new Date(o.time) : new Date();
             const prawidlowy = !isNaN(kiedy.getTime());
-            const dzien = prawidlowy ? kiedy.toISOString().slice(0, 10) : null;
+            const dzien = prawidlowy ? _kluczDnia(kiedy) : null;
             const agent = role === 'ai' ? (o.agent || selectedAgent || 'szef_sztabu') : null;
 
             // 1. Separator dnia — gdy data się zmienia albo to pierwsza wiadomość

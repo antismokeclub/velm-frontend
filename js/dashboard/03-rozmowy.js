@@ -43,8 +43,14 @@
             // i po polsku dawała „Mam sobota interwały" — a przypadki trzeba by
             // wtedy pisać osobno dla polskiego. Sesja za cztery dni i tak nie
             // jest „na teraz", więc nic realnego nie tracimy.
-            const jutro = new Date(new Date(dzis + 'T12:00:00').getTime() + 86400000)
-                .toISOString().slice(0, 10);
+            // Data z części LOKALNYCH. Przez toISOString() kotwica T12:00:00
+            // wystarczała wszędzie poza UTC+13 (Nowa Zelandia w czasie letnim),
+            // gdzie lokalne południe to w UTC dzień wcześniej i „jutro"
+            // rozwiązywało się na dzisiaj.
+            const d = new Date(dzis + 'T12:00:00');
+            d.setDate(d.getDate() + 1);
+            const dwa = (n) => String(n).padStart(2, '0');
+            const jutro = d.getFullYear() + '-' + dwa(d.getMonth() + 1) + '-' + dwa(d.getDate());
 
             for (const d of dni) {
                 if (!d || (d.data !== dzis && d.data !== jutro)) continue;
@@ -281,10 +287,9 @@
                 container.classList.remove('conv-ready');
                 container.querySelectorAll('.msg, .chat-history-separator, .chat-day-sep, .msg-who, .typing-bubble-status').forEach(n => n.remove());
                 resetChatGroups();
-                const intro = document.getElementById('coach-intro');
-                const quick = document.getElementById('coach-quick-suggestions');
-                if (intro) intro.style.display = 'none';
-                if (quick) quick.style.display = 'none';
+                // Karta notatek sztabu chowa się razem z intro — należy do
+                // pustego ekranu, nie do wczytanej rozmowy.
+                _hideIntro();
             }
             try {
                 const res = await authFetch(`${API_BASE}/api/conversation/${convId}/messages?limit=50`, { headers: authHeaders() });
@@ -331,6 +336,9 @@
                 const quick = document.getElementById('coach-quick-suggestions');
                 if (intro) intro.style.display = '';
                 if (quick) quick.style.display = '';
+                // Nowa rozmowa = znowu pusty ekran, więc notatki sztabu wracają.
+                // loadUserMemory sam schowa kartę, jeśli pamięć jest pusta.
+                if (typeof loadUserMemory === 'function') loadUserMemory();
             }
         }
 
