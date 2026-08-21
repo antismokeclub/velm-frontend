@@ -52,38 +52,6 @@
         }
 
         // --- Memory System ---
-        // ── NOTATKI SZTABU O ZAWODNIKU ────────────────────────────────────────
-        //
-        // Ta funkcja istniała od dawna i NIGDY nic nie narysowała, z dwóch
-        // niezależnych powodów naraz:
-        //   1. szukała elementów #memory-list / #memory-content / #coach-memory,
-        //      a żadnego z nich nie było w dashboard.html — więc wychodziła
-        //      pierwszą linijką,
-        //   2. czytała `data.memory`, a /api/memory/get oddaje `data.context`
-        //      w kształcie [{category, fact}] — więc nawet z kontenerem
-        //      wyrenderowałaby pustą listę.
-        // Backend liczył to i wysyłał przez cały czas.
-        //
-        // To jest treść, której nie ma żadna inna apka biegowa: cztery notatki
-        // czterech specjalistów o TYM zawodniku. Dlatego stoi na ekranie
-        // powitalnym Trenera, nad propozycjami pytań — zanim jeszcze cokolwiek
-        // napiszesz, widzisz, co sztab już wie.
-        //
-        // Notatki bywają długie (akapit na specjalistę), więc domyślnie są
-        // przycięte do dwóch linii, a dotknięcie karty rozwija całość.
-        const _MEM_AGENCI = {
-            'Analityk': 'analityk', 'Fizjo': 'fizjo',
-            'Psycholog': 'psycholog', 'Trener': 'szef_sztabu'
-        };
-
-        function toggleMemory(el) {
-            const karta = el.closest('.mem-card');
-            if (!karta) return;
-            karta.classList.toggle('mem-open');
-            const btn = karta.querySelector('.mem-head');
-            if (btn) btn.setAttribute('aria-expanded', String(karta.classList.contains('mem-open')));
-        }
-
         // ── STAN ZAWODNIKA NA EKRANIE POWITALNYM ──────────────────────────────
         //
         // Ekran startowy Trenera pokazywał literę V, nazwę agenta i jedno zdanie
@@ -137,75 +105,83 @@
             box.hidden = false;
         }
 
-        async function loadUserMemory() {
+        // ── CO SZTAB USTALIŁ NA TEN TYDZIEŃ ──────────────────────────────────
+        //
+        // Stała tu karta „Co sztab o Tobie wie" z notatkami czterech specjalistów.
+        // Wyleciała, bo to były notatki TECHNICZNE, pisane dla szefa, w trzeciej
+        // osobie — zawodnik nie ma z nich nic. (Sam ich format wybraliśmy jako
+        // wewnętrzny właśnie dlatego, że „użytkownik nie musi tego czytać".)
+        //
+        // W to miejsce wchodzi jedyna część planu, którą szef pisze WPROST DO
+        // ZAWODNIKA: cel tygodnia, trzy priorytety i uwagi specjalistów.
+        // Wszystko jest już w `calendarPlan` w pamięci przeglądarki, więc ta
+        // karta nie kosztuje ani jednego zapytania (poprzednia kosztowała jedno
+        // po każdej wiadomości).
+        function loadUserMemory() {
             const box = document.getElementById('coach-memory');
-            if (!box || !currentUserId) return;
-            // sendMessage() odświeża pamięć 2 s po każdej odpowiedzi. Bez tego
-            // warunku karta wracałaby nad rozmowę w trakcie czytania, przy każdej
-            // wymianie zdań — należy do pustego ekranu, nie do trwającego czatu.
+            if (!box) return;
+            // Karta należy do pustego ekranu — gdy rozmowa trwa, znika.
             const msgs = document.getElementById('coach-messages');
             if (msgs && msgs.querySelector('.msg')) { box.hidden = true; return; }
-            try {
-                const response = await authFetch(`${API_BASE}/api/memory/get?userId=${currentUserId}`, { headers: authHeaders() });
-                if (!response.ok) { box.hidden = true; return; }
-                const data = await response.json();
 
-                const wpisy = (data.context || [])
-                    .filter(c => c && typeof c.fact === 'string' && c.fact.trim().length > 0);
+            const plan = (typeof calendarPlan !== 'undefined' && calendarPlan) ? calendarPlan : null;
+            const cel = (plan && typeof plan.cel_tygodnia === 'string') ? plan.cel_tygodnia.trim() : '';
+            const prio = Array.isArray(plan?.priorytety)
+                ? plan.priorytety.filter(x => typeof x === 'string' && x.trim()).slice(0, 3)
+                : [];
+            const uwagi = [
+                ['fizjo',     plan?.uwagi_fizjo],
+                ['psycholog', plan?.uwagi_mentalne]
+            ].filter(([, v]) => typeof v === 'string' && v.trim());
 
-                // Świeże konto nie ma notatek — wtedy karty NIE MA. Pusta ramka
-                // z napisem „brak faktów" mówi tylko tyle, że coś nie działa.
-                if (!wpisy.length) { box.hidden = true; box.replaceChildren(); return; }
+            // Bez planu nie ma karty. Brak danych to brak elementu.
+            if (!cel && !prio.length && !uwagi.length) { box.hidden = true; box.replaceChildren(); return; }
 
-                box.replaceChildren();
-                const karta = document.createElement('div');
-                karta.className = 'mem-card';
+            box.replaceChildren();
+            const karta = document.createElement('div');
+            karta.className = 'tyg-card';
 
-                const head = document.createElement('button');
-                head.type = 'button';
-                head.className = 'mem-head';
-                head.setAttribute('aria-expanded', 'false');
-                head.onclick = () => toggleMemory(head);
-                const tytul = document.createElement('span');
-                tytul.className = 'mem-title';
-                tytul.textContent = t('chat.mem.title');
-                const licznik = document.createElement('span');
-                licznik.className = 'mem-n';
-                licznik.textContent = String(wpisy.length);
-                const chev = document.createElement('span');
-                chev.className = 'mem-chev';
-                head.append(tytul, licznik, chev);
-                karta.appendChild(head);
+            const lab = document.createElement('div');
+            lab.className = 'tyg-lab';
+            lab.textContent = t('chat.week.title');
+            karta.appendChild(lab);
 
-                for (const c of wpisy) {
-                    const klucz = _MEM_AGENCI[c.category] || 'szef_sztabu';
-                    const wiersz = document.createElement('div');
-                    wiersz.className = 'mem-row';
-
-                    const kto = document.createElement('div');
-                    kto.className = 'mem-who';
-                    const dot = document.createElement('span');
-                    dot.className = 'mem-dot';
-                    dot.style.background = (typeof AGENT_COLORS !== 'undefined' && AGENT_COLORS[klucz]) || '#1A1A1A';
-                    const nazwa = document.createElement('span');
-                    nazwa.textContent = (typeof agentName === 'function') ? agentName(klucz) : c.category;
-                    kto.append(dot, nazwa);
-
-                    const tresc = document.createElement('div');
-                    tresc.className = 'mem-text';
-                    tresc.textContent = c.fact.trim();
-
-                    wiersz.append(kto, tresc);
-                    karta.appendChild(wiersz);
-                }
-
-                box.appendChild(karta);
-                box.hidden = false;
-            } catch (e) {
-                box.hidden = true;
-                console.error('loadUserMemory:', e?.message || e);
+            if (cel) {
+                const c = document.createElement('div');
+                c.className = 'tyg-cel';
+                c.textContent = cel;
+                karta.appendChild(c);
             }
+
+            if (prio.length) {
+                const row = document.createElement('div');
+                row.className = 'tyg-prio';
+                prio.forEach((tekst, i) => {
+                    const chip = document.createElement('span');
+                    chip.className = 'tyg-chip';
+                    chip.style.animationDelay = (i * 60) + 'ms';
+                    chip.textContent = tekst.trim();
+                    row.appendChild(chip);
+                });
+                karta.appendChild(row);
+            }
+
+            for (const [kto, tekst] of uwagi) {
+                const w = document.createElement('div');
+                w.className = 'tyg-uwaga';
+                const dot = document.createElement('span');
+                dot.className = 'tyg-dot';
+                dot.style.background = (typeof AGENT_COLORS !== 'undefined' && AGENT_COLORS[kto]) || '#1A1A1A';
+                const txt = document.createElement('span');
+                txt.textContent = tekst.trim();
+                w.append(dot, txt);
+                karta.appendChild(w);
+            }
+
+            box.appendChild(karta);
+            box.hidden = false;
         }
+
 
         // --- Chat Logic ---
         function handleEnterTA(e) {

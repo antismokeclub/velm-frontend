@@ -62,7 +62,29 @@
     /* AUTH SCREEN */
     #auth-overlay{position:fixed;inset:0;z-index:9999;background:#F8F5EE;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 22px;transition:opacity .35s ease,transform .35s cubic-bezier(.4,0,.2,1)}
     #auth-overlay.out{opacity:0;transform:scale(.97);pointer-events:none}
-    .auth-logo{font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:44px;letter-spacing:-.03em;color:#111;margin-bottom:4px;text-align:center}
+    /* Znak marki — ten sam co w nagłówku aplikacji. Wcześniej był to sam napis
+       „velm" w Bricolage Grotesque, czyli TRZECIM foncie (velm używa Outfit
+       i Inter), i bez żadnego znaku graficznego. */
+    .auth-logo{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:6px}
+    .auth-kostka{
+        width:46px;height:46px;flex-shrink:0;
+        display:inline-flex;align-items:center;justify-content:center;
+        background:#111;color:#fff;border-radius:14px;
+        font-family:'Outfit',sans-serif;font-weight:800;font-size:29px;
+        letter-spacing:-.06em;text-indent:-.02em;line-height:1;
+        animation:authKostkaIn 620ms cubic-bezier(0.16,1,0.3,1) both;
+    }
+    .auth-slowo{
+        font-family:'Outfit',sans-serif;font-weight:800;font-size:40px;
+        letter-spacing:-.045em;color:#111;line-height:1;
+        animation:authSlowoIn 620ms cubic-bezier(0.16,1,0.3,1) 140ms both;
+    }
+    @keyframes authKostkaIn{from{opacity:0;transform:scale(.84) translateY(8px)}to{opacity:1;transform:scale(1) translateY(0)}}
+    @keyframes authSlowoIn{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:translateX(0)}}
+    @media (prefers-reduced-motion:reduce){
+        .auth-kostka,.auth-slowo{animation:authBezRuchu 200ms ease both}
+        @keyframes authBezRuchu{from{opacity:0}to{opacity:1}}
+    }
     .auth-tag{font-size:14px;color:#5C6B85;margin-bottom:52px;text-align:center}
     .auth-card{width:100%;max-width:400px;background:#FDFBF7;border:1.5px solid #D8D2C4;border-radius:24px;padding:28px 22px;box-shadow:0 8px 32px rgba(17,17,17,0.07)}
     .auth-card h2{font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:20px;color:#111;margin-bottom:6px}

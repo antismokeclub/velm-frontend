@@ -93,11 +93,13 @@
 
             <!-- Center: Animated VELM Logo -->
             <div class="header-center">
-                <div class="velm-anim-wrap">
-                    <span class="velm-anim-letter">V</span>
-                    <span class="velm-anim-letter">E</span>
-                    <span class="velm-anim-letter">L</span>
-                    <span class="velm-anim-letter">M</span>
+                <!-- Znak marki: wypełniona kostka z V + sygnatura „velm".
+                     Wcześniej stały tu cztery gołe litery VELM — czytelne, ale
+                     bez żadnego znaku, który dałoby się rozpoznać z daleka
+                     albo postawić na ikonie aplikacji. -->
+                <div class="velm-anim-wrap" aria-label="velm">
+                    <span class="velm-kostka" aria-hidden="true">V</span>
+                    <span class="velm-slowo" aria-hidden="true">velm</span>
                 </div>
             </div>
 

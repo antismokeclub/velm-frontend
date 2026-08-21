@@ -1856,75 +1856,60 @@
             overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
         }
 
-        /* ── NOTATKI SZTABU NA EKRANIE POWITALNYM ─────────────────────────────
-           Cztery notatki czterech specjalistów o tym zawodniku — treść, której
-           nie ma żadna inna apka biegowa. Domyślnie przycięte do dwóch linii,
-           dotknięcie karty rozwija całość. */
+        /* ── CO SZTAB USTALIŁ NA TEN TYDZIEŃ ──────────────────────────────────
+           Zastąpiła kartę „Co sztab o Tobie wie". Tamte notatki są pisane dla
+           szefa, w trzeciej osobie, technicznie — zawodnik nie ma z nich nic.
+           Tu jest jedyna część planu pisana WPROST DO NIEGO. */
         #coach-memory { width: 100%; margin: 18px 0 4px; }
         #coach-memory[hidden] { display: none; }
-        .mem-card {
+        .tyg-card {
             background: #FFFFFF;
             border: 1px solid #EBEBEB;
             border-radius: 20px;
-            padding: 6px 4px 4px;
+            padding: 16px 18px;
             text-align: left;
             animation: fadeInUp 320ms cubic-bezier(0.23,1,0.32,1) both;
         }
-        .mem-head {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            width: 100%;
-            min-height: 44px;
-            padding: 0 14px;
-            background: none;
-            border: 0;
-            cursor: pointer;
+        .tyg-lab {
             font-family: 'Inter', sans-serif;
-            text-align: left;
-            touch-action: manipulation;
-            -webkit-tap-highlight-color: transparent;
+            font-size: 11.5px; font-weight: 500; color: #8A8A8A;
+            letter-spacing: -0.005em; margin-bottom: 5px;
         }
-        .mem-title { font-size: 13px; font-weight: 650; color: #1A1A1A; letter-spacing: -0.01em; }
-        .mem-n {
-            font-size: 11px; font-weight: 700; color: #6B6B6B;
-            background: rgba(26,26,26,0.06); border-radius: 999px;
-            padding: 1px 6px; line-height: 1.5;
-            font-variant-numeric: tabular-nums;
+        .tyg-cel {
+            font-family: 'Outfit', sans-serif;
+            font-size: 17px; font-weight: 800; color: #1A1A1A;
+            letter-spacing: -0.02em; line-height: 1.3;
         }
-        /* Szewron rysowany obramowaniem — bez dodatkowego SVG w każdej karcie. */
-        .mem-chev {
-            width: 7px; height: 7px; margin: -3px 2px 0 auto; flex-shrink: 0;
-            border-right: 1.5px solid #C4C4C4;
-            border-bottom: 1.5px solid #C4C4C4;
-            transform: rotate(45deg);
-            transition: transform 220ms cubic-bezier(0.23,1,0.32,1);
+        .tyg-prio {
+            display: flex; flex-wrap: wrap; gap: 6px;
+            margin-top: 12px;
         }
-        .mem-card.mem-open .mem-chev { transform: rotate(-135deg) translate(-3px,-3px); }
-        .mem-row {
-            padding: 8px 14px 10px;
+        .tyg-chip {
+            font-family: 'Inter', sans-serif;
+            font-size: 12px; font-weight: 500; color: #6B6B6B;
+            background: rgba(26,26,26,0.04);
+            border: 1px solid rgba(26,26,26,0.05);
+            border-radius: 8px;
+            padding: 4px 9px; line-height: 1.4;
+            animation: airWejscie 260ms cubic-bezier(0.23,1,0.32,1) both;
+        }
+        .tyg-uwaga {
+            display: flex; align-items: flex-start; gap: 7px;
+            margin-top: 11px; padding-top: 11px;
             border-top: 1px solid #F2EFEA;
-        }
-        .mem-who {
-            display: flex; align-items: center; gap: 6px;
-            font-size: 11.5px; font-weight: 650; color: #1A1A1A;
-            letter-spacing: -0.01em; margin-bottom: 3px;
-        }
-        .mem-who .mem-dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
-        .mem-text {
-            font-size: 12.5px;
-            line-height: 1.5;
-            color: #6B6B6B;
+            font-family: 'Inter', sans-serif;
+            font-size: 12.5px; line-height: 1.5; color: #6B6B6B;
             letter-spacing: -0.005em;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
         }
-        .mem-card.mem-open .mem-text {
-            -webkit-line-clamp: unset;
-            overflow: visible;
+        .tyg-uwaga + .tyg-uwaga { margin-top: 7px; padding-top: 7px; }
+        .tyg-dot {
+            width: 5px; height: 5px; border-radius: 50%;
+            flex-shrink: 0; margin-top: 7px;
         }
+        @media (prefers-reduced-motion: reduce) {
+            .tyg-chip { animation: airWejscieBezRuchu 140ms ease both; }
+        }
+
 
         /* ── PODPIS NAD WIADOMOŚCIĄ AGENTA ────────────────────────────────────
            Czterech specjalistów produkowało identyczne białe bańki. Po przewinięciu
@@ -2919,9 +2904,11 @@
 
 /* ═══ z <body> dashboard.html: animacja wejscia logo velm w naglowku ═══ */
 
+                    /* `center`, nie `baseline`: kostka to blok, a nie litera —
+                       przy baseline zwisałaby pod linią pisma sygnatury. */
                     .velm-anim-wrap {
                         display: flex;
-                        align-items: baseline;
+                        align-items: center;
                         gap: 0;
                         opacity: 0;
                         transform: translateY(80px);
@@ -2946,8 +2933,66 @@
                         }
                     }
 
-                    /* Wygląd liter — jedno miejsce zamiast ośmiu atrybutów style=
-                       w dashboard.html (cztery w nagłówku Domu, cztery w Trenerze). */
+                    /* ZNAK MARKI: wypełniona kostka + sygnatura.
+                       Cztery gołe litery czytały się poprawnie, ale nie były
+                       znakiem — nie dało się ich rozpoznać z daleka ani postawić
+                       na ikonie aplikacji. Kostka jest monochromatyczna (#1A1A1A),
+                       bo velm nie ma koloru akcentowego. */
+                    .velm-kostka {
+                        width: 30px;
+                        height: 30px;
+                        flex-shrink: 0;
+                        display: inline-flex;
+                        align-items: center;
+                        justify-content: center;
+                        background: var(--primary-color);
+                        color: #FFFFFF;
+                        border-radius: 9px;
+                        font-family: 'Outfit', sans-serif;
+                        font-size: 19px;
+                        font-weight: 800;
+                        letter-spacing: -0.06em;
+                        /* V ma optycznie ciężką prawą krawędź — bez tego stoi
+                           odrobinę za bardzo w prawo względem środka kostki. */
+                        text-indent: -0.02em;
+                        line-height: 1;
+                        opacity: 0;
+                        transform: scale(0.82) translateY(6px);
+                        animation: velmKostkaIn 620ms cubic-bezier(0.16, 1, 0.3, 1) 0.15s forwards;
+                        will-change: transform, opacity;
+                    }
+                    .velm-slowo {
+                        font-family: 'Outfit', sans-serif;
+                        font-size: 25px;
+                        font-weight: 800;
+                        color: var(--primary-color);
+                        letter-spacing: -0.045em;
+                        line-height: 1;
+                        margin-left: 8px;
+                        opacity: 0;
+                        transform: translateX(-6px);
+                        animation: velmSlowoIn 620ms cubic-bezier(0.16, 1, 0.3, 1) 0.32s forwards;
+                        will-change: transform, opacity;
+                    }
+                    @keyframes velmKostkaIn {
+                        to { opacity: 1; transform: scale(1) translateY(0); }
+                    }
+                    @keyframes velmSlowoIn {
+                        to { opacity: 1; transform: translateX(0); }
+                    }
+                    @media (prefers-reduced-motion: reduce) {
+                        .velm-kostka, .velm-slowo {
+                            animation-duration: 200ms;
+                            animation-delay: 0s;
+                            transform: none;
+                        }
+                        .velm-kostka { animation-name: velmBezRuchu; }
+                        .velm-slowo  { animation-name: velmBezRuchu; }
+                        @keyframes velmBezRuchu { to { opacity: 1; } }
+                    }
+
+                    /* Stare .velm-anim-letter zostaje dla zgodności — używał go
+                       też nagłówek Trenera, zanim litery stamtąd zniknęły (v99). */
                     .velm-anim-letter {
                         font-family: 'Outfit', sans-serif;
                         font-size: 28px;
