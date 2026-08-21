@@ -116,9 +116,9 @@
                 if (banner) banner.remove();
             }
 
-            // 2. Hide suggestions & Welcome Card
-            const suggestions = document.getElementById('coach-suggestions');
-            if (suggestions) suggestions.style.display = 'none';
+            // Podpowiedzi i kartę powitalną chowa addMessage() — elementu
+            // #coach-suggestions nie ma w dashboard.html od dawna, ten getElementById
+            // zwracał null przy każdej wysłanej wiadomości.
 
             // 3. Show Loading
             const loadingId = addLoadingIndicator(text, selectedAgent);

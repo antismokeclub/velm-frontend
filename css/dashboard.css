@@ -654,49 +654,12 @@
         }
 
         /* --- Coach View Specifics --- */
-        #coach-messages {
-            flex: 1;
-            /* override calc */
-            min-height: 0;
-            overflow-y: auto;
-            padding: 16px;
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-            scrollbar-width: none;
-            -ms-overflow-style: none;
-        }
+        /* #coach-messages ma JEDNĄ definicję, niżej w tym pliku (sekcja czatu).
+           Stała tu druga, starsza — przegrywała kaskadę w całości. */
 
-        #coach-messages::-webkit-scrollbar {
-            display: none;
-        }
-
-        .msg {
-            max-width: 85%;
-            padding: 14px 18px;
-            border-radius: 20px;
-            font-size: 15px;
-            line-height: 1.55;
-            word-wrap: break-word;
-            box-shadow: none;
-        }
-
-        .msg-user {
-            align-self: flex-end;
-            background: #1A1A1A;
-            color: #fff;
-            border-bottom-right-radius: 6px;
-            box-shadow: 0 2px 12px rgba(26,26,26,0.15);
-        }
-
-        .msg-ai {
-            align-self: flex-start;
-            background: #FFFFFF;
-            border: 1px solid rgba(235,235,235,0.6);
-            color: #1A1A1A;
-            border-bottom-left-radius: 6px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.04);
-        }
+        /* Same bańki (.msg, .msg-user, .msg-ai) definiuje sekcja czatu niżej.
+           Stał tu drugi, starszy zestaw — przegrywał kaskadę w całości, ale
+           zostawiał po sobie dwa cienie i inne zaokrąglenia w diffach. */
 
         /* --- Odpowiedź agenta: akapity i liczby --- */
         /* Akapit jako blok, żeby dwa zdania od agenta nie sklejały się w ścianę.
@@ -812,92 +775,19 @@
             @keyframes airWejscieBezRuchu { from { opacity: 0; } to { opacity: 1; } }
         }
 
-        /* Suggestions */
-        #coach-suggestions {
-            display: flex;
-            flex-direction: column;
-            align-items: stretch;
-            gap: 8px;
-            padding: 12px 16px 16px 16px;
-            position: absolute;
-            bottom: 100%;
-            left: 0;
-            width: 100%;
-            z-index: 1001;
-            background: linear-gradient(to top, var(--bg-color) 40%, transparent);
-            max-height: 250px;
-            overflow-y: auto;
-            scrollbar-width: none;
-        }
+        /* #coach-suggestions usunięte: elementu o tym id NIE MA w dashboard.html
+           (jest #coach-quick-suggestions). Zostawał tu jedyny gradient w całej
+           zakładce — stylujący element, który nigdy nie powstał. */
 
-        #coach-suggestions::-webkit-scrollbar {
-            display: none;
-        }
-
-        /* Input Area — floating above nav */
-        #coach-input-area {
-            position: fixed;
-            bottom: calc(var(--nav-height) + 20px);
-            left: 12px;
-            width: calc(100% - 24px);
-            max-width: 456px;
-            padding: 8px;
-            background: rgba(255,255,255,0.92);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(235,235,235,0.5);
-            border-radius: 22px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
-            display: none;
-            gap: 8px;
-            z-index: 900;
-        }
-
-        @media (min-width: 481px) {
-            #coach-input-area {
-                left: 50%;
-                transform: translateX(-50%);
-            }}
-
-        #chat-input {
-            flex: 1;
-            background: #F5F3F0;
-            border: 1px solid rgba(235,235,235,0.5);
-            color: var(--text-color);
-            padding: 12px 16px;
-            border-radius: 16px;
-            outline: none;
-            font-size: 14px;
-            font-family: 'Inter', sans-serif;
-            transition: border-color 0.2s;
-        }
-
-        #chat-input:focus {
-            border-color: rgba(26,26,26,0.2);
-        }
-
-        #chat-input::placeholder {
-            color: #B0A89E;
-        }
-
-        #send-btn {
-            background: var(--primary-color);
-            border: none;
-            width: 42px;
-            height: 42px;
-            border-radius: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            color: white;
-            transition: opacity 0.15s;
-            flex-shrink: 0;
-        }
-
-        #send-btn:active {
-            opacity: 0.8;
-        }
+        /* Pole wpisywania czatu (#coach-input-area, #chat-input, #send-btn) ma
+           JEDNĄ definicję, niżej w tym pliku. Stał tu drugi, starszy zestaw z
+           czasów, gdy pole pływało nad nawigacją (`position: fixed`). Nowszy
+           przykrywał go `!important`-ami, ale nie w całości — obramowanie,
+           zaokrąglenie 22px i cień z tamtego bloku dalej działały.
+           Gorsze: `@media (min-width: 481px)` dokładał `transform:
+           translateX(-50%)`, a transform działa niezależnie od `position`.
+           Na tablecie i w przeglądarce pasek wpisywania był przesunięty
+           o połowę własnej szerokości w lewo. */
 
         /* --- Heartbeat Animation --- */
         .heartbeat-container {
@@ -1866,12 +1756,7 @@
         .chat-history-separator span { font-size:11px; font-weight:700; color:#B0A89E; text-transform:uppercase; letter-spacing:0.08em; white-space:nowrap; }
         .chat-history-separator::before, .chat-history-separator::after { content:''; flex:1; height:1px; background:#EBEBEB; }
 
-        /* Quick Suggestions */
-        #coach-quick-suggestions {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
+        /* #coach-quick-suggestions ma jedną definicję — niżej, przy karcie powitalnej. */
 
         /* Message Bubbles */
         .msg {
@@ -1904,6 +1789,7 @@
             align-self: flex-start;
             word-wrap: break-word;
             box-shadow: none;
+            animation: msgSlideInLeft 220ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
         }
 
         @keyframes msgSlideInRight {
@@ -1926,6 +1812,8 @@
         }
 
         /* Input Area */
+        /* Bez `!important` — istniały wyłącznie po to, żeby przykryć starszy,
+           równorzędny blok kilkaset linii wyżej. Ten blok już nie istnieje. */
         #coach-input-area {
             flex-shrink: 0;
             background: rgba(245,243,240,0.88);
@@ -1933,59 +1821,57 @@
             -webkit-backdrop-filter: blur(24px) saturate(1.4);
             border-top: 1px solid rgba(235,235,235,0.4);
             padding: 14px 16px calc(env(safe-area-inset-bottom, 8px) + 10px);
-            display: flex !important;
+            display: flex;
             flex-direction: row;
             align-items: flex-end;
             gap: 12px;
-            position: static;
-            bottom: unset;
-            width: auto;
-            z-index: auto;
         }
         #chat-input {
             flex: 1;
-            background: #FFFFFF !important;
-            border: 1.5px solid #EBEBEB !important;
-            border-radius: 22px !important;
-            padding: 14px 20px !important;
+            background: #FFFFFF;
+            border: 1.5px solid #EBEBEB;
+            border-radius: 22px;
+            padding: 14px 20px;
             font-family: 'Inter', sans-serif;
-            font-size: 16px !important;
-            color: #1A1A1A !important;
+            /* 16px to nie decyzja estetyczna: przy mniejszym foncie iOS Safari
+               sam przybliża stronę przy wejściu w pole i już jej nie oddala. */
+            font-size: 16px;
+            color: #1A1A1A;
             outline: none;
             transition: border-color 0.2s, box-shadow 0.2s;
             resize: none;
-            overflow: hidden;
             max-height: 130px;
             overflow-y: auto;
             line-height: 1.5;
             display: block;
         }
         #chat-input:focus {
-            border-color: #1A1A1A !important;
-            box-shadow: 0 0 0 3px rgba(0,0,0,0.06) !important;
+            border-color: #1A1A1A;
+            box-shadow: 0 0 0 3px rgba(0,0,0,0.06);
         }
-        #chat-input::placeholder { color: #C4C4C4 !important; }
+        #chat-input::placeholder { color: #C4C4C4; }
         #conv-drawer-agent-label {
             font-size: 11px; font-weight: 700; letter-spacing: 0.08em;
             text-transform: uppercase; color: #8A8A8A;
             padding: 8px 16px 2px;
         }
         #send-btn {
-            width: 52px !important;
-            height: 52px !important;
-            border-radius: 50% !important;
-            background: var(--primary-color) !important;
-            border: none !important;
-            display: flex !important;
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            border: none;
+            display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
             color: white;
             flex-shrink: 0;
-            box-shadow: 0 3px 12px rgba(0,0,0,0.18);
             transition: opacity 0.2s, transform 0.15s;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
         }
-        #send-btn:disabled { opacity: 0.35 !important; cursor: default; }
+        #send-btn:disabled { opacity: 0.35; cursor: default; }
         #send-btn:not(:disabled):active { animation: sendBtnTap 0.28s cubic-bezier(0.34,1.56,0.64,1) both; }
 
         /* Coach header title */
@@ -2106,11 +1992,8 @@
             margin-top: 20px;
         }
 
-        /* AI bubbles — no avatar, direct style */
-        .msg-ai-avatar { display: none !important; }
-        .msg-ai {
-            animation: msgSlideInLeft 220ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
-        }
+        /* .msg-ai-avatar usunięte — klasy nie ma ani w dashboard.html, ani w JS.
+           Animacja wejścia bańki przeniesiona do jedynej definicji .msg-ai wyżej. */
         .typing-bubble-status {
             display: flex;
             align-items: center;
