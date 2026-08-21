@@ -2255,6 +2255,67 @@
             50%  { opacity: 0; transform: translateY(-4px); }
             100% { opacity: 1; transform: translateY(0); }
         }
+
+        /* ── TOK PRACY SZTABU ─────────────────────────────────────────────────
+           Kiedy backend przyśle wykaz wczytanych danych (a robi to ZANIM model
+           zacznie pisać), dymek „pracuję" zamienia się w listę policzonych
+           źródeł. Każda pozycja to rzecz, która naprawdę poszła do promptu —
+           nie animacja obietnicy, tylko odhaczanie faktów. */
+        .typing-bubble-status.praca-wykaz {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 8px;
+            max-width: 88%;
+            padding: 12px 14px;
+        }
+        .praca-head { display: flex; align-items: center; gap: 10px; }
+        .praca-lista { display: flex; flex-direction: column; gap: 4px; }
+        .praca-poz {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            font-family: 'Inter', sans-serif;
+            font-size: 12px;
+            font-weight: 500;
+            color: #6B6B6B;
+            letter-spacing: -0.005em;
+            animation: pozWjazd 300ms cubic-bezier(0.23,1,0.32,1) both;
+        }
+        /* Ptaszek rysowany obramowaniem — bez SVG na każdą pozycję. */
+        .praca-ptak {
+            width: 9px; height: 5px; flex-shrink: 0;
+            margin-top: -3px;
+            border-left: 1.6px solid #6B8F71;
+            border-bottom: 1.6px solid #6B8F71;
+            transform: rotate(-45deg);
+        }
+        @keyframes pozWjazd {
+            from { opacity: 0; transform: translateX(-5px); }
+            to   { opacity: 1; transform: translateX(0); }
+        }
+
+        /* Kursor przy tekście, który właśnie się pisze. Znika, gdy strumień
+           zamilknie na dłużej niż 6 s — mrugający kursor przy zatrzymanym
+           strumieniu obiecywałby ruch, którego nie ma. */
+        .msg-ai.msg-pisze .ak::after {
+            content: '';
+            display: inline-block;
+            width: 2px;
+            height: 1em;
+            margin-left: 2px;
+            vertical-align: -0.15em;
+            background: #1A1A1A;
+            animation: kursor 1s steps(2, start) infinite;
+        }
+        @keyframes kursor { 0%, 50% { opacity: 1; } 50.01%, 100% { opacity: 0; } }
+        /* Tekst w trakcie pisania nie wjeżdża akapitami — wjazd jest dla
+           gotowych akapitów, a tu treść dopisuje się w locie. */
+        .msg-ai .ak.strumien { animation: none; }
+        @media (prefers-reduced-motion: reduce) {
+            .praca-poz { animation: pozWjazdBezRuchu 160ms ease both; }
+            .msg-ai.msg-pisze .ak::after { animation: none; opacity: 1; }
+            @keyframes pozWjazdBezRuchu { from { opacity: 0; } to { opacity: 1; } }
+        }
         .context-banner {
             display: flex;
             align-items: center;

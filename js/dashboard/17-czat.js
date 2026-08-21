@@ -168,6 +168,168 @@
             el.style.overflowY = el.scrollHeight > 130 ? 'auto' : 'hidden';
         }
 
+        // ── STRUMIEŃ ODPOWIEDZI ───────────────────────────────────────────────
+        //
+        // Zawodnik prosił o „pokazanie toku myślenia". Jedyny uczciwy sposób to
+        // pokazać PRAWDZIWY przebieg: najpierw wykaz tego, co sztab wczytał
+        // (backend liczy go zaraz po odczycie danych, przed pisaniem), potem
+        // odpowiedź pojawiającą się tak, jak model ją pisze. Wszystko inne było
+        // animowanym udawaniem — dokładnie to, co wycięliśmy w v93.
+        function _strumienDostepny() {
+            return typeof ReadableStream === 'function'
+                && typeof TextDecoder === 'function'
+                && !!(window.Response && Response.prototype && 'body' in Response.prototype);
+        }
+        function _toStrumien(res) {
+            return res.ok && (res.headers.get('content-type') || '').includes('text/event-stream') && res.body;
+        }
+
+        // Bańka rośnie w miarę napływania tekstu. Podczas pisania trzymamy surowy
+        // (zabezpieczony) tekst w jednym akapicie — pełne formatowanie z akapitami
+        // i wyróżnionymi liczbami wchodzi na końcu, kiedy tekst już się nie zmienia.
+        function _strumienBubble(agent) {
+            const bubble = addMessage('ai', '', null, { agent });
+            bubble.innerHTML = '<span class="ak strumien"></span>';
+            bubble.classList.add('msg-pisze');
+            return bubble;
+        }
+
+        async function _czytajStrumien(response, { loadingId, text }) {
+            const reader = response.body.getReader();
+            const dekoder = new TextDecoder('utf-8');
+            let ogon = '', tresc = '', bubble = null, zakonczone = false;
+            let ostatnieMeta = null, konwId = null, trialLeft, agentOdp = selectedAgent;
+
+            // Cisza dłuższa niż 6 s znaczy zwykle, że pośrednik buforuje całą
+            // odpowiedź. Nie ponawiamy żądania (to podwójny koszt modelu za
+            // problem z rysowaniem) — zdejmujemy tylko kursor, żeby nie mrugał
+            // w próżni, a wskaźnik pracy i tak mówi prawdę.
+            let cisza = setTimeout(() => { if (bubble) bubble.classList.remove('msg-pisze'); }, 6000);
+            const odswiezCisze = () => { clearTimeout(cisza); cisza = setTimeout(() => {
+                if (bubble) bubble.classList.remove('msg-pisze');
+            }, 6000); };
+
+            const obsluz = (typ, dane) => {
+                if (typ === 'meta') {
+                    ostatnieMeta = dane && dane.loaded ? dane : null;
+                    _pokazWykazWTrakcie(loadingId, ostatnieMeta);
+                } else if (typ === 'delta') {
+                    if (!bubble) { removeMessage(loadingId); bubble = _strumienBubble(agentOdp); }
+                    tresc += dane.t || '';
+                    const span = bubble.querySelector('.ak');
+                    if (span) span.textContent = tresc;
+                    scrollToBottom();
+                } else if (typ === 'replace') {
+                    if (!bubble) { removeMessage(loadingId); bubble = _strumienBubble(agentOdp); }
+                    tresc = dane.t || '';
+                    const span = bubble.querySelector('.ak');
+                    if (span) span.textContent = tresc;
+                } else if (typ === 'done') {
+                    zakonczone = true;
+                    konwId = dane.conversationId;
+                    trialLeft = dane.trialMessagesLeft;
+                    if (dane.meta && dane.meta.loaded) ostatnieMeta = dane.meta;
+                    if (dane.agent) agentOdp = dane.agent;
+                } else if (typ === 'error') {
+                    zakonczone = true;
+                }
+            };
+
+            try {
+                for (;;) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    odswiezCisze();
+                    ogon += dekoder.decode(value, { stream: true });
+                    // Zdarzenia SSE rozdziela pusta linia. Ostatni, niepełny
+                    // fragment zostaje w ogonie do następnego odczytu.
+                    const czesci = ogon.split('\n\n');
+                    ogon = czesci.pop();
+                    for (const blok of czesci) {
+                        const mTyp = blok.match(/^event: (.+)$/m);
+                        const mDane = blok.match(/^data: ([\s\S]*)$/m);
+                        if (!mTyp || !mDane) continue;
+                        let dane = {};
+                        try { dane = JSON.parse(mDane[1]); } catch (e) { continue; }
+                        obsluz(mTyp[1], dane);
+                    }
+                }
+            } finally {
+                clearTimeout(cisza);
+            }
+
+            removeMessage(loadingId);
+            if (!bubble) {
+                // Strumień skończył się bez ani jednego kawałka tekstu.
+                addMessage('ai', t('chat.replyerr'), null, { agent: agentOdp });
+                return;
+            }
+
+            // Koniec pisania: pełne formatowanie (akapity, wyróżnione liczby)
+            // plus wykaz „co sprawdziłem" pod odpowiedzią.
+            bubble.classList.remove('msg-pisze');
+            bubble.innerHTML = _formatAgentText(tresc) + _wykazHtml(ostatnieMeta);
+
+            if (trialLeft !== null && trialLeft !== undefined) {
+                currentTrialMessagesLeft = trialLeft;
+                updateTrialCounter();
+            }
+            if (konwId && konwId !== currentConversationId) {
+                currentConversationId = konwId;
+                localStorage.setItem(`velm_active_conv_${selectedAgent}`, konwId);
+                const titleText = text.length > 60 ? text.slice(0, 57).trim() + '…' : text;
+                _setCurrentConvTitle(titleText);
+                delete _conversationsCache[selectedAgent];
+            }
+            setTimeout(loadUserMemory, 2000);
+        }
+
+        // Wskaźnik pracy zamienia się w LISTĘ POLICZONYCH ŹRÓDEŁ, gdy tylko
+        // backend przyśle wykaz — czyli zanim model napisze pierwsze słowo.
+        // To jest ten „tok myślenia": nie animacja obietnicy, tylko rzeczy,
+        // które naprawdę zostały wczytane.
+        function _pokazWykazWTrakcie(loadingId, meta) {
+            const el = document.getElementById(loadingId);
+            if (!el || !meta || !meta.loaded) return;
+            const pozycje = [];
+            for (const [pole, klucz] of _WYKAZ_POZYCJE) {
+                if (typeof meta.loaded[pole] === 'number' && meta.loaded[pole] > 0) pozycje.push(tp(klucz, meta.loaded[pole]));
+            }
+            if (meta.loaded.zawody) pozycje.push(t('chat.read.race'));
+            if (!pozycje.length) return;
+
+            (el._statusTimers || []).forEach(clearTimeout);
+            el.classList.add('praca-wykaz');
+            el.replaceChildren();
+
+            const naglowek = document.createElement('div');
+            naglowek.className = 'praca-head';
+            const kropki = document.createElement('div');
+            kropki.className = 'status-dots';
+            kropki.innerHTML = '<span></span><span></span><span></span>';
+            const napis = document.createElement('div');
+            napis.className = 'status-text';
+            napis.textContent = t('chat.work.write');
+            naglowek.append(kropki, napis);
+            el.appendChild(naglowek);
+
+            const lista = document.createElement('div');
+            lista.className = 'praca-lista';
+            pozycje.forEach((p, i) => {
+                const w = document.createElement('div');
+                w.className = 'praca-poz';
+                w.style.animationDelay = Math.min(i * 70, 420) + 'ms';
+                const ptak = document.createElement('span');
+                ptak.className = 'praca-ptak';
+                const txt = document.createElement('span');
+                txt.textContent = p;
+                w.append(ptak, txt);
+                lista.appendChild(w);
+            });
+            el.appendChild(lista);
+            scrollToBottom();
+        }
+
         async function sendMessage() {
             const input = document.getElementById('chat-input');
             const text = input.value.trim();
@@ -208,9 +370,22 @@
                         message: messageForAI,
                         agent: selectedAgent,
                         conversationId: currentConversationId,
-                        clientTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+                        clientTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+                        // Strumień prosimy JAWNIE. Bramki 402/403/401 zostają po
+                        // stronie serwera PRZED otwarciem strumienia, więc dalej
+                        // wracają prawdziwym kodem HTTP i obsługa niżej jest ta sama.
+                        stream: _strumienDostepny()
                     })
                 });
+
+                // Odpowiedź strumieniowa — tekst dociera po kawałku, a wykaz
+                // „co sprawdziłem" jeszcze zanim model zacznie pisać.
+                if (_toStrumien(response)) {
+                    await _czytajStrumien(response, { loadingId, text });
+                    scrollToBottom();
+                    return;
+                }
+
                 let data;
                 try { data = await response.json(); }
                 catch (parseErr) { data = {}; }

@@ -133,7 +133,6 @@
             // Głowa — psycholog
             psycholog:   '<path d="M15.5 21v-3.2a3 3 0 0 1 1-2.2A7 7 0 1 0 5 10a7 7 0 0 0 1.2 3.9c.5.7.8 1.5.8 2.4V21"/>'
         };
-        const AGENT_LISTA = ['szef_sztabu', 'analityk', 'fizjo', 'psycholog'];
 
         function _renderAgentSheet() {
             const sheet = document.getElementById('agent-sheet');
