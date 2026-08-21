@@ -33,9 +33,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
-  <!-- Outfit 800 — TYLKO na znak marki, ten sam co w nagłówku aplikacji.
-       Bez tego .auth-kostka spadłaby na font zastępczy i logo na pierwszym
-       ekranie wyglądałoby inaczej niż logo w środku apki. -->
+  <!-- Outfit 800 — TYLKO na sygnaturę „velm", tę samą co w nagłówku aplikacji.
+       Bez tego napis spadłby na font zastępczy i logo na pierwszym ekranie
+       wyglądałoby inaczej niż logo w środku apki. -->
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/index.css">
   <script>
@@ -58,11 +58,10 @@
 
 <!-- Auth overlay — shown when no userId in localStorage -->
 <div id="auth-overlay" style="display:none">
-  <!-- Ten sam znak marki co w nagłówku aplikacji: wypełniona kostka + sygnatura.
-       To pierwszy ekran, jaki widzi nowy użytkownik — logo musi być tu takie
-       samo jak w środku, inaczej apka wygląda na dwa różne produkty. -->
+  <!-- Sama sygnatura, tak samo jak w nagłówku aplikacji. Kostka wyleciała
+       z obu miejsc naraz — logo musi być identyczne na ekranie logowania
+       i w środku, inaczej apka wygląda na dwa różne produkty. -->
   <div class="auth-logo" aria-label="velm">
-    <span class="auth-kostka" aria-hidden="true">V</span>
     <span class="auth-slowo" aria-hidden="true">velm</span>
   </div>
   <div class="auth-tag">Twój AI sztab treningowy</div>
