@@ -27,13 +27,31 @@
         function _renderSuggestions(agent) {
             const container = document.getElementById('coach-quick-suggestions');
             if (!container) return;
-            const footer = container.querySelector('.coach-suggest-footer');
             const footerLabel = t('agent.' + (['szef_sztabu','analityk','fizjo','psycholog'].includes(agent) ? agent : 'szef_sztabu') + '.footer');
             const picks = _pickSuggestions(agent);
-            const btns = picks.map(q =>
-                `<button class="coach-suggest-card" onclick="sendQuickSuggestion(${JSON.stringify(q)})">${q}</button>`
-            ).join('');
-            container.innerHTML = btns + `<div class="coach-suggest-footer">${footerLabel}</div>`;
+
+            // KARTY BUDUJEMY Z ELEMENTÓW, NIE ZE STRINGA HTML.
+            // Poprzednia wersja skladala `onclick="sendQuickSuggestion(${JSON.stringify(q)})"`,
+            // czyli wstawiala tekst w CUDZYSLOWACH do atrybutu ograniczonego
+            // CUDZYSLOWAMI. Przegladarka konczyla atrybut na pierwszym z nich, więc
+            // onclick brzmial `sendQuickSuggestion(` — blad skladni, klikniecie nie
+            // robilo NIC. Wszystkie propozycje w czacie byly martwe.
+            // Nasluch na wlasciwosci .onclick nie da sie zepsuc zadnym znakiem
+            // w tresci pytania (a francuskie maja apostrofy, hiszpanskie znaki
+            // zapytania po obu stronach).
+            container.replaceChildren();
+            for (const q of picks) {
+                const b = document.createElement('button');
+                b.type = 'button';
+                b.className = 'coach-suggest-card';
+                b.textContent = q;
+                b.onclick = () => sendQuickSuggestion(q);
+                container.appendChild(b);
+            }
+            const f = document.createElement('div');
+            f.className = 'coach-suggest-footer';
+            f.textContent = footerLabel;
+            container.appendChild(f);
         }
 
         // Nagłówek czatu i karty propozycji są budowane z JS (per agent), więc

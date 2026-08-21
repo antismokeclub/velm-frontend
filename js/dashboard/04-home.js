@@ -237,8 +237,14 @@
                 container.style.alignItems = 'center';
                 container.style.justifyContent = 'center';
                 container.style.height = '260px';
+                // Własne SVG, nie emotka — velm nigdzie nie używa systemowych emoji,
+                // bo wyglądają inaczej na każdym telefonie i psują spójność.
                 container.innerHTML = `
-                    <div style="font-size:32px;margin-bottom:12px;opacity:0.5;">📊</div>
+                    <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.45)"
+                         stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:12px;">
+                        <path d="M3 3v16a2 2 0 0 0 2 2h16"></path>
+                        <path d="M7 15l3.5-4 3 3L20 7"></path>
+                    </svg>
                     <div style="color:#fff;font-weight:600;font-size:15px;margin-bottom:4px;">${t('chart.nodata')}</div>
                     <div style="color:rgba(255,255,255,0.6);font-size:13px;text-align:center;max-width:240px;">${t(isSleep ? 'chart.nodata.sleep' : 'chart.nodata.hr')}</div>
                 `;
@@ -281,7 +287,11 @@
             const minV = Math.min(...data);
             const vSpan = Math.max(maxV - minV, 0.5);
 
-            const xs = data.map((_, i) => pL + (i / (data.length - 1)) * cW);
+            // Jeden punkt danych dzieliłby przez zero i cały wykres wychodził NaN —
+            // realne od kiedy sen filtrujemy po godzinach (pierwszy check-in usera).
+            const xs = data.length === 1
+                ? [pL + cW / 2]
+                : data.map((_, i) => pL + (i / (data.length - 1)) * cW);
             const ys = data.map(v => pT + cH - ((v - minV) / vSpan) * cH);
 
             // Straight line + area (like calendar)
@@ -436,7 +446,7 @@
                     const mins = Math.round((v - hrs) * 60);
                     return `${hrs}h ${mins}m`;
                 }
-                return `${v}${currentChartType === 'sleep' ? 'h' : ' BPM'}`;
+                return `${v} BPM`;   // gałąź `isSleep` obsłużona wyżej
             };
 
             // 1. Update List Highlights

@@ -139,10 +139,15 @@
                 const metrics = data?.metrics;
                 if (!metrics?.length) return;
                 const latest = metrics[metrics.length - 1];
-                const score = Math.round((latest.value ?? 0) / 20); // value=score*20
-                const sleepTimes = [null, '5h 0m', '6h 0m', '7h 0m', '7h 45m', '8h 30m'];
-                const timeStr = sleepTimes[score] || null;
-                if (!timeStr) return;
+                // Prawdziwe godziny z check-inu albo z zegarka. Wcześniej stała tu
+                // tablica [null,'5h 0m','6h 0m','7h 0m','7h 45m','8h 30m'] i ocena
+                // 1-5 wybierała z niej pozycję — czyli apka POKAZYWAŁA WYMYŚLONY
+                // CZAS SNU, mając prawdziwy w tym samym wierszu bazy.
+                const godziny = Number(latest.value);
+                if (!Number.isFinite(godziny) || godziny <= 0) return;
+                const h = Math.floor(godziny);
+                const m = Math.round((godziny - h) * 60);
+                const timeStr = h + 'h ' + m + 'm';
                 const el = document.getElementById('sleep-today');
                 if (el) { el.textContent = timeStr; updateSleepRing(); }
             } catch(e) { /* zostaje domyślne */ }
