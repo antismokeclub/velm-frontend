@@ -18,10 +18,54 @@
             return out;
         }
 
+        // ── PYTANIE Z NAJBLIŻSZEGO TRENINGU ───────────────────────────────────
+        //
+        // Pula dziesięciu pytań na agenta jest z konieczności ogólna („Jak
+        // wyglądają moje postępy?"), bo musi pasować każdemu. Jeśli w planie
+        // stoi konkretna sesja, pierwsze pytanie może dotyczyć WŁAŚNIE JEJ.
+        //
+        // Czytamy `calendarPlan`, który wypełnia karta „dziś" na Domu albo
+        // Kalendarz. Wchodząc do Trenera prosto po starcie apki plan zwykle już
+        // jest; jeśli go nie ma, funkcja oddaje null i pula zostaje bez zmian.
+        // ŻADNEGO dociągania planu tutaj — pytanie o „jutrzejsze interwały"
+        // w sytuacji, w której nikt planu nie czytał, byłoby zgadywanką.
+        const _SESJA_KLUCZ = { interval: 'sug.ctx.interval', tempo: 'sug.ctx.tempo', long: 'sug.ctx.long', rest: 'sug.ctx.rest' };
+
+        function _pytanieZPlanu() {
+            const dni = (typeof calendarPlan !== 'undefined' && calendarPlan) ? calendarPlan.dni : null;
+            if (!Array.isArray(dni) || !dni.length) return null;
+            const dzis = (typeof todayStr === 'function') ? todayStr() : null;
+            if (!dzis) return null;
+
+            // TYLKO dziś albo jutro. Nie z lenistwa: „dzisiaj" i „jutro" to
+            // jedyne określenia czasu, które wchodzą do zdania bez odmiany
+            // w każdym z pięciu języków. Nazwa dnia z Intl przychodzi w mianowniku
+            // i po polsku dawała „Mam sobota interwały" — a przypadki trzeba by
+            // wtedy pisać osobno dla polskiego. Sesja za cztery dni i tak nie
+            // jest „na teraz", więc nic realnego nie tracimy.
+            const jutro = new Date(new Date(dzis + 'T12:00:00').getTime() + 86400000)
+                .toISOString().slice(0, 10);
+
+            for (const d of dni) {
+                if (!d || (d.data !== dzis && d.data !== jutro)) continue;
+                const klucz = _SESJA_KLUCZ[d.typ];
+                if (!klucz) continue;
+                const kiedy = (d.data === dzis ? t('chat.day.today') : t('chat.day.tomorrow')).toLowerCase();
+                const km = Number(d.dystans_km);
+                return t(klucz)
+                    .split('{kiedy}').join(kiedy)
+                    .split('{km}').join(Number.isFinite(km) && km > 0 ? km : '');
+            }
+            return null;
+        }
+
         function _pickSuggestions(agent) {
             const pool = agentSuggestions(agent);
             const shuffled = [...pool].sort(() => Math.random() - 0.5);
-            return shuffled.slice(0, 3);
+            const zPlanu = _pytanieZPlanu();
+            // Pytanie z planu wchodzi na pierwsze miejsce i zabiera jedno z puli,
+            // żeby kart dalej były trzy.
+            return zPlanu ? [zPlanu, ...shuffled.slice(0, 2)] : shuffled.slice(0, 3);
         }
 
         function _renderSuggestions(agent) {
@@ -235,7 +279,8 @@
             if (container) {
                 container.classList.add('conv-switching');
                 container.classList.remove('conv-ready');
-                container.querySelectorAll('.msg, .chat-history-separator').forEach(n => n.remove());
+                container.querySelectorAll('.msg, .chat-history-separator, .chat-day-sep, .msg-who, .typing-bubble-status').forEach(n => n.remove());
+                resetChatGroups();
                 const intro = document.getElementById('coach-intro');
                 const quick = document.getElementById('coach-quick-suggestions');
                 if (intro) intro.style.display = 'none';
@@ -250,7 +295,15 @@
                 const data = await res.json();
                 const msgs = data.messages || [];
                 if (container) container.classList.add('bulk-loading');
-                for (const m of msgs) addMessage(m.role === 'user' ? 'user' : 'ai', m.content);
+                resetChatGroups();
+                // created_at leci prosto z bazy — separatory dni i godziny nad
+                // wiadomościami muszą pokazywać KIEDY TO NAPRAWDĘ BYŁO, a nie
+                // moment wczytania historii. Rozmowa jest per agent, więc
+                // selectedAgent poprawnie podpisuje wszystkie wiadomości w wątku.
+                for (const m of msgs) {
+                    addMessage(m.role === 'user' ? 'user' : 'ai', m.content, null,
+                        { agent: selectedAgent, time: m.created_at });
+                }
                 if (container) {
                     container.classList.remove('bulk-loading', 'conv-switching');
                     requestAnimationFrame(() => container.classList.add('conv-ready'));
@@ -272,7 +325,8 @@
             _closeConvDrawer();
             const container = document.getElementById('coach-messages');
             if (container) {
-                container.querySelectorAll('.msg, .chat-history-separator').forEach(n => n.remove());
+                container.querySelectorAll('.msg, .chat-history-separator, .chat-day-sep, .msg-who, .typing-bubble-status').forEach(n => n.remove());
+                resetChatGroups();
                 const intro = document.getElementById('coach-intro');
                 const quick = document.getElementById('coach-quick-suggestions');
                 if (intro) intro.style.display = '';

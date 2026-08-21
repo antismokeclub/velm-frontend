@@ -1805,6 +1805,140 @@
             scroll-behavior: smooth;
         }
         #coach-messages::-webkit-scrollbar { display: none; }
+        /* ── NOTATKI SZTABU NA EKRANIE POWITALNYM ─────────────────────────────
+           Cztery notatki czterech specjalistów o tym zawodniku — treść, której
+           nie ma żadna inna apka biegowa. Domyślnie przycięte do dwóch linii,
+           dotknięcie karty rozwija całość. */
+        #coach-memory { width: 100%; margin: 18px 0 4px; }
+        #coach-memory[hidden] { display: none; }
+        .mem-card {
+            background: #FFFFFF;
+            border: 1px solid #EBEBEB;
+            border-radius: 20px;
+            padding: 6px 4px 4px;
+            text-align: left;
+            animation: fadeInUp 320ms cubic-bezier(0.23,1,0.32,1) both;
+        }
+        .mem-head {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+            min-height: 44px;
+            padding: 0 14px;
+            background: none;
+            border: 0;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            text-align: left;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .mem-title { font-size: 13px; font-weight: 650; color: #1A1A1A; letter-spacing: -0.01em; }
+        .mem-n {
+            font-size: 11px; font-weight: 700; color: #6B6B6B;
+            background: rgba(26,26,26,0.06); border-radius: 999px;
+            padding: 1px 6px; line-height: 1.5;
+            font-variant-numeric: tabular-nums;
+        }
+        /* Szewron rysowany obramowaniem — bez dodatkowego SVG w każdej karcie. */
+        .mem-chev {
+            width: 7px; height: 7px; margin: -3px 2px 0 auto; flex-shrink: 0;
+            border-right: 1.5px solid #C4C4C4;
+            border-bottom: 1.5px solid #C4C4C4;
+            transform: rotate(45deg);
+            transition: transform 220ms cubic-bezier(0.23,1,0.32,1);
+        }
+        .mem-card.mem-open .mem-chev { transform: rotate(-135deg) translate(-3px,-3px); }
+        .mem-row {
+            padding: 8px 14px 10px;
+            border-top: 1px solid #F2EFEA;
+        }
+        .mem-who {
+            display: flex; align-items: center; gap: 6px;
+            font-size: 11.5px; font-weight: 650; color: #1A1A1A;
+            letter-spacing: -0.01em; margin-bottom: 3px;
+        }
+        .mem-who .mem-dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
+        .mem-text {
+            font-size: 12.5px;
+            line-height: 1.5;
+            color: #6B6B6B;
+            letter-spacing: -0.005em;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .mem-card.mem-open .mem-text {
+            -webkit-line-clamp: unset;
+            overflow: visible;
+        }
+
+        /* ── PODPIS NAD WIADOMOŚCIĄ AGENTA ────────────────────────────────────
+           Czterech specjalistów produkowało identyczne białe bańki. Po przewinięciu
+           rozmowy nie dało się stwierdzić, kto co powiedział. Podpis pojawia się
+           raz na grupę: kropka w kolorze agenta, nazwa, godzina. */
+        .msg-who {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            align-self: flex-start;
+            margin: 2px 0 -4px 4px;
+            font-family: 'Inter', sans-serif;
+            font-size: 11.5px;
+            line-height: 1.4;
+            animation: whoWejscie 240ms cubic-bezier(0.23,1,0.32,1) both;
+        }
+        .msg-who .msg-dot {
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        .msg-who .msg-who-name {
+            font-weight: 650;
+            color: #1A1A1A;
+            letter-spacing: -0.01em;
+        }
+        .msg-who .msg-who-time {
+            font-weight: 500;
+            color: #A8A29A;
+            font-variant-numeric: tabular-nums;
+        }
+        .msg-who .msg-who-time::before { content: '·'; margin-right: 5px; color: #C8C2B8; }
+        @keyframes whoWejscie {
+            from { opacity: 0; transform: translateY(3px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Separator dnia. Kreska z obu stron, etykieta w środku — „Dzisiaj",
+           „Wczoraj", nazwa dnia w tym tygodniu, data dalej wstecz. */
+        .chat-day-sep {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 10px 0 2px;
+            animation: whoWejscie 240ms cubic-bezier(0.23,1,0.32,1) both;
+        }
+        .chat-day-sep::before, .chat-day-sep::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: #E6E1D8;
+        }
+        .chat-day-sep span {
+            font-family: 'Inter', sans-serif;
+            font-size: 11.5px;
+            font-weight: 500;
+            color: #A8A29A;
+            letter-spacing: -0.005em;
+            white-space: nowrap;
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .msg-who, .chat-day-sep { animation: none; }
+        }
+
         .chat-history-separator { display:flex; align-items:center; gap:10px; margin:4px 0 8px; }
         .chat-history-separator span { font-size:12px; font-weight:500; color:#8A8A8A; letter-spacing:-0.005em; white-space:nowrap; }
         .chat-history-separator::before, .chat-history-separator::after { content:''; flex:1; height:1px; background:#EBEBEB; }

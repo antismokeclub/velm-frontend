@@ -52,31 +52,100 @@
         }
 
         // --- Memory System ---
+        // ── NOTATKI SZTABU O ZAWODNIKU ────────────────────────────────────────
+        //
+        // Ta funkcja istniała od dawna i NIGDY nic nie narysowała, z dwóch
+        // niezależnych powodów naraz:
+        //   1. szukała elementów #memory-list / #memory-content / #coach-memory,
+        //      a żadnego z nich nie było w dashboard.html — więc wychodziła
+        //      pierwszą linijką,
+        //   2. czytała `data.memory`, a /api/memory/get oddaje `data.context`
+        //      w kształcie [{category, fact}] — więc nawet z kontenerem
+        //      wyrenderowałaby pustą listę.
+        // Backend liczył to i wysyłał przez cały czas.
+        //
+        // To jest treść, której nie ma żadna inna apka biegowa: cztery notatki
+        // czterech specjalistów o TYM zawodniku. Dlatego stoi na ekranie
+        // powitalnym Trenera, nad propozycjami pytań — zanim jeszcze cokolwiek
+        // napiszesz, widzisz, co sztab już wie.
+        //
+        // Notatki bywają długie (akapit na specjalistę), więc domyślnie są
+        // przycięte do dwóch linii, a dotknięcie karty rozwija całość.
+        const _MEM_AGENCI = {
+            'Analityk': 'analityk', 'Fizjo': 'fizjo',
+            'Psycholog': 'psycholog', 'Trener': 'szef_sztabu'
+        };
+
+        function toggleMemory(el) {
+            const karta = el.closest('.mem-card');
+            if (!karta) return;
+            karta.classList.toggle('mem-open');
+            const btn = karta.querySelector('.mem-head');
+            if (btn) btn.setAttribute('aria-expanded', String(karta.classList.contains('mem-open')));
+        }
+
         async function loadUserMemory() {
-            const list = document.getElementById('memory-list') || document.getElementById('memory-content') || document.getElementById('coach-memory') || null;
-            if (!list) return;
+            const box = document.getElementById('coach-memory');
+            if (!box || !currentUserId) return;
             try {
                 const response = await authFetch(`${API_BASE}/api/memory/get?userId=${currentUserId}`, { headers: authHeaders() });
+                if (!response.ok) { box.hidden = true; return; }
                 const data = await response.json();
 
-                const AGENT_DISPLAY = { analityk: t('agent.analityk.name'), fizjo: t('agent.fizjo.name'), psycholog: t('agent.psycholog.name'), szef_sztabu: t('agent.szef_sztabu.name') };
-                const entries = Object.entries(data.memory || {})
-                    .filter(([, notes]) => notes && notes.trim().length > 0)
-                    .map(([agent, notes]) => {
-                        const label = AGENT_DISPLAY[agent] || agent;
-                        const preview = notes.length > 200 ? notes.slice(0, 200) + '...' : notes;
-                        return `<div style="padding: 4px 0; border-bottom: 1px solid var(--border-color); display: flex; gap: 6px;">
-                            <span style="font-weight: 600; color: #8A8A8A; text-transform: uppercase; font-size: 9px; padding-top: 2px;">${label}</span>
-                            <span>${preview}</span>
-                        </div>`;
-                    });
-                if (entries.length > 0) {
-                    list.innerHTML = entries.join('');
-                } else {
-                    list.innerHTML = '<div style="padding: 4px 0; font-style: italic; opacity: 0.6;">' + t('chat.nofacts') + '</div>';
+                const wpisy = (data.context || [])
+                    .filter(c => c && typeof c.fact === 'string' && c.fact.trim().length > 0);
+
+                // Świeże konto nie ma notatek — wtedy karty NIE MA. Pusta ramka
+                // z napisem „brak faktów" mówi tylko tyle, że coś nie działa.
+                if (!wpisy.length) { box.hidden = true; box.replaceChildren(); return; }
+
+                box.replaceChildren();
+                const karta = document.createElement('div');
+                karta.className = 'mem-card';
+
+                const head = document.createElement('button');
+                head.type = 'button';
+                head.className = 'mem-head';
+                head.setAttribute('aria-expanded', 'false');
+                head.onclick = () => toggleMemory(head);
+                const tytul = document.createElement('span');
+                tytul.className = 'mem-title';
+                tytul.textContent = t('chat.mem.title');
+                const licznik = document.createElement('span');
+                licznik.className = 'mem-n';
+                licznik.textContent = String(wpisy.length);
+                const chev = document.createElement('span');
+                chev.className = 'mem-chev';
+                head.append(tytul, licznik, chev);
+                karta.appendChild(head);
+
+                for (const c of wpisy) {
+                    const klucz = _MEM_AGENCI[c.category] || 'szef_sztabu';
+                    const wiersz = document.createElement('div');
+                    wiersz.className = 'mem-row';
+
+                    const kto = document.createElement('div');
+                    kto.className = 'mem-who';
+                    const dot = document.createElement('span');
+                    dot.className = 'mem-dot';
+                    dot.style.background = (typeof AGENT_COLORS !== 'undefined' && AGENT_COLORS[klucz]) || '#1A1A1A';
+                    const nazwa = document.createElement('span');
+                    nazwa.textContent = (typeof agentName === 'function') ? agentName(klucz) : c.category;
+                    kto.append(dot, nazwa);
+
+                    const tresc = document.createElement('div');
+                    tresc.className = 'mem-text';
+                    tresc.textContent = c.fact.trim();
+
+                    wiersz.append(kto, tresc);
+                    karta.appendChild(wiersz);
                 }
+
+                box.appendChild(karta);
+                box.hidden = false;
             } catch (e) {
-                console.error("Failed to load memory", e);
+                box.hidden = true;
+                console.error('loadUserMemory:', e?.message || e);
             }
         }
 
@@ -173,7 +242,8 @@
                 // meta idzie TYLKO tędy — ścieżki 402/403/401 i !response.ok
                 // kończą się wcześniej, więc wykaz nie pojawi się przy paywallu
                 // ani przy wygasłej sesji, gdzie agent niczego nie przeczytał.
-                addMessage('ai', data.reply || data.error || t('chat.replyerr'), data.meta);
+                addMessage('ai', data.reply || data.error || t('chat.replyerr'), data.meta,
+                    { agent: data.agent || selectedAgent });
 
                 // Zaktualizuj licznik trialu (null = premium, bez limitu)
                 if (data.trialMessagesLeft !== null && data.trialMessagesLeft !== undefined) {
@@ -330,13 +400,91 @@
             btn.setAttribute('aria-expanded', String(!otwarte));
         }
 
-        function addMessage(role, text, meta) {
+        // ── PODPIS NAD WIADOMOŚCIĄ AGENTA ─────────────────────────────────────
+        //
+        // Sztab ma czterech specjalistów, a każdy z nich produkował identyczną
+        // białą bańkę. Po przewinięciu rozmowy o tydzień w górę nie dało się
+        // stwierdzić, kto co powiedział — a to jedyna rzecz, która odróżnia
+        // czterech agentów od jednego czatu.
+        //
+        // Podpis pojawia się RAZ NA GRUPĘ: przy zmianie nadawcy, agenta albo
+        // dnia. Przy każdej wiadomości byłby szumem — trener odpowiada zwykle
+        // jednym ciągiem.
+        let _ostatniNadawca = null;   // 'user' | 'ai'
+        let _ostatniAgent   = null;
+        let _ostatniDzien   = null;   // 'YYYY-MM-DD'
+
+        function resetChatGroups() {
+            _ostatniNadawca = null; _ostatniAgent = null; _ostatniDzien = null;
+        }
+
+        function _dzienEtykieta(d) {
+            const dzis = new Date(); dzis.setHours(0, 0, 0, 0);
+            const dzien = new Date(d); dzien.setHours(0, 0, 0, 0);
+            const roznica = Math.round((dzis - dzien) / 86400000);
+            if (roznica === 0) return t('chat.day.today');
+            if (roznica === 1) return t('chat.day.yesterday');
+            // Starsze niż tydzień dostają datę, w tygodniu wystarczy nazwa dnia.
+            return roznica < 7
+                ? _capFirst(new Intl.DateTimeFormat(_appLang, { weekday: 'long' }).format(dzien))
+                : _i18nDate(dzien, { day: 'numeric', month: 'long' });
+        }
+
+        function _godzina(d) {
+            try { return new Intl.DateTimeFormat(_appLang, { hour: '2-digit', minute: '2-digit' }).format(d); }
+            catch (e) { return ''; }
+        }
+
+        function addMessage(role, text, meta, opts) {
             const container = document.getElementById('coach-messages');
+            if (!container) return null;
             // Hide quick suggestions on first message
             const quick = document.getElementById('coach-quick-suggestions');
             if (quick) quick.style.display = 'none';
             const intro = document.getElementById('coach-intro');
             if (intro) intro.style.display = 'none';
+
+            const o = opts || {};
+            // Czas z bazy (`created_at` w historii) albo teraz — nigdy zmyślony.
+            const kiedy = o.time ? new Date(o.time) : new Date();
+            const prawidlowy = !isNaN(kiedy.getTime());
+            const dzien = prawidlowy ? kiedy.toISOString().slice(0, 10) : null;
+            const agent = role === 'ai' ? (o.agent || selectedAgent || 'szef_sztabu') : null;
+
+            // 1. Separator dnia — gdy data się zmienia albo to pierwsza wiadomość
+            if (prawidlowy && dzien !== _ostatniDzien) {
+                const sep = document.createElement('div');
+                sep.className = 'chat-day-sep';
+                const s = document.createElement('span');
+                s.textContent = _dzienEtykieta(kiedy);
+                sep.appendChild(s);
+                container.appendChild(sep);
+                _ostatniDzien = dzien;
+                _ostatniNadawca = null;      // po separatorze podpis zawsze od nowa
+            }
+
+            // 2. Podpis grupy — tylko dla agenta i tylko przy zmianie nadawcy/agenta
+            if (role === 'ai' && (_ostatniNadawca !== 'ai' || _ostatniAgent !== agent)) {
+                const who = document.createElement('div');
+                who.className = 'msg-who';
+                const dot = document.createElement('span');
+                dot.className = 'msg-dot';
+                dot.style.background = (typeof AGENT_COLORS !== 'undefined' && AGENT_COLORS[agent]) || '#1A1A1A';
+                who.appendChild(dot);
+                const nazwa = document.createElement('span');
+                nazwa.className = 'msg-who-name';
+                nazwa.textContent = (typeof agentName === 'function') ? agentName(agent) : '';
+                who.appendChild(nazwa);
+                if (prawidlowy) {
+                    const czas = document.createElement('span');
+                    czas.className = 'msg-who-time';
+                    czas.textContent = _godzina(kiedy);
+                    who.appendChild(czas);
+                }
+                container.appendChild(who);
+            }
+            _ostatniNadawca = role;
+            _ostatniAgent = agent;
 
             const div = document.createElement('div');
             div.className = role === 'user' ? 'msg msg-user' : 'msg msg-ai';

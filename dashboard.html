@@ -386,6 +386,9 @@
                         <div id="coach-intro-title">Trener</div>
                         <div id="coach-intro-desc">Twój prywatny sztab AI. Trener, analityk, fizjoterapeuta i psycholog sportowy — wszystko w jednym miejscu. Zapytaj o cokolwiek.</div>
                     </div>
+                    <!-- Notatki sztabu o zawodniku. Wypełnia loadUserMemory(); przy
+                         pustej pamięci zostaje `hidden` i karty w ogóle nie widać. -->
+                    <div id="coach-memory" hidden></div>
                     <div id="coach-quick-suggestions">
                         <button class="coach-suggest-card" onclick="sendQuickSuggestion(t('sug.szef_sztabu.0'))" data-i18n="sug.szef_sztabu.0">Jaki mam dziś trening?</button>
                         <button class="coach-suggest-card" onclick="sendQuickSuggestion(t('sug.szef_sztabu.1'))" data-i18n="sug.szef_sztabu.1">Jak wyglądają moje postępy?</button>
