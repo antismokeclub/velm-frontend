@@ -242,13 +242,15 @@
         function updateTrialCounter() {
             const el = document.getElementById('trial-counter');
             if (!el) return;
+            // `hidden` zamiast style.display — wygląd licznika siedzi w CSS,
+            // a inline `display` bił się z nim o pierwszeństwo.
             if (currentUserPremium || currentTrialMessagesLeft <= 0) {
-                el.style.display = 'none';
+                el.hidden = true;
                 return;
             }
             const n = currentTrialMessagesLeft;
             el.textContent = tp('sub.left', n);
-            el.style.display = 'block';
+            el.hidden = false;
         }
 
         async function startCheckout(plan) {
