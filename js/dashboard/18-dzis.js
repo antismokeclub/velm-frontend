@@ -280,6 +280,10 @@
                 const res = await authFetch(`${API_BASE}/api/streak/${currentUserId}`, { headers: authHeaders() });
                 const data = await res.json();
                 const streak = data.streak || 0;
+                // Seria zapamiętana globalnie — ekran powitalny Trenera pokazuje
+                // ją bez własnego zapytania. Wcześniej liczba żyła tylko w tym
+                // jednym elemencie na Domu.
+                window.currentStreak = streak;
                 const card = document.getElementById('streak-card');
                 const val = document.getElementById('streak-value');
                 if (card && val) {

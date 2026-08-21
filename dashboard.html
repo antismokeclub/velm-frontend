@@ -394,6 +394,10 @@
                         <div id="coach-intro-title">Trener</div>
                         <div id="coach-intro-desc">Twój prywatny sztab AI. Trener, analityk, fizjoterapeuta i psycholog sportowy — wszystko w jednym miejscu. Zapytaj o cokolwiek.</div>
                     </div>
+                    <!-- Stan zawodnika: dzisiejszy trening i seria check-inów.
+                         Wypełnia renderCoachStan() z danych, które są już w pamięci
+                         przeglądarki — bez własnego zapytania do serwera. -->
+                    <div id="coach-stan" hidden></div>
                     <!-- Notatki sztabu o zawodniku. Wypełnia loadUserMemory(); przy
                          pustej pamięci zostaje `hidden` i karty w ogóle nie widać. -->
                     <div id="coach-memory" hidden></div>

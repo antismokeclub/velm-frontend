@@ -1817,6 +1817,45 @@
             scroll-behavior: smooth;
         }
         #coach-messages::-webkit-scrollbar { display: none; }
+        /* ── STAN ZAWODNIKA NA EKRANIE POWITALNYM ─────────────────────────────
+           Ekran startowy pokazywał literę V i zdanie o aplikacji — czyli nic
+           o zawodniku. Dwa kafelki z danych, które i tak są w pamięci: dzisiejszy
+           trening i seria check-inów. Brak danych = brak kafelka. */
+        #coach-stan {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+            margin-top: 18px;
+        }
+        #coach-stan[hidden] { display: none; }
+        .cst-tile {
+            flex: 1;
+            min-width: 0;
+            background: #FFFFFF;
+            border: 1px solid #EBEBEB;
+            border-radius: 18px;
+            padding: 13px 15px;
+            text-align: left;
+            animation: fadeInUp 320ms cubic-bezier(0.23,1,0.32,1) both;
+        }
+        .cst-tile:nth-child(2) { animation-delay: 60ms; }
+        .cst-lab {
+            font-family: 'Inter', sans-serif;
+            font-size: 11.5px; font-weight: 500; color: #8A8A8A;
+            letter-spacing: -0.005em; margin-bottom: 3px;
+        }
+        .cst-val {
+            font-family: 'Outfit', sans-serif;
+            font-size: 21px; font-weight: 800; color: #1A1A1A;
+            letter-spacing: -0.02em; line-height: 1.1;
+            font-variant-numeric: tabular-nums;
+        }
+        .cst-sub {
+            font-family: 'Inter', sans-serif;
+            font-size: 12px; color: #6B6B6B; margin-top: 2px;
+            overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+        }
+
         /* ── NOTATKI SZTABU NA EKRANIE POWITALNYM ─────────────────────────────
            Cztery notatki czterech specjalistów o tym zawodniku — treść, której
            nie ma żadna inna apka biegowa. Domyślnie przycięte do dwóch linii,
@@ -2030,14 +2069,16 @@
             background: #FFFFFF;
             border: 1.5px solid #EBEBEB;
             border-radius: 22px;
-            padding: 14px 20px;
+            padding: 14px 18px;
             font-family: 'Inter', sans-serif;
             /* 16px to nie decyzja estetyczna: przy mniejszym foncie iOS Safari
                sam przybliża stronę przy wejściu w pole i już jej nie oddala. */
             font-size: 16px;
             color: #1A1A1A;
             outline: none;
-            transition: border-color 0.2s, box-shadow 0.2s;
+            /* Wysokość rośnie z tekstem (autoResizeInput), więc animujemy ją
+               osobno — bez tego pole skacze skokowo przy każdej nowej linii. */
+            transition: border-color 0.2s, box-shadow 0.2s, height 120ms cubic-bezier(0.23,1,0.32,1);
             resize: none;
             max-height: 130px;
             overflow-y: auto;
@@ -2046,7 +2087,12 @@
         }
         #chat-input:focus {
             border-color: #1A1A1A;
-            box-shadow: 0 0 0 3px rgba(0,0,0,0.06);
+            /* Obwódka focusa w kolorze agenta — jedyne miejsce, gdzie kolor mówi
+               „piszesz teraz do TEGO specjalisty". */
+            box-shadow: 0 0 0 3px color-mix(in srgb, var(--agent-color, #1A1A1A) 18%, transparent);
+        }
+        @supports not (color: color-mix(in srgb, red 50%, blue)) {
+            #chat-input:focus { box-shadow: 0 0 0 3px rgba(0,0,0,0.06); }
         }
         #chat-input::placeholder { color: #C4C4C4; }
         #conv-drawer-agent-label {
@@ -2070,7 +2116,9 @@
             touch-action: manipulation;
             -webkit-tap-highlight-color: transparent;
         }
-        #send-btn:disabled { opacity: 0.35; cursor: default; }
+        /* Wyszarzony I lekko mniejszy, kiedy nie ma czego wysłać — sama
+           przezroczystość dawała różnicę, której prawie nie było widać. */
+        #send-btn:disabled { opacity: 0.35; cursor: default; transform: scale(0.9); }
         #send-btn:not(:disabled):active { animation: sendBtnTap 0.28s cubic-bezier(0.34,1.56,0.64,1) both; }
 
         /* Litery VELM zniknęły z paska Trenera — ich miejsce zajęła nazwa agenta,

@@ -23,6 +23,7 @@
                         // domyślnego Trenera, ale wybór agenta i język mogą się
                         // zmienić między wejściami do zakładki.
                         _paintAgentHeader(selectedAgent || 'szef_sztabu');
+                        renderCoachStan();
                         _renderSuggestions(selectedAgent || 'szef_sztabu');
                         // Multi-conversation: ładuj ostatnią aktywną rozmowę dla tego agenta
                         if (typeof switchAgentConversation === 'function') {

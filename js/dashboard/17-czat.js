@@ -84,6 +84,59 @@
             if (btn) btn.setAttribute('aria-expanded', String(karta.classList.contains('mem-open')));
         }
 
+        // ── STAN ZAWODNIKA NA EKRANIE POWITALNYM ──────────────────────────────
+        //
+        // Ekran startowy Trenera pokazywał literę V, nazwę agenta i jedno zdanie
+        // opisu — czyli nic o zawodniku. Trzy liczby, które i tak są w pamięci
+        // przeglądarki (plan z karty „dziś", seria check-inów), robią z niego
+        // ekran o TOBIE, a nie o aplikacji.
+        //
+        // Żadnego dociągania danych: jeśli plan nie został jeszcze wczytany
+        // (wejście prosto do Trenera po starcie), kafelek po prostu się nie
+        // pojawia. Brak danych to brak elementu.
+        function _dzisZPlanu() {
+            const dni = (typeof calendarPlan !== 'undefined' && calendarPlan) ? calendarPlan.dni : null;
+            const dzis = (typeof todayStr === 'function') ? todayStr() : null;
+            if (!Array.isArray(dni) || !dzis) return null;
+            return dni.find(d => d && d.data === dzis) || null;
+        }
+
+        function renderCoachStan() {
+            const box = document.getElementById('coach-stan');
+            if (!box) return;
+            const kafelki = [];
+
+            const day = _dzisZPlanu();
+            if (day) {
+                const typKey = 'wtype.' + day.typ;
+                const nazwa = t(typKey) === typKey ? day.typ : t(typKey);
+                const km = Number(day.dystans_km);
+                kafelki.push({
+                    etykieta: t('chat.stan.today'),
+                    wartosc: day.typ === 'rest' ? nazwa : (Number.isFinite(km) && km > 0 ? km + ' km' : nazwa),
+                    pod: day.typ === 'rest' ? '' : nazwa
+                });
+            }
+            const seria = Number(window.currentStreak);
+            if (Number.isFinite(seria) && seria > 0) {
+                kafelki.push({ etykieta: t('chat.stan.streak'), wartosc: String(seria), pod: tp('chat.stan.days', seria) });
+            }
+
+            if (!kafelki.length) { box.hidden = true; box.replaceChildren(); return; }
+
+            box.replaceChildren();
+            for (const k of kafelki) {
+                const el = document.createElement('div');
+                el.className = 'cst-tile';
+                const lab = document.createElement('div'); lab.className = 'cst-lab'; lab.textContent = k.etykieta;
+                const val = document.createElement('div'); val.className = 'cst-val'; val.textContent = k.wartosc;
+                el.append(lab, val);
+                if (k.pod) { const p = document.createElement('div'); p.className = 'cst-sub'; p.textContent = k.pod; el.appendChild(p); }
+                box.appendChild(el);
+            }
+            box.hidden = false;
+        }
+
         async function loadUserMemory() {
             const box = document.getElementById('coach-memory');
             if (!box || !currentUserId) return;
@@ -191,7 +244,31 @@
             const bubble = addMessage('ai', '', null, { agent });
             bubble.innerHTML = '<span class="ak strumien"></span>';
             bubble.classList.add('msg-pisze');
+            // Uchwyt do akapitu trzymamy RAZ. Haiku przysyła 50-150 kawałków na
+            // odpowiedź; querySelector przy każdym z nich to przeszukiwanie
+            // drzewa kilkadziesiąt razy na sekundę bez żadnego powodu.
+            bubble._ak = bubble.querySelector('.ak');
             return bubble;
+        }
+
+        // Przewijanie w trakcie pisania — JEDNO na klatkę, nie jedno na token.
+        // scrollToBottom() robi setTimeout + scrollTo({behavior:'smooth'}), więc
+        // wywołane przy każdym kawałku uruchamiało sto nakładających się animacji
+        // przewijania. Na średnim Androidzie to zacinka, a zawodnik, który chce
+        // przewinąć w górę w trakcie odpowiedzi, jest ściągany z powrotem przy
+        // każdym tokenie. Tu przewijamy natychmiastowo i tylko wtedy, gdy
+        // zawodnik i tak jest przy dole.
+        let _scrollWKolejce = false;
+        function _przewinWTrakcie() {
+            if (_scrollWKolejce) return;
+            _scrollWKolejce = true;
+            requestAnimationFrame(() => {
+                _scrollWKolejce = false;
+                const c = document.getElementById('coach-messages');
+                if (!c) return;
+                const odDolu = c.scrollHeight - c.scrollTop - c.clientHeight;
+                if (odDolu < 160) c.scrollTop = c.scrollHeight;   // bez 'smooth'
+            });
         }
 
         async function _czytajStrumien(response, { loadingId, text }) {
@@ -216,14 +293,12 @@
                 } else if (typ === 'delta') {
                     if (!bubble) { removeMessage(loadingId); bubble = _strumienBubble(agentOdp); }
                     tresc += dane.t || '';
-                    const span = bubble.querySelector('.ak');
-                    if (span) span.textContent = tresc;
-                    scrollToBottom();
+                    if (bubble._ak) bubble._ak.textContent = tresc;
+                    _przewinWTrakcie();
                 } else if (typ === 'replace') {
                     if (!bubble) { removeMessage(loadingId); bubble = _strumienBubble(agentOdp); }
                     tresc = dane.t || '';
-                    const span = bubble.querySelector('.ak');
-                    if (span) span.textContent = tresc;
+                    if (bubble._ak) bubble._ak.textContent = tresc;
                 } else if (typ === 'done') {
                     zakonczone = true;
                     konwId = dane.conversationId;

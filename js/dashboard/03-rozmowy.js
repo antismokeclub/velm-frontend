@@ -415,6 +415,7 @@
                 // Nowa rozmowa = znowu pusty ekran, więc notatki sztabu wracają.
                 // loadUserMemory sam schowa kartę, jeśli pamięć jest pusta.
                 if (typeof loadUserMemory === 'function') loadUserMemory();
+                if (typeof renderCoachStan === 'function') renderCoachStan();
             }
         }
 
