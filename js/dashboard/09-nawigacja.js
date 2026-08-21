@@ -19,18 +19,18 @@
                     targetView.style.display = 'flex';
                     loadUserMemory();
                     setTimeout(() => {
-                        updateAgentSlider();
+                        // Nazwa i kropka agenta w pasku — markup ma wpisanego
+                        // domyślnego Trenera, ale wybór agenta i język mogą się
+                        // zmienić między wejściami do zakładki.
+                        _paintAgentHeader(selectedAgent || 'szef_sztabu');
                         _renderSuggestions(selectedAgent || 'szef_sztabu');
                         // Multi-conversation: ładuj ostatnią aktywną rozmowę dla tego agenta
                         if (typeof switchAgentConversation === 'function') {
                             switchAgentConversation(selectedAgent || 'szef_sztabu');
                         }
                     }, 50);
-                    document.querySelectorAll('#coach-header-title .velm-anim-letter').forEach(el => {
-                        el.style.animation = 'none';
-                        el.offsetHeight;
-                        el.style.animation = '';
-                    });
+                    // Litery VELM zniknęły z paska Trenera — ich miejsce zajęła
+                    // nazwa agenta. Restart animacji dotyczy już tylko nagłówka Domu.
                 }
 
                 if (viewName === 'calendar') {

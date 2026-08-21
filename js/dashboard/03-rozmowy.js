@@ -108,8 +108,8 @@
         // NIE mają data-i18n — przy zmianie języka trzeba je przerysować ręcznie.
         function _refreshCoachUi() {
             const a = ['szef_sztabu', 'analityk', 'fizjo', 'psycholog'].includes(selectedAgent) ? selectedAgent : 'szef_sztabu';
-            const nameEl = document.getElementById('coach-agent-name');
-            if (nameEl) nameEl.textContent = agentName(a);
+            _paintAgentHeader(a);
+            _renderAgentSheet();
             const introTitle = document.getElementById('coach-intro-title');
             if (introTitle) introTitle.textContent = agentName(a);
             const introDesc = document.getElementById('coach-intro-desc');
@@ -117,20 +117,85 @@
             _renderSuggestions(a);
         }
 
+        // ── LISTA SPECJALISTÓW ────────────────────────────────────────────────
+        //
+        // Zamiast rzędu czterech szarych pigułek na stałe zajmujących pasek:
+        // nazwa agenta w nagłówku jest przyciskiem, a pod nim rozwija się lista
+        // z ikoną i JEDNYM ZDANIEM o tym, czym każdy się zajmuje. Wcześniej
+        // trzeba było zgadywać, czym Analityk różni się od Trenera.
+        const AGENT_IKONY = {
+            // Gwizdek — trener prowadzi całość
+            szef_sztabu: '<path d="M12 3v3"/><circle cx="9" cy="14" r="6"/><path d="M15 11h6"/><path d="M15 14h4"/>',
+            // Wykres — analityk czyta liczby
+            analityk:    '<path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="M7 15l3.5-4 3 3L20 7"/>',
+            // Puls — fizjo pilnuje ciała
+            fizjo:       '<path d="M3 12h4l2.5-7 5 14L17.5 12H21"/>',
+            // Głowa — psycholog
+            psycholog:   '<path d="M15.5 21v-3.2a3 3 0 0 1 1-2.2A7 7 0 1 0 5 10a7 7 0 0 0 1.2 3.9c.5.7.8 1.5.8 2.4V21"/>'
+        };
+        const AGENT_LISTA = ['szef_sztabu', 'analityk', 'fizjo', 'psycholog'];
+
+        function _renderAgentSheet() {
+            const sheet = document.getElementById('agent-sheet');
+            if (!sheet) return;
+            for (const btn of sheet.querySelectorAll('.ag-item')) {
+                const a = btn.getAttribute('data-agent');
+                btn.classList.toggle('ag-active', a === selectedAgent);
+                btn.setAttribute('aria-current', a === selectedAgent ? 'true' : 'false');
+                btn.innerHTML =
+                    '<span class="ag-ico" style="color:' + (AGENT_COLORS[a] || '#1A1A1A') + '">' +
+                        '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
+                        'stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">' + AGENT_IKONY[a] + '</svg>' +
+                    '</span>' +
+                    '<span class="ag-txt">' +
+                        '<span class="ag-name"></span>' +
+                        '<span class="ag-role"></span>' +
+                    '</span>' +
+                    '<span class="ag-check"></span>';
+                // Nazwa i opis przez textContent — to teksty z i18n, ale zasada
+                // jest jedna: do innerHTML idzie tylko nasz własny znacznik.
+                btn.querySelector('.ag-name').textContent = agentName(a);
+                btn.querySelector('.ag-role').textContent = t('agent.' + a + '.role');
+            }
+        }
+
+        function toggleAgentSheet() {
+            const sheet = document.getElementById('agent-sheet');
+            const btn = document.getElementById('coach-agent-btn');
+            if (!sheet || !btn) return;
+            const otwarte = !sheet.classList.contains('hidden');
+            if (otwarte) { sheet.classList.add('hidden'); btn.setAttribute('aria-expanded', 'false'); return; }
+            _closeConvDrawer();
+            _renderAgentSheet();
+            sheet.classList.remove('hidden');
+            btn.setAttribute('aria-expanded', 'true');
+        }
+
+        function _closeAgentSheet() {
+            const sheet = document.getElementById('agent-sheet');
+            const btn = document.getElementById('coach-agent-btn');
+            if (sheet) sheet.classList.add('hidden');
+            if (btn) btn.setAttribute('aria-expanded', 'false');
+        }
+
+        function _paintAgentHeader(agent) {
+            const dot = document.getElementById('coach-agent-dot');
+            if (dot) dot.style.background = AGENT_COLORS[agent] || '#1A1A1A';
+            const lbl = document.getElementById('coach-agent-label');
+            if (lbl) lbl.textContent = agentName(agent);
+        }
+
         function selectAgent(agent, btn) {
             selectedAgent = agent;
-            document.querySelectorAll('#agent-pill-wrap button').forEach(b => b.classList.remove('agent-active'));
-            btn.classList.add('agent-active');
+            _closeAgentSheet();
             const _vc = document.getElementById('view-coach');
             if (_vc) _vc.style.setProperty('--agent-color', AGENT_COLORS[agent] || '#5F8368');
-            const nameEl = document.getElementById('coach-agent-name');
-            if (nameEl) nameEl.textContent = agentName(agent);
+            _paintAgentHeader(agent);
             const introTitle = document.getElementById('coach-intro-title');
             if (introTitle) introTitle.textContent = agentName(agent);
             const introDesc = document.getElementById('coach-intro-desc');
             if (introDesc) introDesc.textContent = agentDesc(agent);
             _renderSuggestions(agent);
-            updateAgentSlider();
             // Multi-conversation: switch to this agent's last active conversation (or new if none)
             switchAgentConversation(agent);
         }
@@ -164,13 +229,21 @@
             if (toggle) toggle.setAttribute('aria-expanded', 'false');
         }
 
-        // Click outside drawer → close
+        // Klik poza rozwiniętą listą → zamknij. Dotyczy obu list w nagłówku:
+        // rozmów i specjalistów.
         document.addEventListener('click', (e) => {
             const drawer = _convDrawerEl();
             const toggle = _convToggleEl();
-            if (!drawer || drawer.classList.contains('hidden')) return;
-            if (drawer.contains(e.target) || toggle.contains(e.target)) return;
-            _closeConvDrawer();
+            if (drawer && !drawer.classList.contains('hidden')
+                && !drawer.contains(e.target) && !(toggle && toggle.contains(e.target))) {
+                _closeConvDrawer();
+            }
+            const sheet = document.getElementById('agent-sheet');
+            const agBtn = document.getElementById('coach-agent-btn');
+            if (sheet && !sheet.classList.contains('hidden')
+                && !sheet.contains(e.target) && !(agBtn && agBtn.contains(e.target))) {
+                _closeAgentSheet();
+            }
         });
 
         async function loadConversationsForAgent(agent) {
@@ -271,9 +344,13 @@
             });
         }
 
+        // Tytul watku nie ma juz miejsca w pasku (nazwe zajmuje agent), a i tak
+        // byl powtorzeniem: tytul rozmowy to jej PIERWSZA WIADOMOSC, ktora stoi
+        // kilka pikseli nizej. Aktywna rozmowe zaznacza szuflada po id.
+        // Funkcja zostaje jako punkt zaczepienia — wolaja ja trzy miejsca.
         function _setCurrentConvTitle(title) {
-            const el = document.getElementById('conv-current-title');
-            if (el) el.textContent = title || agentName(selectedAgent);
+            const btn = document.getElementById('conv-drawer-toggle');
+            if (btn) btn.title = title || agentName(selectedAgent);
         }
 
         async function selectConversation(convId, title) {
@@ -347,14 +424,10 @@
             loadConversationsForAgent(agent); // cache w tle dla szuflady
         }
 
-        function updateAgentSlider() {
-            const wrap = document.getElementById('agent-pill-wrap');
-            const slider = document.getElementById('agent-slider');
-            const activeBtn = wrap && wrap.querySelector('button.agent-active');
-            if (!wrap || !slider || !activeBtn) return;
-            slider.style.left = activeBtn.offsetLeft + 'px';
-            slider.style.width = activeBtn.offsetWidth + 'px';
-        }
+        // Suwak pod pigulkami agentow zniknal razem z pigulkami — zostaje pusta
+        // funkcja, bo wola ja switchView('coach'). Kasowanie jej znaczyloby
+        // grzebanie w nawigacji przy okazji zmiany wygladu czatu.
+        // updateAgentSlider() usuniete razem z pigulkami — nikt go juz nie wola.
 
         function updateSendBtn() {
             const input = document.getElementById('chat-input');
