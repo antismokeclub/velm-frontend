@@ -123,15 +123,50 @@
         // nazwa agenta w nagłówku jest przyciskiem, a pod nim rozwija się lista
         // z ikoną i JEDNYM ZDANIEM o tym, czym każdy się zajmuje. Wcześniej
         // trzeba było zgadywać, czym Analityk różni się od Trenera.
+        // Rysowane na siatce 24×24, obrys 1.9, zaokrąglone końce — ta sama rodzina
+        // co reszta ikon w apce. Każda musi być czytelna przy 18 px i odróżnialna
+        // od pozostałych trzech NA RZUT OKA, dlatego sylwetki są celowo różne:
+        // koło (stoper), kąt (wykres), szpic (tarcza), owal (głowa).
+        //
+        // Pierwsza wersja Trenera miała być gwizdkiem, a wychodziła jako okrąg
+        // z dwiema kreskami — przy 18 px nie do rozpoznania. Stoper jest
+        // najczytelniejszym przedmiotem trenera, jaki mieści się w tej skali.
         const AGENT_IKONY = {
-            // Gwizdek — trener prowadzi całość
-            szef_sztabu: '<path d="M12 3v3"/><circle cx="9" cy="14" r="6"/><path d="M15 11h6"/><path d="M15 14h4"/>',
-            // Wykres — analityk czyta liczby
-            analityk:    '<path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="M7 15l3.5-4 3 3L20 7"/>',
-            // Puls — fizjo pilnuje ciała
-            fizjo:       '<path d="M3 12h4l2.5-7 5 14L17.5 12H21"/>',
-            // Głowa — psycholog
-            psycholog:   '<path d="M15.5 21v-3.2a3 3 0 0 1 1-2.2A7 7 0 1 0 5 10a7 7 0 0 0 1.2 3.9c.5.7.8 1.5.8 2.4V21"/>'
+            // STOPER — trener odmierza, prowadzi całość.
+            // Koronka i przycisk boczny są tym, co odróżnia stoper od zwykłego
+            // zegara; bez nich ikona mówiłaby „godzina", nie „trening".
+            szef_sztabu:
+                '<circle cx="12" cy="14.2" r="7.3"/>' +
+                '<path d="M12 10.4v3.8l2.6 1.6"/>' +
+                '<path d="M9.6 2.8h4.8"/>' +
+                '<path d="M12 2.8v4.1"/>' +
+                // Przycisk zaczyna się DOKŁADNIE na kopercie (12+7.3·cos45°,
+                // 14.2−7.3·sin45°). Wcześniej startował 1,9 jednostki dalej
+                // i przy 18 px czytał się jako odklejona kreska obok ikony.
+                '<path d="M17.2 9l2.3-2.3"/>',
+
+            // WYKRES — analityk czyta trend. Oś, linia rosnąca i kropka na końcu:
+            // kropka mówi „tu jesteś teraz", czyli dokładnie to, po co się pyta
+            // analityka.
+            analityk:
+                '<path d="M4 3.6v14.9a1.9 1.9 0 0 0 1.9 1.9H20.4"/>' +
+                '<path d="M7.6 15.6l3.4-4.4 2.9 2.4 4.7-6.2"/>' +
+                '<circle cx="18.6" cy="7.4" r="1.35" fill="currentColor" stroke="none"/>',
+
+            // TARCZA — fizjo ZAPOBIEGA kontuzjom, nie leczy je (tak ma napisane
+            // w swoim skillu). Puls, który tu był, mówił „tętno" — czyli dane,
+            // a to domena analityka. Szpic u dołu odróżnia tarczę od głowy
+            // psychologa, która jest zaokrąglona.
+            fizjo:
+                '<path d="M12 2.9l7.4 2.9v6.1c0 4.4-3 8.1-7.4 9.2-4.4-1.1-7.4-4.8-7.4-9.2V5.8z"/>' +
+                '<path d="M8.9 12.1l2.1 2.1 4.1-4.3"/>',
+
+            // GŁOWA Z MYŚLĄ — psycholog. Sam obrys głowy bywa brany za „profil
+            // użytkownika"; łuk w środku przesuwa znaczenie na to, co się w niej
+            // dzieje.
+            psycholog:
+                '<path d="M15.4 20.9v-2.7c0-.9.3-1.7.9-2.4a7 7 0 1 0-10.6-.4c.6.8 1 1.7 1 2.7v2.8"/>' +
+                '<path d="M9.6 10.4a2.5 2.5 0 0 1 4.9.4c0 1.2-1 1.8-1.7 2.3-.5.4-.8.8-.8 1.4"/>'
         };
 
         function _renderAgentSheet() {
