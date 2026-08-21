@@ -1453,7 +1453,9 @@
             flex: 1;
             background: transparent;
             border: none;
-            padding: 10px 6px;
+            /* 4 px po bokach, nie 6 — przy 360 px „Psycholog" ma 63 px tekstu
+               na 71 px miejsca. Zapas jest mały, ale jest. */
+            padding: 10px 4px;
             min-height: 44px;
             font-family: 'Inter', sans-serif;
             font-size: 13px;
@@ -1471,27 +1473,33 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 5px;
         }
         #agent-pill-wrap button.agent-active {
             color: #1A1A1A;
             font-weight: 700;
         }
-        /* Kropka koloru agenta — 5px, jedyny ślad koloru w całym przełączniku.
-           Jako element flexa OBOK nazwy, nie nad nią: gdyby siedziała wyżej,
-           tekst aktywnego przycisku zjechałby w dół względem pozostałych trzech. */
+        /* Kropka koloru agenta — jedyny ślad koloru w całym przełączniku.
+           POZYCJONOWANA ABSOLUTNIE, pod nazwą. Dwa powody, oba wymuszone:
+           - jako element flexa obok nazwy zabierała 10 px szerokości, a przy
+             360 px (minimum Androida z velm-design) „Psycholog" w 13 px ma
+             już 63 px na 67 px miejsca — dokładałaby overflow;
+           - jako element NAD nazwą wymagałaby górnego paddingu, przez co tekst
+             aktywnego przycisku zjechałby w dół względem pozostałych trzech.
+           Absolutna nie wchodzi do układu, więc napisy stoją równo. */
         #agent-pill-wrap button.agent-active::before {
             content: '';
-            width: 5px;
-            height: 5px;
+            position: absolute;
+            left: 50%;
+            bottom: 6px;
+            width: 4px;
+            height: 4px;
             border-radius: 50%;
-            flex-shrink: 0;
             background: var(--agent-color, var(--primary-color));
             animation: agentDot 260ms cubic-bezier(0.23,1,0.32,1) both;
         }
         @keyframes agentDot {
-            from { opacity: 0; transform: scale(0.4); }
-            to   { opacity: 1; transform: scale(1); }
+            from { opacity: 0; transform: translateX(-50%) scale(0.4); }
+            to   { opacity: 1; transform: translateX(-50%) scale(1); }
         }
         #agent-slider {
             position: absolute;
