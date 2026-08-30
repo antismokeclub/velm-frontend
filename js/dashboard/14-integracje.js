@@ -257,7 +257,9 @@
         let _connWatch  = false;
 
         function _renderConnCount() {
-            const n = (_connStrava ? 1 : 0) + (_connWatch ? 1 : 0);
+            // Polar liczy się OSOBNO od zgody Health Connect — to dwa różne
+            // połączenia i zawodnik może mieć jedno bez drugiego.
+            const n = (_connStrava ? 1 : 0) + (_connWatch ? 1 : 0) + (_connPolar ? 1 : 0);
             const cnt  = document.getElementById('conn-active-count');
             const cdot = document.getElementById('conn-active-dot');
             if (cnt)  cnt.textContent = tp('conn.active', n);
@@ -322,6 +324,70 @@
             } catch (e) {
                 alert(t('com.error') + ': ' + e.message);
             }
+        }
+
+        // ── POLAR ACCESSLINK ─────────────────────────────────────
+        //
+        // Jedyna marka poza Stravą z WŁASNYM logowaniem. Powód jest jeden:
+        // Polar oddaje przez swoje API Nightly Recharge, czyli pomiar HRV
+        // z nocy — 35% wagi w liczeniu gotowości. Health Connect tego nie
+        // przenosi. Dla marek, które nie dokładają nic ponad telefon
+        // (Samsung, COROS), świadomie zostajemy przy Health Connect.
+        let _connPolar = false;
+
+        async function polarConnect() {
+            const userId = localStorage.getItem('velm_user_id');
+            const token = localStorage.getItem('velm_token');
+            if (!userId || !token) return;
+            try {
+                const res = await authFetch('/api/polar/connect/' + userId, {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                const data = await res.json();
+                if (!res.ok || !data.redirectUrl) { alert(apiErr(data, 'int.polar.err')); return; }
+                window.location.href = data.redirectUrl;
+            } catch (e) {
+                alert(t('err.noserver'));
+            }
+        }
+
+        async function polarDisconnect() {
+            if (!confirm(t('int.polar.disconnect'))) return;
+            const userId = localStorage.getItem('velm_user_id');
+            const token = localStorage.getItem('velm_token');
+            try {
+                await authFetch('/api/polar/disconnect/' + userId, {
+                    method: 'DELETE', headers: { 'Authorization': 'Bearer ' + token }
+                });
+                loadPolarStatus();
+            } catch (e) {
+                alert(t('com.error') + ': ' + e.message);
+            }
+        }
+
+        async function loadPolarStatus() {
+            const userId = localStorage.getItem('velm_user_id');
+            const token = localStorage.getItem('velm_token');
+            const btn  = document.getElementById('polar-btn');
+            const pill = document.getElementById('polar-pill');
+            if (!userId || !token) return;
+            try {
+                const res = await authFetch('/api/polar/status/' + userId, {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                const data = await res.json();
+                _connPolar = !!data.connected;
+            } catch (e) {
+                _connPolar = false;   // brak odpowiedzi to nie jest „połączono"
+            }
+            if (pill) pill.style.display = _connPolar ? '' : 'none';
+            if (btn) {
+                btn.className = _connPolar ? 'cx-btn on' : 'cx-btn';
+                btn.onclick = _connPolar ? polarDisconnect : polarConnect;
+                const etykieta = btn.querySelector('span');
+                if (etykieta) etykieta.textContent = t(_connPolar ? 'conn.disconnect' : 'conn.connect');
+            }
+            _renderConnCount();
         }
 
         // ── GARMIN .FIT IMPORT ───────────────────────────────────

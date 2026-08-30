@@ -59,6 +59,7 @@
                     loadSettings();
                     loadStravaStatus();
                     loadWatchStatus();
+                    loadPolarStatus();
                 }
 
                 if (viewName === 'history') {

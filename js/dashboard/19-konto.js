@@ -15,7 +15,7 @@
 
         // Stempel buildu â€” dowĂłd na urzÄ…dzeniu, ĹĽe dziaĹ‚a Ĺ›wieĹĽy kod (trzymaÄ‡
         // w zgodzie z CACHE_VERSION w sw.js; bump przy kaĹĽdym deployu frontendu)
-        const VELM_BUILD = 'v107';
+        const VELM_BUILD = 'v108';
         console.log('velm build', VELM_BUILD, navigator.userAgent);
 
         async function hardReloadApp() {
@@ -289,6 +289,26 @@
                     msg.textContent = t('acc.strava.err') + ' (' + reason + ')';
                     document.body.appendChild(msg);
                     setTimeout(() => msg.remove(), 5000);
+                }, 500);
+                history.replaceState({}, '', window.location.pathname);
+            }
+
+            // Powrót z logowania do Polara. Ta sama ścieżka co Strava, ale
+            // osobny parametr — Polar to osobne połączenie i może istnieć
+            // niezależnie od zgody Health Connect.
+            const polarResult = urlParams.get('polar');
+            if (polarResult === 'connected' || polarResult === 'error') {
+                const udane = polarResult === 'connected';
+                const powod = urlParams.get('reason') || '';
+                switchView('settings');
+                setTimeout(() => {
+                    const msg = document.createElement('div');
+                    msg.style.cssText = 'position:fixed;top:20px;left:50%;transform:translateX(-50%);background:'
+                        + (udane ? '#1A1A1A' : '#C07264')
+                        + ';color:#fff;padding:12px 24px;border-radius:14px;font-size:14px;font-weight:600;z-index:9999;font-family:Inter,sans-serif;';
+                    msg.textContent = udane ? t('int.polar.ok') : (t('int.polar.err') + (powod ? ' (' + powod + ')' : ''));
+                    document.body.appendChild(msg);
+                    setTimeout(() => msg.remove(), udane ? 4000 : 5000);
                 }, 500);
                 history.replaceState({}, '', window.location.pathname);
             }
