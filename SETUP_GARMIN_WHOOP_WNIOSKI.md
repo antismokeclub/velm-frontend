@@ -63,6 +63,15 @@ Dostęp jest możliwy wyłącznie z natywnej aplikacji zainstalowanej na telefon
   magazyn zdrowia Androida) — Samsung Health, Garmin i inni synchronizują do niego
   dane, a my czytamy jednym pluginem Capacitora. Jedna integracja = Samsung + inni.
 
+  > **Potwierdzone 2026-08-31 (źródła zewnętrzne, nie na urządzeniu):** Garmin Connect
+  > pisze do Health Connect sen, tętno, tętno spoczynkowe, kroki, dystans, SpO2
+  > **i sesje treningowe** (rodzaj, czas, dystans) — czyli dokładnie to, czego velm
+  > potrzebuje. **NIE pisze**: HRV, Body Battery, stresu, obciążenia i efektu
+  > treningowego, mocy biegowej, kadencji ani śladu GPS. Synchronizacja jest
+  > jednokierunkowa i **zawodnik musi ją sam włączyć w aplikacji Garmin Connect** —
+  > bez tego velm nie dostanie nic. Dlatego kanał treningów (v110) obejmuje Garmina,
+  > ale HRV z Garmina nie będzie **nigdy** tą drogą.
+
 Czyli: **jedna robota natywna (Capacitor + 2 pluginy) załatwia Apple i Samsunga naraz.**
 Wniosków składać nie trzeba — to czysto nasza praca inżynierska + konta developerskie
 Apple (99 USD/rok) i Google Play (25 USD jednorazowo), które i tak są potrzebne do sklepów.
