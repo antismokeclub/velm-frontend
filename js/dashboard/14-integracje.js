@@ -335,6 +335,12 @@
         // (Samsung, COROS), świadomie zostajemy przy Health Connect.
         let _connPolar = false;
 
+        // Czy serwer w ogóle ma klucze Polara. Bez POLAR_CLIENT_ID endpoint
+        // /api/polar/connect oddaje 500 — a przycisk, który zawsze kończy się
+        // błędem, jest gorszy niż przycisk wyłączony. Domyślnie false: jeśli
+        // nie potwierdzimy kluczy, nie obiecujemy połączenia.
+        let _polarSkonfigurowany = false;
+
         async function polarConnect() {
             const userId = localStorage.getItem('velm_user_id');
             const token = localStorage.getItem('velm_token');
@@ -377,15 +383,25 @@
                 });
                 const data = await res.json();
                 _connPolar = !!data.connected;
+                _polarSkonfigurowany = data.configured === true;
             } catch (e) {
                 _connPolar = false;   // brak odpowiedzi to nie jest „połączono"
+                _polarSkonfigurowany = false;
             }
             if (pill) pill.style.display = _connPolar ? '' : 'none';
             if (btn) {
+                // Odłączyć wolno ZAWSZE. Gdyby klucze zniknęły z serwera, zawodnik
+                // i tak musi móc zdjąć połączenie, które już ma — inaczej zostaje
+                // z kontem podpiętym na zawsze.
+                const martwy = !_polarSkonfigurowany && !_connPolar;
                 btn.className = _connPolar ? 'cx-btn on' : 'cx-btn';
-                btn.onclick = _connPolar ? polarDisconnect : polarConnect;
+                btn.disabled = martwy;
+                btn.style.opacity = martwy ? '0.45' : '';
+                btn.style.cursor = martwy ? 'default' : '';
+                btn.onclick = martwy ? null : (_connPolar ? polarDisconnect : polarConnect);
                 const etykieta = btn.querySelector('span');
-                if (etykieta) etykieta.textContent = t(_connPolar ? 'conn.disconnect' : 'conn.connect');
+                if (etykieta) etykieta.textContent =
+                    t(martwy ? 'conn.soon' : (_connPolar ? 'conn.disconnect' : 'conn.connect'));
             }
             _renderConnCount();
         }
