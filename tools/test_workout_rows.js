@@ -84,8 +84,15 @@ console.log('\n— rodzaj treningu —');
         _workoutRows([bieg({ workoutType: 'walking' })])[0].type === 'walkrun');
     sprawdz('wedrowka to walkrun',
         _workoutRows([bieg({ workoutType: 'hiking', duration: 3600, totalDistance: 6000 })])[0].type === 'walkrun');
-    sprawdz('dlugi marsz tez jest long',
-        _workoutRows([bieg({ workoutType: 'walking', totalDistance: 25000, duration: 5 * 3600 })])[0].type === 'long');
+    // 25 km marszu to NIE jest dlugie wybieganie. Gdyby awans na 'long' dzialal tez dla
+    // marszu, calodniowa wedrowka po gorach byla by w bazie nie do odroznienia od
+    // dlugiego biegu — a analityk czyta `type`, oceniajac strukture tygodnia.
+    sprawdz('25 km marszu zostaje walkrun, NIE staje sie long',
+        _workoutRows([bieg({ workoutType: 'walking', totalDistance: 25000, duration: 5 * 3600 })])[0].type === 'walkrun');
+    sprawdz('25 km wedrowki tez zostaje walkrun',
+        _workoutRows([bieg({ workoutType: 'hiking', totalDistance: 25000, duration: 6 * 3600 })])[0].type === 'walkrun');
+    sprawdz('19 km biegu nadal awansuje na long',
+        _workoutRows([bieg({ workoutType: 'running', totalDistance: 19000, duration: 6000 })])[0].type === 'long');
 }
 
 console.log('\n— zepsute tempo lepiej pominac niz podac —');

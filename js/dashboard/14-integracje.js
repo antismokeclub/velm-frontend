@@ -210,7 +210,11 @@
                     distance_km: distanceKm,
                     duration_min: durationMin,
                     avg_pace: avgPace,
-                    type: (distanceKm != null && distanceKm > 18) ? 'long' : type,
+                    // Awans na „długie wybieganie" tylko dla BIEGU. Marsz i wędrówka
+                    // zostają przy 'walkrun', choćby miały 30 km — inaczej całodniowa
+                    // wędrówka po górach wchodziłaby do bazy nie do odróżnienia od
+                    // długiego wybiegania, a analityk czyta `type`, oceniając tydzień.
+                    type: (type === 'easy' && distanceKm != null && distanceKm > 18) ? 'long' : type,
                     source_name: typeof w.sourceName === 'string' ? w.sourceName.slice(0, 80) : null,
                     platform_id: typeof w.platformId === 'string' ? w.platformId.slice(0, 120) : null
                 });
