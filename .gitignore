@@ -43,7 +43,12 @@ velm_zadania_natywna_apka.docx
 run-velm-backend.cmd
 run-velm-frontend.cmd
 serve-frontend.js
-tools/
+# `tools/*`, a nie `tools/` — git nie zaglada do wykluczonego KATALOGU, wiec przy
+# `tools/` wyjatek nizej nie mialby jak zadzialac.
+tools/*
+# Testy z tools/ jada z kodem. Pilnuja tego, co idzie na produkcje, wiec bez nich
+# nastepna osoba nie ma czym sprawdzic, czy czegos nie zepsula.
+!tools/test_*.js
 *.log
 
 # Backend (has its own repo)

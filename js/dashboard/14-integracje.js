@@ -64,10 +64,29 @@
             return (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Health) || null;
         }
 
-        // Dokładnie te trzy typy przyjmuje POST /api/health/sync (hrv, resting_hr,
-        // sleep_hours). Nie prosimy o nic ponad to — każde zbędne uprawnienie trzeba
-        // osobno uzasadnić w deklaracji danych zdrowotnych w Google Play.
-        const HEALTH_READ_TYPES = ['heartRateVariability', 'restingHeartRate', 'sleep'];
+        // Trzy pierwsze typy przyjmuje POST /api/health/sync (hrv, resting_hr,
+        // sleep_hours), czwarty — POST /api/health/workouts. Nie prosimy o nic ponad to
+        // — każde zbędne uprawnienie trzeba osobno uzasadnić w deklaracji danych
+        // zdrowotnych w Google Play.
+        //
+        // 'workouts' to po stronie Androida uprawnienie READ_EXERCISE. Jest już
+        // zadeklarowane w manifeście wtyczki @capgo/capacitor-health i wchodzi do naszego
+        // przez scalanie manifestów — sprawdzone w
+        // node_modules/@capgo/capacitor-health/android/src/main/AndroidManifest.xml.
+        // Po co ono jest: telefon oddaje treningi z KAŻDEGO zegarka, który pisze do
+        // Health Connect (Garmin, COROS, Samsung, Polar), więc jeden kanał zastępuje
+        // trzy osobne integracje — bez cudzych haseł i bez konta firmowego.
+        const HEALTH_READ_TYPES = ['heartRateVariability', 'restingHeartRate', 'sleep', 'workouts'];
+
+        // Bieganie i chód. Reszta z ~150 typów Health Connect (joga, siłownia, rower)
+        // nie jest treningiem biegowym i nie ma czego szukać w tabeli `workouts`.
+        const WATCH_RUN_TYPES = {
+            running:          'easy',
+            runningTreadmill: 'easy',
+            trackAndField:    'easy',
+            walking:          'walkrun',
+            hiking:           'walkrun'
+        };
         const WATCH_AUTOSYNC_MS = 6 * 60 * 60 * 1000;
 
         function _avgRound(list) {
@@ -133,6 +152,72 @@
             }).filter((e) => Object.keys(e).length > 1);   // sam `date` = nic do zapisania
         }
 
+        // Treningi z magazynu telefonu → wiersze, których oczekuje POST /api/health/workouts.
+        // Czysta funkcja, tak samo jak _healthEntries — bo to jedyny sposób, żeby sprawdzić
+        // mapowanie bez telefonu (most Health Connect nie wykonał się jeszcze na żadnym
+        // urządzeniu).
+        //
+        // DWIE RZECZY, KTÓRE TU KŁAMIĄ — nie usuwać tych uwag, dopóki nie sprawdzi się ich
+        // na prawdziwym telefonie:
+        //
+        // 1. `duration` to czas CAŁKOWITY, nie czas w ruchu. Wtyczka liczy go jako
+        //    Duration.between(startTime, endTime) (HealthManager.kt:1134) i nie wystawia
+        //    do JS-a przerw z Health Connect. Strava podaje `moving_time`, więc te dwa
+        //    źródła NIE są porównywalne: bieg z postojami na światłach wyjdzie tu wolniejszy
+        //    niż ten sam bieg wzięty ze Stravy.
+        // 2. `totalDistance` wtyczka sumuje z WSZYSTKICH źródeł w oknie treningu — celowo
+        //    zdjęła filtr dataOrigin (HealthManager.kt:1069). Jeśli telefon i zegarek pisały
+        //    dystans równolegle, a Health Connect ich nie scala, dystans będzie zawyżony.
+        //    Niesprawdzone bez urządzenia.
+        //
+        // Dlatego rodzaju treningu NIE zgadujemy z tempa (import .fit robi to prędkością:
+        // >14 km/h interwały, >12 tempo). Tempo policzone z czasu całkowitego jest zaniżone,
+        // więc taka zgadywanka wpisywałaby interwały jako spokojne bieganie. Zostaje sam
+        // dystans, który tego błędu nie ma.
+        function _workoutRows(workouts) {
+            const rows = [];
+            for (const w of (workouts || [])) {
+                if (!w || !w.startDate) continue;
+
+                const type = WATCH_RUN_TYPES[w.workoutType];
+                if (!type) continue;                          // nie bieg — pomijamy
+
+                const durationSec = Number(w.duration) || 0;
+                if (durationSec < 300) continue;              // <5 min to nie trening
+                if (durationSec > 12 * 3600) continue;        // >12 h = śmieć w magazynie
+                const durationMin = Math.round(durationSec / 60);
+
+                // totalDistance jest w metrach i bywa nieobecny (bieżnia bez czujnika).
+                // Brak dystansu nie kasuje treningu — sam czas to nadal obciążenie.
+                let distanceKm = null;
+                const meters = Number(w.totalDistance);
+                if (meters > 0 && meters < 200000) distanceKm = Math.round(meters / 10) / 100;
+
+                let avgPace = null;
+                if (distanceKm > 0) {
+                    const secPerKm = Math.round(durationSec / distanceKm);
+                    // Poniżej 2:00/km i powyżej 20:00/km to nie jest bieg ani marsz —
+                    // to zepsute dane i lepiej nie podawać tempa niż podać nieprawdziwe.
+                    if (secPerKm >= 120 && secPerKm <= 1200) {
+                        avgPace = Math.floor(secPerKm / 60) + ':' + String(secPerKm % 60).padStart(2, '0');
+                    }
+                }
+
+                rows.push({
+                    // Data LOKALNA początku biegu — ten sam dzień, pod którym check-in
+                    // zapisuje samopoczucie. UTC rozjechałoby wieczorne biegi na inny dzień.
+                    date: toDateStr(new Date(w.startDate)),
+                    distance_km: distanceKm,
+                    duration_min: durationMin,
+                    avg_pace: avgPace,
+                    type: (distanceKm != null && distanceKm > 18) ? 'long' : type,
+                    source_name: typeof w.sourceName === 'string' ? w.sourceName.slice(0, 80) : null,
+                    platform_id: typeof w.platformId === 'string' ? w.platformId.slice(0, 120) : null
+                });
+            }
+            return rows;
+        }
+
         async function _watchReadSamples(Health, dataType, range) {
             try {
                 const r = await Health.readSamples(Object.assign({ dataType }, range));
@@ -141,6 +226,20 @@
                 // Brak zgody na JEDEN typ nie może wywalić całej synchronizacji — user
                 // mógł odznaczyć sen w oknie Health Connect i wciąż chcieć HRV.
                 console.warn('[zegarek] odczyt ' + dataType + ':', (e && e.message) || e);
+                return [];
+            }
+        }
+
+        // Bez filtra `workoutType` — wtyczka przyjmuje tylko JEDEN typ na zapytanie, a nas
+        // interesuje pięć (bieg, bieżnia, bieżnia lekkoatletyczna, marsz, wędrówka).
+        // Taniej wziąć wszystko i odsiać w _workoutRows niż strzelać pięć razy.
+        async function _watchReadWorkouts(Health, range) {
+            if (typeof Health.queryWorkouts !== 'function') return [];   // starsza wersja wtyczki
+            try {
+                const r = await Health.queryWorkouts(range);
+                return (r && r.workouts) || [];
+            } catch (e) {
+                console.warn('[zegarek] odczyt treningow:', (e && e.message) || e);
                 return [];
             }
         }
@@ -162,24 +261,44 @@
                 _watchReadSamples(Health, 'sleep', range)
             ]);
 
+            const userId = localStorage.getItem('velm_user_id');
             const entries = _healthEntries(hrv, rhr, sleep);
-            if (!entries.length) return { saved: 0, days: 0 };
+            let savedMetrics = 0;
 
-            // Backend tnie do 60 wpisów na żądanie — wysyłamy najnowsze, bo to one
-            // decydują o dzisiejszej formie.
-            const res = await authFetch('/api/health/sync', {
-                method: 'POST',
-                headers: authHeaders(),
-                body: JSON.stringify({
-                    userId: localStorage.getItem('velm_user_id'),
-                    entries: entries.slice(-60)
-                })
-            });
-            const data = await res.json().catch(() => ({}));
-            if (!res.ok || !data.success) throw new Error(apiErr(data, 'int.watch.err'));
+            if (entries.length) {
+                // Backend tnie do 60 wpisów na żądanie — wysyłamy najnowsze, bo to one
+                // decydują o dzisiejszej formie.
+                const res = await authFetch('/api/health/sync', {
+                    method: 'POST',
+                    headers: authHeaders(),
+                    body: JSON.stringify({ userId, entries: entries.slice(-60) })
+                });
+                const data = await res.json().catch(() => ({}));
+                if (!res.ok || !data.success) throw new Error(apiErr(data, 'int.watch.err'));
+                savedMetrics = data.saved || 0;
+            }
+
+            // Treningi idą osobnym żądaniem, bo to osobna tabela i osobne odsiewanie
+            // duplikatów. Nieudany import treningów NIE może przewrócić synchronizacji
+            // formy — zawodnik ma wtedy nadal HRV, sen i tętno spoczynkowe.
+            let savedWorkouts = 0;
+            try {
+                const rows = _workoutRows(await _watchReadWorkouts(Health, range));
+                if (rows.length) {
+                    const wres = await authFetch('/api/health/workouts', {
+                        method: 'POST',
+                        headers: authHeaders(),
+                        body: JSON.stringify({ userId, workouts: rows.slice(-60) })
+                    });
+                    const wdata = await wres.json().catch(() => ({}));
+                    if (wres.ok && wdata.success) savedWorkouts = wdata.saved || 0;
+                }
+            } catch (e) {
+                console.warn('[zegarek] import treningow:', (e && e.message) || e);
+            }
 
             localStorage.setItem('velm_watch_last_sync', String(Date.now()));
-            return { saved: data.saved || 0, days: entries.length };
+            return { saved: savedMetrics, days: entries.length, workouts: savedWorkouts };
         }
 
         async function connectWatch() {
@@ -218,7 +337,12 @@
                 localStorage.setItem('velm_watch_connected', '1');
                 _connWatch = true;
                 _renderWatchStatus();
-                showVelmToast(r.days ? tp('int.watch.synced', r.days) : t('int.watch.nodata'), false);
+                // Dni z pomiarami i pobrane biegi to dwie różne rzeczy — zawodnik może mieć
+                // jedno bez drugiego (zegarek noszony tylko w nocy albo tylko na trening).
+                const parts = [];
+                if (r.days)     parts.push(tp('int.watch.synced', r.days));
+                if (r.workouts) parts.push(tp('int.watch.runs', r.workouts));
+                showVelmToast(parts.length ? parts.join(' · ') : t('int.watch.nodata'), false);
             } catch (e) {
                 showVelmToast(t('int.watch.err'), true);
                 console.error('[zegarek] połączenie:', e);
