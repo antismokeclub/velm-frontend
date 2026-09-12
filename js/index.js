@@ -608,6 +608,14 @@ function visSteps(){return STEPS.filter(s=>!s.skip||!s.skip(S.data));}
 
 // ─── NAV ──────────────────────────────────────────────────────
 function next(){
+  // Bramka wiekowa — zatrzymuje NA KROKU z datą urodzenia, a nie dopiero przy
+  // wysyłce. Przejście całego kreatora i dostanie 400 na końcu byłoby dla
+  // zawodnika karą za odpowiedź, której nie mógł udzielić inaczej.
+  if(STEPS[S.step]&&STEPS[S.step].id==='profile_dob'){
+    const w=wiekZDob(S.data);
+    if(w!==null&&w<MIN_WIEK){ S.dobBlok=true; render(false); return; }
+    S.dobBlok=false;
+  }
   const vs=visSteps();
   const ci=vs.findIndex(s=>s.id===STEPS[S.step].id);
   if(ci<vs.length-1){
@@ -2589,18 +2597,49 @@ function bProfileGender(){
 }
 function pickGender(v){S.data.gender=v;setTimeout(next,190);}
 
+// Dolna granica wieku — ta sama liczba co MIN_WIEK w velm-backend/server.js.
+// 16 lat to granica z art. 8 RODO przyjęta w Polsce: poniżej niej zgody na
+// przetwarzanie danych o zdrowiu nie udziela sam zainteresowany.
+const MIN_WIEK = 16;
+
+/** Wiek z pełnej daty urodzenia albo null, gdy daty nie ma. */
+function wiekZDob(d){
+  if(!d||!d.dob_y||!d.dob_m||!d.dob_d) return null;
+  const mies = Array.isArray(c('months')) ? c('months').indexOf(d.dob_m) : -1;
+  const mIdx = mies>=0 ? mies : (parseInt(d.dob_m)-1);
+  if(!isFinite(mIdx)) return null;
+  const dzis=new Date(), ur=new Date(parseInt(d.dob_y), mIdx, parseInt(d.dob_d));
+  if(isNaN(ur.getTime())) return null;
+  let w=dzis.getFullYear()-ur.getFullYear();
+  const r=dzis.getMonth()-ur.getMonth();
+  if(r<0||(r===0&&dzis.getDate()<ur.getDate()))w--;
+  return w;
+}
+
 function bDob(){
   const lang=S.data.language||'en';
   const h={en:'When is your birthday?',pl:'Kiedy masz urodziny?',fr:'Quelle est ta date de naissance ?',es:'¿Cuándo es tu cumpleaños?',de:'Wann hast du Geburtstag?'}[lang]||"When is your birthday?";
   if(!S.data.dob_d)S.data.dob_d=15;
   if(!S.data.dob_m)S.data.dob_m=c('months')[6];
   if(!S.data.dob_y)S.data.dob_y=2000;
+  // Rocznik przycięty tak, żeby za młodego w ogóle NIE DAŁO SIĘ wybrać.
+  // Lepiej nie pokazywać opcji, niż pokazać i odrzucić po kliknięciu.
+  const maxRok=new Date().getFullYear()-MIN_WIEK;
+  // Zostaje jeden przypadek graniczny, którego samym rocznikiem nie da się
+  // odsiać: urodziny dopiero przed nami, więc lat jest wciąż o jeden mniej.
+  const blok=S.dobBlok?`<div class="dob-blok" style="margin:18px 16px 0;text-align:center;font-size:14px;line-height:1.45;color:#8A8A8A">${e({
+    en:`velm is for people aged ${MIN_WIEK} and over.`,
+    pl:`velm jest dla osób od ${MIN_WIEK} lat.`,
+    fr:`velm est réservé aux personnes de ${MIN_WIEK} ans et plus.`,
+    es:`velm es para personas de ${MIN_WIEK} años o más.`,
+    de:`velm ist für Personen ab ${MIN_WIEK} Jahren.`
+  }[lang]||`velm is for people aged ${MIN_WIEK} and over.`)}</div>`:'';
   return`<h1 class="hl">${e(h)}</h1>
 <div class="pk-row" style="margin-top:64px; padding: 0 16px;">
   ${picker(S.data.dob_d,1,31,1,'dob_d','')}
   <div style="flex:1.5">${pickerStr('dob_m',c('months'),S.data.dob_m).replace('<div class="pk-col-wrap">','<div class="pk-col-wrap" style="flex:1.5">')}</div>
-  ${picker(S.data.dob_y,1940,2012,1,'dob_y','')}
-</div>`;
+  ${picker(S.data.dob_y,1940,maxRok,1,'dob_y','')}
+</div>${blok}`;
 }
 
 // ── AVAILABILITY ──
