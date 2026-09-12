@@ -80,13 +80,19 @@
 
         // Bieganie i chód. Reszta z ~150 typów Health Connect (joga, siłownia, rower)
         // nie jest treningiem biegowym i nie ma czego szukać w tabeli `workouts`.
-        const WATCH_RUN_TYPES = {
-            running:          'easy',
-            runningTreadmill: 'easy',
-            trackAndField:    'easy',
-            walking:          'walkrun',
-            hiking:           'walkrun'
-        };
+        //
+        // To jest SITO, nie mapa. Na co typ się przekłada — jaka dyscyplina, jaki
+        // rodzaj treningu — rozstrzyga backend (`SPORT_MAP` w lib/dedup.js
+        // i `toWorkoutRow` w lib/canonical.js). Wcześniej stały tu wartości
+        // 'easy'/'walkrun' i ta sama wiedza żyła w dwóch miejscach naraz; przy
+        // trzecim źródle (intervals.icu) rozjechałaby się po cichu.
+        const WATCH_RUN_TYPES = [
+            'running',
+            'runningTreadmill',
+            'trackAndField',
+            'walking',
+            'hiking'
+        ];
         const WATCH_AUTOSYNC_MS = 6 * 60 * 60 * 1000;
 
         function _avgRound(list) {
@@ -157,6 +163,23 @@
         // mapowanie bez telefonu (most Health Connect nie wykonał się jeszcze na żadnym
         // urządzeniu).
         //
+        // ── TA FUNKCJA ODSIEWA, ALE JUŻ NIE PRZELICZA ───────────────────────────────
+        // Wcześniej liczyła tu datę lokalną, dystans w kilometrach, tempo i rodzaj
+        // treningu — czyli kształt gotowy do wpisania do `workouts`. Teraz przelicza
+        // to backend (lib/canonical.js), a stąd idą LICZBY SUROWE. Powody, po kolei:
+        //
+        // 1. ODSIEWANIE DUPLIKATÓW POTRZEBUJE GODZINY, NIE DATY. Ten sam bieg wpada
+        //    dwiema drogami (telefon i intervals.icu) i rozpoznaje się go po starcie
+        //    z dokładnością do ±3 minut. Sama data dzienna gubi tę informację
+        //    bezpowrotnie i porównanie nie ma na czym pracować.
+        // 2. `sourceId` (pakiet aplikacji, która zapisała rekord) to jedyny sposób,
+        //    żeby rozpoznać bieg RELAYOWANY — wypchnięty do telefonu przez Garmin
+        //    Connect, gdy ten sam bieg przyjdzie też z intervals.icu. Dotąd to pole
+        //    w ogóle nie opuszczało telefonu.
+        // 3. Rodzaj treningu i awans na „długie wybieganie" liczy `toWorkoutRow`
+        //    na backendzie. Trzymanie tej samej reguły w dwóch miejscach kończy się
+        //    rozjazdem przy trzecim źródle.
+        //
         // DWIE RZECZY, KTÓRE TU KŁAMIĄ — nie usuwać tych uwag, dopóki nie sprawdzi się ich
         // na prawdziwym telefonie:
         //
@@ -164,7 +187,8 @@
         //    Duration.between(startTime, endTime) (HealthManager.kt:1134) i nie wystawia
         //    do JS-a przerw z Health Connect. Strava podaje `moving_time`, więc te dwa
         //    źródła NIE są porównywalne: bieg z postojami na światłach wyjdzie tu wolniejszy
-        //    niż ten sam bieg wzięty ze Stravy.
+        //    niż ten sam bieg wzięty ze Stravy. Backend zapisuje to wprost w `pace_basis`,
+        //    żeby analityk nie porównywał nieporównywalnego.
         // 2. `totalDistance` wtyczka sumuje z WSZYSTKICH źródeł w oknie treningu — celowo
         //    zdjęła filtr dataOrigin (HealthManager.kt:1069). Jeśli telefon i zegarek pisały
         //    dystans równolegle, a Health Connect ich nie scala, dystans będzie zawyżony.
@@ -172,51 +196,50 @@
         //
         // Dlatego rodzaju treningu NIE zgadujemy z tempa (import .fit robi to prędkością:
         // >14 km/h interwały, >12 tempo). Tempo policzone z czasu całkowitego jest zaniżone,
-        // więc taka zgadywanka wpisywałaby interwały jako spokojne bieganie. Zostaje sam
-        // dystans, który tego błędu nie ma.
+        // więc taka zgadywanka wpisywałaby interwały jako spokojne bieganie.
         function _workoutRows(workouts) {
             const rows = [];
             for (const w of (workouts || [])) {
                 if (!w || !w.startDate) continue;
 
-                const type = WATCH_RUN_TYPES[w.workoutType];
-                if (!type) continue;                          // nie bieg — pomijamy
+                // Data musi dać się odczytać — inaczej backend i tak odrzuci rekord,
+                // a my stracimy informację, ile ich odpadło.
+                const start = new Date(w.startDate);
+                if (!isFinite(start.getTime())) continue;
 
-                const durationSec = Number(w.duration) || 0;
+                if (WATCH_RUN_TYPES.indexOf(w.workoutType) === -1) continue;   // nie bieg
+
+                const durationSec = Math.round(Number(w.duration) || 0);
                 if (durationSec < 300) continue;              // <5 min to nie trening
                 if (durationSec > 12 * 3600) continue;        // >12 h = śmieć w magazynie
-                const durationMin = Math.round(durationSec / 60);
 
                 // totalDistance jest w metrach i bywa nieobecny (bieżnia bez czujnika).
                 // Brak dystansu nie kasuje treningu — sam czas to nadal obciążenie.
-                let distanceKm = null;
+                let distanceM = null;
                 const meters = Number(w.totalDistance);
-                if (meters > 0 && meters < 200000) distanceKm = Math.round(meters / 10) / 100;
+                if (meters > 0 && meters < 200000) distanceM = Math.round(meters);
 
-                let avgPace = null;
-                if (distanceKm > 0) {
-                    const secPerKm = Math.round(durationSec / distanceKm);
-                    // Poniżej 2:00/km i powyżej 20:00/km to nie jest bieg ani marsz —
-                    // to zepsute dane i lepiej nie podawać tempa niż podać nieprawdziwe.
-                    if (secPerKm >= 120 && secPerKm <= 1200) {
-                        avgPace = Math.floor(secPerKm / 60) + ':' + String(secPerKm % 60).padStart(2, '0');
-                    }
-                }
+                const liczbaAlbo = (v, min, max) => {
+                    const n = Number(v);
+                    return (isFinite(n) && n >= min && n <= max) ? Math.round(n) : null;
+                };
+                const tekstAlbo = (v, len) =>
+                    (typeof v === 'string' && v.trim()) ? v.trim().slice(0, len) : null;
 
                 rows.push({
-                    // Data LOKALNA początku biegu — ten sam dzień, pod którym check-in
-                    // zapisuje samopoczucie. UTC rozjechałoby wieczorne biegi na inny dzień.
-                    date: toDateStr(new Date(w.startDate)),
-                    distance_km: distanceKm,
-                    duration_min: durationMin,
-                    avg_pace: avgPace,
-                    // Awans na „długie wybieganie" tylko dla BIEGU. Marsz i wędrówka
-                    // zostają przy 'walkrun', choćby miały 30 km — inaczej całodniowa
-                    // wędrówka po górach wchodziłaby do bazy nie do odróżnienia od
-                    // długiego wybiegania, a analityk czyta `type`, oceniając tydzień.
-                    type: (type === 'easy' && distanceKm != null && distanceKm > 18) ? 'long' : type,
-                    source_name: typeof w.sourceName === 'string' ? w.sourceName.slice(0, 80) : null,
-                    platform_id: typeof w.platformId === 'string' ? w.platformId.slice(0, 120) : null
+                    // Pełny znacznik czasu, nie sama data — patrz punkt 1 wyżej.
+                    started_at: start.toISOString(),
+                    duration_s: durationSec,
+                    distance_m: distanceM,
+                    // Typ Health Connect bez tłumaczenia. Na dyscyplinę przekłada go
+                    // `normalizeSport` na backendzie.
+                    workout_type: tekstAlbo(w.workoutType, 60),
+                    source_name: tekstAlbo(w.sourceName, 80),
+                    // Pakiet aplikacji, np. com.garmin.android.apps.connectmobile.
+                    source_id: tekstAlbo(w.sourceId, 120),
+                    platform_id: tekstAlbo(w.platformId, 120),
+                    avg_hr: liczbaAlbo(w.avgHeartRate, 21, 259),
+                    calories: liczbaAlbo(w.totalEnergyBurned, 0, 30000)
                 });
             }
             return rows;
