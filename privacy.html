@@ -16,11 +16,14 @@ a{color:#1A1A1A;}
 .back{display:inline-block;margin-top:32px;font-size:14px;color:#8A8A8A;text-decoration:none;}
 .back:hover{color:#1A1A1A;}
 strong{color:#1A1A1A;}
+code{font-size:13px;background:#F5F3F0;padding:1px 5px;border-radius:5px;}
 .langbar{display:flex;gap:8px;margin:0 0 28px 0;}
 .langbar button{font:inherit;font-size:13px;font-weight:600;padding:6px 14px;border-radius:99px;border:1px solid #D8D2C4;background:transparent;color:#8A8A8A;cursor:pointer;}
 .langbar button[aria-current="true"]{background:#1A1A1A;color:#fff;border-color:#1A1A1A;}
-.todo{background:#FEF2F2;border:1px solid #FCA5A5;color:#991B1B;padding:4px 10px;border-radius:8px;font-weight:700;font-size:13px;display:inline-block;}
-.notice{background:#FFF7ED;border:1px solid #FED7AA;color:#9A3412;padding:12px 16px;border-radius:12px;font-size:14px;margin:16px 0;}
+.tablewrap{overflow-x:auto;margin:0 0 12px 0;}
+table{border-collapse:collapse;width:100%;font-size:14px;}
+th,td{text-align:left;vertical-align:top;padding:8px 10px;border-bottom:1px solid #EDE9E1;color:#3A3A3A;}
+th{font-weight:600;color:#1A1A1A;background:#FAF8F5;}
 [hidden]{display:none;}
 </style>
 </head>
@@ -35,94 +38,131 @@ strong{color:#1A1A1A;}
 <!-- ══════════════════ ENGLISH ══════════════════ -->
 <section id="doc-en">
   <h1>Privacy Policy</h1>
-  <p class="updated">Last updated: 8 August 2026</p>
+  <p class="updated">Last updated: 15 September 2026</p>
 
-  <h2>1. Who controls your data</h2>
-  <p>The controller of personal data collected by the <strong>velm</strong> app is:</p>
+  <h2>1. Who is responsible for your data</h2>
+  <p>The controller of personal data processed in the <strong>velm</strong> app is:</p>
   <ul>
-    <li><span class="todo">TO FILL IN — legal name or company</span></li>
-    <li><span class="todo">TO FILL IN — registered address</span></li>
-    <li>Email: <span class="todo">TO FILL IN — contact email</span></li>
+    <li><strong>Paulina Wójcik</strong></li>
+    <li>Email: <a href="mailto:prywatne.wojcik@gmail.com">prywatne.wojcik@gmail.com</a></li>
+    <li>Country: Poland</li>
+  </ul>
+  <p>For anything concerning your data, write to that address. We answer within one month at the latest, as the GDPR requires.</p>
+
+  <h2>2. What we collect and where it comes from</h2>
+  <ul>
+    <li><strong>Account:</strong> email address, first name and password. The password is stored only as a bcrypt hash — we do not know it and cannot read it.</li>
+    <li><strong>Training profile:</strong> what you enter at registration and in Settings: date of birth, gender, weight, height, maximum heart rate, your running goal and its date, experience and current fitness (for example how long you can run without stopping), sports you did before, past injuries, days available for training, weekly distance, time zone, language and units.</li>
+    <li><strong>Workouts:</strong> date, distance, duration, pace, workout type, average heart rate, perceived effort (RPE), whether you followed the plan, and your notes. You can log a workout by hand or it can arrive from an external source (see below).</li>
+    <li><strong>Daily check-in and health data:</strong> sleep (hours and quality), energy, readiness, resting heart rate, heart rate variability (HRV), muscle soreness (where and since when) and recovery. Section 4 covers these in detail.</li>
+    <li><strong>AI conversations:</strong> your chat with the Head Coach, Analyst, Physio and Psychologist, your weekly plans, evening reports and the notes the agents keep about your training (for example "runs better in the morning" or "left knee after long runs").</li>
+    <li><strong>Survey (optional):</strong> how you heard about velm, whether you pay for other apps, what you would pay, and what you feel is missing.</li>
+    <li><strong>Payments:</strong> handled by Stripe. We store only your Stripe customer and subscription identifiers, the subscription status and its expiry date. <strong>Your card number never reaches us.</strong></li>
+    <li><strong>Technical data:</strong> your IP address is used on the server only to limit the number of requests (protection against abuse) and is not written to our database. Our hosting providers keep their own technical logs under their own terms.</li>
+  </ul>
+  <p><strong>External sources.</strong> Each one requires your separate, explicit action and can be disconnected in Settings:</p>
+  <ul>
+    <li><strong>Health Connect (Android)</strong> — in the mobile app only. We read four things: heart rate variability, resting heart rate, sleep, and running and walking workouts (type, start time, duration, distance, average heart rate, calories, and the name of the app that recorded the workout). This is how data from Garmin, Samsung, COROS and other watches that write to Health Connect reaches velm. Other data types (steps, weight, cycling, yoga and so on) are not read.</li>
+    <li><strong>Polar</strong> — after you sign in to Polar Flow we fetch Nightly Recharge (HRV, heart rate), sleep, and workout summaries (date, distance, duration, average heart rate, sport).</li>
+    <li><strong>Strava</strong> — after you connect your account we import your activity history and receive notifications about new activities (date, distance, duration, pace, type and activity name). We ask for the <code>read</code> and <code>activity:read_all</code> permissions only; we never post anything on your behalf.</li>
+    <li><strong>Garmin <code>.fit</code> files</strong> (Premium) — a file you upload yourself. We read the workout summary from it (date, distance, duration, pace, heart rate).</li>
+  </ul>
+  <p><strong>What we do not collect.</strong> We do not ask for access to your phone's location and we do not track where you are. We have no access to your contacts, photos or microphone. We do not use advertising identifiers.</p>
+
+  <h2>3. Why we use your data and on what legal basis</h2>
+  <div class="tablewrap">
+  <table>
+    <tr><th>Purpose</th><th>Legal basis (GDPR)</th></tr>
+    <tr><td>Running your account and the app itself: generating and adjusting your training plan, analysing workouts, answering in chat, calendar, statistics.</td><td>Performance of a contract — Art. 6(1)(b).</td></tr>
+    <tr><td>Processing health data from check-ins and from your watch: heart rate zones, recovery, training load, injury warnings, the Form trend.</td><td>Your explicit consent — Art. 9(2)(a). Check-ins and watch connections are voluntary.</td></tr>
+    <tr><td>Importing data from Health Connect, Polar and Strava.</td><td>Consent — Art. 6(1)(a), and for health data Art. 9(2)(a).</td></tr>
+    <tr><td>Transactional email: address verification, password reset.</td><td>Performance of a contract — Art. 6(1)(b).</td></tr>
+    <tr><td>Payments and subscription management.</td><td>Performance of a contract — Art. 6(1)(b).</td></tr>
+    <tr><td>Security: request limits, sessions, detecting abuse.</td><td>Our legitimate interest in keeping the service secure — Art. 6(1)(f).</td></tr>
+    <tr><td>The survey: understanding, in aggregate, who velm is for and how to price it.</td><td>Consent — Art. 6(1)(a). Answers are never used to target ads.</td></tr>
+    <tr><td>Responding to your requests about your data, and other legal duties.</td><td>Legal obligation — Art. 6(1)(c).</td></tr>
+  </table>
+  </div>
+  <p>We do not profile you for advertising and we do not sell personal data.</p>
+
+  <h2>4. Health data — special rules</h2>
+  <p>velm is a training app, so health data is central to what it does. Under the GDPR it is a special category of data, so we are precise about it.</p>
+  <ul>
+    <li><strong>Your consent.</strong> You give it by entering data in a check-in, by granting the permission in Health Connect, or by signing in to Polar. You can withdraw it at any time: stop filling in check-ins, revoke the permission in your phone's settings, disconnect the watch in velm Settings, or write to us and we will delete the health data. Withdrawal does not affect the lawfulness of processing before it.</li>
+    <li><strong>Why we need it.</strong> To set your heart rate zones, estimate recovery and readiness, adjust training load, show the Form trend in the Lab, and let the Physio agent warn you before an injury develops.</li>
+    <li><strong>Who sees it.</strong> The controller and the processors listed in section 6, only as far as needed. Fragments go to the AI provider so the agents can answer — section 5 explains exactly what.</li>
+    <li><strong>What we never do.</strong> We do not sell health data. We do not use it for advertising and do not share it with advertising networks. We do not link it to advertising identifiers. We do not pass it to data brokers.</li>
+    <li><strong>Deletion.</strong> Health data already collected is removed when you delete your account, or earlier at your request.</li>
   </ul>
 
-  <h2>2. What we collect</h2>
+  <h2>5. Artificial intelligence</h2>
   <ul>
-    <li><strong>Account:</strong> email address, name, password (stored only as a bcrypt hash — we never see or store your plaintext password).</li>
-    <li><strong>Training profile:</strong> age, gender, weight, height, running goal, experience level, available training days, injury history you enter yourself.</li>
-    <li><strong>Workouts:</strong> distance, pace, duration, heart rate, perceived effort (RPE) and any notes you add.</li>
-    <li><strong>Health data:</strong> sleep score and sleep hours, energy, readiness, resting heart rate, heart rate variability (HRV), muscle soreness (location and duration) and muscle recovery.</li>
-    <li><strong>Strava (optional):</strong> if you connect your account, we import your run history and receive updates for new activities.</li>
-    <li><strong>Garmin .fit files (optional, Premium):</strong> workout files you upload yourself.</li>
-    <li><strong>AI conversations:</strong> your chat history with the Head Coach, Analyst, Physio and Psychologist, plus notes the agents keep about your training.</li>
-    <li><strong>Survey (optional):</strong> if you choose to fill in the in-app survey — how you heard about velm, whether you pay for other apps, what you would be willing to pay, and what you feel is missing.</li>
-    <li><strong>Payments:</strong> handled entirely by Stripe. We store your Stripe customer and subscription identifiers and your subscription status. <strong>We never receive or store your card details.</strong></li>
+    <li>Plans, analyses and agent replies are generated by the Claude model from <strong>Anthropic</strong>. To get an answer we send it the data needed for that answer: your training profile, workouts, check-ins, watch data, the conversation so far and the agents' notes.</li>
+    <li><strong>What we strip before sending:</strong> your email address, your account identifiers, and your subscription status. The coach does not need them, so they never leave our server.</li>
+    <li>Under Anthropic's commercial terms, data sent through the API is not used to train its models.</li>
+    <li>A training plan is a recommendation, not a decision with legal effects. You can change or ignore it at any time. velm makes no automated decisions that produce legal or similarly significant effects for you (Art. 22 GDPR).</li>
+    <li>Anthropic is based in the USA — see section 6 on transfers.</li>
   </ul>
 
-  <h2>3. Health and fitness data — how we handle it</h2>
-  <p>velm is a training app, so health data is central to what it does. We want to be precise about it.</p>
+  <h2>6. Who we share data with</h2>
+  <p>We use the following providers (processors). Each processes data only on our instructions and only to provide its service:</p>
   <ul>
-    <li><strong>Where it comes from.</strong> Two sources. First, the daily check-ins you fill in yourself. Second — <strong>in the mobile app only</strong> — from your phone's health store: Health Connect on Android, Apple Health on iOS. This is how data from Garmin, Coros, Samsung and similar devices reaches velm, because those devices already sync into that store.</li>
-    <li><strong>What we read from it.</strong> Only sleep, resting heart rate and heart rate variability. Nothing else, and only if you explicitly grant permission.</li>
-    <li><strong>Why.</strong> To set your heart rate zones, estimate recovery and readiness, adjust training load, and let the Physio agent warn you before an injury develops.</li>
-    <li><strong>What we never do.</strong> We do not sell health data. We do not use it for advertising or share it with advertising networks. We do not link it to advertising identifiers. We do not transfer it to data brokers.</li>
-    <li><strong>Revoking access.</strong> You can withdraw the health permission at any time in your phone's system settings (Health Connect / Apple Health) or by disconnecting the watch in velm Settings. Data already collected is removed when you delete your account.</li>
+    <li><strong>Anthropic PBC</strong> (USA) — the AI model behind the agents.</li>
+    <li><strong>Supabase</strong> (USA; our database is hosted in Ireland, EU) — database.</li>
+    <li><strong>Railway</strong> (USA) — the application server.</li>
+    <li><strong>Vercel</strong> (USA) — hosting of the app's web pages.</li>
+    <li><strong>Resend</strong> (USA) — transactional email.</li>
+    <li><strong>Stripe</strong> — subscription payments. For the payment itself Stripe acts as an independent controller under its own privacy policy.</li>
+    <li><strong>Strava, Polar</strong> — only if you connect them, and data flows one way: from them to velm.</li>
   </ul>
+  <p><strong>Transfers outside the EEA.</strong> Anthropic, Railway, Vercel, Resend and Stripe are US companies. Where data leaves the European Economic Area, the transfer is based on the Standard Contractual Clauses approved by the European Commission or another mechanism permitted by the GDPR, as set out in these providers' data processing agreements. You can ask us for a copy of the safeguards at the address in section 1.</p>
+  <p>We do not sell personal data and we do not use it for advertising.</p>
 
-  <h2>4. Why we use your data</h2>
+  <h2>7. Where we store data and for how long</h2>
+  <p>Our database is in the European Union (Ireland).</p>
   <ul>
-    <li>Generating and adjusting your personalised training plan.</li>
-    <li>Analysing progress and detecting patterns (for example: which day of the week you run best).</li>
-    <li>Warning you about injury risk, based on RPE, resting heart rate and HRV trends.</li>
-    <li>Sending transactional email — password reset and email verification.</li>
-    <li>Processing subscription payments.</li>
-    <li>Survey answers only: understanding, in aggregate, who velm is for and how to price it. Answers are not used to target ads at you.</li>
+    <li><strong>Account, profile, workouts, check-ins, watch data, conversations, plans and agent notes:</strong> for as long as your account exists. The coach needs your full history, so we do not shorten it.</li>
+    <li><strong>Short-term agent notes</strong> (for example "knee hurt this week"): expire on their own after 7–14 days. More important observations stay until the account is deleted.</li>
+    <li><strong>Raw payloads from external sources</strong> (a file or server response exactly as it arrived) <strong>and the watch sync log:</strong> at most 12 months from the moment they were fetched. A weekly cleanup removes anything older.</li>
+    <li><strong>Session tokens:</strong> access token 1 hour, refresh token 30 days.</li>
+    <li><strong>Survey answers:</strong> for as long as your account exists.</li>
   </ul>
+  <p><strong>Deleting your account</strong> (Settings → Account → Delete account) immediately and irreversibly removes everything listed above from our live database. We keep no separate long-term archives of user data; any short-lived copies our hosting provider holds as part of normal database operation are overwritten in its ordinary rotation. Stripe keeps records of payments already made, as payment regulations require it to.</p>
 
-  <h2>5. Who we share it with (processors)</h2>
+  <h2>8. Your rights</h2>
   <ul>
-    <li><strong>Anthropic (Claude API):</strong> we send fragments of your profile, training data and conversation so the AI agents can answer. Data sent through the Anthropic API is not used to train their models.</li>
-    <li><strong>Supabase:</strong> database hosting (PostgreSQL).</li>
-    <li><strong>Railway:</strong> backend hosting.</li>
-    <li><strong>Vercel:</strong> frontend hosting.</li>
-    <li><strong>Resend:</strong> transactional email delivery.</li>
-    <li><strong>Stripe:</strong> subscription payments.</li>
-    <li><strong>Strava (optional):</strong> only if you connect your account.</li>
+    <li><strong>Access and a copy of your data:</strong> Settings → Account → Export data. The JSON file contains your profile, workouts, check-ins, watch data, plans, conversations, agent notes and survey answers. If you need something that is not in the file, write to us.</li>
+    <li><strong>Rectification:</strong> edit your profile in Settings, or write to us.</li>
+    <li><strong>Erasure:</strong> Settings → Account → Delete account. Immediate and irreversible.</li>
+    <li><strong>Restriction of processing and objection:</strong> write to us.</li>
+    <li><strong>Data portability:</strong> the export file is in a machine-readable format (JSON).</li>
+    <li><strong>Withdrawing consent:</strong> at any time, as described in section 4, without affecting earlier processing.</li>
+    <li><strong>Complaint:</strong> if you are in the EU/EEA you may complain to your national data protection authority. In Poland this is the President of the Personal Data Protection Office (uodo.gov.pl).</li>
   </ul>
-  <p>We do not sell personal data. We do not use your data for advertising.</p>
+  <p>We handle every request within one month at the latest. Write to the address in section 1.</p>
 
-  <h2>6. Where we store it and how long we keep it</h2>
-  <p>Your data is stored in the European Union (Ireland). If you use velm from outside the EU, your data is transferred to and processed there.</p>
-  <p>We keep your data until you delete your account. Deleting your account immediately removes your profile, workouts, plans, health data, conversations, agent notes and survey answers from our live database. We do not maintain separate long-term archives of user data; any short-lived copies our hosting provider holds as part of normal database operation are overwritten in their ordinary rotation.</p>
-
-  <h2>7. Your rights</h2>
-  <ul>
-    <li><strong>Access / portability:</strong> download a full copy of your data from Settings → Account → Export data (delivered as a JSON file).</li>
-    <li><strong>Rectification:</strong> edit your profile in Settings.</li>
-    <li><strong>Erasure:</strong> Settings → Account → Delete account. This is immediate and irreversible.</li>
-    <li><strong>Objection / withdrawal of consent:</strong> email us at <span class="todo">TO FILL IN — contact email</span>.</li>
-    <li><strong>Complaint:</strong> if you are in the EU/EEA you may lodge a complaint with your national data protection authority. In Poland this is the President of the Personal Data Protection Office (uodo.gov.pl).</li>
-  </ul>
-
-  <h2>8. Security</h2>
+  <h2>9. Security</h2>
   <ul>
     <li>All traffic is encrypted in transit (HTTPS / TLS).</li>
     <li>Passwords are hashed with bcrypt (cost factor 12).</li>
-    <li>Access tokens expire after 1 hour; refresh tokens after 30 days.</li>
-    <li>Changing your password invalidates every active session on all devices.</li>
+    <li>Access tokens expire after 1 hour; refresh tokens after 30 days. Changing your password invalidates every active session on all devices.</li>
     <li>Every endpoint that returns personal data verifies that the requester owns that data.</li>
+    <li>Request limits protect login, password reset and chat against abuse.</li>
+    <li>Your email address and account identifiers are stripped from data before it is sent to the AI provider.</li>
+    <li>Watch-data tables have row-level security enabled in the database.</li>
   </ul>
 
-  <h2>9. Cookies and local storage</h2>
-  <p>velm uses your browser's <code>localStorage</code> to hold your session token, user id and language preference. We use no tracking cookies and no third-party analytics.</p>
+  <h2>10. Cookies and local storage</h2>
+  <p>velm uses no tracking cookies and no third-party analytics. Your browser's <code>localStorage</code> holds: session tokens, your user id and first name, language and theme, your age and maximum heart rate (so heart rate zones can be computed without asking the server), and flags such as "check-in done today", "watch connected" and the time of the last sync. The service worker caches the app's own files so it can open offline — those files contain no personal data.</p>
 
-  <h2>10. Children</h2>
-  <p>velm is not intended for anyone under 16. If you are a parent and believe your child has given us data without your consent, write to <span class="todo">TO FILL IN — contact email</span> and we will delete it.</p>
+  <h2>11. Age</h2>
+  <p>velm is for people aged 16 and over. We ask for your date of birth at registration; if it shows you are under 16, the account is not created. If you are a parent and believe your child has given us data anyway, write to <a href="mailto:prywatne.wojcik@gmail.com">prywatne.wojcik@gmail.com</a> and we will delete it.</p>
 
-  <h2>11. Changes to this policy</h2>
-  <p>We may update this policy. If a change materially affects you, we will notify you by email.</p>
+  <h2>12. Changes to this policy</h2>
+  <p>We may update this policy. If a change materially affects you, we will tell you in the app or by email before it takes effect.</p>
 
-  <h2>12. Contact</h2>
-  <p>Questions? Write to <span class="todo">TO FILL IN — contact email</span>.</p>
+  <h2>13. Contact</h2>
+  <p>Questions? Write to <a href="mailto:prywatne.wojcik@gmail.com">prywatne.wojcik@gmail.com</a>.</p>
 
   <p>See also: <a href="/terms.html">Terms of Service</a></p>
   <a href="/index.html" class="back">← Back to the app</a>
@@ -131,94 +171,131 @@ strong{color:#1A1A1A;}
 <!-- ══════════════════ POLSKI ══════════════════ -->
 <section id="doc-pl" hidden>
   <h1>Polityka prywatności</h1>
-  <p class="updated">Ostatnia aktualizacja: 8 sierpnia 2026</p>
+  <p class="updated">Ostatnia aktualizacja: 15 września 2026</p>
 
-  <h2>1. Kto jest administratorem danych</h2>
-  <p>Administratorem danych osobowych zbieranych przez aplikację <strong>velm</strong> jest:</p>
+  <h2>1. Kto odpowiada za Twoje dane</h2>
+  <p>Administratorem danych osobowych przetwarzanych w aplikacji <strong>velm</strong> jest:</p>
   <ul>
-    <li><span class="todo">DO UZUPEŁNIENIA — imię i nazwisko lub nazwa firmy</span></li>
-    <li><span class="todo">DO UZUPEŁNIENIA — adres rejestrowy</span></li>
-    <li>Email: <span class="todo">DO UZUPEŁNIENIA — email kontaktowy</span></li>
+    <li><strong>Paulina Wójcik</strong></li>
+    <li>E-mail: <a href="mailto:prywatne.wojcik@gmail.com">prywatne.wojcik@gmail.com</a></li>
+    <li>Kraj: Polska</li>
+  </ul>
+  <p>W każdej sprawie dotyczącej Twoich danych napisz na ten adres. Odpowiadamy najpóźniej w ciągu miesiąca, jak wymaga RODO.</p>
+
+  <h2>2. Jakie dane zbieramy i skąd</h2>
+  <ul>
+    <li><strong>Konto:</strong> adres e-mail, imię i hasło. Hasło zapisujemy wyłącznie jako skrót (bcrypt) — nie znamy go i nie możemy go odczytać.</li>
+    <li><strong>Profil treningowy:</strong> to, co podajesz przy rejestracji i w Ustawieniach: data urodzenia, płeć, waga, wzrost, tętno maksymalne, cel biegowy i jego termin, doświadczenie i obecna forma (np. ile potrafisz przebiec bez zatrzymania), uprawiane wcześniej sporty, przebyte kontuzje, dni na trening, tygodniowy kilometraż, strefa czasowa, język i jednostki.</li>
+    <li><strong>Treningi:</strong> data, dystans, czas, tempo, rodzaj treningu, średnie tętno, odczuwany wysiłek (RPE), czy trening był zgodny z planem, oraz Twoje notatki. Trening możesz wpisać ręcznie albo może przyjść ze źródła zewnętrznego (patrz niżej).</li>
+    <li><strong>Codzienny check-in i dane zdrowotne:</strong> sen (długość i jakość), energia, gotowość, tętno spoczynkowe, zmienność rytmu serca (HRV), obolałość mięśni (gdzie i od kiedy) oraz regeneracja. Szczegóły w punkcie 4.</li>
+    <li><strong>Rozmowy z agentami AI:</strong> czat z Szefem Sztabu, Analitykiem, Fizjo i Psychologiem, plany tygodniowe, wieczorne raporty oraz notatki, które agenci prowadzą o Twoim treningu (np. „lepiej biega rano" albo „lewe kolano po długim wybieganiu").</li>
+    <li><strong>Ankieta (opcjonalnie):</strong> skąd wiesz o velm, czy płacisz za inne aplikacje, ile byłbyś skłonny zapłacić i czego Ci brakuje.</li>
+    <li><strong>Płatności:</strong> obsługuje je Stripe. My zapisujemy tylko identyfikator klienta i subskrypcji w Stripe, jej status i datę wygaśnięcia. <strong>Numer karty nigdy do nas nie trafia.</strong></li>
+    <li><strong>Dane techniczne:</strong> adres IP służy na serwerze wyłącznie do ograniczania liczby żądań (ochrona przed nadużyciami) i nie jest zapisywany w naszej bazie. Nasi dostawcy hostingu prowadzą własne dzienniki techniczne na swoich warunkach.</li>
+  </ul>
+  <p><strong>Źródła zewnętrzne.</strong> Każde wymaga Twojego osobnego, wyraźnego działania i każde możesz odłączyć w Ustawieniach:</p>
+  <ul>
+    <li><strong>Health Connect (Android)</strong> — tylko w aplikacji mobilnej. Odczytujemy cztery rzeczy: zmienność rytmu serca, tętno spoczynkowe, sen oraz treningi biegowe i marszowe (rodzaj, godzina startu, czas, dystans, średnie tętno, kalorie i nazwę aplikacji, która trening zapisała). Tą drogą trafiają do velm dane z Garmina, Samsunga, COROS-a i innych zegarków, które zapisują dane do Health Connect. Innych typów danych (kroki, waga, rower, joga itd.) nie odczytujemy.</li>
+    <li><strong>Polar</strong> — po zalogowaniu do Polar Flow pobieramy nocną regenerację (HRV, tętno), sen oraz podsumowania treningów (data, dystans, czas, średnie tętno, dyscyplina).</li>
+    <li><strong>Strava</strong> — po połączeniu konta importujemy historię aktywności i odbieramy powiadomienia o nowych (data, dystans, czas, tempo, rodzaj i nazwa aktywności). Prosimy tylko o uprawnienia <code>read</code> i <code>activity:read_all</code>; niczego nie publikujemy w Twoim imieniu.</li>
+    <li><strong>Pliki <code>.fit</code> z Garmina</strong> (Premium) — plik, który sam przesyłasz. Odczytujemy z niego podsumowanie treningu (data, dystans, czas, tempo, tętno).</li>
+  </ul>
+  <p><strong>Czego nie zbieramy.</strong> Nie prosimy o dostęp do lokalizacji telefonu i nie śledzimy, gdzie jesteś. Nie mamy dostępu do kontaktów, zdjęć ani mikrofonu. Nie używamy identyfikatorów reklamowych.</p>
+
+  <h2>3. Po co używamy danych i na jakiej podstawie</h2>
+  <div class="tablewrap">
+  <table>
+    <tr><th>Cel</th><th>Podstawa prawna (RODO)</th></tr>
+    <tr><td>Prowadzenie konta i działanie aplikacji: układanie i korygowanie planu, analiza treningów, odpowiedzi na czacie, kalendarz, statystyki.</td><td>Wykonanie umowy — art. 6 ust. 1 lit. b.</td></tr>
+    <tr><td>Przetwarzanie danych zdrowotnych z check-inów i z zegarka: strefy tętna, regeneracja, obciążenie, ostrzeżenia o kontuzji, trend Formy.</td><td>Twoja wyraźna zgoda — art. 9 ust. 2 lit. a. Check-iny i podłączenie zegarka są dobrowolne.</td></tr>
+    <tr><td>Import danych z Health Connect, Polara i Stravy.</td><td>Zgoda — art. 6 ust. 1 lit. a, a przy danych zdrowotnych art. 9 ust. 2 lit. a.</td></tr>
+    <tr><td>E-maile transakcyjne: weryfikacja adresu, reset hasła.</td><td>Wykonanie umowy — art. 6 ust. 1 lit. b.</td></tr>
+    <tr><td>Płatności i obsługa subskrypcji.</td><td>Wykonanie umowy — art. 6 ust. 1 lit. b.</td></tr>
+    <tr><td>Bezpieczeństwo: limity żądań, sesje, wykrywanie nadużyć.</td><td>Nasz prawnie uzasadniony interes w utrzymaniu bezpiecznej usługi — art. 6 ust. 1 lit. f.</td></tr>
+    <tr><td>Ankieta: zbiorcze zrozumienie, dla kogo jest velm i jak go wycenić.</td><td>Zgoda — art. 6 ust. 1 lit. a. Odpowiedzi nigdy nie służą do kierowania reklam.</td></tr>
+    <tr><td>Odpowiadanie na Twoje wnioski dotyczące danych i inne obowiązki prawne.</td><td>Obowiązek prawny — art. 6 ust. 1 lit. c.</td></tr>
+  </table>
+  </div>
+  <p>Nie profilujemy Cię pod reklamy i nie sprzedajemy danych osobowych.</p>
+
+  <h2>4. Dane zdrowotne — zasady szczególne</h2>
+  <p>velm jest aplikacją treningową, więc dane zdrowotne są w niej kluczowe. W RODO to dane szczególnej kategorii, dlatego opisujemy je precyzyjnie.</p>
+  <ul>
+    <li><strong>Twoja zgoda.</strong> Wyrażasz ją, wpisując dane w check-inie, udzielając uprawnienia w Health Connect albo logując się do Polara. Możesz ją cofnąć w każdej chwili: przestać wypełniać check-iny, cofnąć uprawnienie w ustawieniach telefonu, odłączyć zegarek w Ustawieniach velm albo napisać do nas — wtedy usuniemy dane zdrowotne. Cofnięcie zgody nie wpływa na zgodność z prawem wcześniejszego przetwarzania.</li>
+    <li><strong>Po co ich potrzebujemy.</strong> Żeby wyznaczyć Twoje strefy tętna, oszacować regenerację i gotowość, dobrać obciążenie, pokazać trend Formy w Laboratorium i pozwolić agentowi Fizjo ostrzec Cię, zanim rozwinie się kontuzja.</li>
+    <li><strong>Kto je widzi.</strong> Administrator oraz dostawcy z punktu 6, tylko w potrzebnym zakresie. Fragmenty trafiają do dostawcy AI, żeby agenci mogli odpowiedzieć — punkt 5 opisuje dokładnie, które.</li>
+    <li><strong>Czego nigdy nie robimy.</strong> Nie sprzedajemy danych zdrowotnych. Nie używamy ich do reklam i nie udostępniamy sieciom reklamowym. Nie wiążemy ich z identyfikatorami reklamowymi. Nie przekazujemy ich brokerom danych.</li>
+    <li><strong>Usunięcie.</strong> Zebrane dane zdrowotne znikają wraz z usunięciem konta albo wcześniej — na Twoją prośbę.</li>
   </ul>
 
-  <h2>2. Jakie dane zbieramy</h2>
+  <h2>5. Sztuczna inteligencja</h2>
   <ul>
-    <li><strong>Konto:</strong> adres email, imię, hasło (przechowywane wyłącznie jako skrót bcrypt — nigdy nie widzimy ani nie zapisujemy hasła jawnie).</li>
-    <li><strong>Profil treningowy:</strong> wiek, płeć, waga, wzrost, cel biegowy, poziom doświadczenia, dostępne dni treningowe, historia kontuzji, którą sam podajesz.</li>
-    <li><strong>Treningi:</strong> dystans, tempo, czas trwania, tętno, odczuwany wysiłek (RPE) i notatki, które dodasz.</li>
-    <li><strong>Dane zdrowotne:</strong> jakość i długość snu, energia, gotowość, tętno spoczynkowe, zmienność rytmu serca (HRV), obolałość mięśni (miejsce i czas trwania) oraz regeneracja mięśni.</li>
-    <li><strong>Strava (opcjonalnie):</strong> po połączeniu konta importujemy historię biegów i odbieramy powiadomienia o nowych aktywnościach.</li>
-    <li><strong>Pliki .fit z Garmina (opcjonalnie, Premium):</strong> pliki treningowe, które sam przesyłasz.</li>
-    <li><strong>Rozmowy z agentami AI:</strong> historia czatu z Szefem Sztabu, Analitykiem, Fizjo i Psychologiem oraz notatki, które agenci prowadzą o Twoim treningu.</li>
-    <li><strong>Ankieta (opcjonalnie):</strong> jeśli zdecydujesz się ją wypełnić — skąd wiesz o velm, czy płacisz za inne aplikacje, ile byłbyś skłonny zapłacić i czego Ci brakuje.</li>
-    <li><strong>Płatności:</strong> obsługuje je w całości Stripe. Przechowujemy identyfikatory klienta i subskrypcji oraz jej status. <strong>Nigdy nie otrzymujemy ani nie zapisujemy danych Twojej karty.</strong></li>
+    <li>Plany, analizy i odpowiedzi agentów generuje model Claude firmy <strong>Anthropic</strong>. Żeby uzyskać odpowiedź, wysyłamy mu dane potrzebne do tej odpowiedzi: profil treningowy, treningi, check-iny, dane z zegarka, dotychczasową rozmowę i notatki agentów.</li>
+    <li><strong>Co usuwamy przed wysyłką:</strong> Twój adres e-mail, identyfikatory konta i status subskrypcji. Trener ich nie potrzebuje, więc nigdy nie opuszczają naszego serwera.</li>
+    <li>Zgodnie z warunkami komercyjnymi Anthropic dane przesłane przez API nie są używane do trenowania jego modeli.</li>
+    <li>Plan treningowy to rekomendacja, nie decyzja ze skutkiem prawnym. Możesz go w każdej chwili zmienić albo zignorować. velm nie podejmuje zautomatyzowanych decyzji wywołujących wobec Ciebie skutki prawne ani podobnie istotne (art. 22 RODO).</li>
+    <li>Anthropic ma siedzibę w USA — patrz punkt 6 o przekazywaniu danych.</li>
   </ul>
 
-  <h2>3. Dane zdrowotne — jak z nimi postępujemy</h2>
-  <p>velm jest aplikacją treningową, więc dane zdrowotne są w niej kluczowe. Chcemy to opisać precyzyjnie.</p>
+  <h2>6. Komu przekazujemy dane</h2>
+  <p>Korzystamy z następujących dostawców (podmiotów przetwarzających). Każdy przetwarza dane wyłącznie na nasze polecenie i tylko po to, by świadczyć swoją usługę:</p>
   <ul>
-    <li><strong>Skąd pochodzą.</strong> Z dwóch źródeł. Po pierwsze — z codziennych check-inów, które wypełniasz sam. Po drugie, <strong>wyłącznie w aplikacji mobilnej</strong> — z magazynu zdrowia Twojego telefonu: Health Connect na Androidzie, Apple Health na iOS. Tą drogą trafiają do velm dane z Garmina, Corosa, Samsunga i podobnych urządzeń, bo one już synchronizują się z tym magazynem.</li>
-    <li><strong>Co z niego odczytujemy.</strong> Wyłącznie sen, tętno spoczynkowe i zmienność rytmu serca. Nic poza tym i tylko wtedy, gdy wyraźnie udzielisz zgody.</li>
-    <li><strong>Po co.</strong> Żeby wyznaczyć Twoje strefy tętna, oszacować regenerację i gotowość, dobrać obciążenie treningowe oraz umożliwić agentowi Fizjo ostrzeżenie Cię, zanim rozwinie się kontuzja.</li>
-    <li><strong>Czego nigdy nie robimy.</strong> Nie sprzedajemy danych zdrowotnych. Nie używamy ich do reklam ani nie udostępniamy sieciom reklamowym. Nie wiążemy ich z identyfikatorami reklamowymi. Nie przekazujemy ich brokerom danych.</li>
-    <li><strong>Cofnięcie dostępu.</strong> Zgodę na dane zdrowotne możesz cofnąć w każdej chwili w ustawieniach systemowych telefonu (Health Connect / Apple Health) albo odłączając zegarek w Ustawieniach velm. Dane już zebrane znikają wraz z usunięciem konta.</li>
+    <li><strong>Anthropic PBC</strong> (USA) — model AI stojący za agentami.</li>
+    <li><strong>Supabase</strong> (USA; nasza baza danych stoi w Irlandii, UE) — baza danych.</li>
+    <li><strong>Railway</strong> (USA) — serwer aplikacji.</li>
+    <li><strong>Vercel</strong> (USA) — hosting stron aplikacji.</li>
+    <li><strong>Resend</strong> (USA) — e-maile transakcyjne.</li>
+    <li><strong>Stripe</strong> — płatności subskrypcyjne. W zakresie samej płatności Stripe jest niezależnym administratorem i działa według własnej polityki prywatności.</li>
+    <li><strong>Strava, Polar</strong> — tylko jeśli je połączysz; dane płyną w jedną stronę: od nich do velm.</li>
   </ul>
+  <p><strong>Przekazywanie poza EOG.</strong> Anthropic, Railway, Vercel, Resend i Stripe to firmy z USA. Tam, gdzie dane opuszczają Europejski Obszar Gospodarczy, podstawą przekazania są standardowe klauzule umowne zatwierdzone przez Komisję Europejską albo inny mechanizm dopuszczony przez RODO, zgodnie z umowami powierzenia przetwarzania z tymi dostawcami. Kopię zabezpieczeń możesz uzyskać, pisząc na adres z punktu 1.</p>
+  <p>Nie sprzedajemy danych osobowych i nie używamy ich do reklam.</p>
 
-  <h2>4. Po co używamy danych</h2>
+  <h2>7. Gdzie przechowujemy dane i jak długo</h2>
+  <p>Nasza baza danych znajduje się w Unii Europejskiej (Irlandia).</p>
   <ul>
-    <li>Generowanie i korygowanie spersonalizowanego planu treningowego.</li>
-    <li>Analiza postępów i wykrywanie wzorców (np. w który dzień tygodnia biegasz najlepiej).</li>
-    <li>Ostrzeganie przed ryzykiem kontuzji na podstawie RPE, tętna spoczynkowego i trendów HRV.</li>
-    <li>Wysyłka maili transakcyjnych — reset hasła i weryfikacja adresu.</li>
-    <li>Obsługa płatności subskrypcyjnych.</li>
-    <li>Wyłącznie odpowiedzi z ankiety: zbiorcze zrozumienie, dla kogo jest velm i jak go wycenić. Odpowiedzi nie służą do kierowania reklam do Ciebie.</li>
+    <li><strong>Konto, profil, treningi, check-iny, dane z zegarka, rozmowy, plany i notatki agentów:</strong> dopóki istnieje Twoje konto. Trener potrzebuje pełnej historii, więc jej nie skracamy.</li>
+    <li><strong>Krótkie notatki robocze agentów</strong> (np. „w tym tygodniu bolało kolano"): wygasają same po 7–14 dniach. Ważniejsze spostrzeżenia zostają do usunięcia konta.</li>
+    <li><strong>Surowe ładunki ze źródeł zewnętrznych</strong> (plik albo odpowiedź serwera dokładnie w takiej postaci, w jakiej przyszła) <strong>oraz dziennik synchronizacji zegarka:</strong> najwyżej 12 miesięcy od chwili pobrania. Cotygodniowe sprzątanie usuwa wszystko starsze.</li>
+    <li><strong>Tokeny sesji:</strong> token dostępu 1 godzina, token odświeżający 30 dni.</li>
+    <li><strong>Odpowiedzi z ankiety:</strong> dopóki istnieje konto.</li>
   </ul>
+  <p><strong>Usunięcie konta</strong> (Ustawienia → Konto → Usuń konto) natychmiast i nieodwracalnie kasuje z naszej działającej bazy wszystko, co wymieniono wyżej. Nie prowadzimy osobnych, długoterminowych archiwów danych użytkowników; krótkotrwałe kopie, które nasz dostawca hostingu utrzymuje w ramach normalnej pracy bazy, są nadpisywane w jego zwykłej rotacji. Stripe zachowuje zapisy o już wykonanych płatnościach, bo wymagają tego od niego przepisy o płatnościach.</p>
 
-  <h2>5. Komu udostępniamy dane (procesory)</h2>
+  <h2>8. Twoje prawa</h2>
   <ul>
-    <li><strong>Anthropic (Claude API):</strong> wysyłamy fragmenty profilu, danych treningowych i rozmowy, żeby agenci AI mogli odpowiedzieć. Dane przesłane przez API Anthropic nie są używane do trenowania ich modeli.</li>
-    <li><strong>Supabase:</strong> hosting bazy danych (PostgreSQL).</li>
-    <li><strong>Railway:</strong> hosting backendu.</li>
-    <li><strong>Vercel:</strong> hosting frontendu.</li>
-    <li><strong>Resend:</strong> wysyłka maili transakcyjnych.</li>
-    <li><strong>Stripe:</strong> płatności subskrypcyjne.</li>
-    <li><strong>Strava (opcjonalnie):</strong> tylko jeśli połączysz konto.</li>
-  </ul>
-  <p>Nie sprzedajemy danych osobowych. Nie używamy Twoich danych do reklam.</p>
-
-  <h2>6. Gdzie przechowujemy dane i jak długo</h2>
-  <p>Twoje dane są przechowywane w Unii Europejskiej (Irlandia). Jeśli korzystasz z velm spoza UE, dane są tam przekazywane i przetwarzane.</p>
-  <p>Przechowujemy dane do momentu usunięcia konta. Usunięcie konta natychmiast kasuje z naszej działającej bazy profil, treningi, plany, dane zdrowotne, rozmowy, notatki agentów i odpowiedzi z ankiety. Nie prowadzimy osobnych, długoterminowych archiwów danych użytkowników; ewentualne krótkotrwałe kopie, które nasz dostawca hostingu utrzymuje w ramach normalnej pracy bazy, są nadpisywane w jego zwykłej rotacji.</p>
-
-  <h2>7. Twoje prawa</h2>
-  <ul>
-    <li><strong>Dostęp i przenoszenie:</strong> pełną kopię danych pobierzesz w Ustawienia → Konto → Eksport danych (plik JSON).</li>
-    <li><strong>Sprostowanie:</strong> profil edytujesz w Ustawieniach.</li>
-    <li><strong>Usunięcie:</strong> Ustawienia → Konto → Usuń konto. Działa natychmiast i jest nieodwracalne.</li>
-    <li><strong>Sprzeciw i cofnięcie zgody:</strong> napisz na <span class="todo">DO UZUPEŁNIENIA — email kontaktowy</span>.</li>
+    <li><strong>Dostęp i kopia danych:</strong> Ustawienia → Konto → Eksport danych. Plik JSON zawiera profil, treningi, check-iny, dane z zegarka, plany, rozmowy, notatki agentów i odpowiedzi z ankiety. Jeśli potrzebujesz czegoś, czego w pliku nie ma, napisz do nas.</li>
+    <li><strong>Sprostowanie:</strong> profil edytujesz w Ustawieniach albo piszesz do nas.</li>
+    <li><strong>Usunięcie:</strong> Ustawienia → Konto → Usuń konto. Natychmiast i nieodwracalnie.</li>
+    <li><strong>Ograniczenie przetwarzania i sprzeciw:</strong> napisz do nas.</li>
+    <li><strong>Przenoszenie danych:</strong> plik eksportu jest w formacie nadającym się do odczytu maszynowego (JSON).</li>
+    <li><strong>Cofnięcie zgody:</strong> w każdej chwili, jak opisano w punkcie 4, bez wpływu na wcześniejsze przetwarzanie.</li>
     <li><strong>Skarga:</strong> jeśli jesteś w UE/EOG, możesz złożyć skargę do krajowego organu ochrony danych. W Polsce jest to Prezes Urzędu Ochrony Danych Osobowych (uodo.gov.pl).</li>
   </ul>
+  <p>Każdy wniosek załatwiamy najpóźniej w ciągu miesiąca. Pisz na adres z punktu 1.</p>
 
-  <h2>8. Bezpieczeństwo</h2>
+  <h2>9. Bezpieczeństwo</h2>
   <ul>
     <li>Cały ruch jest szyfrowany w tranzycie (HTTPS / TLS).</li>
     <li>Hasła są hashowane bcryptem (koszt 12).</li>
-    <li>Tokeny dostępu wygasają po 1 godzinie, tokeny odświeżające po 30 dniach.</li>
-    <li>Zmiana hasła unieważnia wszystkie aktywne sesje na wszystkich urządzeniach.</li>
+    <li>Tokeny dostępu wygasają po 1 godzinie, tokeny odświeżające po 30 dniach. Zmiana hasła unieważnia wszystkie aktywne sesje na wszystkich urządzeniach.</li>
     <li>Każdy endpoint zwracający dane osobowe sprawdza, czy pytający jest ich właścicielem.</li>
+    <li>Limity żądań chronią logowanie, reset hasła i czat przed nadużyciami.</li>
+    <li>Adres e-mail i identyfikatory konta są usuwane z danych przed wysłaniem ich do dostawcy AI.</li>
+    <li>Tabele z danymi z zegarka mają w bazie włączone zabezpieczenia na poziomie wiersza (row-level security).</li>
   </ul>
 
-  <h2>9. Cookies i pamięć lokalna</h2>
-  <p>velm używa <code>localStorage</code> przeglądarki do przechowywania tokenu sesji, identyfikatora użytkownika i wybranego języka. Nie używamy cookies śledzących ani analityki firm trzecich.</p>
+  <h2>10. Cookies i pamięć lokalna</h2>
+  <p>velm nie używa cookies śledzących ani analityki firm trzecich. W <code>localStorage</code> przeglądarki trzymamy: tokeny sesji, identyfikator i imię użytkownika, język i motyw, Twój wiek i tętno maksymalne (żeby liczyć strefy tętna bez pytania serwera) oraz znaczniki typu „check-in dziś zrobiony", „zegarek połączony" i czas ostatniej synchronizacji. Service worker zapisuje w pamięci podręcznej pliki samej aplikacji, żeby dało się ją otworzyć bez sieci — te pliki nie zawierają danych osobowych.</p>
 
-  <h2>10. Dzieci</h2>
-  <p>velm nie jest przeznaczony dla osób poniżej 16. roku życia. Jeśli jesteś rodzicem i sądzisz, że Twoje dziecko przekazało nam dane bez Twojej zgody, napisz na <span class="todo">DO UZUPEŁNIENIA — email kontaktowy</span>, a je usuniemy.</p>
+  <h2>11. Wiek</h2>
+  <p>velm jest dla osób, które mają co najmniej 16 lat. Przy rejestracji pytamy o datę urodzenia; jeśli wynika z niej, że masz mniej niż 16 lat, konto nie zostanie założone. Jeśli jesteś rodzicem i sądzisz, że Twoje dziecko mimo to przekazało nam dane, napisz na <a href="mailto:prywatne.wojcik@gmail.com">prywatne.wojcik@gmail.com</a>, a je usuniemy.</p>
 
-  <h2>11. Zmiany polityki</h2>
-  <p>Możemy aktualizować tę politykę. O zmianach, które istotnie Cię dotyczą, poinformujemy mailem.</p>
+  <h2>12. Zmiany polityki</h2>
+  <p>Możemy aktualizować tę politykę. O zmianie, która istotnie Cię dotyczy, poinformujemy w aplikacji albo mailem, zanim wejdzie w życie.</p>
 
-  <h2>12. Kontakt</h2>
-  <p>Pytania? Napisz na <span class="todo">DO UZUPEŁNIENIA — email kontaktowy</span>.</p>
+  <h2>13. Kontakt</h2>
+  <p>Pytania? Napisz na <a href="mailto:prywatne.wojcik@gmail.com">prywatne.wojcik@gmail.com</a>.</p>
 
   <p>Zobacz też: <a href="/terms.html">Regulamin</a></p>
   <a href="/index.html" class="back">← Wróć do aplikacji</a>
